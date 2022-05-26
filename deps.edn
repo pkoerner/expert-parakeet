@@ -15,7 +15,7 @@
                     :extra-deps {
                                  }}
            :backend {:extra-paths ["src/clj"]
-                     :extra-deps {
+                     :extra-deps {ring/ring {:mvn/version "1.9.5"}
                                   }}
 
            :frontend {:extra-paths ["src/cljs"]
