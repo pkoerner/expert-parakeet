@@ -1,10 +1,10 @@
 (ns core
-  (:use ring.adapter.jetty))
+  (:require [ring.adapter.jetty :refer [run-jetty]]))
 
-(defn handler [request]
+(defn handler [_request]
   {:status 200
    :headers {"Content-Type" "text/plain"}
    :body "Hello World"})
 
-(defn start-server [& args]
+(defn start-server [& _args]
   (run-jetty handler {:port 8080}))

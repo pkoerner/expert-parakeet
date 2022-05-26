@@ -1,0 +1,4 @@
+- repo: https://github.com/clj-kondo/clj-kondo
+    rev: v2022.04.25
+    hooks:
+      - id: clj-kondo
