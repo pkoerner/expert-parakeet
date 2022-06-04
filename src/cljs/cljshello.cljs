@@ -1,19 +1,57 @@
 (ns cljshello
   (:require
-    ; [reagent.core :as reagent :refer [atom]]
+    ;[reagent.core :as reagent :refer [atom]]
     [reagent.dom :as rd]
-    ; [re-frame.core :as rf]
+    [re-frame.core :as rf]
     ))
 
 (defn Hello []
-  [:h1 "Hello World !"])
+  [:h1 "Hello World!"])
+
+(rf/reg-event-db
+  :init-db
+  (fn [_ _]
+      (let
+        [a (rand-int 5)
+         b (rand-int 5)
+         res (+ a b)]
+       {:a a, :b b, :res res})))
+
+(rf/reg-event-db
+  :check-answer
+  (fn [db val]
+      (let [res (:res db)]
+           (assoc db :correct (= val res)))))
+
+(rf/reg-sub
+  :values
+  (fn [db _] db))
+
+(defn Calc []
+      (let [vals @(rf/subscribe [:values])
+            a (:a vals)
+            b (:b vals)
+            res (:res vals)]
+            [:div
+             (str a "+" b "=" res)
+             [:input {:type "number"
+                      :on-change #(rf/dispatch [:check-answer (-> % .-target .-value)])}]]))
+
+(defn React-to-user []
+      (let [ans (:correct @(rf/subscribe [:values]))]
+           (if (not (nil? ans))
+             [:div
+              (if ans "Correct" "False")
+              ans]
+             [:div])))
+
+(rf/dispatch [:init-db])
 
 (defn Root []
   [:div
-   [Hello]])
+   [Hello]
+   [Calc]
+   [React-to-user]])
 
 (rd/render [Root]
            (. js/document (getElementById "app")))
-
-(defn ^:export prt []
-  (println "Hello"))
