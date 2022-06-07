@@ -1,3 +1,6 @@
 (ns common)
 
-(defn addtwo [a] (+ 2 a))
+
+(defn addtwo
+  [a]
+  (+ 2 a))

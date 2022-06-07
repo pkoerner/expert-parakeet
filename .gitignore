@@ -3,3 +3,8 @@
 .cpcache
 .lsp
 /expert-parakeet.iml
+.shadow-cljs/
+node_modules/
+package.json
+resources/public/js/
+package-lock.json
