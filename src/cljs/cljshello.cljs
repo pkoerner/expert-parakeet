@@ -5,7 +5,7 @@
     [reagent.dom :as rd]))
 
 
-(defn Hello 
+(defn Hello
   []
   [:h1 "Hello World!"])
 
