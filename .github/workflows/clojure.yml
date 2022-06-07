@@ -15,6 +15,10 @@ jobs:
         uses: vouch-opensource/tools.deps-build@1.0.1
         with:
           alias: :clj-format check
+      - name: kondo-check
+        uses: vouch-opensource/tools.deps-build@1.0.1
+        with:
+          alias: :clj-kondo --lint src test
       - name: run tests
         uses: vouch-opensource/tools.deps-build@1.0.1
         with:
