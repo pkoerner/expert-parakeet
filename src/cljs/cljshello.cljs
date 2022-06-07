@@ -19,9 +19,10 @@
 
 (rf/reg-event-db
   :check-answer
-  (fn [db val]
+  (fn [db [_ val]]
       (let [res (:res db)]
-           (assoc db :correct (= val res)))))
+           (prn val res)
+           (assoc db :correct (= val (str res))))))
 
 (rf/reg-sub
   :values
@@ -30,10 +31,9 @@
 (defn Calc []
       (let [vals @(rf/subscribe [:values])
             a (:a vals)
-            b (:b vals)
-            res (:res vals)]
+            b (:b vals)]
             [:div
-             (str a "+" b "=" res)
+             (str a "+" b "=")
              [:input {:type "number"
                       :on-change #(rf/dispatch [:check-answer (-> % .-target .-value)])}]]))
 
