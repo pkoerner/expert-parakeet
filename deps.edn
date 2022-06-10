@@ -16,8 +16,9 @@
            :common       {:extra-paths ["src/cljc"]
                           :extra-deps  {}}
            :backend      {:extra-paths ["src/clj"]
-                          :extra-deps  {org.clojure/clojure {:mvn/version "1.11.1"}
-                                        compojure/compojure {:mvn/version "1.7.0"}
+                          :extra-deps  {compojure/compojure {:mvn/version "1.7.0"}
+                                        org.clojure/clojure {:mvn/version "1.11.1"}
+                                        ring-cors/ring-cors {:mvn/version "0.1.13"}
                                         ring/ring {:mvn/version "1.9.5"}}}
 
            :frontend     {:extra-paths ["src/cljs"]
@@ -31,7 +32,7 @@
                                        "--source-paths" "src/cljs/simplefrontend"
                                        "--inputs" "main.scss"
                                        "--target-path" "target/shadow/dev/resources/public/css"]}
-           :shadow-cljs  {:extra-deps { thheller/shadow-cljs       {:mvn/version "2.18.0"}}
+           :shadow-cljs  {:extra-deps {thheller/shadow-cljs       {:mvn/version "2.18.0"}}
                           :main-opts ["-m" "shadow.cljs.devtools.cli"]}
 
            ;; Test runner in console.

@@ -7,6 +7,10 @@
     [reagent.dom :as rd]))
 
 
+(GET "http://localhost:8081/random"
+     {:handler (fn [x] (prn x))})
+
+
 (defn Hello
   []
   [:h1 "Hello World!"])
@@ -41,13 +45,10 @@
 (rf/reg-event-db
   :update-correct
   (fn [db [_ val]]
-    (assoc db :correct val)))
 
-
-(rf/reg-event-db
-  :update-answer
-  (fn [db [_ answer]]
-    (assoc db :answer answer)))
+    (let [res (:res db)]
+      (prn val res)
+      (assoc db :correct (= val (str res))))))
 
 
 (rf/reg-sub
