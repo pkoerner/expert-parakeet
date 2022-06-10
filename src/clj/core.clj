@@ -1,6 +1,11 @@
 (ns core
   (:require
+    [compojure.core :refer [GET, defroutes]]
+    [compojure.route :as route]
     [ring.adapter.jetty :refer [run-jetty]]))
+
+(defroutes app
+  (GET "/api/random" [] (str [(rand-int 10) (rand-int 10)])))
 
 
 (defn handler
@@ -12,4 +17,4 @@
 
 (defn start-server
   [& _args]
-  (run-jetty handler {:port 8080}))
+  (run-jetty app {:port 8081}))

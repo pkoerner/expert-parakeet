@@ -1,9 +1,12 @@
 (ns cljshello
   (:require
+    [ajax.core :refer [GET POST]]
     [re-frame.core :as rf]
     ;; [reagent.core :as reagent :refer [atom]]
     [reagent.dom :as rd]))
 
+
+(GET "http://localhost/backend/random" )
 
 (defn Hello
   []
