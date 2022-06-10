@@ -5,6 +5,7 @@
            metosin/muuntaja {:mvn/version "0.6.8"}
            compojure/compojure {:mvn/version "1.7.0"}
            ring/ring {:mvn/version "1.9.5"}
+           ring-cors/ring-cors {:mvn/version "0.1.13"}
            ;; is this a dev dependency
            org.clojure/test.check {:mvn/version "1.1.1"}
            }

@@ -1,7 +1,8 @@
 (ns studierenden-uebersicht.events
   (:require
     [ajax.core :as ajax]
-    [re-frame.core :as rf]))
+    [re-frame.core :as rf]
+    [vars]))
 
 
 (rf/reg-event-db
@@ -21,7 +22,7 @@
   (fn [{:keys [db]} [_ user-id]]
     {:db          (assoc db :laedt true)
      :http-xhrio  {:method          :get
-                   :uri             (str "/api/studierenden-uebersicht/user/" user-id)
+                   :uri             (str vars/base-url "/studierenden-uebersicht/user/" user-id)
                    :timeout         8000
                    :response-format (ajax/transit-response-format)
                    :on-success      [:studierenden-uebersicht/speichere-daten]}}))
