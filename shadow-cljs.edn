@@ -5,7 +5,7 @@
  :builds {:app {:target          :browser
                 :output-dir      "resources/public/js/compiled"
                 :asset-path      "/js/compiled"
-                :modules         {:app {:init-fn cljshello/Root
+                :modules         {:app {:init-fn hiccup-demo/Root
                                         :preloads [devtools.preload]}}
                 :devtools        {:http-root    "resources/public"
                                   :http-port    8080
