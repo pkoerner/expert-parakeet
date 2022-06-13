@@ -26,16 +26,6 @@
   [:div {:id "id-name", :class "example-class"} "Attribute"]
   ;; -> <div class="example-class" id="id-name">Attribute</div>
 
-  ;; Statt eines Keywords als erstes Element kann auch ein Symbol angegeben werden
-  ;; Dieses Symbol wird als Funktion evaluiert und gibt einen Hiccup Vektor zurück
-
-  (defn header
-    []
-    [:h1 "Head"])
-
-  [:div
-   [header]]
-
   ;; Sequenzen werden expandiert
   [:ul (for [x (range 3)] [:li x])]
   [:ul (map (fn [s] [:li (str s)]) (range 3))]
@@ -55,6 +45,16 @@
 
 
   ;; Zusätzliche Funktionalität durch Hiccup verbunden mit Reagent
+
+  ;; Statt eines Keywords als erstes Element kann auch ein Symbol angegeben werden
+  ;; Dieses Symbol wird als Funktion evaluiert und gibt einen Hiccup Vektor zurück
+
+  (defn head
+    []
+    [:h1 "Head"])
+
+  [:div
+   [head]]
 
   {:style "color: red; font-weight: bold;"}
   ;; ->
@@ -88,20 +88,28 @@
   )
 
 
+(defn header
+  []
+  [:h1 "Head"])
+
+
 (defn Root
   []
   [:div
+   [header]
    ;; [:p {:style "color: red; font-weight: bold;"} "Hi"] Funktioniert nur bei reinem Hiccup
-   [:p {:style {:color "red", :font-weight "bold"}} "Hello"]
+   ;; [:p {:style {:color "red", :font-weight "bold"}} "Hello"]
    ;; [:div {:class ["c1" "c2"]}]
    ;; [:input {:type "checkbox" :checked false}]
    ;; [:input {:type "checkbox" :checked true}]
    ;; [:div {:class "hello", :id 12, :style {:width 20}}]
    ;; [:div {:id :a/b, :class nil}]
+   ;; [:div [:ul [:li "Hello"]]]
+   ;; [:div>ul>li "Hello"]
    ;; [form]
    ;; (if (:finished @data)
-   ;; [:p "Ihre Eingabe: "]
-   ;; [form2])
+   ;;  [:p "Ihre Eingabe: "]
+   ;;  [form2])
    ;; [user-input]
    ])
 
@@ -171,7 +179,7 @@
     (if (not-empty d)
       [:div
        (if (:clicks d) [:p "Anzahl Klicks: " (:clicks d)] [:p])
-       (if (:double-clicks d) [:p "Anzahl Klicks: " (:double-clicks d)] [:p])
+       (if (:double-clicks d) [:p "Anzahl Doppelklicks: " (:double-clicks d)] [:p])
        (if (and (:fav-drink d) (not-empty (:fav-drink d))) [:p "Ihr Lieblingsgetränk: " (:fav-drink d)] [:p])]
       [:div])))
 
