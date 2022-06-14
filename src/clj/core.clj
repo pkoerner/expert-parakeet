@@ -1,7 +1,7 @@
 (ns core
   (:require
     [compojure.core :refer [GET, defroutes]]
-    ;[compojure.route :as route]
+    ;; [compojure.route :as route]
     [ring.adapter.jetty :refer [run-jetty]]))
 
 
