@@ -1,8 +1,9 @@
 (ns core
   (:require
     [compojure.core :refer [GET, defroutes]]
-    [compojure.route :as route]
+    ;[compojure.route :as route]
     [ring.adapter.jetty :refer [run-jetty]]))
+
 
 (defroutes app
   (GET "/api/random" [] (str [(rand-int 10) (rand-int 10)])))
