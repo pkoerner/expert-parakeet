@@ -1,6 +1,6 @@
 (ns cljshello
   (:require
-    [ajax.core :refer [GET #_POST]]
+    [ajax.core :refer [GET POST]]
     [cljs.tools.reader.edn :as edn]
     [re-frame.core :as rf]
     ;; [reagent.core :as reagent :refer [atom]]
@@ -15,9 +15,9 @@
 (rf/reg-event-db
   :init-db
   (fn [db _]
-    (GET "http://localhost/backend/random"
-         {:handler (fn [resp]
-                     (rf/dispatch [:update-challenge (edn/read-string resp)]))})
+    (POST "/backend/random"
+          {:handler (fn [resp]
+                      (rf/dispatch [:update-challenge (edn/read-string resp)]))})
     db))
 
 
@@ -30,9 +30,19 @@
 (rf/reg-event-db
   :check-answer
   (fn [db [_ val]]
-    (let [res (:res db)]
-      (prn val res)
-      (assoc db :correct (= val (str res))))))
+    (GET "/backend/check-random"
+         {:handler (fn [resp]
+                     (rf/dispatch [:update-correct (edn/read-string resp)]))
+          :params {:a (:a db), :b (:b db), :res val}
+          :format :raw})
+    ;;  (= val (str res))
+    db))
+
+
+(rf/reg-event-db
+  :update-correct
+  (fn [db [_ val]]
+    (assoc db :correct val)))
 
 
 (rf/reg-sub
