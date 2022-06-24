@@ -15,7 +15,7 @@
 (rf/reg-event-db
   :init-db
   (fn [db _]
-    (POST "/backend/random"
+    (GET "/backend/random"
           {:handler (fn [resp]
                       (rf/dispatch [:update-challenge (edn/read-string resp)]))})
     db))
@@ -29,13 +29,12 @@
 
 (rf/reg-event-db
   :check-answer
-  (fn [db [_ val]]
+  (fn [{:keys [a b answer] :as db}]
     (GET "/backend/check-random"
          {:handler (fn [resp]
                      (rf/dispatch [:update-correct (edn/read-string resp)]))
-          :params {:a (:a db), :b (:b db), :res val}
+          :params {:a a :b b :res answer}
           :format :raw})
-    ;;  (= val (str res))
     db))
 
 
@@ -44,6 +43,11 @@
   (fn [db [_ val]]
     (assoc db :correct val)))
 
+
+(rf/reg-event-db
+  :update-answer
+  (fn [db [_ answer]]
+    (assoc db :answer answer)))
 
 (rf/reg-sub
   :values
@@ -58,7 +62,10 @@
     [:div
      (str a "+" b "=")
      [:input {:type "number"
-              :on-change #(rf/dispatch [:check-answer (-> % .-target .-value)])}]]))
+              :on-change #(rf/dispatch [:update-answer (-> % .-target .-value)])}]
+     [:button {:type "button"
+               :on-click #(rf/dispatch [:check-answer])}
+      "Check"]]))
 
 
 (defn React-to-user
