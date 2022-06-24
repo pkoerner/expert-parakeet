@@ -1,19 +1,18 @@
 (ns core
   (:require
-    [compojure.core :refer [GET POST defroutes]]
     [compojure.coercions :refer [as-int]]
-    [ring.util.response :refer [response]]
+    [compojure.core :refer [GET defroutes]]
     [compojure.route :as route]
     [ring.adapter.jetty :refer [run-jetty]]
-    [ring.middleware.reload :refer [wrap-reload]]
-    [ring.middleware.params :refer [wrap-params]]))
+    [ring.middleware.params :refer [wrap-params]]
+    [ring.middleware.reload :refer [wrap-reload]]))
 
 
 (defroutes routes
   (GET "/api/random" [] (str [(rand-int 10) (rand-int 10)]))
   (GET "/api/random3" [] (str [(rand-int 10) (rand-int 10)]))
-  (GET "/api/check-random"[a :<< as-int b :<< as-int res :<< as-int]
-        (str (= (+ a b) res)))
+  (GET "/api/check-random" [a :<< as-int b :<< as-int res :<< as-int]
+       (str (= (+ a b) res)))
   (route/not-found "Not Found"))
 
 
@@ -21,7 +20,9 @@
   (-> routes
       wrap-params))
 
+
 (def app-dev (wrap-reload #'app))
+
 
 (defn handler
   [_request]

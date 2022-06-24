@@ -1,6 +1,6 @@
 (ns cljshello
   (:require
-    [ajax.core :refer [GET POST]]
+    [ajax.core :refer [GET]]
     [cljs.tools.reader.edn :as edn]
     [re-frame.core :as rf]
     ;; [reagent.core :as reagent :refer [atom]]
@@ -16,8 +16,8 @@
   :init-db
   (fn [db _]
     (GET "/backend/random"
-          {:handler (fn [resp]
-                      (rf/dispatch [:update-challenge (edn/read-string resp)]))})
+         {:handler (fn [resp]
+                     (rf/dispatch [:update-challenge (edn/read-string resp)]))})
     db))
 
 
@@ -48,6 +48,7 @@
   :update-answer
   (fn [db [_ answer]]
     (assoc db :answer answer)))
+
 
 (rf/reg-sub
   :values
