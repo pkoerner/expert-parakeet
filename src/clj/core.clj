@@ -29,13 +29,15 @@
                  [:body :email])))
   (route/not-found "Not Found"))
 
+(def oauth-client-id (System/getenv "OAUTH_CLIENT_ID"))
+(def oauth-client-secret (System/getenv "OAUTH_CLIENT_SECRET"))
 
 (def app
   (let [profiles {:github
                   {:authorize-uri    "https://github.com/login/oauth/authorize"
                    :access-token-uri "https://github.com/login/oauth/access_token"
-                   :client-id        "top secret"
-                   :client-secret    "bottom secret"
+                   :client-id        oauth-client-id
+                   :client-secret    oauth-client-secret
                    :scopes           ["user:email"]
                    :launch-uri       "/api/oauth2/github"
                    :redirect-uri     "/api/oauth2/github/callback"
