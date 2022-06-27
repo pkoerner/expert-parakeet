@@ -1,5 +1,6 @@
 (ns core
   (:require
+    [auth :refer [extract-token wrap-authentication]]
     [compojure.coercions :refer [as-int]]
     [compojure.core :refer [GET POST defroutes context]]
     [compojure.route :as route]
@@ -8,6 +9,7 @@
     [muuntaja.middleware :refer [wrap-format]]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.cors :refer [wrap-cors]]
+    [ring.middleware.defaults :refer :all]
     [ring.middleware.params :refer [wrap-params]]
     [ring.middleware.reload :refer [wrap-reload]]
     [ring.util.response :refer [response]]))
@@ -38,7 +40,11 @@
            (GET "/user/:uid/kurse" [uid :<< as-int]
                 (response (domain/kurse-mit-gesamt-punkten
                             (db/kurse-von-studierendem uid)
-                            (partial db/antworten-von-test uid)))))
+                            (partial db/antworten-von-test uid))))
+
+           (GET "/api/access-token" request (str (extract-token request)))
+
+           (GET "/api/session" request (str (:session request))))
   (route/not-found "Not Found"))
 
 
@@ -49,7 +55,9 @@
 
 (def app
   (-> routes
+      wrap-authentication
       wrap-format ; handle content negotiation
+      (wrap-defaults (assoc-in site-defaults [:session :cookie-attrs :same-site] :lax))
       wrap-params
       (wrap-cors :access-control-allow-origin allowed-origins
                  :access-control-allow-methods allowed-methods)))

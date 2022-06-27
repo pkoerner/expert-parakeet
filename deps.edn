@@ -6,9 +6,11 @@
            compojure/compojure {:mvn/version "1.7.0"}
            ring/ring {:mvn/version "1.9.5"}
            ring-cors/ring-cors {:mvn/version "0.1.13"}
+           ring/ring-defaults {:mvn/version "0.3.3"}
+           ring-oauth2/ring-oauth2 {:mvn/version "0.2.0"}
+           clj-http/clj-http {:mvn/version "3.12.3"}
            ;; is this a dev dependency
-           org.clojure/test.check {:mvn/version "1.1.1"}
-           }
+           org.clojure/test.check {:mvn/version "1.1.1"}}
 
  :aliases {;; Test runner in console.
            :test-runner {:extra-paths ["test"]
@@ -32,5 +34,4 @@
                          :main-opts ["-m" "cljstyle.main"]}
 
            :nrepl       {:extra-deps {cider/cider-nrepl   {:mvn/version "0.28.5"}}
-                         :main-opts  ["-m" "nrepl.cmdline" "--interactive" "--middleware" "[cider.nrepl/cider-middleware]"]}
-           }}
+                         :main-opts  ["-m" "nrepl.cmdline" "--interactive" "--middleware" "[cider.nrepl/cider-middleware]"]}}}
