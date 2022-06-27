@@ -20,7 +20,8 @@
                                         compojure/compojure {:mvn/version "1.7.0"}
                                         ring/ring {:mvn/version "1.9.5"}
                                         ring/ring-defaults {:mvn/version "0.3.3"}
-                                        ring-oauth2/ring-oauth2 {:mvn/version "0.2.0"}}}
+                                        ring-oauth2/ring-oauth2 {:mvn/version "0.2.0"}
+                                        clj-http/clj-http {:mvn/version "3.12.3"}}}
 
            :frontend     {:extra-paths ["src/cljs"]
                           :extra-deps  {org.clojure/clojurescript {:mvn/version "1.11.54"}

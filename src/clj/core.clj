@@ -8,15 +8,25 @@
    [ring.middleware.params :refer [wrap-params]]
    [ring.middleware.reload :refer [wrap-reload]]
    [ring.middleware.oauth2 :refer [wrap-oauth2]]
-   [ring.util.request :refer [body-string]]))
+   [ring.util.request :refer [body-string]]
+   [clj-http.client :as client]))
 
+(defn extract-token [request] (get-in request [:oauth2/access-tokens :github :token]))
 
 (defroutes routes
   (GET "/api/random" [] (str [(rand-int 10) (rand-int 10)]))
   (GET "/api/random3" [] (str [(rand-int 10) (rand-int 10)]))
   (GET "/api/check-random" [a :<< as-int b :<< as-int res :<< as-int]
     (str (= (+ a b) res)))
-  (GET "/api/access-token" request (str (-> request :ring.middleware.oauth2/access-tokens :github)))
+  ;;(GET "/api/access-token" request (str (-> request :ring.middleware.oauth2/access-tokens :github)))
+  (GET "/api/access-token" request (str (extract-token request)))
+  (GET "/api/user" request
+    (str (get-in (client/get
+                  "https://api.github.com/user"
+                  {:accept :json
+                   :oauth-token (extract-token request)
+                   :as :json})
+                 [:body :email])))
   (route/not-found "Not Found"))
 
 
