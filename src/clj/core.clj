@@ -38,14 +38,6 @@
 
 (def app-dev (wrap-reload #'app))
 
-
-(defn handler
-  [_request]
-  {:status 200
-   :headers {"Content-Type" "text/plain"}
-   :body "Hello World"})
-
-
 (defn start-server
   [& _args]
   (run-jetty app-dev {:port 8081 :join? false}))
