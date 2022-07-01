@@ -1,6 +1,6 @@
 (ns cljshello
   (:require
-    [ajax.core :refer [GET]]
+    [ajax.core :refer [GET POST]]
     [cljs.tools.reader.edn :as edn]
     [re-frame.core :as rf]
     ;; [reagent.core :as reagent :refer [atom]]
@@ -15,7 +15,7 @@
 (rf/reg-event-db
   :init-db
   (fn [db _]
-    (GET "/backend/random"
+    (GET "/api/random"
          {:handler (fn [resp]
                      (rf/dispatch [:update-challenge (edn/read-string resp)]))})
     db))
@@ -29,12 +29,12 @@
 
 (rf/reg-event-db
   :check-answer
-  (fn [{:keys [a b answer] :as db}]
-    (GET "/backend/check-random"
-         {:handler (fn [resp]
-                     (rf/dispatch [:update-correct (edn/read-string resp)]))
-          :params {:a a :b b :res answer}
-          :format :raw})
+  (fn [{:keys [answers] :as db}]
+    (POST "/api/foobarmachenwirspaeter"
+          {:handler (fn [resp]
+                      (rf/dispatch [:update-correct (edn/read-string resp)]))
+           :body answers
+           :format :raw})
     db))
 
 
@@ -47,7 +47,7 @@
 (rf/reg-event-db
   :update-answer
   (fn [db [_ answer]]
-    (assoc db :answer answer)))
+    (update-in db [:answers] merge answer)))
 
 
 (rf/reg-sub
@@ -69,14 +69,34 @@
       "Check"]]))
 
 
+(defn TextQuestion
+  [{:keys [question points question-id]}]
+  [:div {:key question-id} [:h3.title.is-4 (str question " - " points " Punkte")]
+   [:div.field
+    [:label.label "Antwort"]
+    [:div.control
+     [:textarea.textarea
+      {:placeholder "Der Sinn des Lebens ist 42 weil..."
+       :on-change #(rf/dispatch [:update-answer {question-id (-> % .-target .-value)}])}]]]])
+
+
+(defn Questions
+  [{:keys [questions]}]
+  [:form (map TextQuestion questions)
+   [:div.control
+    [:button.button.is-link
+     {:type "button"
+      :on-click #(rf/dispatch [:check-answer])}
+     "Abschicken"]]])
+
+
 (defn React-to-user
   []
   (let [ans (:correct @(rf/subscribe [:values]))]
     (if (not (nil? ans))
       [:div
        (if ans "Correct" "False")
-       ans]
-      [:div])))
+       ans])))
 
 
 (rf/dispatch [:init-db])
@@ -84,7 +104,10 @@
 
 (defn Root
   []
-  [:div
+  [:div.container
+   [Questions {:questions
+               [{:question-id 0 :question "Fühlen Sie sich prüfungsbereit?" :points 0}
+                {:question-id 1 :question "Was ist der Sinn des Lebens?" :points 42}]}]
    [Hello]
    [Calc]
    [React-to-user]])
