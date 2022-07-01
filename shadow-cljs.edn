@@ -8,5 +8,5 @@
                 :modules         {:app {:init-fn cljshello/Root
                                         :preloads [devtools.preload]}}
                 :devtools        {:http-root    "resources/public"
-                                  :http-port    8080
+                                  :http-port    8082
                                   }}}}

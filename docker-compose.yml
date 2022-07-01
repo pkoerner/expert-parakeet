@@ -1,0 +1,10 @@
+version: '3.2'
+services:
+  proxy:
+    image: nginx:1.13-alpine
+    volumes:
+      - ./proxy/conf/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./proxy/conf/domain.conf:/etc/nginx/domain.conf:ro
+    ports:
+      - "8080:80"
+    network_mode: host
