@@ -17,5 +17,5 @@ Front & Backend:
 ```shell
 docker-compose up -d
 clj -A:backend -X core/start-server
-shadow-cljs -A dev-frontend watch app
+shadow-cljs -A dev-frontend watch app # clj -A:dev-frontend -M:shadow-cljs  watch app
 ```
