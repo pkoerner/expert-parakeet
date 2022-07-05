@@ -15,22 +15,22 @@
 (rf/reg-event-db
   :init-db
   (fn [db _]
-    (GET "/api/random"
+    (GET "/api/test/3"
          {:handler (fn [resp]
-                     (rf/dispatch [:update-challenge (edn/read-string resp)]))})
-    db))
+                     (rf/dispatch [:update-test (edn/read-string resp)]))})
+    (assoc db :test-id 3)))
 
 
 (rf/reg-event-db
-  :update-challenge
-  (fn [db [_ [a b]]]
-    (assoc db :a a :b b)))
+  :update-test
+  (fn [db [_ test]]
+    (assoc db :test test)))
 
 
 (rf/reg-event-db
   :check-answer
-  (fn [{:keys [answers] :as db}]
-    (POST "/api/foobarmachenwirspaeter"
+  (fn [{:keys [answers test-id] :as db}]
+    (POST "/api/test/"
           {:handler (fn [resp]
                       (rf/dispatch [:update-correct (edn/read-string resp)]))
            :body answers
@@ -51,8 +51,8 @@
 
 
 (rf/reg-sub
-  :values
-  (fn [db _] db))
+  :test
+  (fn [db _] (:test db)))
 
 
 (defn Calc
@@ -80,8 +80,7 @@
        :on-change #(rf/dispatch [:update-answer {question-id (-> % .-target .-value)}])}]]]])
 
 
-(defn Questions
-  [{:keys [questions]}]
+(defn Questions [questions]
   [:form (map TextQuestion questions)
    [:div.control
     [:button.button.is-link
@@ -105,9 +104,7 @@
 (defn Root
   []
   [:div.container
-   [Questions {:questions
-               [{:question-id 0 :question "Fühlen Sie sich prüfungsbereit?" :points 0}
-                {:question-id 1 :question "Was ist der Sinn des Lebens?" :points 42}]}]
+   [Questions (:questions @(rf/subscribe [:test]))]
    [Hello]
    [Calc]
    [React-to-user]])
