@@ -29,7 +29,7 @@
 
 (rf/reg-event-db
   :check-answer
-  (fn [{:keys [answers _] :as db}]
+  (fn [{:keys [answers _test-id] :as db}]
     (POST "/api/test/"
           {:handler (fn [resp]
                       (rf/dispatch [:update-correct (edn/read-string resp)]))
