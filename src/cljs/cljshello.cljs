@@ -29,7 +29,7 @@
 
 (rf/reg-event-db
   :check-answer
-  (fn [{:keys [answers test-id] :as db}]
+  (fn [{:keys [answers _] :as db}]
     (POST "/api/test/"
           {:handler (fn [resp]
                       (rf/dispatch [:update-correct (edn/read-string resp)]))
@@ -55,20 +55,6 @@
   (fn [db _] (:test db)))
 
 
-(defn Calc
-  []
-  (let [vals @(rf/subscribe [:values])
-        a (:a vals)
-        b (:b vals)]
-    [:div
-     (str a "+" b "=")
-     [:input {:type "number"
-              :on-change #(rf/dispatch [:update-answer (-> % .-target .-value)])}]
-     [:button {:type "button"
-               :on-click #(rf/dispatch [:check-answer])}
-      "Check"]]))
-
-
 (defn TextQuestion
   [{:keys [question points question-id]}]
   [:div {:key question-id} [:h3.title.is-4 (str question " - " points " Punkte")]
@@ -80,7 +66,8 @@
        :on-change #(rf/dispatch [:update-answer {question-id (-> % .-target .-value)}])}]]]])
 
 
-(defn Questions [questions]
+(defn Questions
+  [questions]
   [:form (map TextQuestion questions)
    [:div.control
     [:button.button.is-link
@@ -89,26 +76,16 @@
      "Abschicken"]]])
 
 
-(defn React-to-user
-  []
-  (let [ans (:correct @(rf/subscribe [:values]))]
-    (if (not (nil? ans))
-      [:div
-       (if ans "Correct" "False")
-       ans])))
-
-
-(rf/dispatch [:init-db])
-
-
 (defn Root
   []
   [:div.container
-   [Questions (:questions @(rf/subscribe [:test]))]
-   [Hello]
-   [Calc]
-   [React-to-user]])
+   [Questions (:questions @(rf/subscribe [:test]))]])
 
 
-(rd/render [Root]
-           (. js/document (getElementById "app")))
+(defn main
+  []
+  (rf/dispatch [:init-db])
+  (rd/render [Root]
+             (. js/document (getElementById "app"))))
+
+
