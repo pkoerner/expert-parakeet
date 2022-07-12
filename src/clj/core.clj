@@ -19,13 +19,9 @@
                 (str (db/test-by-id id)))
            ;; fragen
            (GET "/frage" []
-                (str (mapv first (d/q '[:find (pull ?e [:frage/id])
-                                        :where [?e :frage/id]]
-                                      @db/conn))))
+                (str (db/all-fragen)))
            (GET "/frage/:id" [id :<< as-int]
-                (str (d/pull @db/conn
-                             [:frage/frage-text :frage/punkte :frage/typ]
-                             [:frage/id id]))))
+                (str (db/frage-by-id id))))
   (route/not-found "Not Found"))
 
 

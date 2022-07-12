@@ -123,6 +123,19 @@
                    @conn)))
 
 
+(defn all-fragen
+      []
+      (mapv first (d/q '[:find (pull ?e [:frage/id])
+                         :where [?e :frage/id]]
+                       @db/conn)))
+
+(defn frage-by-id
+      [id]
+      (d/pull @db/conn
+              [:frage/frage-text :frage/punkte :frage/typ]
+              [:frage/id id]))
+
+
 (comment 
   (ffirst (d/q '[:find (count ?e)
                  :where 
