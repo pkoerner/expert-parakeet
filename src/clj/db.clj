@@ -6,7 +6,7 @@
 
 
 (s/def :frage/id pos-int?)
-(s/def :frage/typ keyword?)
+(s/def :frage/typ #{:frage.typ/text})
 (s/def :frage/frage-text string?)
 (s/def :frage/loesung string?)
 (s/def :frage/punkte int?)
@@ -16,9 +16,13 @@
   (s/keys :req [:frage/id :frage/typ :frage/frage-text
                 :frage/loesung :frage/punkte]))
 
+(s/explain ::frage {:frage/id 2 :frage/typ :frage.typ/text 
+            :frage/frage-text "foo" :frage/loesung "bar" :frage/punkte 3})
+
+(s/def :user/id pos-int?)
 
 (s/def :antwort/id pos-int?)
-(s/def :antwort/user keyword?)
+(s/def :antwort/user :user/id)
 (s/def :antwort/frage ::frage)
 (s/def :antwort/antwort-text string?)
 
@@ -34,8 +38,9 @@
 
 (def frage-schema
   (spectomic/datomic-schema
-    [:frage/id
-     :frage/typ
+    [[:frage/id {:db/unique :db.unique/identity
+                 :db/index true}]
+     :frage/typ ;; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/on-prem/best-practices.html#idents-for-enumerated-types)
      :frage/frage-text
      :frage/loesung
      :frage/punkte]))
@@ -43,7 +48,8 @@
 
 (def antwort-schema
   (spectomic/datomic-schema
-    [:antwort/id
+    [[:antwort/id {:db/unique :db.unique/identity
+                   :db/index true}]
      :antwort/user
      :antwort/frage
      :antwort/antwort-text]))
@@ -51,7 +57,8 @@
 
 (def test-schema
   (spectomic/datomic-schema
-    [:test/id
+    [[:test/id {:db/unique :db.unique/identity
+                :db/index true}]
      :test/fragen]))
 
 
@@ -59,34 +66,49 @@
   (concat frage-schema antwort-schema test-schema))
 
 
-(s/exercise ::antwort)
+(comment 
+  ;; use file db
+  (def cfg
+    {:store {:backend :file
+             :path "/tmp/expert-db"}
+     :initial-tx schema})
 
+  (if (d/database-exists? cfg)
+    (println "Found existing DB at:" (get-in cfg [:store :path]))
+    (d/create-database cfg))
+  )
 
-(def dummy-data
-  [{:frage/id  "272453", :github "123459"}
-   {:mat-nr  "000000", :github "312592"}
-   {:mat-nr  "101010", :github "193991"}])
+(def dummy-data 
+  [{:frage/id 1
+    :frage/frage-text "Wie geht es dir heute?"
+    :frage/typ :frage.typ/text
+    :frage/punkte 7}
+   {:frage/id 3
+    :frage/frage-text "Fühlen sie sich prüfungsbereit?"
+    :frage/typ :frage.typ/bool
+    :frage/punkte 0}
+   {:test/id 1
+    :test/fragen [[:frage/id 1] [:frage/id 3]]}])
 
-
+;; use mem db
 (def cfg
-  {:store {:backend :file
-           :path "/tmp/expert-db"}
-   :initial-tx (concat schema)})
+  {:store {:backend :mem
+           :id "expert-db"}
+   :initial-tx schema})
 
-
-(if (d/database-exists? cfg)
-  (println "Found existing DB at:" (get-in cfg [:store :path]))
-  (d/create-database cfg))
-
+(d/create-database cfg)
 
 (def conn (d/connect cfg))
 
+(d/transact conn dummy-data)
 
-(defn get-by-mat-rn
-  [mat-nr]
-  (d/q '[:find ?mat-nr ?github
-         :in $ ?mat-nr
-         :where
-         [?e :mat-nr ?mat-nr]
-         [?e :github ?github]]
-       @conn mat-nr))
+(comment 
+  (ffirst (d/q '[:find (count ?e)
+                 :where 
+                 [?e :frage/id]] @conn)))
+
+(comment 
+  (d/pull @conn [:test/fragen] [:test/id 1])
+  (d/pull @conn [:test/id {:test/fragen [:frage/frage-text]}] [:test/id 1])
+  (d/pull @conn [:frage/frage-text] [:frage/id 1])
+  )

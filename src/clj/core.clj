@@ -3,42 +3,41 @@
     [compojure.coercions :refer [as-int]]
     [compojure.core :refer [GET defroutes context]]
     [compojure.route :as route]
+    [db :as db]
+    [datahike.api :as d]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.params :refer [wrap-params]]
     [ring.middleware.reload :refer [wrap-reload]]))
 
 
-(defn get-test-by-id
-  [id]
-  {:test-id id
-   :questions [{:question-id 0 :question "Fühlen Sie sich prüfungsbereit?" :points 0}
-               {:question-id 1 :question "Was ist der Sinn des Lebens?" :points 42}]})
-
-
 (defroutes routes
   (context "/api" []
-           (GET "/test" [] [])
-           (GET "/test/:test-id" [test-id] (str (get-test-by-id test-id)))
-           (GET "/check-random" [a :<< as-int b :<< as-int res :<< as-int]
-                (str (= (+ a b) res))))
-
+           ;; tests
+           (GET "/test" [] 
+                (str (mapv first (d/q '[:find ?id
+                                  :where [_ :test/id ?id]] 
+                                @db/conn))))
+           (GET "/test/:id" [id :<< as-int] 
+                (str (d/pull @db/conn 
+                             [:test/id {:test/fragen [:frage/frage-text :frage/punkte :frage/typ]}] 
+                             [:test/id id])))
+           ;; fragen
+           (GET "/frage" [] 
+                (str (mapv first (d/q '[:find (pull ?e [:frage/id])
+                                        :where [?e :frage/id]] 
+                                      @db/conn))))
+           (GET "/frage/:id" [id :<< as-int] 
+                (str (d/pull @db/conn 
+                             [:frage/frage-text :frage/punkte :frage/typ] 
+                             [:frage/id id])))
+           )
   (route/not-found "Not Found"))
-
 
 (def app
   (-> routes
       wrap-params))
 
-
 (def app-dev (wrap-reload #'app))
-
-
-(defn handler
-  [_request]
-  {:status 200
-   :headers {"Content-Type" "text/plain"}
-   :body "Hello World"})
-
 
 (defn start-server
   [& _args]
