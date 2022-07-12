@@ -14,13 +14,9 @@
   (context "/api" []
            ;; tests
            (GET "/test" []
-                (str (mapv first (d/q '[:find ?id
-                                        :where [_ :test/id ?id]]
-                                      @db/conn))))
+                (str (db/all-tests)))
            (GET "/test/:id" [id :<< as-int]
-                (str (d/pull @db/conn
-                             [:test/id {:test/fragen [:frage/frage-text :frage/punkte :frage/typ]}]
-                             [:test/id id])))
+                (str (db/test-by-id id)))
            ;; fragen
            (GET "/frage" []
                 (str (mapv first (d/q '[:find (pull ?e [:frage/id])

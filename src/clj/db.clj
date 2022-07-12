@@ -68,8 +68,8 @@
   (concat frage-schema antwort-schema test-schema))
 
 
-  ;; use file db
-  #_#_(def cfg
+;; use file db
+#_#_(def cfg
     {:store {:backend :file
              :path "/tmp/expert-db"}
      :initial-tx schema})
@@ -77,6 +77,7 @@
   (if (d/database-exists? cfg)
     (println "Found existing DB at:" (get-in cfg [:store :path]))
     (d/create-database cfg))
+
 
 (def dummy-data
   [{:frage/id 1
@@ -98,11 +99,28 @@
    :initial-tx schema})
 
 
-(d/create-database cfg)
+(if (d/database-exists? cfg)
+  (println "Found existing DB at:" (get-in cfg [:store :path]))
+  (d/create-database cfg))
+
 
 (def conn (d/connect cfg))
 
 (d/transact conn dummy-data)
+
+
+(defn test-by-id
+  [id]
+  (d/pull @conn
+          [:test/id {:test/fragen [:frage/frage-text :frage/punkte :frage/typ]}]
+          [:test/id id]))
+
+
+(defn all-tests
+  []
+  (mapv first (d/q '[:find ?id
+                     :where [_ :test/id ?id]]
+                   @conn)))
 
 
 (comment 
