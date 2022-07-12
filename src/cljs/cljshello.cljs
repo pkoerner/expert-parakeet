@@ -15,10 +15,10 @@
 (rf/reg-event-db
   :init-db
   (fn [db _]
-    (GET "/api/test/3"
+    (GET "/api/test/1"
          {:handler (fn [resp]
                      (rf/dispatch [:update-test (edn/read-string resp)]))})
-    (assoc db :test-id 3)))
+    db))
 
 
 (rf/reg-event-db
