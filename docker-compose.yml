@@ -7,5 +7,3 @@ services:
       - ./proxy/conf/domain.conf:/etc/nginx/domain.conf:ro
     ports:
       - "8080:80"
-    extra_hosts:
-      - "host.docker.internal:172.18.0.1"

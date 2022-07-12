@@ -11,17 +11,23 @@
 
 
 (defroutes routes
-  (context "/api" []
-           ;; tests
-           (GET "/test" []
-                (str (db/all-tests)))
-           (GET "/test/:id" [id :<< as-int]
-                (str (db/test-by-id id)))
-           ;; fragen
-           (GET "/frage" []
-                (str (db/all-fragen)))
-           (GET "/frage/:id" [id :<< as-int]
-                (str (db/frage-by-id id))))
+           (context "/api" []
+                    ;; tests
+                    (GET "/test" []
+                         (str (db/all-tests)))
+                    (GET "/test/:id" [id :<< as-int]
+                         (str (db/test-by-id id)))
+                    ;; fragen
+                    (GET "/frage" []
+                         (str (db/all-fragen)))
+                    (GET "/frage/:id" [id :<< as-int]
+                         (str (db/frage-by-id id)))
+                    ;; antworten
+                    (PUT "api/test/:test-id/antwort" [test-id :<< as-int antworten]
+                         (prn antworten)
+                         ;(db/add-antwort test-id antworten)
+                         )
+                    )
   (route/not-found "Not Found"))
 
 
