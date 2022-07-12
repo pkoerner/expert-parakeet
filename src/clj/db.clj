@@ -16,8 +16,10 @@
   (s/keys :req [:frage/id :frage/typ :frage/frage-text
                 :frage/loesung :frage/punkte]))
 
-(s/explain ::frage {:frage/id 2 :frage/typ :frage.typ/text 
-            :frage/frage-text "foo" :frage/loesung "bar" :frage/punkte 3})
+
+(s/explain ::frage {:frage/id 2 :frage/typ :frage.typ/text
+                    :frage/frage-text "foo" :frage/loesung "bar" :frage/punkte 3})
+
 
 (s/def :user/id pos-int?)
 
@@ -40,7 +42,7 @@
   (spectomic/datomic-schema
     [[:frage/id {:db/unique :db.unique/identity
                  :db/index true}]
-     :frage/typ ;; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/on-prem/best-practices.html#idents-for-enumerated-types)
+     :frage/typ ; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/on-prem/best-practices.html#idents-for-enumerated-types)
      :frage/frage-text
      :frage/loesung
      :frage/punkte]))
@@ -66,9 +68,8 @@
   (concat frage-schema antwort-schema test-schema))
 
 
-(comment 
   ;; use file db
-  (def cfg
+  #_#_(def cfg
     {:store {:backend :file
              :path "/tmp/expert-db"}
      :initial-tx schema})
@@ -76,9 +77,8 @@
   (if (d/database-exists? cfg)
     (println "Found existing DB at:" (get-in cfg [:store :path]))
     (d/create-database cfg))
-  )
 
-(def dummy-data 
+(def dummy-data
   [{:frage/id 1
     :frage/frage-text "Wie geht es dir heute?"
     :frage/typ :frage.typ/text
@@ -90,11 +90,13 @@
    {:test/id 1
     :test/fragen [[:frage/id 1] [:frage/id 3]]}])
 
+
 ;; use mem db
 (def cfg
   {:store {:backend :mem
            :id "expert-db"}
    :initial-tx schema})
+
 
 (d/create-database cfg)
 
@@ -102,10 +104,12 @@
 
 (d/transact conn dummy-data)
 
+
 (comment 
   (ffirst (d/q '[:find (count ?e)
                  :where 
                  [?e :frage/id]] @conn)))
+
 
 (comment 
   (d/pull @conn [:test/fragen] [:test/id 1])
