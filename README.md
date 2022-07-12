@@ -20,7 +20,7 @@ clj -A:backend -X core/start-server
 shadow-cljs -A dev-frontend watch app # clj -A:dev-frontend -M:shadow-cljs  watch app
 ```
 
-#Troubleshooting:
+# Troubleshooting:
 
 If `The required JS dependency "highlight.js/lib/core" is not available`.
 Try running:
