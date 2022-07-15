@@ -1,9 +1,8 @@
 (ns core
   (:require
     [compojure.coercions :refer [as-int]]
-    [compojure.core :refer [GET defroutes context]]
+    [compojure.core :refer [GET PUT defroutes context]]
     [compojure.route :as route]
-    [datahike.api :as d]
     [db :as db]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.params :refer [wrap-params]]
@@ -11,23 +10,21 @@
 
 
 (defroutes routes
-           (context "/api" []
-                    ;; tests
-                    (GET "/test" []
-                         (str (db/all-tests)))
-                    (GET "/test/:id" [id :<< as-int]
-                         (str (db/test-by-id id)))
-                    ;; fragen
-                    (GET "/frage" []
-                         (str (db/all-fragen)))
-                    (GET "/frage/:id" [id :<< as-int]
-                         (str (db/frage-by-id id)))
-                    ;; antworten
-                    (PUT "api/test/:test-id/antwort" [test-id :<< as-int antworten]
-                         (prn antworten)
-                         ;(db/add-antwort test-id antworten)
-                         )
-                    )
+  (context "/api" []
+           ;; tests
+           (GET "/test" []
+                (str (db/all-tests)))
+           (GET "/test/:id" [id :<< as-int]
+                (str (db/test-by-id id)))
+           ;; fragen
+           (GET "/frage" []
+                (str (db/all-fragen)))
+           (GET "/frage/:id" [id :<< as-int]
+                (str (db/frage-by-id id)))
+           ;; antworten
+           (PUT "api/test/:test-id/antwort" [test-id :<< as-int antworten]
+                (prn antworten)
+                (db/add-antwort test-id antworten)))
   (route/not-found "Not Found"))
 
 

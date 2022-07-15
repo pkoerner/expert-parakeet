@@ -37,6 +37,16 @@
 (s/def :test/id pos-int?)
 (s/def :test/fragen (s/coll-of ::frage))
 
+(s/def :fach/id pos-int?)
+(s/def :fach/fachtitel string?)
+(s/def :fach/tests (s/coll-of :test-id))
+
+(s/def :kurs/id pos-int?)
+(s/def :kurs/fach :fach/id)
+(s/def :kurs/jahr pos-int?)
+(s/def :kurs/semester string?)
+(s/def :kurs/tests (s/coll-of :test-id))
+
 
 (def frage-schema
   (spectomic/datomic-schema
@@ -64,8 +74,26 @@
      :test/fragen]))
 
 
+(def fach-schema
+  (spectomic/datascript-schema
+    [[:fach/id {:db/unique :db.unique/identity
+                :db/index true}]
+     :fach/fachtitel
+     :fach/tests]))
+
+
+(def kurs-schema
+  (spectomic/datascript-schema
+    [[:kurs/id {:db/unique :db.unique/identity
+                :db/index true}]
+     :kurs/fach
+     :kurs/jahr
+     :kurs/semester
+     :kurs/tests]))
+
+
 (def schema
-  (concat frage-schema antwort-schema test-schema))
+  (concat frage-schema antwort-schema test-schema fach-schema kurs-schema))
 
 
 ;; use file db
@@ -124,16 +152,23 @@
 
 
 (defn all-fragen
-      []
-      (mapv first (d/q '[:find (pull ?e [:frage/id])
-                         :where [?e :frage/id]]
-                       @db/conn)))
+  []
+  (mapv first (d/q '[:find (pull ?e [:frage/id])
+                     :where [?e :frage/id]]
+                   @db/conn)))
+
 
 (defn frage-by-id
-      [id]
-      (d/pull @db/conn
-              [:frage/frage-text :frage/punkte :frage/typ]
-              [:frage/id id]))
+  [id]
+  (d/pull @db/conn
+          [:frage/frage-text :frage/punkte :frage/typ]
+          [:frage/id id]))
+
+
+(defn add-antwort
+  [_id _antwort]
+  ;; Todo
+  nil)
 
 
 (comment 

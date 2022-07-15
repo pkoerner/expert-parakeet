@@ -2,7 +2,7 @@
   (:require
     [ajax.core :refer [GET POST PUT]]
     [cljs.tools.reader.edn :as edn]
-    [re-com.core :refer [at h-box v-box box p gap button label input-textarea line title]]
+    [re-com.core :refer [at v-box box gap button label input-textarea line title]]
     [re-frame.core :as rf]
     [reagent.core :as reagent]
     [reagent.dom :as rd]))
@@ -79,10 +79,11 @@
                                 (rf/dispatch [:update-antwort id val])
                                 (reset! antwort val))]]]]]))
 
+
 (rf/reg-event-db
   :update-antwort
   (fn [db [_ id antwort-text]]
-      (assoc-in db [:antworten id] antwort-text)))
+    (assoc-in db [:antworten id] antwort-text)))
 
 
 (defn Questions
@@ -117,9 +118,9 @@
   (fn [db [_]]
     (PUT (str "api/test/" (get-in db [:test :test/id]) "/antwort")
          {:handler (fn [resp]
-                        (rf/dispatch [:update-corrections (edn/read-string resp)]))
-           :params  (str (:antworten db))
-           :format :raw})
+                     (rf/dispatch [:update-corrections (edn/read-string resp)]))
+          :params  (str (:antworten db))
+          :format :raw})
     (assoc db :waiting-for-answer true)))
 
 
@@ -144,7 +145,7 @@
 
 (defn Root
   []
-   [box
+  [box
    :padding "15px"
    :child
    [v-box
@@ -153,13 +154,12 @@
     :children [[title :label "Test" :level :level1]
                [line]
                [Questions]
-               [Corrections]
-               ]]])
+               [Corrections]]]])
 
 
 (defn main
-      []
-      (rf/dispatch [:init-db])
-      (rd/render [Root]
-                 (. js/document (getElementById "app"))))
+  []
+  (rf/dispatch [:init-db])
+  (rd/render [Root]
+             (. js/document (getElementById "app"))))
 
