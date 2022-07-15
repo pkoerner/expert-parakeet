@@ -37,15 +37,20 @@
 (s/def :test/id pos-int?)
 (s/def :test/fragen (s/coll-of ::frage))
 
+
+(s/def ::test
+  (s/keys :req [:test/id :test/fragen]))
+
+
 (s/def :fach/id pos-int?)
 (s/def :fach/fachtitel string?)
-(s/def :fach/tests (s/coll-of :test-id))
+(s/def :fach/tests (s/coll-of ::test))
 
 (s/def :kurs/id pos-int?)
 (s/def :kurs/fach :fach/id)
 (s/def :kurs/jahr pos-int?)
 (s/def :kurs/semester string?)
-(s/def :kurs/tests (s/coll-of :test-id))
+(s/def :kurs/tests (s/coll-of ::test))
 
 
 (def frage-schema
