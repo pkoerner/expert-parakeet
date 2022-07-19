@@ -80,7 +80,7 @@
 
 
 (def fach-schema
-  (spectomic/datascript-schema
+  (spectomic/datomic-schema
     [[:fach/id {:db/unique :db.unique/identity
                 :db/index true}]
      :fach/fachtitel
@@ -88,7 +88,7 @@
 
 
 (def kurs-schema
-  (spectomic/datascript-schema
+  (spectomic/datomic-schema
     [[:kurs/id {:db/unique :db.unique/identity
                 :db/index true}]
      :kurs/fach
@@ -124,22 +124,27 @@
    {:test/id 1
     :test/fragen [[:frage/id 1] [:frage/id 3]]}])
 
-
 ;; use mem db
 (def cfg
   {:store {:backend :mem
            :id "expert-db"}
    :initial-tx schema})
 
+(defn create-conn
+  []
+  (if (d/database-exists? cfg)
+    (println "Found existing DB at:" (get-in cfg [:store :path]))
+    (d/create-database cfg))
+  (d/connect cfg)
+  )
 
-(if (d/database-exists? cfg)
-  (println "Found existing DB at:" (get-in cfg [:store :path]))
-  (d/create-database cfg))
+(def conn (create-conn))
 
+(defn load-dummy-data
+  []
+  (d/transact conn dummy-data))
 
-(def conn (d/connect cfg))
-
-(d/transact conn dummy-data)
+(load-dummy-data)
 
 
 (defn test-by-id
