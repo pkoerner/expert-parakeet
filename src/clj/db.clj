@@ -121,23 +121,18 @@
    :initial-tx schema})
 
 
+;; use file db
+#_(def cfg
+      {:store {:backend :file
+               :path "/tmp/expert-db"}
+       :initial-tx schema})
+
+
 (defn create-conn
   []
-
-  ;; use mem db
   (if (d/database-exists? cfg)
     (println "Found existing DB at:" (get-in cfg [:store :path]))
     (d/create-database cfg))
-
-  ;; use file db
-  #_#_(def cfg
-        {:store {:backend :file
-                 :path "/tmp/expert-db"}
-         :initial-tx schema})
-
-          (if (d/database-exists? cfg)
-            (println "Found existing DB at:" (get-in cfg [:store :path]))
-            (d/create-database cfg))
 
   (d/connect cfg))
 
