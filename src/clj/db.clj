@@ -63,7 +63,11 @@
     :frage/typ :frage.typ/bool
     :frage/punkte 0}
    {:test/id 1
-    :test/fragen [[:frage/id 1] [:frage/id 3]]}])
+    :test/fragen [[:frage/id 1] [:frage/id 3]]}
+   {:antwort/id 1
+    :antwort/frage 1
+    :antwort/user 2
+    :antwort/antwort-text "Antwort"}])
 
 
 ;; use mem db
@@ -132,6 +136,22 @@
   [_id _antwort]
   ;; Todo
   nil)
+
+
+(defn add-antwort-three-args
+  [frage-id user-id antworttext]
+  (d/transact conn
+              [{:antwort/id -1
+                :antwort/frage frage-id
+                :antwort/user user-id
+                :antwort/antwort-text antworttext}]))
+
+
+(defn all-antwort
+  []
+  (str (d/q '[:find (pull ?e [:antwort/id :antwort/user :antwort/frage :antwort/antwort-text])
+              :where [?e :antwort/id]]
+            @db/conn)))
 
 
 (comment 
