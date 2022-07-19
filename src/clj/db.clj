@@ -101,17 +101,6 @@
   (concat frage-schema antwort-schema test-schema fach-schema kurs-schema))
 
 
-;; use file db
-#_#_(def cfg
-    {:store {:backend :file
-             :path "/tmp/expert-db"}
-     :initial-tx schema})
-
-  (if (d/database-exists? cfg)
-    (println "Found existing DB at:" (get-in cfg [:store :path]))
-    (d/create-database cfg))
-
-
 (def dummy-data
   [{:frage/id 1
     :frage/frage-text "Wie geht es dir heute?"
@@ -134,9 +123,22 @@
 
 (defn create-conn
   []
+
+  ;; use mem db
   (if (d/database-exists? cfg)
     (println "Found existing DB at:" (get-in cfg [:store :path]))
     (d/create-database cfg))
+
+  ;; use file db
+  #_#_(def cfg
+        {:store {:backend :file
+                 :path "/tmp/expert-db"}
+         :initial-tx schema})
+
+          (if (d/database-exists? cfg)
+            (println "Found existing DB at:" (get-in cfg [:store :path]))
+            (d/create-database cfg))
+
   (d/connect cfg))
 
 
