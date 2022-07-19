@@ -7,4 +7,3 @@ services:
       - ./proxy/conf/domain.conf:/etc/nginx/domain.conf:ro
     ports:
       - "8080:80"
-    network_mode: host

@@ -1,40 +1,36 @@
 (ns cljshello
   (:require
-    [ajax.core :refer [GET]]
+    [ajax.core :refer [GET POST PUT]]
     [cljs.tools.reader.edn :as edn]
+    [re-com.core :refer [at v-box box gap button label input-textarea line title]]
     [re-frame.core :as rf]
-    ;; [reagent.core :as reagent :refer [atom]]
+    [reagent.core :as reagent]
     [reagent.dom :as rd]))
-
-
-(defn Hello
-  []
-  [:h1 "Hello World!"])
 
 
 (rf/reg-event-db
   :init-db
   (fn [db _]
-    (GET "/backend/random"
+    (GET "/api/test/1"
          {:handler (fn [resp]
-                     (rf/dispatch [:update-challenge (edn/read-string resp)]))})
+                     (rf/dispatch [:update-test (edn/read-string resp)]))})
     db))
 
 
 (rf/reg-event-db
-  :update-challenge
-  (fn [db [_ [a b]]]
-    (assoc db :a a :b b)))
+  :update-test
+  (fn [db [_ test]]
+    (assoc db :test test)))
 
 
 (rf/reg-event-db
   :check-answer
-  (fn [{:keys [a b answer] :as db}]
-    (GET "/backend/check-random"
-         {:handler (fn [resp]
-                     (rf/dispatch [:update-correct (edn/read-string resp)]))
-          :params {:a a :b b :res answer}
-          :format :raw})
+  (fn [{:keys [answers _test-id] :as db}]
+    (POST "/api/test/"
+          {:handler (fn [resp]
+                      (rf/dispatch [:update-correct (edn/read-string resp)]))
+           :body answers
+           :format :raw})
     db))
 
 
@@ -47,48 +43,123 @@
 (rf/reg-event-db
   :update-answer
   (fn [db [_ answer]]
-    (assoc db :answer answer)))
+    (update-in db [:answers] merge answer)))
 
 
 (rf/reg-sub
-  :values
+  :test
+  (fn [db _] (:test db)))
+
+
+(rf/reg-sub
+  :questions
+  (fn [db _] (:test db)))
+
+
+(defn TextQuestion
+  [{:keys [frage-text punkte id]}]
+  (let [antwort (reagent/atom "")]
+    [v-box
+     :src (at)
+     :attr {:key (str id)}
+     :gap "5px"
+     :children
+     [[title
+       :label (str frage-text " - " punkte " Punkte")
+       :level :level2]
+      [label
+       :label "Antwort"]
+      [v-box
+       :children [[input-textarea
+                   :src (at)
+                   :model antwort
+                   :placeholder "Der Sinn des Lebens ist 42 weil..."
+                   ;; :change-on-blur? false
+                   :on-change (fn [val]
+                                (rf/dispatch [:update-antwort id val])
+                                (reset! antwort val))]]]]]))
+
+
+(rf/reg-event-db
+  :update-antwort
+  (fn [db [_ id antwort-text]]
+    (assoc-in db [:antworten id] antwort-text)))
+
+
+(defn Questions
+  []
+  (fn []
+    [v-box
+     :src (at)
+     :children
+     (conj
+       (mapv TextQuestion (:test/fragen @(rf/subscribe :test)))
+       [gap
+        :size "10px"]
+       [button
+        :src (at)
+        :class "button-primary"
+        :on-click #(rf/dispatch [:check-answers])
+        :label "Abschicken"])]))
+
+
+(defn Corrections
+  []
+  [v-box
+   :children
+   (mapv (fn [c]
+           [title :label (str "Correction: " c)
+            :level :level2])
+         @(rf/subscribe [:corrections]))])
+
+
+(rf/reg-event-db
+  :check-answers
+  (fn [db [_]]
+    (PUT (str "api/test/" (get-in db [:test :test/id]) "/antwort")
+         {:handler (fn [resp]
+                     (rf/dispatch [:update-corrections (edn/read-string resp)]))
+          :params  (str (:antworten db))
+          :format :raw})
+    (assoc db :waiting-for-answer true)))
+
+
+(rf/reg-event-db
+  :update-corrections
+  (fn [db [_ corrections]]
+    (assoc db :corrections corrections)))
+
+
+(rf/reg-sub
+  :corrections
+  (fn [db _] (:corrections db)))
+
+
+;; (set! re-com.box/visualise-flow? true)
+
+
+(rf/reg-sub
+  :debug
   (fn [db _] db))
-
-
-(defn Calc
-  []
-  (let [vals @(rf/subscribe [:values])
-        a (:a vals)
-        b (:b vals)]
-    [:div
-     (str a "+" b "=")
-     [:input {:type "number"
-              :on-change #(rf/dispatch [:update-answer (-> % .-target .-value)])}]
-     [:button {:type "button"
-               :on-click #(rf/dispatch [:check-answer])}
-      "Check"]]))
-
-
-(defn React-to-user
-  []
-  (let [ans (:correct @(rf/subscribe [:values]))]
-    (if (not (nil? ans))
-      [:div
-       (if ans "Correct" "False")
-       ans]
-      [:div])))
-
-
-(rf/dispatch [:init-db])
 
 
 (defn Root
   []
-  [:div
-   [Hello]
-   [Calc]
-   [React-to-user]])
+  [box
+   :padding "15px"
+   :child
+   [v-box
+    :size "auto"
+    :gap "15px"
+    :children [[title :label "Test" :level :level1]
+               [line]
+               [Questions]
+               [Corrections]]]])
 
 
-(rd/render [Root]
-           (. js/document (getElementById "app")))
+(defn main
+  []
+  (rf/dispatch [:init-db])
+  (rd/render [Root]
+             (. js/document (getElementById "app"))))
+

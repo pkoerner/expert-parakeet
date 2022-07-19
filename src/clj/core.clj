@@ -1,18 +1,30 @@
 (ns core
   (:require
     [compojure.coercions :refer [as-int]]
-    [compojure.core :refer [GET defroutes]]
+    [compojure.core :refer [GET PUT defroutes context]]
     [compojure.route :as route]
+    [db :as db]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.params :refer [wrap-params]]
     [ring.middleware.reload :refer [wrap-reload]]))
 
 
 (defroutes routes
-  (GET "/api/random" [] (str [(rand-int 10) (rand-int 10)]))
-  (GET "/api/random3" [] (str [(rand-int 10) (rand-int 10)]))
-  (GET "/api/check-random" [a :<< as-int b :<< as-int res :<< as-int]
-       (str (= (+ a b) res)))
+  (context "/api" []
+           ;; tests
+           (GET "/test" []
+                (str (db/all-tests)))
+           (GET "/test/:id" [id :<< as-int]
+                (str (db/test-by-id id)))
+           ;; fragen
+           (GET "/frage" []
+                (str (db/all-fragen)))
+           (GET "/frage/:id" [id :<< as-int]
+                (str (db/frage-by-id id)))
+           ;; antworten
+           (PUT "api/test/:test-id/antwort" [test-id :<< as-int antworten]
+                (prn antworten)
+                (db/add-antwort test-id antworten)))
   (route/not-found "Not Found"))
 
 
@@ -22,13 +34,6 @@
 
 
 (def app-dev (wrap-reload #'app))
-
-
-(defn handler
-  [_request]
-  {:status 200
-   :headers {"Content-Type" "text/plain"}
-   :body "Hello World"})
 
 
 (defn start-server
