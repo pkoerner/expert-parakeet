@@ -24,6 +24,12 @@
            :format      {:replace-deps {mvxcvi/cljstyle {:mvn/version "0.15.0"}}
                          :main-opts ["-m" "cljstyle.main" "fix" "src" "test"]}
 
+           :clj-kondo   {:replace-deps {clj-kondo/clj-kondo {:mvn/version "2022.06.22"}}
+                         :main-opts  ["-m" "clj-kondo.main"]}
+
+           :clj-format  {:replace-deps {mvxcvi/cljstyle {:mvn/version "0.15.0"}}
+                         :main-opts ["-m" "cljstyle.main"]}
+
            :nrepl       {:extra-deps {cider/cider-nrepl   {:mvn/version "0.28.5"}}
                          :main-opts  ["-m" "nrepl.cmdline" "--middleware" "[cider.nrepl/cider-middleware]"]}
            }}
