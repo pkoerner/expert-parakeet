@@ -15,19 +15,19 @@
 
                          :main-opts   ["-m" "cognitect.test-runner"]}
 
-           :outdated    {:replace-deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
+           :outdated    {:deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
                          :main-opts ["-m" "antq.core"]}
 
-           :kondo       {:replace-deps {clj-kondo/clj-kondo {:mvn/version "2022.06.22"}}
+           :kondo       {:deps {clj-kondo/clj-kondo {:mvn/version "2022.06.22"}}
                          :main-opts  ["-m" "clj-kondo.main" "--lint" "src" "test"]}
 
-           :format      {:replace-deps {mvxcvi/cljstyle {:mvn/version "0.15.0"}}
+           :format      {:deps {mvxcvi/cljstyle {:mvn/version "0.15.0"}}
                          :main-opts ["-m" "cljstyle.main" "fix" "src" "test"]}
 
-           :clj-kondo   {:replace-deps {clj-kondo/clj-kondo {:mvn/version "2022.06.22"}}
+           :clj-kondo   {:deps {clj-kondo/clj-kondo {:mvn/version "2022.06.22"}}
                          :main-opts  ["-m" "clj-kondo.main"]}
 
-           :clj-format  {:replace-deps {mvxcvi/cljstyle {:mvn/version "0.15.0"}}
+           :clj-format  {:deps {mvxcvi/cljstyle {:mvn/version "0.15.0"}}
                          :main-opts ["-m" "cljstyle.main"]}
 
            :nrepl       {:extra-deps {cider/cider-nrepl   {:mvn/version "0.28.5"}}
