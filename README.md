@@ -1,9 +1,11 @@
 # How to run
 
-Run:
+Run Front & Backend:
 
 ```shell
-clj -A:backend -X core/start-server
+docker-compose up -d
+clj -X core/start-server
+shadow-cljs watch app 
 ```
 
 Tests:
@@ -12,13 +14,6 @@ Tests:
 clj -A:test-runner
 ```
 
-Front & Backend:
-
-```shell
-docker-compose up -d
-clj -A:backend -X core/start-server
-shadow-cljs -A dev-frontend watch app # clj -A:dev-frontend -M:shadow-cljs  watch app
-```
 
 # Troubleshooting:
 
