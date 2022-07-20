@@ -19,7 +19,7 @@
                          :main-opts ["-m" "antq.core"]}
 
            :kondo       {:replace-deps {clj-kondo/clj-kondo {:mvn/version "2022.06.22"}}
-                         :main-opts  ["-m" "clj-kondo.main"]}
+                         :main-opts  ["-m" "clj-kondo.main" "--lint" "src" "test"]}
 
            :format      {:replace-deps {mvxcvi/cljstyle {:mvn/version "0.15.0"}}
                          :main-opts ["-m" "cljstyle.main" "fix" "src" "test"]}
