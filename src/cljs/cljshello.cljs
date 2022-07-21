@@ -57,7 +57,7 @@
 
 
 (defn TextQuestion
-  [{:keys [frage-text punkte id]}]
+  [{:keys [frage/frage-text frage/punkte id]}]
   (let [antwort (reagent/atom "")]
     [v-box
      :src (at)
@@ -93,7 +93,7 @@
      :src (at)
      :children
      (conj
-       (mapv TextQuestion (:test/fragen @(rf/subscribe :test)))
+       (mapv TextQuestion (:test/fragen @(rf/subscribe [:test])))
        [gap
         :size "10px"]
        [button
