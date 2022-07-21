@@ -21,14 +21,23 @@
                    :db/index true}]
      :antwort/user
      :antwort/frage
-     :antwort/antwort-text]))
+     :antwort/antwort-text
+     :antwort/punkte]))
 
 
 (def test-schema
   (spectomic/datomic-schema
     [[:test/id {:db/unique :db.unique/identity
                 :db/index true}]
+     :test/name
      :test/fragen]))
+
+
+(def user-schema
+  (spectomic/datomic-schema
+    [[:user/id {:db/unique :db.unique/identity
+                :db/index true}]
+     :user/kurse]))
 
 
 (def fach-schema
@@ -50,7 +59,7 @@
 
 
 (def schema
-  (concat frage-schema antwort-schema test-schema fach-schema kurs-schema))
+  (concat frage-schema antwort-schema test-schema user-schema fach-schema kurs-schema))
 
 
 (def dummy-data
@@ -63,11 +72,13 @@
     :frage/typ :frage.typ/bool
     :frage/punkte 0}
    {:test/id 1
+    :test/name "Test 1"
     :test/fragen [[:frage/id 1] [:frage/id 3]]}
    {:antwort/id 1
     :antwort/frage 1
     :antwort/user 2
-    :antwort/antwort-text "Antwort"}])
+    :antwort/antwort-text "Antwort"
+    :antwort/punkte 4}])
 
 
 ;; use mem db
