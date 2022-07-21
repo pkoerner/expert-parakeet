@@ -2,6 +2,7 @@
  :deps    {org.clojure/clojure {:mvn/version "1.11.1"}
            io.replikativ/datahike {:mvn/version "0.5.1507"}
            provisdom/spectomic {:mvn/version "1.0.78"}
+           metosin/muuntaja {:mvn/version "0.6.8"}
            compojure/compojure {:mvn/version "1.7.0"}
            ring/ring {:mvn/version "1.9.5"}
            ;; is this a dev dependency
@@ -12,7 +13,6 @@
            :test-runner {:extra-paths ["test"]
                          :extra-deps  {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
                                                                   :sha     "a85b3b02765fb68684ab9ee4a8598eacf7e471d2"}}
-
                          :main-opts   ["-m" "cognitect.test-runner"]}
 
            :outdated    {:deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}

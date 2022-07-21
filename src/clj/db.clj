@@ -128,10 +128,10 @@
           [:frage/id id]))
 
 
-(defn add-antwort
-  [_id _antwort]
+(defn add-antworten
+  [_id antworten]
   ;; Todo
-  nil)
+  antworten)
 
 
 (comment 
