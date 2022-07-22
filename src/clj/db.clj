@@ -108,11 +108,11 @@
 
 
 (defn load-dummy-data
-  []
-  (d/transact conn dummy-data))
+  [data]
+  (d/transact conn data))
 
 
-(load-dummy-data)
+;; (load-dummy-data dummy-data)
 
 
 (defn test-by-id

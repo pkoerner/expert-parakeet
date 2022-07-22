@@ -36,9 +36,12 @@
                           :main-opts ["-m" "shadow.cljs.devtools.cli"]}
 
            ;; Test runner in console.
-           :test-runner  {:extra-paths ["test"]
+           :test-runner  {:extra-paths ["test" "src/clj"]
                           :extra-deps  {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
-                                                                   :sha     "a85b3b02765fb68684ab9ee4a8598eacf7e471d2"}}
+                                                                   :sha     "a85b3b02765fb68684ab9ee4a8598eacf7e471d2"}
+                                        org.clojure/test.check {:mvn/version "1.1.1"}
+                                        io.replikativ/datahike {:mvn/version "0.5.1506"}
+                                        provisdom/spectomic {:mvn/version "1.0.78"}}
 
                           :main-opts   ["-m" "cognitect.test-runner"]}
 
