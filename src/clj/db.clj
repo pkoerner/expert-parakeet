@@ -78,7 +78,12 @@
     :antwort/frage 1
     :antwort/user 2
     :antwort/antwort-text "Antwort"
-    :antwort/punkte 4}])
+    :antwort/punkte 4}
+   {:kurs/id 1
+    :kurs/fach 1
+    :kurs/jahr 2000
+    :kurs/semester "WiSe"
+    :kurs/tests [[:test/id 1]]}])
 
 
 ;; use mem db
@@ -163,6 +168,11 @@
   (str (d/q '[:find (pull ?e [:antwort/id :antwort/user :antwort/frage :antwort/antwort-text])
               :where [?e :antwort/id]]
             @db/conn)))
+
+
+(defn kurs-by-user-id
+  [_id]
+  nil)
 
 
 (comment 
