@@ -117,6 +117,13 @@
   (d/transact conn data))
 
 
+;; Für Tests
+(defn restart
+  []
+  (d/delete-database cfg)
+  (create-conn))
+
+
 ;; (load-dummy-data dummy-data)
 
 
@@ -170,9 +177,24 @@
             @db/conn)))
 
 
+(defn kurs-by-user-id-query
+  [id]
+  (d/q '[:find ?f ?j ?s
+         :in $ ?id
+         :where
+         [?u :user/id ?id]
+         [?u :user/kurse ?k]
+         [?k :kurs/fach ?f]
+         [?k :kurs/jahr ?j]
+         [?k :kurs/semester ?s]]
+       @conn id))
+
+
 (defn kurs-by-user-id
-  [_id]
-  nil)
+  [id]
+  (map
+    #(zipmap [:kurs/fach :kurs/jahr :kurs/semester] %)
+    (kurs-by-user-id-query id)))
 
 
 (comment 
