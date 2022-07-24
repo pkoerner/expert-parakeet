@@ -1,5 +1,5 @@
 (ns db-test
-  {:clj-kondo/config '{:linters {:unresolved-symbol {:exclude (test-frage-by-id test-kurs-by-user-id)}}}}
+  {:clj-kondo/config '{:linters {:unresolved-symbol {:exclude (test-frage-by-id test-kurs-by-user-id test-tests-by-kurs-id)}}}}
   (:require
     [clojure.test :as t]
     [clojure.test.check.clojure-test :refer [defspec]]
@@ -11,6 +11,10 @@
 (def frage-gen-prev (gen/hash-map :frage/id gen/nat :frage/frage-text gen/string-alphanumeric :frage/typ (gen/elements [:attribut :free-text :multiple-choice :single-choice]) :frage/punkte gen/nat))
 
 (def frage-gen (gen/list-distinct-by #(get % :frage/id) frage-gen-prev {:min-elements 10}))
+
+(def test-gen-prev (gen/hash-map :test/id gen/nat :test/name (gen/not-empty gen/string-alphanumeric) :test/fragen (gen/elements ['()])))
+
+(def test-gen (gen/list-distinct-by #(get % :test/id) test-gen-prev {:min-elements 10}))
 
 (def user-gen-prev (gen/hash-map :user/id gen/nat :user/kurse (gen/elements ['()])))
 
@@ -86,3 +90,41 @@
       (db/load-dummy-data k)
       (db/load-dummy-data u)
       (check-if-right-kurs-for-user-id chosen-u k))))
+
+
+(defn tests-for-kurs
+  [tests]
+  (let [tf (random-sample (rand) tests)]
+    (mapv #(conj [:test/id] (:test/id %)) tf)))
+
+
+(defn put-tests-into-kurse
+  [kurse tests]
+  (mapv
+    #(assoc % :kurs/tests (tests-for-kurs tests))
+    kurse))
+
+
+(defn check-if-right-tests-for-kurs-id
+  [kurs tests]
+  (let [{id :kurs/id tests-kurs :kurs/tests} kurs
+        test-ids (map second tests-kurs)
+        tests-with-correct-ids (vec (filter #(contains? (into #{} test-ids) (:test/id %)) tests))
+        test-namen-in-set (sort (map #(:test/name %) tests-with-correct-ids))
+        pulled-tests (db/tests-by-kurs-id id)
+        pulled-test-namen-in-set (sort (map #(:test/name %) pulled-tests))]
+    (= test-namen-in-set pulled-test-namen-in-set)))
+
+
+(defspec test-tests-by-kurs-id 1
+  (prop/for-all
+    [kurse kurs-gen
+     tests test-gen]
+    (db/restart)
+    (let [k-pre (vec kurse)
+          t (vec tests)
+          k (put-tests-into-kurse k-pre t)
+          chosen-k (rand-nth (vec k))]
+      (db/load-dummy-data t)
+      (db/load-dummy-data k)
+      (check-if-right-tests-for-kurs-id chosen-k t))))

@@ -197,6 +197,11 @@
     (kurs-by-user-id-query id)))
 
 
+(defn tests-by-kurs-id
+  [_id]
+  nil)
+
+
 (comment 
   (ffirst (d/q '[:find (count ?e)
                  :where 
