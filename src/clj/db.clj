@@ -75,7 +75,7 @@
     :test/name "Test 1"
     :test/fragen [[:frage/id 1] [:frage/id 3]]}
    {:antwort/id 1
-    :antwort/frage 1
+    :antwort/frage [:frage/id 1]
     :antwort/user 2
     :antwort/antwort-text "Antwort"
     :antwort/punkte 4}])
