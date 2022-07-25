@@ -110,12 +110,31 @@
   (let [{id :kurs/id tests-kurs :kurs/tests} kurs
         test-ids (map second tests-kurs)
         tests-with-correct-ids (vec (filter #(contains? (into #{} test-ids) (:test/id %)) tests))
-        test-namen-in-set (sort (map #(:test/name %) tests-with-correct-ids))
+        test-namen-sorted (sort (map #(:test/name %) tests-with-correct-ids))
         pulled-tests (db/tests-by-kurs-id id)
-        pulled-test-namen-in-set (sort (map #(:test/name %) pulled-tests))]
-    (= test-namen-in-set pulled-test-namen-in-set)))
+        pulled-test-namen-sorted (sort (map #(:test/name %) pulled-tests))]
+    (= test-namen-sorted pulled-test-namen-sorted)))
 
 
+(t/deftest test-test-for-kurs-id
+  (db/restart)
+  (db/load-dummy-data [{:test/id 2
+                        :test/name "Test 2"
+                        :test/fragen []}
+                       {:test/id 3
+                        :test/name "Test 3"
+                        :test/fragen []}])
+  (db/load-dummy-data [{:kurs/id 1
+                        :kurs/fach 1
+                        :kurs/jahr 2000
+                        :kurs/semester "WiSe"
+                        :kurs/tests [[:test/id 2] [:test/id 3]]}])
+  (check-if-right-tests-for-kurs-id {:kurs/id 1 :kurs/fach 1 :kurs/jahr 2000 :kurs/semester "WiSe" :kurs/tests [[:test/id 2] [:test/id 3]]}
+                                    [{:test/id 2 :test/name "Test 2" :test/fragen []}
+                                     {:test/id 3 :test/name "Test 3" :test/fragen []}]))
+
+
+;; Does not work for more than one run, because db keeps old entries and ids stop being unique
 (defspec test-tests-by-kurs-id 1
   (prop/for-all
     [kurse kurs-gen

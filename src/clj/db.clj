@@ -197,9 +197,23 @@
     (kurs-by-user-id-query id)))
 
 
+(defn test-by-kurs-id-query
+  [id]
+  (d/q '[:find ?i ?n
+         :in $ ?id
+         :where
+         [?k :kurs/id ?id]
+         [?k :kurs/tests ?t]
+         [?t :test/id ?i]
+         [?t :test/name ?n]]
+       @conn id))
+
+
 (defn tests-by-kurs-id
-  [_id]
-  nil)
+  [id]
+  (map
+    #(zipmap [:test/id :test/name] %)
+    (test-by-kurs-id-query id)))
 
 
 (comment 
