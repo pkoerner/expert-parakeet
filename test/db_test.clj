@@ -20,7 +20,11 @@
 
 (def user-gen (gen/list-distinct-by #(get % :user/id) user-gen-prev {:min-elements 10}))
 
-(def kurs-gen-prev (gen/hash-map :kurs/id gen/nat :kurs/fach gen/nat :kurs/jahr (gen/large-integer* {:min 2000 :max 2050}) :kurs/semester (gen/elements ["SoSe" "WiSe"]) :kurs/tests (gen/elements ['()])))
+(def fach-gen-prev (gen/hash-map :fach/id gen/nat :fach/fachtitel (gen/not-empty gen/string-alphanumeric) :fach/tests (gen/elements ['()])))
+
+(def fach-gen (gen/list-distinct-by #(get % :fach/id) fach-gen-prev {:min-elements 10}))
+
+(def kurs-gen-prev (gen/hash-map :kurs/id gen/nat :kurs/fach (gen/elements [nil]) :kurs/jahr (gen/large-integer* {:min 2000 :max 2050}) :kurs/semester (gen/elements ["SoSe" "WiSe"]) :kurs/tests (gen/elements ['()])))
 
 (def kurs-gen (gen/list-distinct-by #(get % :kurs/id) kurs-gen-prev {:min-elements 10}))
 
@@ -36,13 +40,20 @@
          (= typ pulled-typ))))
 
 
-(defspec test-frage-by-id 10
+#_(defspec test-frage-by-id 10
   (prop/for-all
     [fragen frage-gen]
     (let [f (vec fragen)]
       (db/restart)
       (db/load-dummy-data f)
       (check-if-right-frage-is-found f))))
+
+
+(defn put-fach-into-kurse
+  [fach kurse]
+  (mapv
+    #(assoc % :kurs/fach [:fach/id (:fach/id fach)])
+    kurse))
 
 
 (defn put-one-kurs-id-into-users
@@ -59,34 +70,40 @@
         {fach :kurs/fach jahr :kurs/jahr semester :kurs/semester} (first (vec (filter #(= kurs-id (:kurs/id %)) kurse)))
         pulled-kurs (first (db/kurs-by-user-id id))
         {pulled-fach :kurs/fach pulled-jahr :kurs/jahr pulled-semester :kurs/semester} pulled-kurs]
-    (and (= fach pulled-fach)
+    (and (= (second fach) pulled-fach)
          (= jahr pulled-jahr)
          (= semester pulled-semester))))
 
 
 (t/deftest t
   (db/restart)
+  (db/load-dummy-data [{:fach/id 0
+                        :fach/fachtitel "Fach 1"
+                        :fach/tests []}])
   (db/load-dummy-data [{:kurs/id 1
-                        :kurs/fach 1
+                        :kurs/fach [:fach/id 0]
                         :kurs/jahr 2000
                         :kurs/semester "WiSe"
                         :kurs/tests []}])
   (db/load-dummy-data [{:user/id 2
                         :user/kurse [[:kurs/id 1]]}])
   (check-if-right-kurs-for-user-id {:user/id 2 :user/kurse [[:kurs/id 1]]}
-                                   [{:kurs/id 1 :kurs/fach 1 :kurs/jahr 2000 :kurs/semester "WiSe" :kurs/tests [[:test/id 1]]}]))
+                                   [{:kurs/id 1 :kurs/fach [:fach/id 0] :kurs/jahr 2000 :kurs/semester "WiSe" :kurs/tests [[:test/id 1]]}]))
 
 
 ;; Does not work for more than one run, because db keeps old entries and ids stop being unique
 (defspec test-kurs-by-user-id 1
   (prop/for-all
-    [users user-gen
+    [faecher fach-gen
+     users user-gen
      kurse kurs-gen]
     (db/restart)
-    (let [u-pre (vec users)
-          k (vec kurse)
+    (let [f (rand-nth (vec faecher))
+          u-pre (vec users)
+          k (put-fach-into-kurse f (vec kurse))
           u (put-one-kurs-id-into-users u-pre k)
           chosen-u (rand-nth (vec u))]
+      (db/load-dummy-data faecher)
       (db/load-dummy-data k)
       (db/load-dummy-data u)
       (check-if-right-kurs-for-user-id chosen-u k))))
@@ -113,11 +130,15 @@
         test-namen-sorted (sort (map #(:test/name %) tests-with-correct-ids))
         pulled-tests (db/tests-by-kurs-id id)
         pulled-test-namen-sorted (sort (map #(:test/name %) pulled-tests))]
+    ;; (print "User: " user " Fach: " fach " Jahr: " jahr " Semester: " semester " Pulled-Kurs: " pulled-kurs)
     (= test-namen-sorted pulled-test-namen-sorted)))
 
 
 (t/deftest test-test-for-kurs-id
   (db/restart)
+  (db/load-dummy-data [{:fach/id 0
+                        :fach/fachtitel "Fach 1"
+                        :fach/tests []}])
   (db/load-dummy-data [{:test/id 2
                         :test/name "Test 2"
                         :test/fragen []}
@@ -125,11 +146,11 @@
                         :test/name "Test 3"
                         :test/fragen []}])
   (db/load-dummy-data [{:kurs/id 1
-                        :kurs/fach 1
+                        :kurs/fach [:fach/id 0]
                         :kurs/jahr 2000
                         :kurs/semester "WiSe"
                         :kurs/tests [[:test/id 2] [:test/id 3]]}])
-  (check-if-right-tests-for-kurs-id {:kurs/id 1 :kurs/fach 1 :kurs/jahr 2000 :kurs/semester "WiSe" :kurs/tests [[:test/id 2] [:test/id 3]]}
+  (check-if-right-tests-for-kurs-id {:kurs/id 1 :kurs/fach [:fach/id 0] :kurs/jahr 2000 :kurs/semester "WiSe" :kurs/tests [[:test/id 2] [:test/id 3]]}
                                     [{:test/id 2 :test/name "Test 2" :test/fragen []}
                                      {:test/id 3 :test/name "Test 3" :test/fragen []}]))
 
@@ -137,13 +158,16 @@
 ;; Does not work for more than one run, because db keeps old entries and ids stop being unique
 (defspec test-tests-by-kurs-id 1
   (prop/for-all
-    [kurse kurs-gen
+    [faecher fach-gen
+     kurse kurs-gen
      tests test-gen]
     (db/restart)
-    (let [k-pre (vec kurse)
+    (let [f (rand-nth (vec faecher))
+          k-pre (put-fach-into-kurse f (vec kurse))
           t (vec tests)
           k (put-tests-into-kurse k-pre t)
           chosen-k (rand-nth (vec k))]
+      (db/load-dummy-data faecher)
       (db/load-dummy-data t)
       (db/load-dummy-data k)
       (check-if-right-tests-for-kurs-id chosen-k t))))

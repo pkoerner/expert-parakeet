@@ -79,8 +79,11 @@
     :antwort/user 2
     :antwort/antwort-text "Antwort"
     :antwort/punkte 4}
+   {:fach/id 0
+    :fach/fachtitel "Fach 1"
+    :fach/tests []}
    {:kurs/id 1
-    :kurs/fach 1
+    :kurs/fach [:fach/id 0]
     :kurs/jahr 2000
     :kurs/semester "WiSe"
     :kurs/tests [[:test/id 1]]}])
@@ -124,7 +127,7 @@
   (create-conn))
 
 
-;; (load-dummy-data dummy-data)
+(load-dummy-data dummy-data)
 
 
 (defn test-by-id
@@ -184,7 +187,8 @@
          :where
          [?u :user/id ?id]
          [?u :user/kurse ?k]
-         [?k :kurs/fach ?f]
+         [?k :kurs/fach ?fi]
+         [?fi :fach/id ?f]
          [?k :kurs/jahr ?j]
          [?k :kurs/semester ?s]]
        @conn id))
