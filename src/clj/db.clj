@@ -123,8 +123,10 @@
 ;; Für Tests
 (defn restart
   []
-  (d/delete-database cfg)
-  (create-conn))
+  (d/transact conn {:tx-data [[:db.history.purge/before (java.util.Date.)]]})
+  ;; (d/delete-database cfg)
+  ;; (create-conn)
+  )
 
 
 (load-dummy-data dummy-data)

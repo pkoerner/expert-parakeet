@@ -11,27 +11,27 @@
 
 (def frage-gen-prev (gen/hash-map :frage/id gen/nat :frage/frage-text gen/string-alphanumeric :frage/typ (gen/elements [:attribut :free-text :multiple-choice :single-choice]) :frage/punkte gen/nat))
 
-(def frage-gen (gen/list-distinct-by #(get % :frage/id) frage-gen-prev {:min-elements 10}))
+(def frage-gen (gen/list-distinct-by #(get % :frage/id) frage-gen-prev {:min-elements 10 :max-tries 50}))
 
 (def test-gen-prev (gen/hash-map :test/id gen/nat :test/name (gen/not-empty gen/string-alphanumeric) :test/fragen (gen/elements ['()])))
 
-(def test-gen (gen/list-distinct-by #(get % :test/id) test-gen-prev {:min-elements 10}))
+(def test-gen (gen/list-distinct-by #(get % :test/id) test-gen-prev {:min-elements 10 :max-tries 50}))
 
 (def user-gen-prev (gen/hash-map :user/id gen/nat :user/kurse (gen/elements ['()])))
 
-(def user-gen (gen/list-distinct-by #(get % :user/id) user-gen-prev {:min-elements 10}))
+(def user-gen (gen/list-distinct-by #(get % :user/id) user-gen-prev {:min-elements 10 :max-tries 50}))
 
 (def antwort-gen-prev (gen/hash-map :antwort/id gen/nat :antwort/user (gen/elements [nil]) :antwort/frage (gen/elements [nil]) :antwort/antwort-text (gen/not-empty gen/string-alphanumeric) :antwort/punkte gen/nat))
 
-(def antwort-gen (gen/list-distinct-by #(get % :antwort/id) antwort-gen-prev {:min-elements 10}))
+(def antwort-gen (gen/list-distinct-by #(get % :antwort/id) antwort-gen-prev {:min-elements 10 :max-tries 50}))
 
 (def fach-gen-prev (gen/hash-map :fach/id gen/nat :fach/fachtitel (gen/not-empty gen/string-alphanumeric) :fach/tests (gen/elements ['()])))
 
-(def fach-gen (gen/list-distinct-by #(get % :fach/id) fach-gen-prev {:min-elements 10}))
+(def fach-gen (gen/list-distinct-by #(get % :fach/id) fach-gen-prev {:min-elements 10 :max-tries 50}))
 
 (def kurs-gen-prev (gen/hash-map :kurs/id gen/nat :kurs/fach (gen/elements [nil]) :kurs/jahr (gen/large-integer* {:min 2000 :max 2050}) :kurs/semester (gen/elements ["SoSe" "WiSe"]) :kurs/tests (gen/elements ['()])))
 
-(def kurs-gen (gen/list-distinct-by #(get % :kurs/id) kurs-gen-prev {:min-elements 10}))
+(def kurs-gen (gen/list-distinct-by #(get % :kurs/id) kurs-gen-prev {:min-elements 10 :max-tries 50}))
 
 
 (defn check-if-right-frage-is-found
@@ -45,7 +45,7 @@
          (= typ pulled-typ))))
 
 
-(defspec test-frage-by-id 10
+(defspec test-frage-by-id 2
   (prop/for-all
     [fragen frage-gen]
     (let [f (vec fragen)]
