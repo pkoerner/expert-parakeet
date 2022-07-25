@@ -222,9 +222,26 @@
     (test-by-kurs-id-query id)))
 
 
+(defn antworten-by-frage-user-id-query
+  [f-id u-id]
+  (d/q '[:find ?i ?at ?p
+         :in $ ?f-id ?u-id
+         :where
+         [?f :frage/id ?f-id]
+         [?u :user/id ?u-id]
+         [?a :antwort/frage ?f]
+         [?a :antwort/user ?u]
+         [?a :antwort/id ?i]
+         [?a :antwort/antwort-text ?at]
+         [?a :antwort/punkte ?p]]
+       @conn f-id u-id))
+
+
 (defn antworten-by-frage-user-id
-  [_frage-id _user-id]
-  nil)
+  [frage-id user-id]
+  (map
+    #(zipmap [:antwort/id :antwort/antwort-text :antwort/punkte] %)
+    (antworten-by-frage-user-id-query frage-id user-id)))
 
 
 (comment 
