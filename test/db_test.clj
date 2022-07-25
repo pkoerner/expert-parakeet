@@ -1,5 +1,6 @@
 (ns db-test
-  {:clj-kondo/config '{:linters {:unresolved-symbol {:exclude (test-frage-by-id test-kurs-by-user-id test-tests-by-kurs-id)}}}}
+  {:clj-kondo/config '{:linters {:unresolved-symbol
+                                 {:exclude (test-frage-by-id test-kurs-by-user-id test-tests-by-kurs-id test-antworten-by-frage-user-id)}}}}
   (:require
     [clojure.test :as t]
     [clojure.test.check.clojure-test :refer [defspec]]
@@ -19,6 +20,10 @@
 (def user-gen-prev (gen/hash-map :user/id gen/nat :user/kurse (gen/elements ['()])))
 
 (def user-gen (gen/list-distinct-by #(get % :user/id) user-gen-prev {:min-elements 10}))
+
+(def antwort-gen-prev (gen/hash-map :antwort/id gen/nat :antwort/user (gen/elements [nil]) :antwort/frage (gen/elements [nil]) :antwort/antwort-text (gen/not-empty gen/string-alphanumeric) :antwort/punkte gen/nat))
+
+(def antwort-gen (gen/list-distinct-by #(get % :antwort/id) antwort-gen-prev {:min-elements 10}))
 
 (def fach-gen-prev (gen/hash-map :fach/id gen/nat :fach/fachtitel (gen/not-empty gen/string-alphanumeric) :fach/tests (gen/elements ['()])))
 
@@ -40,7 +45,7 @@
          (= typ pulled-typ))))
 
 
-#_(defspec test-frage-by-id 10
+(defspec test-frage-by-id 10
   (prop/for-all
     [fragen frage-gen]
     (let [f (vec fragen)]
@@ -130,7 +135,6 @@
         test-namen-sorted (sort (map #(:test/name %) tests-with-correct-ids))
         pulled-tests (db/tests-by-kurs-id id)
         pulled-test-namen-sorted (sort (map #(:test/name %) pulled-tests))]
-    ;; (print "User: " user " Fach: " fach " Jahr: " jahr " Semester: " semester " Pulled-Kurs: " pulled-kurs)
     (= test-namen-sorted pulled-test-namen-sorted)))
 
 
@@ -171,3 +175,46 @@
       (db/load-dummy-data t)
       (db/load-dummy-data k)
       (check-if-right-tests-for-kurs-id chosen-k t))))
+
+
+(defn put-one-frage-into-antwort
+  [fragen antworten]
+  (mapv
+    #(assoc % :antwort/frage [:frage/id (:frage/id (rand-nth fragen))])
+    antworten))
+
+
+(defn put-one-user-into-antwort
+  [users antworten]
+  (mapv
+    #(assoc % :antwort/user [:user/id (:user/id (rand-nth users))])
+    antworten))
+
+
+(defn check-if-right-antworten-for-frage-user-id
+  [frage user antworten]
+  (let [{f-id :frage/id} frage
+        {u-id :user/id} user
+        correct-antworten (vec (filter #(= u-id (second (:antwort/user %))) (filter #(= f-id (second (:antwort/frage %))) antworten)))
+        correct-antworten-properties (mapv #(into [] (select-keys % [:antwort/id :antwort/antwort-text :antwort/punkte])) correct-antworten)
+        pulled-antworten (db/antworten-by-frage-user-id f-id u-id)
+        pulled-antworten-properties (mapv #(into [] (select-keys % [:antwort/id :antwort/antwort-text :antwort/punkte])) pulled-antworten)]
+    (= (sort correct-antworten-properties) (sort pulled-antworten-properties))))
+
+
+(defspec test-antworten-by-frage-user-id 1
+  (prop/for-all
+    [fragen frage-gen
+     users user-gen
+     antworten antwort-gen]
+    (db/restart)
+    (let [;; Take 2 to make it more likely that an antwort exists that has the chosen combination of frage and user
+          f (take 2 (vec fragen))
+          u (take 2 (vec users))
+          a (put-one-user-into-antwort u (put-one-frage-into-antwort f (vec antworten)))
+          chosen-f (rand-nth f)
+          chosen-u (rand-nth u)]
+      (db/load-dummy-data f)
+      (db/load-dummy-data u)
+      (db/load-dummy-data a)
+      (check-if-right-antworten-for-frage-user-id chosen-f chosen-u a))))

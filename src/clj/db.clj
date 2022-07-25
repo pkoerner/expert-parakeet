@@ -220,6 +220,11 @@
     (test-by-kurs-id-query id)))
 
 
+(defn antworten-by-frage-user-id
+  [_frage-id _user-id]
+  nil)
+
+
 (comment 
   (ffirst (d/q '[:find (count ?e)
                  :where 
