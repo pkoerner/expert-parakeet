@@ -100,7 +100,7 @@
     :antwort/user [:user/id 0]
     :antwort/antwort-text "Antwort"
     :antwort/punkte 4}
-   {:antwort/id 1
+   {:antwort/id 2
     :antwort/frage [:frage/id 3]
     :antwort/user [:user/id 0]
     :antwort/antwort-text "Antwort"
@@ -282,9 +282,26 @@
     (fach-by-kurs-id-query id)))
 
 
+(defn fragen-by-tests-id-query
+  [id]
+  (d/q '[:find ?i ?ty ?ft ?l ?p
+         :in $ ?id
+         :where
+         [?t :test/id ?id]
+         [?t :test/fragen ?f]
+         [?f :frage/id ?i]
+         [?f :frage/typ ?ty]
+         [?f :frage/frage-text ?ft]
+         [?f :frage/loesung ?l]
+         [?f :frage/punkte ?p]]
+       @conn id))
+
+
 (defn fragen-by-test-id
-  [_id]
-  nil)
+  [id]
+  (map
+    #(zipmap [:frage/id :frage/typ :frage/frage-text :frage/loesung :frage/punkte] %)
+    (fragen-by-tests-id-query id)))
 
 
 (comment 

@@ -9,7 +9,7 @@
     [db :as db]))
 
 
-(def frage-gen-prev (gen/hash-map :frage/id gen/nat :frage/frage-text gen/string-alphanumeric :frage/typ (gen/elements [:attribut :free-text :multiple-choice :single-choice]) :frage/punkte gen/nat))
+(def frage-gen-prev (gen/hash-map :frage/id gen/nat :frage/frage-text (gen/not-empty gen/string-alphanumeric) :frage/typ (gen/elements [:attribut :free-text :multiple-choice :single-choice]) :frage/loesung (gen/not-empty gen/string-alphanumeric) :frage/punkte gen/nat))
 
 (def frage-gen (gen/list-distinct-by #(get % :frage/id) frage-gen-prev {:min-elements 10 :max-tries 50}))
 
