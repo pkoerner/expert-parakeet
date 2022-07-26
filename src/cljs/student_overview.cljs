@@ -10,13 +10,13 @@
 (def user-id 0)
 
 
-(rf/reg-event-db
+(rf/reg-event-fx
   :retrieve-kurse-for-this-student
-  (fn [db _]
-    (GET (str "/api/kurse-from-user/" user-id)
-         {:handler (fn [resp]
-                     (rf/dispatch [:update-kurse-for-this-student (edn/read-string [resp])]))})
-    db))
+  (fn [{:keys [db]} _]
+    {:db db
+     :dispatch (GET (str "/api/kurse-from-user/" user-id)
+                    {:handler (fn [resp]
+                                (rf/dispatch [:update-kurse-for-this-student (edn/read-string [resp])]))})}))
 
 
 (rf/reg-event-db
