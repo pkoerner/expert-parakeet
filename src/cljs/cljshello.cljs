@@ -5,7 +5,8 @@
     [re-com.core :refer [at v-box box gap button label input-textarea line title]]
     [re-frame.core :as rf]
     [reagent.core :as reagent]
-    [reagent.dom :as rd]))
+    [reagent.dom :as rd]
+    [student-overview :as sov]))
 
 
 (rf/reg-event-db
@@ -170,7 +171,7 @@
         :class "button-primary"
         :on-click #(rf/dispatch [:away-from-student-overview])
         :label "Verstecke student-overview"]
-       "Overview here!"]
+       (sov/main)]
       [button
        :src (at)
        :class "button-primary"
