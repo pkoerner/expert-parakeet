@@ -1,6 +1,6 @@
 (ns db-test
   {:clj-kondo/config '{:linters {:unresolved-symbol
-                                 {:exclude (test-frage-by-id test-kurs-by-user-id test-tests-by-kurs-id test-antworten-by-frage-user-id test-fach-by-kurs-id)}}}}
+                                 {:exclude (test-frage-by-id test-kurs-by-user-id test-tests-by-kurs-id test-antworten-by-frage-user-id test-fach-by-kurs-id test-fragen-by-test-id)}}}}
   (:require
     [clojure.test :as t]
     [clojure.test.check.clojure-test :refer [defspec]]
@@ -250,3 +250,40 @@
       (db/load-dummy-data faecher)
       (db/load-dummy-data k)
       (check-if-right-fach-for-kurs-id chosen-k f))))
+
+
+(defn fragen-for-tests
+  [fragen]
+  (let [f (random-sample (rand) fragen)]
+    (mapv #(conj [:frage/id] (:frage/id %)) f)))
+
+
+(defn put-fragen-into-tests
+  [fragen tests]
+  (mapv
+    #(assoc % :test/fragen (fragen-for-tests fragen))
+    tests))
+
+
+(defn check-if-right-fragen-for-test-id
+  [test fragen]
+  (let [{id :test/id fragen-test :test/fragen} test
+        fragen-ids (mapv second fragen-test)
+        fragen-with-correct-ids (vec (filter #(contains? (into #{} fragen-ids) (:frage/id %)) fragen))
+        fragen-text-sorted (sort (map #(:frage/frage-text %) fragen-with-correct-ids))
+        pulled-fragen (db/fragen-by-test-id id)
+        pulled-fragen-text-sorted (sort (map #(:frage/frage-text %) pulled-fragen))]
+    (= fragen-text-sorted pulled-fragen-text-sorted)))
+
+
+(defspec test-fragen-by-test-id 1
+  (prop/for-all
+    [fragen frage-gen
+     tests test-gen]
+    (db/restart)
+    (let [f (vec fragen)
+          t (put-fragen-into-tests f (vec tests))
+          chosen-t (rand-nth (vec t))]
+      (db/load-dummy-data f)
+      (db/load-dummy-data t)
+      (check-if-right-fragen-for-test-id chosen-t f))))

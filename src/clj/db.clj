@@ -76,7 +76,7 @@
     :test/fragen [[:frage/id 1] [:frage/id 3]]}
    {:test/id 2
     :test/name "Test 2"
-    :test/fragen [[:frage/id 1] [:frage/id 3]]}
+    :test/fragen [[:frage/id 1]]}
    {:fach/id 0
     :fach/fachtitel "Fach 1"
     :fach/tests []}
@@ -99,7 +99,12 @@
     :antwort/frage [:frage/id 1]
     :antwort/user [:user/id 0]
     :antwort/antwort-text "Antwort"
-    :antwort/punkte 4}])
+    :antwort/punkte 4}
+   {:antwort/id 1
+    :antwort/frage [:frage/id 3]
+    :antwort/user [:user/id 0]
+    :antwort/antwort-text "Antwort"
+    :antwort/punkte 1}])
 
 
 ;; use mem db
@@ -275,6 +280,11 @@
   (map
     #(zipmap [:fach/id :fach/fachtitel] %)
     (fach-by-kurs-id-query id)))
+
+
+(defn fragen-by-test-id
+  [_id]
+  nil)
 
 
 (comment 
