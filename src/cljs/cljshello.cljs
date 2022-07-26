@@ -143,6 +143,29 @@
   (fn [db _] db))
 
 
+(rf/reg-event-db
+  :to-student-overview
+  (fn [db _]
+    (assoc db :student-overview true)))
+
+
+(rf/reg-sub
+  :student-overview
+  (fn [db _] (:student-overview db)))
+
+
+(defn to-student-overview
+  []
+  (let [show-overview @(rf/subscribe [:student-overview])]
+    (if show-overview
+      [:div "Overview here!"]
+      [button
+       :src (at)
+       :class "button-primary"
+       :on-click #(rf/dispatch [:to-student-overview])
+       :label "Zeige student-overview"])))
+
+
 (defn Root
   []
   [box
@@ -154,7 +177,8 @@
     :children [[title :label "Test" :level :level1]
                [line]
                [Questions]
-               [Corrections]]]])
+               [Corrections]
+               [to-student-overview]]]])
 
 
 (defn main
