@@ -12,7 +12,7 @@
 
 (rf/reg-event-fx
   :retrieve-kurse-for-this-student
-  (fn [{:keys [db]} _]
+  (fn [{:keys [db]} [_ user-id]]
     {:db db
      :dispatch (GET (str "/api/kurse-from-user/" user-id)
                     {:handler (fn [resp]
@@ -87,13 +87,13 @@
 
 
 (defn show-test
-  [{_id :test/id name :test/name}]
+  [_user-id {_id :test/id name :test/name}]
   [button
    :label name])
 
 
 (defn show-kurs
-  [{id :kurs/id jahr :kurs/jahr semester :kurs/semester}]
+  [user-id {id :kurs/id jahr :kurs/jahr semester :kurs/semester}]
   (rf/dispatch [:retrieve-fach-for-this-kurs id])
   (rf/dispatch [:retrieve-tests-for-this-kurs id])
   (let [fach @(rf/subscribe [:fach-from-kurs id])
@@ -106,14 +106,14 @@
      [[title
        :label (str (:fach/fachtitel fach) " - " semester " - " jahr ":")
        :level :level2]
-      (map show-test tests)]]))
+      (map (partial show-test user-id) tests)]]))
 
 
 (defn show-kurse-and-tests
-  []
-  (rf/dispatch [:retrieve-kurse-for-this-student])
+  [user-id]
+  (rf/dispatch [:retrieve-kurse-for-this-student user-id])
   (let [kurse @(rf/subscribe [:kurse])]
-    [:div (map show-kurs kurse)]))
+    [:div (map (partial show-kurs user-id) kurse)]))
 
 
 (defn main
@@ -121,4 +121,4 @@
   [:div
    [:h1 "Hello from Student Overview"]
    [headline user-id]
-   [show-kurse-and-tests]])
+   [show-kurse-and-tests user-id]])
