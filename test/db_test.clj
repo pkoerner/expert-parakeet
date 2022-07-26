@@ -1,6 +1,6 @@
 (ns db-test
   {:clj-kondo/config '{:linters {:unresolved-symbol
-                                 {:exclude (test-frage-by-id test-kurs-by-user-id test-tests-by-kurs-id test-antworten-by-frage-user-id)}}}}
+                                 {:exclude (test-frage-by-id test-kurs-by-user-id test-tests-by-kurs-id test-antworten-by-frage-user-id test-fach-by-kurs-id)}}}}
   (:require
     [clojure.test :as t]
     [clojure.test.check.clojure-test :refer [defspec]]
@@ -58,6 +58,13 @@
   [fach kurse]
   (mapv
     #(assoc % :kurs/fach [:fach/id (:fach/id fach)])
+    kurse))
+
+
+(defn put-faecher-into-kurse
+  [faecher kurse]
+  (mapv
+    #(assoc % :kurs/fach [:fach/id (:fach/id (rand-nth faecher))])
     kurse))
 
 
@@ -218,3 +225,28 @@
       (db/load-dummy-data u)
       (db/load-dummy-data a)
       (check-if-right-antworten-for-frage-user-id chosen-f chosen-u a))))
+
+
+(defn check-if-right-fach-for-kurs-id
+  [kurs faecher]
+  (let [{id :kurs/id fach-from-kurs :kurs/fach} kurs
+        fach-id (second fach-from-kurs)
+        {fach-id :fach/id fachtitel :fach/fachtitel fach-tests :fach/tests} (first (vec (filter #(= fach-id (:fach/id %)) faecher)))
+        pulled-fach (first (db/fach-by-kurs-id id))
+        {pulled-fach-id :fach/id pulled-fachtitel :fach/fachtitel pulled-fach-tests :fach/tests} pulled-fach]
+    (and (= fach-id pulled-fach-id)
+         (= fachtitel pulled-fachtitel)
+         (= fach-tests pulled-fach-tests))))
+
+
+(defspec test-fach-by-kurs-id 1
+  (prop/for-all
+    [faecher fach-gen
+     kurse kurs-gen]
+    (db/restart)
+    (let [f (vec faecher)
+          k (put-faecher-into-kurse f (vec kurse))
+          chosen-k (rand-nth (vec k))]
+      (db/load-dummy-data faecher)
+      (db/load-dummy-data k)
+      (check-if-right-fach-for-kurs-id chosen-k f))))

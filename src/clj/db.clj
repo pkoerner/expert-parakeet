@@ -244,6 +244,11 @@
     (antworten-by-frage-user-id-query frage-id user-id)))
 
 
+(defn fach-by-kurs-id
+  [_id]
+  nil)
+
+
 (comment 
   (ffirst (d/q '[:find (count ?e)
                  :where 
