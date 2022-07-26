@@ -79,12 +79,13 @@
   [user kurse]
   (let [{id :user/id kurs-user :user/kurse} user
         kurs-id (second (first kurs-user))
-        {fach :kurs/fach jahr :kurs/jahr semester :kurs/semester} (first (vec (filter #(= kurs-id (:kurs/id %)) kurse)))
+        {kurs-id :kurs/id fach :kurs/fach jahr :kurs/jahr semester :kurs/semester} (first (vec (filter #(= kurs-id (:kurs/id %)) kurse)))
         pulled-kurs (first (db/kurs-by-user-id id))
-        {pulled-fach :kurs/fach pulled-jahr :kurs/jahr pulled-semester :kurs/semester} pulled-kurs]
+        {pulled-id :kurs/id pulled-fach :kurs/fach pulled-jahr :kurs/jahr pulled-semester :kurs/semester} pulled-kurs]
     (and (= (second fach) pulled-fach)
          (= jahr pulled-jahr)
-         (= semester pulled-semester))))
+         (= semester pulled-semester)
+         (= kurs-id pulled-id))))
 
 
 (t/deftest t
@@ -238,7 +239,7 @@
          (= fachtitel pulled-fachtitel))))
 
 
-(defspec test-fach-by-kurs-id 3
+(defspec test-fach-by-kurs-id 2
   (prop/for-all
     [faecher fach-gen
      kurse kurs-gen]

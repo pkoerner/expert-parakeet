@@ -139,7 +139,7 @@
   )
 
 
-(load-dummy-data dummy-data)
+;; (load-dummy-data dummy-data)
 
 
 (defn test-by-id
@@ -194,13 +194,14 @@
 
 (defn kurs-by-user-id-query
   [id]
-  (d/q '[:find ?f ?j ?s
+  (d/q '[:find ?i ?f ?j ?s
          :in $ ?id
          :where
          [?u :user/id ?id]
          [?u :user/kurse ?k]
          [?k :kurs/fach ?fi]
          [?fi :fach/id ?f]
+         [?k :kurs/id ?i]
          [?k :kurs/jahr ?j]
          [?k :kurs/semester ?s]]
        @conn id))
@@ -209,7 +210,7 @@
 (defn kurs-by-user-id
   [id]
   (map
-    #(zipmap [:kurs/fach :kurs/jahr :kurs/semester] %)
+    #(zipmap [:kurs/id :kurs/fach :kurs/jahr :kurs/semester] %)
     (kurs-by-user-id-query id)))
 
 
