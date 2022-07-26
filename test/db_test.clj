@@ -231,15 +231,14 @@
   [kurs faecher]
   (let [{id :kurs/id fach-from-kurs :kurs/fach} kurs
         fach-id (second fach-from-kurs)
-        {fach-id :fach/id fachtitel :fach/fachtitel fach-tests :fach/tests} (first (vec (filter #(= fach-id (:fach/id %)) faecher)))
+        {fach-id :fach/id fachtitel :fach/fachtitel} (first (vec (filter #(= fach-id (:fach/id %)) faecher)))
         pulled-fach (first (db/fach-by-kurs-id id))
-        {pulled-fach-id :fach/id pulled-fachtitel :fach/fachtitel pulled-fach-tests :fach/tests} pulled-fach]
+        {pulled-fach-id :fach/id pulled-fachtitel :fach/fachtitel} pulled-fach]
     (and (= fach-id pulled-fach-id)
-         (= fachtitel pulled-fachtitel)
-         (= fach-tests pulled-fach-tests))))
+         (= fachtitel pulled-fachtitel))))
 
 
-(defspec test-fach-by-kurs-id 1
+(defspec test-fach-by-kurs-id 3
   (prop/for-all
     [faecher fach-gen
      kurse kurs-gen]

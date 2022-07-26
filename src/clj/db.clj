@@ -244,9 +244,23 @@
     (antworten-by-frage-user-id-query frage-id user-id)))
 
 
+(defn fach-by-kurs-id-query
+  [id]
+  (d/q '[:find ?i ?fi
+         :in $ ?id
+         :where
+         [?k :kurs/id ?id]
+         [?k :kurs/fach ?f]
+         [?f :fach/id ?i]
+         [?f :fach/fachtitel ?fi]]
+       @conn id))
+
+
 (defn fach-by-kurs-id
-  [_id]
-  nil)
+  [id]
+  (map
+    #(zipmap [:fach/id :fach/fachtitel] %)
+    (fach-by-kurs-id-query id)))
 
 
 (comment 
