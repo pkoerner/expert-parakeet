@@ -149,6 +149,12 @@
     (assoc db :student-overview true)))
 
 
+(rf/reg-event-db
+  :away-from-student-overview
+  (fn [db _]
+    (assoc db :student-overview false)))
+
+
 (rf/reg-sub
   :student-overview
   (fn [db _] (:student-overview db)))
@@ -158,7 +164,13 @@
   []
   (let [show-overview @(rf/subscribe [:student-overview])]
     (if show-overview
-      [:div "Overview here!"]
+      [:div
+       [button
+        :src (at)
+        :class "button-primary"
+        :on-click #(rf/dispatch [:away-from-student-overview])
+        :label "Verstecke student-overview"]
+       "Overview here!"]
       [button
        :src (at)
        :class "button-primary"
