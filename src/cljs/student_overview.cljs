@@ -1,10 +1,33 @@
 (ns student-overview
   (:require
-    [re-com.core :refer [at button h-box]]))
+    [ajax.core :refer [GET]]
+    [cljs.tools.reader.edn :as edn]
+    [re-com.core :refer [at button h-box]]
+    [re-frame.core :as rf]))
 
 
 ;; For now, we only look at user with id 0
 (def user-id 0)
+
+
+(rf/reg-event-db
+  :retrieve-kurse-for-this-student
+  (fn [db _]
+    (GET (str "/api/kurse-from-user/" user-id)
+         {:handler (fn [resp]
+                     (rf/dispatch [:update-kurse-for-this-student (edn/read-string [resp])]))})
+    db))
+
+
+(rf/reg-event-db
+  :update-kurse-for-this-student
+  (fn [db [_ kurse]]
+    (assoc db :kurse kurse)))
+
+
+(rf/reg-sub
+  :kurse
+  (fn [db _] (:kurse db)))
 
 
 (defn headline
@@ -20,8 +43,16 @@
                 :label "Logout"]]]])
 
 
+(defn show-kurse-and-tests
+  []
+  (rf/dispatch [:retrieve-kurse-for-this-student])
+  (let [kurse @(rf/subscribe [:kurse])]
+    [:div (str kurse)]))
+
+
 (defn main
   []
   [:div
    [:h1 "Hello from Student Overview"]
-   [headline user-id]])
+   [headline user-id]
+   [show-kurse-and-tests]])

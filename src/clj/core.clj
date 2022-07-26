@@ -29,7 +29,11 @@
            ;; antworten
            (PUT "api/test/:test-id/antwort" [test-id :<< as-int antworten]
                 (prn antworten)
-                (db/add-antwort test-id antworten)))
+                (db/add-antwort test-id antworten))
+
+           ;; kurse
+           (GET "/kurse-from-user/:id" [id :<< as-int]
+                (db/kurs-by-user-id id)))
   (route/not-found "Not Found"))
 
 
