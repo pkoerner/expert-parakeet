@@ -20,15 +20,36 @@
                                               (edn/read-string (str "[" resp "]"))]))})}))
 
 
+(rf/reg-event-fx
+  :retrieve-fach-for-this-kurs
+  (fn [{:keys [db]} [_ kurs-id]]
+    {:db db
+     :dispatch (GET (str "/api/fach-from-kurs/" kurs-id)
+                    {:handler (fn [resp]
+                                (rf/dispatch [:update-fach-for-this-kurs
+                                              [kurs-id (edn/read-string resp)]]))})}))
+
+
 (rf/reg-event-db
   :update-kurse-for-this-student
   (fn [db [_ kurse]]
     (assoc db :kurse kurse)))
 
 
+(rf/reg-event-db
+  :update-fach-for-this-kurs
+  (fn [db [_ [kurs-id fach]]]
+    (assoc db [:kurs kurs-id] fach)))
+
+
 (rf/reg-sub
   :kurse
   (fn [db _] (:kurse db)))
+
+
+(rf/reg-sub
+  :fach-from-kurs
+  (fn [db [_ kurs-id]] (get db [:kurs kurs-id])))
 
 
 (defn headline
@@ -45,15 +66,17 @@
 
 
 (defn show-kurs
-  [{fach :kurs/fach jahr :kurs/jahr semester :kurs/semester}]
-  [v-box
-   :src (at)
-   ;; :attr {:key (str id)}
-   :gap "5px"
-   :children
-   [[title
-     :label (str fach " - " semester " - " jahr ":")
-     :level :level2]]])
+  [{id :kurs/id jahr :kurs/jahr semester :kurs/semester}]
+  (rf/dispatch [:retrieve-fach-for-this-kurs id])
+  (let [fach @(rf/subscribe [:fach-from-kurs id])]
+    [v-box
+     :src (at)
+     :attr {:key (str id)}
+     :gap "5px"
+     :children
+     [[title
+       :label (str (:fach/fachtitel fach) " - " semester " - " jahr ":")
+       :level :level2]]]))
 
 
 (defn show-kurse-and-tests
