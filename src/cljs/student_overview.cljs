@@ -86,6 +86,12 @@
                 :label "Logout"]]]])
 
 
+(defn show-test
+  [{_id :test/id name :test/name}]
+  [button
+   :label name])
+
+
 (defn show-kurs
   [{id :kurs/id jahr :kurs/jahr semester :kurs/semester}]
   (rf/dispatch [:retrieve-fach-for-this-kurs id])
@@ -100,8 +106,7 @@
      [[title
        :label (str (:fach/fachtitel fach) " - " semester " - " jahr ":")
        :level :level2]
-      [title
-       :label (str tests)]]]))
+      (map show-test tests)]]))
 
 
 (defn show-kurse-and-tests
