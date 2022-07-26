@@ -82,11 +82,21 @@
    {:fach/id 0
     :fach/fachtitel "Fach 1"
     :fach/tests []}
+   {:fach/id 1
+    :fach/fachtitel "Fach 2"
+    :fach/tests []}
    {:kurs/id 1
     :kurs/fach [:fach/id 0]
     :kurs/jahr 2000
     :kurs/semester "WiSe"
-    :kurs/tests [[:test/id 1]]}])
+    :kurs/tests [[:test/id 1]]}
+   {:kurs/id 2
+    :kurs/fach [:fach/id 1]
+    :kurs/jahr 2001
+    :kurs/semester "SoSe"
+    :kurs/tests [[:test/id 1]]}
+   {:user/id 0
+    :user/kurse [[:kurs/id 1] [:kurs/id 2]]}])
 
 
 ;; use mem db
