@@ -74,6 +74,9 @@
    {:test/id 1
     :test/name "Test 1"
     :test/fragen [[:frage/id 1] [:frage/id 3]]}
+   {:test/id 2
+    :test/name "Test 2"
+    :test/fragen [[:frage/id 1] [:frage/id 3]]}
    {:antwort/id 1
     :antwort/frage [:frage/id 1]
     :antwort/user 2
@@ -94,7 +97,7 @@
     :kurs/fach [:fach/id 1]
     :kurs/jahr 2001
     :kurs/semester "SoSe"
-    :kurs/tests [[:test/id 1]]}
+    :kurs/tests [[:test/id 1] [:test/id 2]]}
    {:user/id 0
     :user/kurse [[:kurs/id 1] [:kurs/id 2]]}])
 

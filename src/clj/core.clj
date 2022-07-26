@@ -16,6 +16,8 @@
                 (str (db/all-tests)))
            (GET "/test/:id" [id :<< as-int]
                 (str (db/test-by-id id)))
+           (GET "/tests-from-kurs/:id" [id :<< as-int]
+                (db/tests-by-kurs-id id))
            ;; fragen
            (GET "/frage" []
                 (str (db/all-fragen)))
