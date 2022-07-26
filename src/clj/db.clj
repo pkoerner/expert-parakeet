@@ -66,11 +66,13 @@
   [{:frage/id 1
     :frage/frage-text "Wie geht es dir heute?"
     :frage/typ :frage.typ/text
+    :frage/loesung "Lösung"
     :frage/punkte 7}
    {:frage/id 3
     :frage/frage-text "Fühlen sie sich prüfungsbereit?"
     :frage/typ :frage.typ/bool
-    :frage/punkte 0}
+    :frage/loesung "Lösung"
+    :frage/punkte 1}
    {:test/id 1
     :test/name "Test 1"
     :test/fragen [[:frage/id 1] [:frage/id 3]]}

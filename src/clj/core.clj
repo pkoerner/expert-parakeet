@@ -23,6 +23,8 @@
                 (str (db/all-fragen)))
            (GET "/frage/:id" [id :<< as-int]
                 (str (db/frage-by-id id)))
+           (GET "/fragen-from-test/:id" [id :<< as-int]
+                (db/fragen-by-test-id id))
 
            (GET "/antwort" []
                 (str (db/all-antwort)))

@@ -41,12 +41,22 @@
 
 
 (rf/reg-event-fx
-  :retrieve-antworten-for-this-user-frage
+  :retrieve-fragen-for-this-test
+  (fn [{:keys [db]} [_ test-id]]
+    {:db db
+     :dispatch (GET (str "/api/fragen-from-test/" test-id)
+                    {:handler (fn [resp]
+                                (rf/dispatch [:update-fragen-for-test
+                                              [test-id (edn/read-string (str "[" resp "]"))]]))})}))
+
+
+(rf/reg-event-fx
+  :retrieve-antwort-for-this-user-frage
   (fn [{:keys [db]} [_ [user-id frage-id]]]
     {:db db
-     :dispatch (GET (str "/api/antworten-from-user-frage/" user-id "/" frage-id) ; get frage ids out of test
+     :dispatch (GET (str "/api/antworten-from-user-frage/" user-id "/" frage-id)
                     {:handler (fn [resp]
-                                (rf/dispatch [:update-antworten-for-this-user-frage
+                                (rf/dispatch [:update-antwort-for-this-user-frage
                                               [user-id frage-id (edn/read-string (str "[" resp "]"))]]))})}))
 
 
@@ -69,9 +79,15 @@
 
 
 (rf/reg-event-db
-  :update-antworten-for-this-user-frage
+  :update-fragen-for-test
+  (fn [db [_ [test-id fragen]]]
+    (assoc db [:fragen-by-test test-id] fragen)))
+
+
+(rf/reg-event-db
+  :update-antwort-for-this-user-frage
   (fn [db [_ [user-id frage-id antworten]]]
-    (assoc db [:antworten-by-user-frage user-id frage-id] antworten)))
+    (assoc db [:antwort-by-user-frage user-id frage-id] antworten)))
 
 
 (rf/reg-sub
@@ -90,8 +106,13 @@
 
 
 (rf/reg-sub
-  :antworten-from-user-frage
-  (fn [db [_ user-id frage-id]] (get db [:antworten-by-user-frage user-id frage-id])))
+  :fragen-from-test
+  (fn [db [_ test-id]] (get db [:fragen-by-test test-id])))
+
+
+(rf/reg-sub
+  :antwort-from-user-frage
+  (fn [db [_ user-id frage-id]] (get db [:antwort-by-user-frage user-id frage-id])))
 
 
 (defn headline
@@ -107,13 +128,30 @@
                 :label "Logout"]]]])
 
 
+(defn calc-total-points-per-test
+  [fragen]
+  (reduce
+    #(+ %1 (:frage/punkte %2))
+    0 fragen))
+
+
+(defn calc-reached-points-per-frage
+  [user-id frage-id]
+  (rf/dispatch [:retrieve-antwort-for-this-user-frage [user-id frage-id]])
+  (let [antwort @(rf/subscribe [:antwort-from-user-frage user-id frage-id])]
+    (:antwort/punkte (first antwort))))
+
+
 (defn show-test
-  [user-id {_test-id :test/id name :test/name}]
-  (let [frage-id 1]
-    (rf/dispatch [:retrieve-antworten-for-this-user-frage [user-id frage-id]])
-    (let [antworten @(rf/subscribe [:antworten-from-user-frage user-id frage-id])]
-      [button
-       :label (str name " - " antworten)])))
+  [user-id {test-id :test/id name :test/name}]
+  (rf/dispatch [:retrieve-fragen-for-this-test test-id])
+  (let [fragen @(rf/subscribe [:fragen-from-test test-id])]
+    [button
+     :label (str name " - Bisher erreichte Punkte: "
+                 (reduce
+                   #(+ %1 (calc-reached-points-per-frage user-id (:frage/id %2)))
+                   0 fragen)
+                 " von " (calc-total-points-per-test fragen))]))
 
 
 (defn show-kurs
