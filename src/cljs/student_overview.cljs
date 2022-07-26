@@ -40,6 +40,16 @@
                                               [kurs-id (edn/read-string (str "[" resp "]"))]]))})}))
 
 
+(rf/reg-event-fx
+  :retrieve-antworten-for-this-user-frage
+  (fn [{:keys [db]} [_ [user-id frage-id]]]
+    {:db db
+     :dispatch (GET (str "/api/antworten-from-user-frage/" user-id "/" frage-id) ; get frage ids out of test
+                    {:handler (fn [resp]
+                                (rf/dispatch [:update-antworten-for-this-user-frage
+                                              [user-id frage-id (edn/read-string (str "[" resp "]"))]]))})}))
+
+
 (rf/reg-event-db
   :update-kurse-for-this-student
   (fn [db [_ kurse]]
@@ -58,6 +68,12 @@
     (assoc db [:fach-by-kurs kurs-id] fach)))
 
 
+(rf/reg-event-db
+  :update-antworten-for-this-user-frage
+  (fn [db [_ [user-id frage-id antworten]]]
+    (assoc db [:antworten-by-user-frage user-id frage-id] antworten)))
+
+
 (rf/reg-sub
   :kurse
   (fn [db _] (:kurse db)))
@@ -71,6 +87,11 @@
 (rf/reg-sub
   :tests-from-kurs
   (fn [db [_ kurs-id]] (get db [:tests-by-kurs kurs-id])))
+
+
+(rf/reg-sub
+  :antworten-from-user-frage
+  (fn [db [_ user-id frage-id]] (get db [:antworten-by-user-frage user-id frage-id])))
 
 
 (defn headline
@@ -87,9 +108,12 @@
 
 
 (defn show-test
-  [_user-id {_id :test/id name :test/name}]
-  [button
-   :label name])
+  [user-id {_test-id :test/id name :test/name}]
+  (let [frage-id 1]
+    (rf/dispatch [:retrieve-antworten-for-this-user-frage [user-id frage-id]])
+    (let [antworten @(rf/subscribe [:antworten-from-user-frage user-id frage-id])]
+      [button
+       :label (str name " - " antworten)])))
 
 
 (defn show-kurs

@@ -77,11 +77,6 @@
    {:test/id 2
     :test/name "Test 2"
     :test/fragen [[:frage/id 1] [:frage/id 3]]}
-   {:antwort/id 1
-    :antwort/frage [:frage/id 1]
-    :antwort/user 2
-    :antwort/antwort-text "Antwort"
-    :antwort/punkte 4}
    {:fach/id 0
     :fach/fachtitel "Fach 1"
     :fach/tests []}
@@ -99,7 +94,12 @@
     :kurs/semester "SoSe"
     :kurs/tests [[:test/id 1] [:test/id 2]]}
    {:user/id 0
-    :user/kurse [[:kurs/id 1] [:kurs/id 2]]}])
+    :user/kurse [[:kurs/id 1] [:kurs/id 2]]}
+   {:antwort/id 1
+    :antwort/frage [:frage/id 1]
+    :antwort/user [:user/id 0]
+    :antwort/antwort-text "Antwort"
+    :antwort/punkte 4}])
 
 
 ;; use mem db

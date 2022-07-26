@@ -32,6 +32,8 @@
            (PUT "api/test/:test-id/antwort" [test-id :<< as-int antworten]
                 (prn antworten)
                 (db/add-antwort test-id antworten))
+           (GET "/antworten-from-user-frage/:uid/:fid" [uid :<< as-int fid :<< as-int]
+                (db/antworten-by-frage-user-id fid uid))
            ;; kurse
            (GET "/kurse-from-user/:id" [id :<< as-int]
                 (db/kurs-by-user-id id))
