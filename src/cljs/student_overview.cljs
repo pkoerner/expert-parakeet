@@ -2,7 +2,7 @@
   (:require
     [ajax.core :refer [GET]]
     [cljs.tools.reader.edn :as edn]
-    [re-com.core :refer [at button h-box]]
+    [re-com.core :refer [at button h-box v-box title]]
     [re-frame.core :as rf]))
 
 
@@ -16,7 +16,8 @@
     {:db db
      :dispatch (GET (str "/api/kurse-from-user/" user-id)
                     {:handler (fn [resp]
-                                (rf/dispatch [:update-kurse-for-this-student (edn/read-string [resp])]))})}))
+                                (rf/dispatch [:update-kurse-for-this-student
+                                              (edn/read-string (str "[" resp "]"))]))})}))
 
 
 (rf/reg-event-db
@@ -43,11 +44,23 @@
                 :label "Logout"]]]])
 
 
+(defn show-kurs
+  [{fach :kurs/fach jahr :kurs/jahr semester :kurs/semester}]
+  [v-box
+   :src (at)
+   ;; :attr {:key (str id)}
+   :gap "5px"
+   :children
+   [[title
+     :label (str fach " - " semester " - " jahr ":")
+     :level :level2]]])
+
+
 (defn show-kurse-and-tests
   []
   (rf/dispatch [:retrieve-kurse-for-this-student])
   (let [kurse @(rf/subscribe [:kurse])]
-    [:div (str kurse)]))
+    [:div (map show-kurs kurse)]))
 
 
 (defn main
