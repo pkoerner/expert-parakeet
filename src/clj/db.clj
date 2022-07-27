@@ -99,11 +99,10 @@
 
 (load-dummy-data)
 
-
 (defn test-by-id
   [id]
   (d/pull @conn
-          [:test/id {:test/fragen [:frage/frage-text :frage/punkte :frage/typ]}]
+          [:test/id {:test/fragen [:frage/id :frage/frage-text :frage/punkte :frage/typ]}]
           [:test/id id]))
 
 
@@ -124,7 +123,7 @@
 (defn frage-by-id
   [id]
   (d/pull @db/conn
-          [:frage/frage-text :frage/punkte :frage/typ]
+          [:frage/id :frage/frage-text :frage/punkte :frage/typ]
           [:frage/id id]))
 
 
