@@ -2,8 +2,7 @@
   (:require
     [re-com.core :refer [at v-box box gap button label input-textarea line title]]
     [re-frame.core :as rf]
-    [reagent.core :as reagent]
-    [reagent.dom :as rd]))
+    [reagent.core :as reagent]))
 
 
 (defn TextQuestion

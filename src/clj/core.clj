@@ -4,7 +4,6 @@
     [compojure.core :refer [GET POST defroutes context]]
     [compojure.route :as route]
     [db :as db]
-    [muuntaja.core :as m]
     [muuntaja.middleware :refer [wrap-format]]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.params :refer [wrap-params]]
