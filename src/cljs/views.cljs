@@ -5,6 +5,7 @@
     [reagent.core :as reagent]
     [reagent.dom :as rd]))
 
+
 (defn TextQuestion
   [{frage-text :frage/frage-text punkte :frage/punkte id :frage/id}]
   (let [antwort (reagent/atom "")]
@@ -28,6 +29,7 @@
                                 (rf/dispatch [:frage-beantworten id val])
                                 (reset! antwort val))]]]]]))
 
+
 (defn Questions
   []
   (fn []
@@ -44,6 +46,7 @@
         :on-click #(rf/dispatch [:antworten-abschicken])
         :label "Abschicken"])]))
 
+
 (defn Corrections
   []
   [v-box
@@ -52,6 +55,7 @@
            [title :label (str "Correction: " c)
             :level :level2])
          @(rf/subscribe [:corrections]))])
+
 
 (defn Root
   []
