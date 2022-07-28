@@ -1,5 +1,6 @@
 (ns student-overview
   (:require
+    [day8.re-frame.http-fx]
     [re-com.core :refer [at button h-box v-box title]]
     [re-frame.core :as rf]
     [student-overview-events]

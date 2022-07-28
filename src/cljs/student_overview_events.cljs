@@ -1,18 +1,28 @@
 (ns student-overview-events
   (:require
-    [ajax.core :refer [GET]]
+    [ajax.core :as ajax :refer [GET]]
     [cljs.tools.reader.edn :as edn]
     [re-frame.core :as rf]))
+
+
+(def <sub (comp deref rf/subscribe))
+
+(def >evt rf/dispatch)
 
 
 (rf/reg-event-fx
   :retrieve-kurse-for-this-student
   (fn [{:keys [db]} [_ user-id]]
-    {:db db
-     :dispatch (GET (str "/api/kurse-from-user/" user-id)
+    {:db          (assoc db :loading true)
+     :http-xhrio  {:method          :get
+                   :uri             (str "/api/kurse-from-user/" user-id)
+                   :timeout         8000
+                   :response-format (ajax/text-response-format)
+                   :on-success      [:update-kurse-for-this-student]}
+     #_#_:dispatch (GET (str "/api/kurse-from-user/" user-id)
                     {:handler (fn [resp]
                                 (rf/dispatch [:update-kurse-for-this-student
-                                              (edn/read-string (str "[" resp "]"))]))})}))
+                                              (edn/read-string resp)]))})}))
 
 
 (rf/reg-event-fx
@@ -58,7 +68,10 @@
 (rf/reg-event-db
   :update-kurse-for-this-student
   (fn [db [_ kurse]]
-    (assoc db :kurse kurse)))
+    (let [{k :kurse} (edn/read-string kurse)]
+      (-> db
+          (assoc :loading false)
+          (assoc :kurse k)))))
 
 
 (rf/reg-event-db

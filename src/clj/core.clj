@@ -38,7 +38,13 @@
                 (db/antworten-by-frage-user-id fid uid))
            ;; kurse
            (GET "/kurse-from-user/:id" [id :<< as-int]
-                (db/kurs-by-user-id id))
+                (prn (-> {}
+                         (assoc :user-id id)
+                         (assoc :kurse (into []  (db/kurs-by-user-id id)))))
+                (str
+                  (-> {}
+                      (assoc :user-id id)
+                      (assoc :kurse (into []  (db/kurs-by-user-id id))))))
            ;; Faecher
            (GET "/fach-from-kurs/:id" [id :<< as-int]
                 (db/fach-by-kurs-id id)))
