@@ -4,6 +4,7 @@
     [compojure.core :refer [GET POST defroutes context]]
     [compojure.route :as route]
     [db :as db]
+    [domain-functions :as df]
     [muuntaja.middleware :refer [wrap-format]]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.params :refer [wrap-params]]
@@ -66,7 +67,10 @@
            ;; maybe better route /test/:test-id/antworten
            (POST "/test/:test-id/antwort" [test-id :<< as-int :as r]
                  (println "Neue Antworten für Test" test-id)
-                 (response (db/add-antworten test-id (:body-params r)))))
+                 (response (db/add-antworten test-id (:body-params r))))
+
+           (GET "/studierenden-uebersicht/user/:uid" [uid :<< as-int]
+                (df/studierenden-uebersicht-map uid)))
   (route/not-found "Not Found"))
 
 
