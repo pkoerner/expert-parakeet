@@ -32,7 +32,7 @@
 (defn calc-reached-points-per-frage
   [frage-id]
   (let [antworten @(rf/subscribe [:antworten/zu-bestimmter-frage frage-id])]
-    (apply max (map :antwort/punkte antworten))))
+    (apply (partial max 0) (map :antwort/punkte antworten))))
 
 
 (defn show-test
