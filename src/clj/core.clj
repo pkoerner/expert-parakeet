@@ -56,7 +56,7 @@
                 (str
                   (-> {}
                       (assoc :user-id id)
-                      (assoc :kurse (into [] (db/kurs-by-user-id id))))))
+                      (assoc :kurse (into [] (db/kurse-by-user-id id))))))
            ;; Faecher
            (GET "/fach-from-kurs/:id" [id :<< as-int]
                 (str

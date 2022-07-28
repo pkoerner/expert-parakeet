@@ -14,25 +14,25 @@
 
 
 (rf/reg-sub
-  :fach-from-kurs
+  :fach/zu-bestimmten-kurs
   (fn [db [_ kurs-id]]
     (get (:daten db) [:fach-by-kurs kurs-id])))
 
 
 (rf/reg-sub
-  :tests-from-kurs
+  :tests/zu-bestimmten-kurs
   (fn [db [_ kurs-id]]
     (get (:daten db) [:tests-by-kurs kurs-id])))
 
 
 (rf/reg-sub
-  :fragen-from-test
+  :fragen/zu-bestimmten-test
   (fn [db [_ test-id]]
     (get (:daten db) [:fragen-by-test test-id])))
 
 
 (rf/reg-sub
-  :antwort-from-user-frage
+  :antwort/zu-bestimmter-frage
   (fn [db [_ frage-id]]
     (get (:daten db) [:antwort-by-frage frage-id])))
 

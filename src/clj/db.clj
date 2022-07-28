@@ -202,7 +202,7 @@
             @db/conn)))
 
 
-(defn kurs-by-user-id-query
+(defn kurse-by-user-id-query
   [id]
   (d/q '[:find ?i ?f ?j ?s
          :in $ ?id
@@ -217,14 +217,14 @@
        @conn id))
 
 
-(defn kurs-by-user-id
+(defn kurse-by-user-id
   [id]
   (map
     #(zipmap [:kurs/id :kurs/fach :kurs/jahr :kurs/semester] %)
-    (kurs-by-user-id-query id)))
+    (kurse-by-user-id-query id)))
 
 
-(defn test-by-kurs-id-query
+(defn tests-by-kurs-id-query
   [id]
   (d/q '[:find ?i ?n
          :in $ ?id
@@ -240,7 +240,7 @@
   [id]
   (map
     #(zipmap [:test/id :test/name] %)
-    (test-by-kurs-id-query id)))
+    (tests-by-kurs-id-query id)))
 
 
 (defn antworten-by-frage-user-id-query
@@ -284,7 +284,7 @@
     (fach-by-kurs-id-query id)))
 
 
-(defn fragen-by-tests-id-query
+(defn fragen-by-test-id-query
   [id]
   (d/q '[:find ?i ?ty ?ft ?l ?p
          :in $ ?id
@@ -303,7 +303,7 @@
   [id]
   (map
     #(zipmap [:frage/id :frage/typ :frage/frage-text :frage/loesung :frage/punkte] %)
-    (fragen-by-tests-id-query id)))
+    (fragen-by-test-id-query id)))
 
 
 (comment 

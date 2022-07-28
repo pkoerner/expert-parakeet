@@ -32,13 +32,13 @@
 
 (defn calc-reached-points-per-frage
   [frage-id]
-  (let [antwort @(rf/subscribe [:antwort-from-user-frage frage-id])]
+  (let [antwort @(rf/subscribe [:antwort/zu-bestimmter-frage frage-id])]
     (:antwort/punkte (first antwort))))
 
 
 (defn show-test
   [{test-id :test/id name :test/name}]
-  (let [fragen @(rf/subscribe [:fragen-from-test test-id])]
+  (let [fragen @(rf/subscribe [:fragen/zu-bestimmten-test test-id])]
     [button
      :label (str name " - Bisher erreichte Punkte: "
                  (reduce
@@ -49,8 +49,8 @@
 
 (defn show-kurs
   [{id :kurs/id jahr :kurs/jahr semester :kurs/semester}]
-  (let [fach @(rf/subscribe [:fach-from-kurs id])
-        tests @(rf/subscribe [:tests-from-kurs id])]
+  (let [fach @(rf/subscribe [:fach/zu-bestimmten-kurs id])
+        tests @(rf/subscribe [:tests/zu-bestimmten-kurs id])]
     [v-box
      :src (at)
      :attr {:key (str id)}

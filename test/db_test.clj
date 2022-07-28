@@ -80,7 +80,7 @@
   (let [{id :user/id kurs-user :user/kurse} user
         kurs-id (second (first kurs-user))
         {kurs-id :kurs/id fach :kurs/fach jahr :kurs/jahr semester :kurs/semester} (first (vec (filter #(= kurs-id (:kurs/id %)) kurse)))
-        pulled-kurs (first (db/kurs-by-user-id id))
+        pulled-kurs (first (db/kurse-by-user-id id))
         {pulled-id :kurs/id pulled-fach :kurs/fach pulled-jahr :kurs/jahr pulled-semester :kurs/semester} pulled-kurs]
     (and (= (second fach) pulled-fach)
          (= jahr pulled-jahr)
