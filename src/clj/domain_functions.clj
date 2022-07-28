@@ -18,5 +18,5 @@
         test-ids (distinct (mapv :test/id (flatten (vals (apply assoc {} tests-by-kurs)))))
         fragen-by-tests (reduce #(conj %1 [:fragen-by-test %2] (fragen-from-test-without-loesungen %2)) [] test-ids)
         frage-ids (distinct (mapv :frage/id (flatten (vals (apply assoc {} fragen-by-tests)))))
-        antwort-by-frage (reduce #(conj %1 [:antwort-by-frage %2] (into [] (db/antworten-by-frage-user-id %2 user-id))) [] frage-ids)]
+        antwort-by-frage (reduce #(conj %1 [:antworten-by-frage %2] (into [] (db/antworten-by-frage-user-id %2 user-id))) [] frage-ids)]
     (apply assoc {:kurse kurse} (concat faecher-by-kurs tests-by-kurs fragen-by-tests antwort-by-frage))))

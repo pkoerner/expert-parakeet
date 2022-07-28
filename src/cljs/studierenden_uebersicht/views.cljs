@@ -26,14 +26,13 @@
 
 (defn calc-total-points-per-test
   [fragen]
-  (reduce
-    #(+ %1 (:frage/punkte %2)) 0 fragen))
+  (reduce #(+ %1 (:frage/punkte %2)) 0 fragen))
 
 
 (defn calc-reached-points-per-frage
   [frage-id]
-  (let [antwort @(rf/subscribe [:antwort/zu-bestimmter-frage frage-id])]
-    (:antwort/punkte (first antwort))))
+  (let [antworten @(rf/subscribe [:antworten/zu-bestimmter-frage frage-id])]
+    (apply max (map :antwort/punkte antworten))))
 
 
 (defn show-test
@@ -41,9 +40,7 @@
   (let [fragen @(rf/subscribe [:fragen/zu-bestimmten-test test-id])]
     [button
      :label (str name " - Bisher erreichte Punkte: "
-                 (reduce
-                   #(+ %1 (calc-reached-points-per-frage (:frage/id %2)))
-                   0 fragen)
+                 (reduce #(+ %1 (calc-reached-points-per-frage (:frage/id %2))) 0 fragen)
                  " von " (calc-total-points-per-test fragen))]))
 
 

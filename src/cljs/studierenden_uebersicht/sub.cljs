@@ -32,9 +32,9 @@
 
 
 (rf/reg-sub
-  :antwort/zu-bestimmter-frage
+  :antworten/zu-bestimmter-frage
   (fn [db [_ frage-id]]
-    (get (:daten db) [:antwort-by-frage frage-id])))
+    (get (:daten db) [:antworten-by-frage frage-id])))
 
 
 (rf/reg-sub
