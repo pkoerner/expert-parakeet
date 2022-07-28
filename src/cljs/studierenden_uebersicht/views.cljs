@@ -27,33 +27,28 @@
 (defn calc-total-points-per-test
   [fragen]
   (reduce
-    #(+ %1 (:frage/punkte %2))
-    0 fragen))
+    #(+ %1 (:frage/punkte %2)) 0 fragen))
 
 
 (defn calc-reached-points-per-frage
-  [user-id frage-id]
-  (rf/dispatch [:retrieve-antwort-for-this-user-frage [user-id frage-id]])
-  (let [antwort @(rf/subscribe [:antwort-from-user-frage user-id frage-id])]
+  [frage-id]
+  (let [antwort @(rf/subscribe [:antwort-from-user-frage frage-id])]
     (:antwort/punkte (first antwort))))
 
 
 (defn show-test
-  [user-id {test-id :test/id name :test/name}]
-  (rf/dispatch [:retrieve-fragen-for-this-test test-id])
+  [{test-id :test/id name :test/name}]
   (let [fragen @(rf/subscribe [:fragen-from-test test-id])]
     [button
      :label (str name " - Bisher erreichte Punkte: "
                  (reduce
-                   #(+ %1 (calc-reached-points-per-frage user-id (:frage/id %2)))
+                   #(+ %1 (calc-reached-points-per-frage (:frage/id %2)))
                    0 fragen)
                  " von " (calc-total-points-per-test fragen))]))
 
 
 (defn show-kurs
-  [user-id {id :kurs/id jahr :kurs/jahr semester :kurs/semester}]
-  (rf/dispatch [:retrieve-fach-for-this-kurs id])
-  (rf/dispatch [:retrieve-tests-for-this-kurs id])
+  [{id :kurs/id jahr :kurs/jahr semester :kurs/semester}]
   (let [fach @(rf/subscribe [:fach-from-kurs id])
         tests @(rf/subscribe [:tests-from-kurs id])]
     [v-box
@@ -64,14 +59,14 @@
      [[title
        :label (str (:fach/fachtitel fach) " - " semester " - " jahr ":")
        :level :level2]
-      (map (partial show-test user-id) tests)]]))
+      (map show-test tests)]]))
 
 
 (defn show-kurse-and-tests
   [user-id]
-  (rf/dispatch [:retrieve-kurse-for-this-student user-id])
+  (rf/dispatch [:studierenden-uebersicht/hole-daten user-id])
   (let [kurse @(rf/subscribe [:kurse])]
-    [:div (map (partial show-kurs user-id) kurse)]))
+    [:div (map show-kurs kurse)]))
 
 
 (defn overview

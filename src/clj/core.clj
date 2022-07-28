@@ -70,7 +70,7 @@
                  (response (db/add-antworten test-id (:body-params r))))
 
            (GET "/studierenden-uebersicht/user/:uid" [uid :<< as-int]
-                (df/studierenden-uebersicht-map uid)))
+                (response (df/studierenden-uebersicht-map uid))))
   (route/not-found "Not Found"))
 
 
