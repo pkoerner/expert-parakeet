@@ -25,7 +25,7 @@
                    :placeholder "Der Sinn des Lebens ist 42 weil..."
                    ;; :change-on-blur? false
                    :on-change (fn [val]
-                                (rf/dispatch [:frage-beantworten id val])
+                                (rf/dispatch [:frage/beantworten id val])
                                 (reset! antwort val))]]]]]))
 
 
@@ -42,10 +42,13 @@
        [button
         :src (at)
         :class "button-primary"
-        :on-click #(rf/dispatch [:antworten-abschicken])
+        :on-click #(rf/dispatch [:antworten/senden])
+        :disabled? (rf/subscribe [:antworten/gesendet])
         :label "Abschicken"])]))
 
 
+;; not in use
+;; for debugging
 (defn Corrections
   []
   [v-box
@@ -66,5 +69,4 @@
     :gap "15px"
     :children [[title :label "Test" :level :level1]
                [line]
-               [Questions]
-               #_[Corrections]]]])
+               [Questions]]]])

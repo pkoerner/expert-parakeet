@@ -19,33 +19,34 @@
                    :uri             "/api/test/1"
                    :timeout         8000
                    :response-format (ajax/transit-response-format)
-                   :on-success      [:update-test]}}))
+                   :on-success      [:test/angekommen]}}))
 
 
 (rf/reg-event-db
-  :update-test
+  :test/angekommen
   (fn [db [_ test]]
     (-> db
         (assoc :loading false)
         (assoc :test test))))
 
 
+;; Default event for HTTP Failure
 (rf/reg-event-db
   :http-no-on-failure
   (fn [db fail]
     (-> db
-        (assoc :loading false)
+        (assoc :laedt false)
         (assoc :error fail))))
 
 
 (rf/reg-event-db
-  :frage-beantworten
+  :frage/beantworten
   (fn [db [_ frage-id antwort-text]]
     (assoc-in db [:antworten frage-id] antwort-text)))
 
 
 (rf/reg-event-fx
-  :antworten-abschicken
+  :antworten/senden
   (fn [{:keys [db]} _]
     (let [test-id (get-in db [:test :test/id])
           antworten (:antworten db)]
@@ -54,11 +55,11 @@
                      :params          antworten
                      :format          (ajax/transit-request-format)
                      :response-format (ajax/transit-response-format)
-                     :on-success      [:antworten-erfolgreich]}})))
+                     :on-success      [:antworten/erfolgreich-gesendet]}})))
 
 
 (rf/reg-event-db
-  :antworten-erfolgreich
+  :antworten/erfolgreich-gesendet
   (fn [db _]
-    (assoc db :abgesendet true)))
+    (assoc db :gesendet true)))
 

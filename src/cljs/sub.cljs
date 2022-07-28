@@ -9,12 +9,12 @@
 
 
 (rf/reg-sub
-  :loading
-  (fn [db _] (:loading db)))
+  :laedt
+  (fn [db _] (:laedt db)))
 
 
 (rf/reg-sub
-  :abgesendet
-  (fn [db _] (:abgesendet db)))
+  :antworten/gesendet
+  (fn [db _] (:gesendet db)))
 
 
