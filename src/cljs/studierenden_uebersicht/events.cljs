@@ -1,13 +1,20 @@
-(ns student-overview-events
+(ns studierenden-uebersicht.events
   (:require
     [ajax.core :as ajax]
     [cljs.tools.reader.edn :as edn]
     [re-frame.core :as rf]))
 
 
-(def <sub (comp deref rf/subscribe))
+(rf/reg-event-db
+  :studierenden-uebersicht/laden
+  (fn [db _]
+    (assoc db :studierenden-uebersicht true)))
 
-(def >evt rf/dispatch)
+
+(rf/reg-event-db
+  :studierenden-uebersicht/verstecken
+  (fn [db _]
+    (assoc db :studierenden-uebersicht false)))
 
 
 (rf/reg-event-fx

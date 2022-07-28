@@ -1,10 +1,10 @@
-(ns student-overview
+(ns studierenden-uebersicht.views
   (:require
     [day8.re-frame.http-fx]
     [re-com.core :refer [at button h-box v-box title]]
     [re-frame.core :as rf]
-    [student-overview-events]
-    [student-overview-subscriptions]))
+    [studierenden-uebersicht.events]
+    [studierenden-uebersicht.sub]))
 
 
 ;; For now, we only look at user with id 0
@@ -74,9 +74,27 @@
     [:div (map (partial show-kurs user-id) kurse)]))
 
 
-(defn main
+(defn overview
   []
   [:div
-   [:h1 "Hello from Student Overview"]
+   [:h1 "Studierenden Übersicht"]
    [headline user-id]
    [show-kurse-and-tests user-id]])
+
+
+(defn to-student-overview
+  []
+  (let [show-overview @(rf/subscribe [:studierenden-uebersicht/aktiv])]
+    (if show-overview
+      [:div
+       [button
+        :src (at)
+        :class "button-primary"
+        :on-click #(rf/dispatch [:studierenden-uebersicht/verstecken])
+        :label "Verstecke student-overview"]
+       [overview]]
+      [button
+       :src (at)
+       :class "button-primary"
+       :on-click #(rf/dispatch [:studierenden-uebersicht/laden])
+       :label "Zeige student-overview"])))

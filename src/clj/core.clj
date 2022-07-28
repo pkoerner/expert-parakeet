@@ -1,31 +1,35 @@
 (ns core
   (:require
     [compojure.coercions :refer [as-int]]
-    [compojure.core :refer [GET PUT defroutes context]]
+    [compojure.core :refer [GET POST defroutes context]]
     [compojure.route :as route]
     [db :as db]
+    [muuntaja.middleware :refer [wrap-format]]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.params :refer [wrap-params]]
-    [ring.middleware.reload :refer [wrap-reload]]))
+    [ring.middleware.reload :refer [wrap-reload]]
+    [ring.util.response :refer [response]]))
 
 
 (defroutes routes
   (context "/api" []
            ;; tests
+           ;; maybe better route /tests
            (GET "/test" []
-                (str (db/all-tests)))
+                (response (db/all-tests)))
            (GET "/test/:id" [id :<< as-int]
-                (str (db/test-by-id id)))
+                (response (db/test-by-id id)))
            (GET "/tests-from-kurs/:id" [id :<< as-int]
                 (str
                   (-> {}
                       (assoc :kurs-id id)
                       (assoc :tests (into [] (db/tests-by-kurs-id id))))))
            ;; fragen
+           ;; do we need these route, why can't we embed the questions in the test
            (GET "/frage" []
-                (str (db/all-fragen)))
+                (response (db/all-fragen)))
            (GET "/frage/:id" [id :<< as-int]
-                (str (db/frage-by-id id)))
+                (response (db/frage-by-id id)))
            (GET "/fragen-from-test/:id" [id :<< as-int]
                 (str
                   (-> {}
@@ -37,9 +41,9 @@
            (GET "/antwort/add" []
                 (db/add-antwort-three-args 1 1 "Hallo"))
            ;; antworten
-           (PUT "api/test/:test-id/antwort" [test-id :<< as-int antworten]
-                (prn antworten)
-                (db/add-antwort test-id antworten))
+           (POST "api/test/:test-id/antwort" [test-id :<< as-int antworten]
+                 (prn antworten)
+                 (db/add-antworten test-id antworten))
            (GET "/antworten-from-user-frage/:uid/:fid" [uid :<< as-int fid :<< as-int]
                 (str
                   (-> {}
@@ -57,12 +61,18 @@
                 (str
                   (-> {}
                       (assoc :kurs-id id)
-                      (assoc :fach (db/fach-by-kurs-id id))))))
+                      (assoc :fach (db/fach-by-kurs-id id)))))
+           ;; antworten
+           ;; maybe better route /test/:test-id/antworten
+           (POST "/test/:test-id/antwort" [test-id :<< as-int :as r]
+                 (println "Neue Antworten für Test" test-id)
+                 (response (db/add-antworten test-id (:body-params r)))))
   (route/not-found "Not Found"))
 
 
 (def app
   (-> routes
+      wrap-format ; handle content negotiation
       wrap-params))
 
 

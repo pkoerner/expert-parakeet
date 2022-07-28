@@ -1,6 +1,11 @@
-(ns student-overview-subscriptions
+(ns studierenden-uebersicht.sub
   (:require
     [re-frame.core :as rf]))
+
+
+(rf/reg-sub
+  :studierenden-uebersicht/aktiv
+  (fn [db _] (:studierenden-uebersicht db)))
 
 
 (rf/reg-sub
