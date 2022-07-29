@@ -24,24 +24,10 @@
                 :label "Logout"]]]])
 
 
-(defn calc-total-points-per-test
-  [fragen]
-  (reduce #(+ %1 (:frage/punkte %2)) 0 fragen))
-
-
-(defn calc-reached-points-per-frage
-  [frage-id]
-  (let [antworten @(rf/subscribe [:antworten/zu-bestimmter-frage frage-id])]
-    (apply (partial max 0) (map :antwort/punkte antworten))))
-
-
 (defn show-test
-  [{test-id :test/id name :test/name}]
-  (let [fragen @(rf/subscribe [:fragen/zu-bestimmten-test test-id])]
-    [button
-     :label (str name " - Bisher erreichte Punkte: "
-                 (reduce #(+ %1 (calc-reached-points-per-frage (:frage/id %2))) 0 fragen)
-                 " von " (calc-total-points-per-test fragen))]))
+  [{name :test/name max-punkte :test/max-punkte erreichte-punkte :test/erreichte-punkte}]
+  [button
+   :label (str name " - Bisher erreichte Punkte: " erreichte-punkte " von " max-punkte)])
 
 
 (defn show-kurs

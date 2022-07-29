@@ -26,17 +26,5 @@
 
 
 (rf/reg-sub
-  :fragen/zu-bestimmten-test
-  (fn [db [_ test-id]]
-    (get (:daten db) [:fragen-by-test test-id])))
-
-
-(rf/reg-sub
-  :antworten/zu-bestimmter-frage
-  (fn [db [_ frage-id]]
-    (get (:daten db) [:antworten-by-frage frage-id])))
-
-
-(rf/reg-sub
   :daten
   (fn [db _] (:daten db)))
