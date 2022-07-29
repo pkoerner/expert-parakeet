@@ -16,5 +16,3 @@
 (rf/reg-sub
   :antworten/gesendet
   (fn [db _] (:gesendet db)))
-
-

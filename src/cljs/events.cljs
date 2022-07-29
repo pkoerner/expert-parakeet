@@ -62,4 +62,3 @@
   :antworten/erfolgreich-gesendet
   (fn [db _]
     (assoc db :gesendet true)))
-

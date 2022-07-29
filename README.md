@@ -5,7 +5,7 @@ Run Front & Backend:
 ```shell
 docker-compose up -d
 clj -X core/start-server
-shadow-cljs watch app 
+shadow-cljs watch app
 ```
 
 Tests:
