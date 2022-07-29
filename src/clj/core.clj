@@ -43,7 +43,8 @@
                  (response (db/add-antworten test-id (:body-params r))))
 
            (GET "/studierenden-uebersicht/user/:uid" [uid :<< as-int]
-                (response (df/studierenden-uebersicht-map uid))))
+                (response
+                  (df/studierenden-uebersicht-map uid db/kurse-by-user-id db/fach-by-kurs-id db/tests-by-kurs-id db/antworten-by-frage-user-id db/fragen-by-test-id))))
   (route/not-found "Not Found"))
 
 
