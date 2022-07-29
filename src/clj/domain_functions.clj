@@ -11,7 +11,7 @@
   (let [fragen (fragen-by-test-id test-id)
         total-points (reduce #(+ %1 (:frage/punkte %2)) 0 fragen)
         antworten (mapv #(antworten-by-frage-user-id (:frage/id %) user-id) fragen)
-        reached-points (reduce #(+ %1 (:antwort/punkte (first %2))) 0 antworten)]
+        reached-points (reduce #(+ %1 (apply max 0 (map :antwort/punkte %2))) 0 antworten)]
     [:test/max-punkte total-points :test/erreichte-punkte reached-points]))
 
 
