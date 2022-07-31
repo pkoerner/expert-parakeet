@@ -28,7 +28,7 @@
                 (response (db/frage-by-id id)))
 
            (GET "/antwort" []
-                (str (db/all-antwort)))
+                (response (db/all-antwort)))
            (GET "/antwort/add" []
                 (db/add-antwort-three-args 1 1 "Hallo"))
            ;; antworten
