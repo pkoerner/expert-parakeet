@@ -28,14 +28,9 @@
                 (response (db/frage-by-id id)))
 
            (GET "/antwort" []
-                (str (db/all-antwort)))
+                (response (db/all-antwort)))
            (GET "/antwort/add" []
                 (db/add-antwort-three-args 1 1 "Hallo"))
-           ;; antworten
-           (POST "api/test/:test-id/antwort" [test-id :<< as-int antworten]
-                 (prn antworten)
-                 (db/add-antworten test-id antworten))
-
            ;; antworten
            ;; maybe better route /test/:test-id/antworten
            (POST "/test/:test-id/antwort" [test-id :<< as-int :as r]
