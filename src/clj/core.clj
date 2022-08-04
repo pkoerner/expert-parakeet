@@ -29,13 +29,10 @@
 
            (GET "/antwort" []
                 (response (db/all-antwort)))
-           (GET "/antwort/add" []
-                (db/add-antwort-three-args 1 1 "Hallo"))
            ;; antworten
            ;; maybe better route /test/:test-id/antworten
-           (POST "/test/:test-id/antwort" [test-id :<< as-int :as r]
-                 (println "Neue Antworten für Test" test-id)
-                 (response (db/add-antworten test-id (:body-params r))))
+           (POST "/test/:test-id/antwort" [test-id :<< as-int]
+                 (println "Neue Antworten für Test" test-id))
 
            (GET "/user/:uid/kurse" [uid :<< as-int]
                 (response (domain/kurse-mit-gesamt-punkten uid))))
