@@ -9,7 +9,7 @@
   (fn [{:keys [db]} _]
     {:db          (assoc db :laedt true)
      :http-xhrio  {:method          :get
-                   :uri             (str "/api/studi/user/" (get-in db [:user :id]))
+                   :uri             (str "/api/user/" (get-in db [:user :id]) "/kurse")
                    :timeout         8000
                    :response-format (ajax/transit-response-format)
                    :on-success      [:kurse/angekommen]}}))

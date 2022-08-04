@@ -4,7 +4,7 @@
     [compojure.core :refer [GET POST defroutes context]]
     [compojure.route :as route]
     [db :as db]
-    [domain-functions :as df]
+    [domain]
     [muuntaja.middleware :refer [wrap-format]]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.params :refer [wrap-params]]
@@ -37,9 +37,8 @@
                  (println "Neue Antworten für Test" test-id)
                  (response (db/add-antworten test-id (:body-params r))))
 
-           (GET "/studierenden-uebersicht/user/:uid" [uid :<< as-int]
-                (response
-                  (df/studierenden-uebersicht-map uid db/kurse-by-user-id db/fach-by-kurs-id db/tests-by-kurs-id db/antworten-by-frage-user-id db/fragen-by-test-id))))
+           (GET "/user/:uid/kurse" [uid :<< as-int]
+                (response (domain/kurse-mit-gesamt-punkten uid))))
   (route/not-found "Not Found"))
 
 

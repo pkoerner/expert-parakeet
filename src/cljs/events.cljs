@@ -7,10 +7,11 @@
 
 (def >evt rf/dispatch)
 
+
 (rf/reg-event-db
   :init-db
   (fn [db _]
-    (assoc db :user {:id 1 :name "Test_User"})))
+    (assoc db :user {:id 0 :name "Test_User"})))
 
 
 ;; Default event for HTTP Failure
