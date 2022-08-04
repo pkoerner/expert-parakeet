@@ -4,32 +4,26 @@
     [re-frame.core :as rf]))
 
 
-(rf/reg-event-db
-  :studierenden-uebersicht/laden
-  (fn [db _]
-    (assoc db :studierenden-uebersicht true)))
-
-
-(rf/reg-event-db
-  :studierenden-uebersicht/verstecken
-  (fn [db _]
-    (assoc db :studierenden-uebersicht false)))
-
-
 (rf/reg-event-fx
-  :studierenden-uebersicht/hole-daten
-  (fn [{:keys [db]} [_ user-id]]
+  :kurse/laden
+  (fn [{:keys [db]} _]
     {:db          (assoc db :laedt true)
      :http-xhrio  {:method          :get
-                   :uri             (str "/api/studierenden-uebersicht/user/" user-id)
+                   :uri             (str "/api/studi/user/" (get-in db [:user :id]))
                    :timeout         8000
                    :response-format (ajax/transit-response-format)
-                   :on-success      [:studierenden-uebersicht/speichere-daten]}}))
+                   :on-success      [:kurse/angekommen]}}))
 
 
 (rf/reg-event-db
-  :studierenden-uebersicht/speichere-daten
+  :kurse/angekommen
   (fn [db [_ daten]]
     (-> db
-        (assoc :laedt false)
-        (assoc :daten daten))))
+        (dissoc :laedt)
+        (assoc :kurse daten))))
+
+
+(rf/reg-event-db
+  :kurse/entfernen
+  (fn [db _]
+    (dissoc db :kurse)))

@@ -4,27 +4,11 @@
 
 
 (rf/reg-sub
-  :studierenden-uebersicht/aktiv
-  (fn [db _] (:studierenden-uebersicht db)))
-
-
-(rf/reg-sub
   :kurse
-  (fn [db _] (:kurse (:daten db))))
+  (fn [db _] (:kurse db)))
 
 
 (rf/reg-sub
-  :fach/zu-bestimmten-kurs
-  (fn [db [_ kurs-id]]
-    (get (:daten db) [:fach-by-kurs kurs-id])))
+  :user
+  (fn [db _] (get-in db [:user :name])))
 
-
-(rf/reg-sub
-  :tests/zu-bestimmten-kurs
-  (fn [db [_ kurs-id]]
-    (get (:daten db) [:tests-by-kurs kurs-id])))
-
-
-(rf/reg-sub
-  :daten
-  (fn [db _] (:daten db)))
