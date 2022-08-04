@@ -1,14 +1,20 @@
 # How to run
 
-Run Front & Backend:
-
+## Windows and Mac:
 ```shell
 docker-compose up -d
 clj -X core/start-server
 shadow-cljs watch app 
 ```
 
-Tests:
+## Linux
+```shell
+docker-compose -f docker-compose-linux.yml up -d
+clj -X core/start-server
+shadow-cljs watch app 
+```
+
+## Tests:
 
 ```shell
 clj -A:test-runner
