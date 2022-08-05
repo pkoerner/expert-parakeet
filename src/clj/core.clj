@@ -1,6 +1,5 @@
 (ns core
   (:require
-    [compojure.coercions :refer [as-int]]
     [compojure.core :refer [GET POST defroutes context]]
     [compojure.route :as route]
     [db :as db]
@@ -19,23 +18,24 @@
            ;; maybe better route /tests
            (GET "/test" []
                 (response (db/all-tests)))
-           (GET "/test/:id" [id :<< as-int]
+           (GET "/test/:id" [id]
                 (response (db/test-by-id id)))
            ;; fragen
            ;; do we need these route, why can't we embed the questions in the test
            (GET "/frage" []
                 (response (db/all-fragen)))
-           (GET "/frage/:id" [id :<< as-int]
+           (GET "/frage/:id" [id]
                 (response (db/frage-by-id id)))
 
            (GET "/antwort" []
                 (response (db/all-antwort)))
            ;; antworten
            ;; maybe better route /test/:test-id/antworten
-           (POST "/test/:test-id/antwort" [test-id :<< as-int]
-                 (println "Neue Antworten für Test" test-id))
+           (POST "/test/:test-id/antworten" [test-id :as r]
+                 (println "Neue Antworten für Test" test-id)
+                 (response (db/user-add-antworten test-id (:body-params r))))
 
-           (GET "/user/:uid/kurse" [uid :<< as-int]
+           (GET "/user/:uid/kurse" [uid]
                 (response (domain/kurse-mit-gesamt-punkten
                             (db/kurse-von-studierendem uid)
                             (partial db/antworten-von-test uid))))

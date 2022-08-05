@@ -2,10 +2,15 @@
   (:require
     [datahike.api :as d]
     [db.dummy-data :refer [dummy-data]]
-    [db.schema :refer [schema]]))
+    [db.schema :refer [schema]]
+    [nano-id.core :refer [nano-id]]))
+
+
+(def id-len 10)
 
 
 ;; use mem db
+
 (def cfg
   {:store {:backend :mem
            :id "expert-db"}
@@ -13,6 +18,8 @@
 
 
 ;; use file db
+
+
 #_(def cfg
       {:store {:backend :file
                :path "/tmp/expert-db"}
@@ -31,24 +38,19 @@
 (def conn (create-conn))
 
 
-(defn load-dummy-data
-  [data]
-  (d/transact conn data))
+(do (d/transact conn dummy-data) nil)
 
 
-(do
-  (load-dummy-data dummy-data)
-  nil)
-
-
-;; Für Tests
-
-(defn restart
-  []
-  (d/transact conn {:tx-data [[:db.history.purge/before (java.util.Date.)]]})
-  ;; (d/delete-database cfg)
-  ;; (create-conn)
-  )
+;; provide the db attr of the id you want to check for collisions
+(defn generate-id
+  [attr]
+  (loop [id (nano-id id-len)]
+    (if (seq (d/q '[:find ?e
+                    :in $ ?attr ?id
+                    :where [?e ?attr ?id]]
+                  @conn attr id))
+      (recur (nano-id id-len))
+      id)))
 
 
 (defn kurse-von-studierendem
@@ -158,13 +160,23 @@
           [:frage/id id]))
 
 
-(defn add-antworten
+(defn user-add-antwort
   [user-id frage-id antwort]
-  (d/transact conn
-              [{:db/id -1
-                :antwort/frage frage-id
-                :antwort/user user-id
-                :antwort/antwort-text antwort}]))
+
+  (let [id (generate-id :antwort/id)]
+    (d/transact conn
+                [{:db/id -1
+                  :antwort/id id
+                  :antwort/frage [:frage/id frage-id]
+                  :antwort/user [:user/id user-id]
+                  :antwort/antwort-text antwort}])))
+
+
+(defn user-add-antworten
+  [user-id antworten]
+  (mapv
+    #(db/user-add-antwort user-id (:antwort/frage %) (:antwort/antwort-text %))
+    antworten))
 
 
 (defn all-antwort
@@ -175,6 +187,8 @@
 
 
 (comment 
+  (set! *print-length* 5)
+
   (ffirst (d/q '[:find (count ?e)
                  :where 
                  [?e :frage/id]] @conn)))
