@@ -35,7 +35,9 @@
                  (println "Neue Antworten für Test" test-id))
 
            (GET "/user/:uid/kurse" [uid :<< as-int]
-                (response (domain/kurse-mit-gesamt-punkten uid))))
+                (response (domain/kurse-mit-gesamt-punkten
+                            (db/kurse-von-studierendem uid)
+                            (partial db/antworten-von-test uid)))))
   (route/not-found "Not Found"))
 
 
