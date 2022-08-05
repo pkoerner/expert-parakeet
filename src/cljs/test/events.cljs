@@ -1,7 +1,8 @@
 (ns test.events
   (:require
     [ajax.core :as ajax]
-    [re-frame.core :as rf]))
+    [re-frame.core :as rf]
+    [vars]))
 
 
 (rf/reg-event-fx
@@ -9,7 +10,7 @@
   (fn [{:keys [db]} [_ test-id]]
     {:db          (assoc db :loading true)
      :http-xhrio  {:method          :get
-                   :uri             (str "/api/test/" test-id)
+                   :uri             (str vars/base-url "/test/" test-id)
                    :timeout         8000
                    :response-format (ajax/transit-response-format)
                    :on-success      [:test/angekommen]}}))
@@ -41,7 +42,7 @@
     (let [test-id (get-in db [:test :test/id])
           antworten (:antworten db)]
       {:http-xhrio  {:method          :post
-                     :uri             (str "/api/test/" test-id "/antwort")
+                     :uri             (str vars/base-url "/test/" test-id "/antwort")
                      :params          antworten
                      :format          (ajax/transit-request-format)
                      :response-format (ajax/transit-response-format)
