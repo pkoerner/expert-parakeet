@@ -1,31 +1,21 @@
 # How to run
 
-## Windows and Mac:
-```shell
-docker-compose up -d
-clj -X core/start-server
-shadow-cljs watch app
-```
-
-## Linux
-```shell
-docker-compose -f docker-compose-linux.yml up -d
-clj -X core/start-server
-shadow-cljs watch app 
-```
-
-## Tests:
+Run Backend:
 
 ```shell
-clj -A:test-runner
+make backend
 ```
 
-
-# Troubleshooting:
-
-If `The required JS dependency "highlight.js/lib/core" is not available`.
-Try running:
+Run Frontend:
 
 ```shell
-npm install highlight.js@latest
+make frontend
 ```
+
+Tests:
+
+```shell
+make test
+```
+
+
