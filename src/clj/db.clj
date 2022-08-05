@@ -162,20 +162,23 @@
 
 (defn user-add-antwort
   [user-id frage-id antwort]
-
-  (let [id (generate-id :antwort/id)]
-    (d/transact conn
-                [{:db/id -1
-                  :antwort/id id
-                  :antwort/frage [:frage/id frage-id]
-                  :antwort/user [:user/id user-id]
-                  :antwort/antwort-text antwort}])))
+  (let [id (generate-id :antwort/id)
+        tx-result (d/transact conn
+                              [{:db/id -1
+                                :antwort/id id
+                                :antwort/frage [:frage/id frage-id]
+                                :antwort/user [:user/id user-id]
+                                :antwort/antwort-text antwort}])
+        db-after (:db-after tx-result)]
+    (d/pull db-after [:antwort/id {:antwort/frage [:frage/id]}] [:antwort/id id])))
 
 
 (defn user-add-antworten
   [user-id antworten]
   (mapv
-    #(db/user-add-antwort user-id (:antwort/frage %) (:antwort/antwort-text %))
+    #(let [frage-id (get-in % [:antwort/frage :frage/id])
+           text (:antwort/antwort-text %)]
+       (db/user-add-antwort user-id frage-id text))
     antworten))
 
 

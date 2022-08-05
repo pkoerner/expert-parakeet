@@ -42,7 +42,7 @@
     (let [test-id (get-in db [:test :test/id])
           antworten (:antworten db)]
       {:http-xhrio  {:method          :post
-                     :uri             (str vars/base-url "/test/" test-id "/antwort")
+                     :uri             (str vars/base-url "/test/" test-id "/antworten")
                      :params          antworten
                      :format          (ajax/transit-request-format)
                      :response-format (ajax/transit-response-format)

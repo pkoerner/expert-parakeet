@@ -1,6 +1,4 @@
-(ns domain
-  (:require
-    [db]))
+(ns domain)
 
 
 (defn test-max-punkte
