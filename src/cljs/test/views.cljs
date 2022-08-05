@@ -1,9 +1,9 @@
-(ns views
+(ns test.views
   (:require
     [re-com.core :refer [at v-box box gap button label input-textarea line title]]
     [re-frame.core :as rf]
     [reagent.core :as reagent]
-    [studierenden-uebersicht.views :refer [to-student-overview]]))
+    [test.events]))
 
 
 (defn TextQuestion
@@ -70,5 +70,4 @@
     :gap "15px"
     :children [[title :label "Test" :level :level1]
                [line]
-               [Questions]
-               [to-student-overview]]]])
+               [Questions]]]])
