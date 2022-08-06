@@ -62,7 +62,7 @@
     :antwort/user [:user/id 2]
     :antwort/antwort-text "Korrigierte Antwort"
     :antwort/punkte 5}
-   {:antwort/id 2
+   {:antwort/id 4
     :antwort/frage [:frage/id 2]
     :antwort/user [:user/id 3]
     :antwort/antwort-text "Bool Antwort"
