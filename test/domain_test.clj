@@ -154,3 +154,21 @@
                       :test/id 1, :test/name "Test 1", :frage/id 3, :frage/typ :frage.typ/text, :fach/fachtitel "Fach 2"}]
           result []]
       (t/is (= result (d/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id antworten-mit-korrekturen antworten))))))
+
+
+(t/deftest test-antworten-korrigiert
+  (t/testing "Eine Korrektur"
+    (let [korrigierte-antworten [{:antwort/id 1}]
+          antworten [{:antwort/id 0}, {:antwort/id 1}, {:antwort/id 2}]
+          result [{:antwort/id 1}]]
+      (t/is (= result (d/antworten-korrigiert korrigierte-antworten antworten)))))
+  (t/testing "Keine passende Korrektur"
+    (let [korrigierte-antworten [{:antwort/id 4}]
+          antworten [{:antwort/id 0}, {:antwort/id 1}, {:antwort/id 2}]
+          result []]
+      (t/is (= result (d/antworten-korrigiert korrigierte-antworten antworten)))))
+  (t/testing "Alles korrigiert"
+    (let [korrigierte-antworten [{:antwort/id 0}, {:antwort/id 1}, {:antwort/id 2}]
+          antworten [{:antwort/id 0}, {:antwort/id 1}, {:antwort/id 2}]
+          result [{:antwort/id 0}, {:antwort/id 1}, {:antwort/id 2}]]
+      (t/is (= result (d/antworten-korrigiert korrigierte-antworten antworten))))))

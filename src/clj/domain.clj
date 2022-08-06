@@ -94,3 +94,9 @@
                 :antwort/uhrzeit (.format (java.text.SimpleDateFormat. "HH:mm") date))
          :antwort/timestamp))
     antwort-map))
+
+
+(defn antworten-korrigiert
+  [antwort-map-ids-korrigiert antworten]
+  (let [antwort-ids-korrigiert (into #{} (map :antwort/id antwort-map-ids-korrigiert))]
+    (filter #(contains? antwort-ids-korrigiert (:antwort/id %)) antworten)))

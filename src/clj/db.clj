@@ -120,6 +120,17 @@
              @conn)))
 
 
+(defn antworten-von-korrektorin-korrigiert
+  [korrektorin-id]
+  (mapv first
+        (d/q '[:find (pull ?ant [:antwort/id])
+               :in $ ?korr
+               :where
+               [?k :korrektur/korrektor ?korr]
+               [?k :korrektur/antwort ?ant]]
+             @conn [:user/id korrektorin-id])))
+
+
 (defn test-by-id
   [id]
   (d/pull @conn
