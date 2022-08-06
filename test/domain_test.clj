@@ -145,4 +145,12 @@
                    :test/id 1, :test/name "Test 1", :frage/id 3, :frage/typ :frage.typ/text, :fach/fachtitel "Fach 1"},
                   {:antwort/id 3, :user/id 0, :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :kurs/semester "SoSe", :kurs/jahr 2001,
                    :test/id 1, :test/name "Test 1", :frage/id 3, :frage/typ :frage.typ/text, :fach/fachtitel "Fach 2"}]]
+      (t/is (= result (d/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id antworten-mit-korrekturen antworten)))))
+  (t/testing "Unkorrigierte Frage und eine jüngere korrigierte Frage"
+    (let [antworten-mit-korrekturen [{:antwort/id 1}]
+          antworten [{:antwort/id 0, :user/id 1, :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :kurs/semester "WiSe", :kurs/jahr 2000,
+                      :test/id 1, :test/name "Test 1", :frage/id 3, :frage/typ :frage.typ/text, :fach/fachtitel "Fach 1"},
+                     {:antwort/id 1, :user/id 1, :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-06"), :kurs/semester "WiSe", :kurs/jahr 2000,
+                      :test/id 1, :test/name "Test 1", :frage/id 3, :frage/typ :frage.typ/text, :fach/fachtitel "Fach 2"}]
+          result []]
       (t/is (= result (d/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id antworten-mit-korrekturen antworten))))))
