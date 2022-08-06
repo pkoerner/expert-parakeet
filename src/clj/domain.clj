@@ -56,8 +56,41 @@
 
 
 (defn sortierte-antworten-von-freitext-fragen
-  [fct-antworten-von-frage kurse-mit-inneren-tests]
-  (let [freitext-fragen (freitext-fragen kurse-mit-inneren-tests)
-        freitext-fragen-mit-inneren-antworten (map #(assoc % :frage/antworten (fct-antworten-von-frage (:frage/id %))) freitext-fragen)
+  [fct-antworten-von-frage freitext-fragen]
+  (let [freitext-fragen-mit-inneren-antworten (map #(assoc % :frage/antworten (fct-antworten-von-frage (:frage/id %))) freitext-fragen)
         antworten (flatten (map (partial unpack-map-in-map :frage/antworten) freitext-fragen-mit-inneren-antworten))]
     (sort-by :antwort/timestamp antworten)))
+
+
+(defn remove-antworten-with-identical-user-frage-test-id
+  [antworten]
+  (let [antworten-vec (vec antworten)]
+    (loop [a []
+           i 0
+           prev-ids #{}]
+      (if (= i (count antworten))
+        a
+        (let [current-ids {:user/id (:user/id (get antworten-vec i)), :frage/id (:frage/id (get antworten-vec i)),
+                           :test/id (:test/id (get antworten-vec i)), :kurs/id (:kurs/id (get antworten-vec i))}]
+          (if (contains? prev-ids current-ids)
+            (recur a (inc i) prev-ids)
+            (recur (conj a (get antworten-vec i)) (inc i) (conj prev-ids current-ids))))))))
+
+
+(defn antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id
+  [antworten-mit-korrekturen antworten]
+  (let [antworten-ohne-duplicates (reverse (remove-antworten-with-identical-user-frage-test-id (reverse antworten)))
+        korrigiert-ids (into #{} (map :antwort/id antworten-mit-korrekturen))
+        antworten-ohne-korrekturen (remove #(contains? korrigiert-ids (:antwort/id %)) antworten-ohne-duplicates)]
+    antworten-ohne-korrekturen))
+
+
+(defn timestamp-to-datum-and-uhrzeit
+  [antwort-map]
+  (map
+    #(let [date (:antwort/timestamp %)]
+       (dissoc
+         (assoc % :antwort/datum (.format (java.text.SimpleDateFormat. "dd.MM.yyyy") date)
+                :antwort/uhrzeit (.format (java.text.SimpleDateFormat. "HH:mm") date))
+         :antwort/timestamp))
+    antwort-map))
