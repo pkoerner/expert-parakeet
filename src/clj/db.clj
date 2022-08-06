@@ -80,6 +80,41 @@
              @conn [:user/id user-id] [:test/id test-id])))
 
 
+(defn fragen-fuer-user
+  [korrektorin-id]
+  (mapv first
+        (d/q '[:find (pull ?kurs [:kurs/semester
+                                  :kurs/jahr
+                                  {:kurs/fach [:fach/fachtitel]}
+                                  {:kurs/tests [:test/id :test/name
+                                                {:test/fragen [:frage/id :frage/typ]}]}])
+               :in $ ?korr
+               :where
+               [?korr :user/kurse ?kurs]]
+             @conn [:user/id korrektorin-id])))
+
+
+(defn antworten-von-frage
+  [frage-id]
+  (mapv first
+        (d/q '[:find (pull ?antwort [:antwort/id
+                                     {:antwort/user [:user/id]}])
+               :in $ ?frage
+               :where
+               [?antwort :antwort/frage ?frage]]
+             @conn [:frage/id frage-id])))
+
+
+(defn alle-antworten-mit-korrekturen
+  []
+  (mapv first
+        (d/q '[:find (pull ?antwort [:antwort/id])
+               :in $
+               :where
+               [?korrektur :korrektur/antwort ?antwort]]
+             @conn)))
+
+
 (defn test-by-id
   [id]
   (d/pull @conn
