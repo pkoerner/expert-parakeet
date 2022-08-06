@@ -24,6 +24,15 @@
      :antwort/punkte]))
 
 
+(def korrektur-schema
+  (spectomic/datomic-schema
+    [[:korrektur/id {:db/unique :db.unique/identity
+                     :db/index true}]
+     :korrektur/korrektor
+     :korrektur/antwort
+     :korrektur/korrektur-text]))
+
+
 (def test-schema
   (spectomic/datomic-schema
     [[:test/id {:db/unique :db.unique/identity
@@ -58,4 +67,4 @@
 
 
 (def schema
-  (concat frage-schema antwort-schema test-schema user-schema fach-schema kurs-schema))
+  (concat frage-schema antwort-schema korrektur-schema test-schema user-schema fach-schema kurs-schema))
