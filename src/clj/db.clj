@@ -96,13 +96,18 @@
 
 (defn antworten-von-frage
   [frage-id]
-  (mapv first
-        (d/q '[:find (pull ?antwort [:antwort/id
-                                     {:antwort/user [:user/id]}])
-               :in $ ?frage
-               :where
-               [?antwort :antwort/frage ?frage]]
-             @conn [:frage/id frage-id])))
+  (map
+    #(zipmap [:antwort/id :user/id :antwort/timestamp] %)
+    (d/q '[:find ?antwort-id ?user-id ?timestamp
+           :in $ ?frage-id
+           :where
+           [?frage :frage/id ?frage-id]
+           [?antwort :antwort/frage ?frage]
+           [?antwort :antwort/id ?antwort-id ?tx]
+           [?tx :db/txInstant ?timestamp]
+           [?antwort :antwort/user ?user]
+           [?user :user/id ?user-id]]
+         @conn frage-id)))
 
 
 (defn alle-antworten-mit-korrekturen
