@@ -158,17 +158,19 @@
 
 (t/deftest test-antworten-korrigiert
   (t/testing "Eine Korrektur"
-    (let [korrigierte-antworten [{:antwort/id 1}]
+    (let [korrigierte-antworten [{:korrektur/id 1, :korrektur/antwort {:antwort/id 1}}]
           antworten [{:antwort/id 0}, {:antwort/id 1}, {:antwort/id 2}]
-          result [{:antwort/id 1}]]
+          result [{:antwort/id 1, :korrektur/id 1}]]
       (t/is (= result (d/antworten-korrigiert korrigierte-antworten antworten)))))
   (t/testing "Keine passende Korrektur"
-    (let [korrigierte-antworten [{:antwort/id 4}]
+    (let [korrigierte-antworten [{:korrektur/id 1, :korrektur/antwort {:antwort/id 4}}]
           antworten [{:antwort/id 0}, {:antwort/id 1}, {:antwort/id 2}]
           result []]
       (t/is (= result (d/antworten-korrigiert korrigierte-antworten antworten)))))
   (t/testing "Alles korrigiert"
-    (let [korrigierte-antworten [{:antwort/id 0}, {:antwort/id 1}, {:antwort/id 2}]
+    (let [korrigierte-antworten [{:korrektur/id 4, :korrektur/antwort {:antwort/id 0}}
+                                 {:korrektur/id 5, :korrektur/antwort {:antwort/id 1}}
+                                 {:korrektur/id 6, :korrektur/antwort {:antwort/id 2}}]
           antworten [{:antwort/id 0}, {:antwort/id 1}, {:antwort/id 2}]
-          result [{:antwort/id 0}, {:antwort/id 1}, {:antwort/id 2}]]
+          result [{:korrektur/id 4, :antwort/id 0}, {:korrektur/id 5, :antwort/id 1}, {:korrektur/id 6, :antwort/id 2}]]
       (t/is (= result (d/antworten-korrigiert korrigierte-antworten antworten))))))

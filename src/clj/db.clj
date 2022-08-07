@@ -120,14 +120,14 @@
              @conn)))
 
 
-(defn antworten-von-korrektorin-korrigiert
+(defn korrekturen-von-korrektorin-korrigiert
   [korrektorin-id]
   (mapv first
-        (d/q '[:find (pull ?ant [:antwort/id])
+        (d/q '[:find (pull ?k [:korrektur/id
+                               {:korrektur/antwort [:antwort/id]}])
                :in $ ?korr
                :where
-               [?k :korrektur/korrektor ?korr]
-               [?k :korrektur/antwort ?ant]]
+               [?k :korrektur/korrektor ?korr]]
              @conn [:user/id korrektorin-id])))
 
 

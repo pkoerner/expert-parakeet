@@ -96,7 +96,14 @@
     antwort-map))
 
 
+(defn get-antwort-with-given-id
+  [id antworten]
+  (first (filter #(= id (:antwort/id %)) antworten)))
+
+
 (defn antworten-korrigiert
-  [antwort-map-ids-korrigiert antworten]
-  (let [antwort-ids-korrigiert (into #{} (map :antwort/id antwort-map-ids-korrigiert))]
-    (filter #(contains? antwort-ids-korrigiert (:antwort/id %)) antworten)))
+  [korrektur-map antworten]
+  (let [korrekturen-with-antwort-id (flatten (map #(unpack-map-in-map :korrektur/antwort %) korrektur-map))
+        antworten-mit-korrekturen (map #(merge % (get-antwort-with-given-id (:antwort/id %) antworten)) korrekturen-with-antwort-id)
+        antwort-ids-for-this-korrektor (into #{} (map :antwort/id antworten))]
+    (filter #(contains? antwort-ids-for-this-korrektor (:antwort/id %)) antworten-mit-korrekturen)))
