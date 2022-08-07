@@ -67,7 +67,26 @@
     :antwort/user [:user/id 3]
     :antwort/antwort-text "Bool Antwort"
     :antwort/punkte 1}
+   {:antwort/id 5
+    :antwort/frage [:frage/id 3]
+    :antwort/user [:user/id 0]
+    :antwort/antwort-text "Antwort"
+    :antwort/punkte 0}
+   {:antwort/id 6
+    :antwort/frage [:frage/id 3]
+    :antwort/user [:user/id 2]
+    :antwort/antwort-text "Antwort"
+    :antwort/punkte 0}
+   {:antwort/id 7
+    :antwort/frage [:frage/id 3]
+    :antwort/user [:user/id 3]
+    :antwort/antwort-text "Korrigierte Antwort"
+    :antwort/punkte 0}
    {:korrektur/id 0
     :korrektur/antwort [:antwort/id 3]
+    :korrektur/korrektor [:user/id 1]
+    :korrektur/korrektur-text "Superb!"}
+   {:korrektur/id 1
+    :korrektur/antwort [:antwort/id 7]
     :korrektur/korrektor [:user/id 1]
     :korrektur/korrektur-text "Superb!"}])
