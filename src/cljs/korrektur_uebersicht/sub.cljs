@@ -4,8 +4,13 @@
 
 
 (rf/reg-sub
-  :antworten/erhalten
-  (fn [db _] (:antworten db)))
+  :antworten-unkorrigiert/erhalten
+  (fn [db _] (:antworten-unkorrigiert db)))
+
+
+(rf/reg-sub
+  :antworten-korrigiert/erhalten
+  (fn [db _] (:antworten-korrigiert db)))
 
 
 (rf/reg-sub
