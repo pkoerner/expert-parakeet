@@ -1,9 +1,52 @@
 (ns domain-test
+  {:clj-kondo/config '{:linters {:unresolved-symbol
+                                 {:exclude (test-test-max-punkte)}}}}
   (:require
     [clojure.test :as t]
+    [clojure.test.check.clojure-test :refer [defspec]]
+    [clojure.test.check.generators :as gen]
+    [clojure.test.check.properties :as prop]
     [domain :as d])
   (:import
     java.text.SimpleDateFormat))
+
+
+(defn frage-from-punkte
+  [punkte]
+  (assoc {} :test/fragen (mapv #(assoc {} :frage/punkte %) punkte)))
+
+
+(defspec test-test-max-punkte 10
+  (prop/for-all
+    [punkte (gen/list gen/nat)]
+    (let [test (frage-from-punkte punkte)
+          expected-result (apply + punkte)]
+      (= expected-result (d/test-max-punkte test)))))
+
+
+(t/deftest test-test-erreichte-punkte
+  (t/testing "Keine zwei Antworten für die gleiche Frage"
+    (let [input [{:antwort/punkte 10, :antwort/frage {:frage/id 2, :frage/typ :frage.typ/bool}}
+                 {:antwort/punkte 4, :antwort/frage {:frage/id 3, :frage/typ :frage.typ/text}}
+                 {:antwort/punkte 1, :antwort/frage {:frage/id 5, :frage/typ :frage.typ/bool}}]]
+      (t/is (= 15 (d/test-erreichte-punkte input)))))
+  (t/testing "Zwei Antworten für die gleiche Frage"
+    (let [input [{:antwort/punkte 10, :antwort/frage {:frage/id 2, :frage/typ :frage.typ/bool}}
+                 {:antwort/punkte 4, :antwort/frage {:frage/id 3, :frage/typ :frage.typ/text}}
+                 {:antwort/punkte 1, :antwort/frage {:frage/id 2, :frage/typ :frage.typ/bool}}
+                 {:antwort/punkte 5, :antwort/frage {:frage/id 3, :frage/typ :frage.typ/text}}]]
+      (t/is (= 15 (d/test-erreichte-punkte input)))))
+  (t/testing "Keine Antworten"
+    (let [input []]
+      (t/is (= 0 (d/test-erreichte-punkte input))))))
+
+
+(t/deftest test-test-punkte
+  (t/testing "Zwei Fragen in Test"
+    (let [test {:test/id 1, :test/name "Test 1", :test/fragen [{:frage/id 2, :frage/punkte 10},{:frage/id 3, :frage/punkte 2}]}
+          antwort-fct (fn [& _args] [{:antwort/punkte 10, :antwort/frage {:frage/id 2, :frage/typ :frage.typ/bool}}])]
+      (t/is (= (d/test-punkte antwort-fct test)
+               {:test/id 1 :test/name "Test 1" :test/max-punkte 12 :test/erreichte-punkte 10})))))
 
 
 (t/deftest test-unpack-map-in-map
