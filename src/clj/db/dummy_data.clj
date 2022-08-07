@@ -64,7 +64,7 @@
     :antwort/punkte 5}
    {:antwort/id 4
     :antwort/frage [:frage/id 2]
-    :antwort/user [:user/id 3]
+    :antwort/user [:user/id 0]
     :antwort/antwort-text "Bool Antwort"
     :antwort/punkte 1}
    {:antwort/id 5
@@ -81,6 +81,11 @@
     :antwort/frage [:frage/id 3]
     :antwort/user [:user/id 3]
     :antwort/antwort-text "Korrigierte Antwort"
+    :antwort/punkte 0}
+   {:antwort/id 8
+    :antwort/frage [:frage/id 2]
+    :antwort/user [:user/id 0]
+    :antwort/antwort-text "Bool Antwort"
     :antwort/punkte 0}
    {:korrektur/id 0
     :korrektur/antwort [:antwort/id 3]
