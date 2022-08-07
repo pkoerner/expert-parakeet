@@ -6,10 +6,6 @@
     [re-frame.core :as rf]))
 
 
-;; For now, we only look at user (korrektor) with id 1
-(def user-id 1)
-
-
 (defn headline
   []
   (let [user @(rf/subscribe [:korrektor])]
@@ -20,6 +16,18 @@
         :value "Logout"
         ;; :on-click #(rf/dispatch [:logout])
         }]]]))
+
+
+(defn button-to-korrigiert
+  [unkorrigiert]
+  [:div
+   [:p
+    [:input
+     {:type  "button"
+      :value (if unkorrigiert "Zu bisher korrigierten Antworten" "Zu unkorrigierten Antworten")
+      :on-click #(rf/dispatch (if unkorrigiert
+                                [:router/push-state {:name :router/bisherige-korekturen}]
+                                [:router/push-state {:name :router/korrektur-overview}]))}]]])
 
 
 (defn show-antwort
@@ -34,8 +42,10 @@
 
 
 (defn show-antworten
-  []
-  (let [antworten @(rf/subscribe [:antworten/erhalten])]
+  [unkorrigiert]
+  (let [antworten (if unkorrigiert
+                    @(rf/subscribe [:antworten-unkorrigiert/erhalten])
+                    @(rf/subscribe [:antworten-korrigiert/erhalten]))]
     [:div
      (map show-antwort antworten)]))
 
@@ -44,5 +54,15 @@
   []
   [:div
    [:h1 "Korrektur Übersicht"]
-   [headline user-id]
-   [show-antworten]])
+   [headline]
+   [button-to-korrigiert true]
+   [show-antworten true]])
+
+
+(defn previous-corrections
+  []
+  [:div
+   [:h1 "Bisherige Korrekturen"]
+   [headline]
+   [button-to-korrigiert false]
+   [show-antworten false]])

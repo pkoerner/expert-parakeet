@@ -60,8 +60,15 @@
      :view      korr/overview
      :link-text "Korrektur-Übersicht"
      :controllers
-     [{:start #(re-frame/dispatch [:korrektur-uebersicht/hole-daten])
-       :stop  #(re-frame/dispatch [:korrektur-uebersicht/entfernen])}]}]
+     [{:start #(re-frame/dispatch [:korrektur-uebersicht/hole-unkorrigierte-antworten])
+       :stop  #(re-frame/dispatch [:korrektur-uebersicht/entferne-unkorrigierte-antworten])}]}]
+   ["bisherige-korrekturen"
+    {:name      ::bisherige-korekturen
+     :view      korr/previous-corrections
+     :link-text "Korrektur-Übersicht"
+     :controllers
+     [{:start #(re-frame/dispatch [:korrektur-uebersicht/hole-korrigierte-antworten])
+       :stop  #(re-frame/dispatch [:korrektur-uebersicht/entferne-korrigierte-antworten])}]}]
    ["test/:id"
     {:name      ::test
      :view      test/Root
