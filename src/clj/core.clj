@@ -52,7 +52,7 @@
                   (->> (db/fragen-fuer-user uid)
                        (domain/freitext-fragen)
                        (domain/sortierte-antworten-von-freitext-fragen db/antworten-von-frage)
-                       (domain/antworten-korrigiert (db/antworten-von-korrektorin-korrigiert uid))
+                       (domain/antworten-korrigiert (db/korrekturen-von-korrektorin-korrigiert uid))
                        (domain/timestamp-to-datum-and-uhrzeit)))))
   (route/not-found "Not Found"))
 
