@@ -195,8 +195,7 @@
         (d/q '[:find (pull ?antwort [:antwort/id
                                      :antwort/punkte
                                      :antwort/antwort-text
-                                     {:antwort/frage [:frage/frage-text :frage/punkte :frage/loesung]}
-                                     {:antwort/user [:user/id]}])
+                                     {:antwort/frage [:frage/frage-text :frage/punkte :frage/loesungskriterien]}])
                :in $ ?antwort
                :where
                [?antwort :antwort/frage ?frage]

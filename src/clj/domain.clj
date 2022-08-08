@@ -115,13 +115,12 @@
         korrekturen-sorted (reverse (sort-by :korrektur/timestamp korrekturen))]
     (if (first korrekturen-sorted)
       (merge antwort (first korrekturen-sorted))
-      (assoc antwort :korrektur/id nil))))
+      antwort)))
 
 
 (defn antworten-fuer-korrektur-ansicht
   [[antwort-map]]
   (let [antwort-unpacked-frage-nested (merge antwort-map (:antwort/frage antwort-map))
-        antwort-unpacked-nested (merge antwort-unpacked-frage-nested (:antwort/user antwort-unpacked-frage-nested))
-        antwort-unpacked (select-keys antwort-unpacked-nested [:user/id :frage/frage-text :frage/punkte :frage/loesung
-                                                               :antwort/antwort-text :antwort/punkte :antwort/id])]
+        antwort-unpacked (select-keys antwort-unpacked-frage-nested [:user/id :frage/frage-text :frage/punkte :frage/loesung
+                                                                     :antwort/antwort-text :antwort/punkte :antwort/id])]
     antwort-unpacked))

@@ -17,7 +17,6 @@
         }]]]))
 
 
-<<<<<<< HEAD
 (defn korrektur-form
   [{ant-punkte :antwort/punkte frag-punkte :frage/punkte :as m}]
   [:div
@@ -52,8 +51,8 @@
     [:div
      [:h2 (str (:frage/frage-text korrektur) " - " (:frage/punkte korrektur) " Punkte")]
      [:p (str "Lösungsvorschlag: ")]
-     [:p (:frage/loesung korrektur)]
-     [:p (str "Antwort von " (:user/id korrektur) ":")]
+     [:p (:frage/loesungskriterien korrektur)]
+     [:p (str "Antwort:")]
      [:p (:antwort/antwort-text korrektur)]
      [korrektur-form korrektur]
      [korrektur-erfolgreich (:gesendet korrektur)]]))

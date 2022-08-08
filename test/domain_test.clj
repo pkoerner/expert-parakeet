@@ -222,10 +222,9 @@
 (t/deftest test-antworten-fuer-korrektur-ansicht
   (t/testing "Eine Antwort aufbereiten"
     (let [input [{:antwort/id 0, :antwort/antwort-text "Antwort", :antwort/punkte 5,
-                  :antwort/frage {:frage/frage-text "Fragetext", :frage/punkte 6, :frage/loesungskriterien "Loesung"}
-                  :antwort/user {:user/id 1}}]
+                  :antwort/frage {:frage/frage-text "Fragetext", :frage/punkte 6, :frage/loesungskriterien "Loesung"}}]
           output {:antwort/id 0, :antwort/antwort-text "Antwort", :antwort/punkte 5, :frage/frage-text "Fragetext",
-                  :frage/punkte 6, :frage/loesungskriterien "Loesung", :user/id 1}]
+                  :frage/punkte 6, :frage/loesungskriterien "Loesung"}]
       (t/is output (d/antworten-fuer-korrektur-ansicht input)))))
 
 
