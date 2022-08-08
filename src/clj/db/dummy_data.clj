@@ -3,18 +3,30 @@
 
 (def dummy-data
   [{:frage/id 1
-    :frage/frage-text "Wie geht es dir heute?"
     :frage/typ :frage.typ/text
-    :frage/loesung "Lösung"
+    :frage/frage-text "Wie geht es dir heute?"
+    :frage/loesungskriterien "Student schreibt Worte (7P)"
     :frage/punkte 7}
    {:frage/id 3
+    :frage/typ :frage.typ/text
     :frage/frage-text "Fühlen sie sich prüfungsbereit?"
-    :frage/typ :frage.typ/bool
-    :frage/loesung "Lösung"
+    :frage/loesungskriterien "Lösungskriterien"
+    :frage/punkte 1}
+   {:frage/id 4
+    :frage/typ :frage.typ/single-choice
+    :frage/frage-text "Was ist die Hauptstadt von Italien?"
+    :frage/choices #{"Wien" "Venedig" "Rom" "Pizza"}
+    :frage/single-choice-loesung "Rom"
+    :frage/punkte 1}
+   {:frage/id 5
+    :frage/typ :frage.typ/multiple-choice
+    :frage/frage-text "Was ist gut?"
+    :frage/choices #{"Lasagne" "Eis" "Schnecken" "Pasta"}
+    :frage/multiple-choice-loesung #{"Lasagne" "Eis" "Pasta"}
     :frage/punkte 1}
    {:test/id 1
     :test/name "Test 1"
-    :test/fragen [[:frage/id 1] [:frage/id 3]]}
+    :test/fragen [[:frage/id 1] [:frage/id 3] [:frage/id 4] [:frage/id 5]]}
    {:test/id 2
     :test/name "Test 2"
     :test/fragen [[:frage/id 1]]}

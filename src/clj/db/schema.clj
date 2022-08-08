@@ -10,8 +10,14 @@
                  :db/index true}]
      :frage/typ ; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/on-prem/best-practices.html#idents-for-enumerated-types)
      :frage/frage-text
-     :frage/loesung
-     :frage/punkte]))
+     :frage/punkte
+     :frage/loesungskriterien
+     :frage/choices
+     :frage/single-choice-loesung
+     :frage/multiple-choice-loesung]))
+
+
+;; manche Felder bleiben leer (abhaengig vom Fragentyp)
 
 
 (def antwort-schema

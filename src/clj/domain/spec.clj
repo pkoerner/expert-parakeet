@@ -4,19 +4,51 @@
 
 
 (s/def :frage/id pos-int?)
-(s/def :frage/typ #{:frage.typ/text})
+(s/def :frage/typ #{:frage.typ/text :frage.typ/single-choice :frage.typ/multiple-choice})
 (s/def :frage/frage-text string?)
-(s/def :frage/loesung string?)
 (s/def :frage/punkte int?)
 
 
+(s/def :frage/loesungskriterien string?)
+
+
+(s/def :frage/text
+  (s/and
+    (s/keys :req [:frage/id :frage/typ :frage/frage-text :frage/punkte
+                  :frage/loesungskriterien])
+    #(= (:frage/typ %) :frage.typ/text)))
+
+
+(s/def :frage/choices (s/coll-of string?))
+
+(s/def :frage/single-choice-loesung string?)
+
+
+(s/def :frage/single-choice
+  (s/and
+    (s/keys :req [:frage/id :frage/typ :frage/frage-text :frage/punkte
+                  :frage/choices :frage/single-choice-loesung])
+    #(= (:frage/typ %) :frage.typ/single-choice)))
+
+
+(s/def :frage/multiple-choice-loesung (s/coll-of string?))
+
+
+(s/def :frage/multiple-choice
+  (s/and
+    (s/keys :req [:frage/id :frage/typ :frage/frage-text :frage/punkte
+                  :frage/choices :frage/multiple-choice-loesung])
+    #(= (:frage/typ %) :frage.typ/multiple-choice)))
+
+
 (s/def ::frage
-  (s/keys :req [:frage/id :frage/typ :frage/frage-text
-                :frage/loesung :frage/punkte]))
+  (s/or :text :frage/text
+        :single-choice :frage/single-choice
+        :multiple-choice :frage/multiple-choice))
 
 
 (s/explain ::frage {:frage/id 2 :frage/typ :frage.typ/text
-                    :frage/frage-text "foo" :frage/loesung "bar" :frage/punkte 3})
+                    :frage/frage-text "foo" :frage/loesungskriterien "bar" :frage/punkte 3})
 
 
 (s/def :user/id pos-int?)
