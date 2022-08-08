@@ -3,6 +3,7 @@
     [db]))
 
 
+<<<<<<< HEAD
 (defn test-max-punkte
   [test]
   (apply + (map :frage/punkte (:test/fragen test))))
