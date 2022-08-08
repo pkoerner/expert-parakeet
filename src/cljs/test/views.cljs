@@ -1,6 +1,6 @@
 (ns test.views
   (:require
-    [re-com.core :refer [at v-box box gap button label input-textarea line title radio-button checkbox]]
+    [re-com.core :refer [at v-box box gap button label input-textarea line title radio-button checkbox throbber]]
     [re-frame.core :as rf]
     [reagent.core :as reagent]
     [test.events]))
@@ -122,6 +122,15 @@
    [v-box
     :size "auto"
     :gap "15px"
-    :children [[title :label "Test" :level :level1]
-               [line]
-               [Questions]]]])
+    :children
+    [[title :label "Test" :level :level1]
+     [line]
+     (if @(rf/subscribe [:laedt])
+       [throbber]
+       [Questions])]]])
+
+
+
+
+
+

@@ -8,7 +8,7 @@
 (rf/reg-event-fx
   :test/laden
   (fn [{:keys [db]} [_ test-id]]
-    {:db          (assoc db :loading true)
+    {:db          (assoc db :laedt true)
      :http-xhrio  {:method          :get
                    :uri             (str vars/base-url "/test/" test-id)
                    :timeout         8000
@@ -20,7 +20,7 @@
   :test/angekommen
   (fn [db [_ test]]
     (-> db
-        (assoc :loading false)
+        (assoc :laedt false)
         (assoc :test test))))
 
 
