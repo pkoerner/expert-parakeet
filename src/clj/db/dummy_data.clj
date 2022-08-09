@@ -34,11 +34,6 @@
     :frage/typ :frage.typ/text
     :frage/loesungskriterien "Lösung"
     :frage/punkte 1}
-   {:frage/id 3
-    :frage/frage-text "Nächste Frage gefällig?"
-    :frage/typ :frage.typ/text
-    :frage/loesung "Lösung"
-    :frage/punkte 1}
    {:test/id 1
     :test/name "Test 1"
     :test/fragen [[:frage/id 1] [:frage/id 3] [:frage/id 4] [:frage/id 5]]}
