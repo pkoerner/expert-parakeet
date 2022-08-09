@@ -104,11 +104,9 @@
     :antwort/user [:user/id 0]
     :antwort/antwort-text "Bool Antwort"
     :antwort/punkte 0}
-   {:korrektur/id 0
-    :korrektur/antwort [:antwort/id 3]
+   {:korrektur/antwort [:antwort/id 3]
     :korrektur/korrektor [:user/id 1]
     :korrektur/korrektur-text "Superb!"}
-   {:korrektur/id 1
-    :korrektur/antwort [:antwort/id 7]
+   {:korrektur/antwort [:antwort/id 7]
     :korrektur/korrektor [:user/id 1]
     :korrektur/korrektur-text "Superb!"}])

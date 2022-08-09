@@ -32,9 +32,7 @@
 
 (def korrektur-schema
   (spectomic/datomic-schema
-    [[:korrektur/id {:db/unique :db.unique/identity
-                     :db/index true}]
-     :korrektur/korrektor
+    [:korrektur/korrektor
      :korrektur/antwort
      :korrektur/korrektur-text]))
 

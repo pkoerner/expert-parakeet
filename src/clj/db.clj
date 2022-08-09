@@ -123,8 +123,7 @@
 (defn korrekturen-von-korrektorin-korrigiert
   [korrektorin-id]
   (mapv first
-        (d/q '[:find (pull ?k [:korrektur/id
-                               {:korrektur/antwort [:antwort/id]}])
+        (d/q '[:find (pull ?k [{:korrektur/antwort [:antwort/id]}])
                :in $ ?korr
                :where
                [?k :korrektur/korrektor ?korr]]
