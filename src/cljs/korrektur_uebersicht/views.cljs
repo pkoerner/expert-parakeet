@@ -32,11 +32,11 @@
 
 (defn show-antwort
   [{_antwort-id :antwort/id test-name :test/name datum :antwort/datum uhrzeit :antwort/uhrzeit fachtitel :fach/fachtitel
-    semester :kurs/semester jahr :kurs/jahr studi :user/id}]
+    semester :kurs/semester jahr :kurs/jahr}]
   [:p
    [:input
     {:type  "button"
-     :value (str test-name ", beantwortet von " studi " um " uhrzeit ", " datum " (" fachtitel ", " semester ", " jahr ")")
+     :value (str test-name ", beantwortet um " uhrzeit ", " datum " (" fachtitel ", " semester ", " jahr ")")
      ;; :on-click #(rf/dispatch [])
      }]])
 

@@ -32,7 +32,7 @@
    {:frage/id 3
     :frage/frage-text "Nächste Frage gefällig?"
     :frage/typ :frage.typ/text
-    :frage/loesung "Lösung"
+    :frage/loesungskriterien "Lösung"
     :frage/punkte 1}
    {:test/id 1
     :test/name "Test 1"

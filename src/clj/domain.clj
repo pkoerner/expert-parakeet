@@ -80,8 +80,9 @@
 (defn antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id
   [antworten-mit-korrekturen antworten]
   (let [antworten-ohne-duplicates (reverse (remove-antworten-with-identical-user-frage-test-id (reverse antworten)))
+        antworten-ohne-user-id (map #(dissoc % :user/id) antworten-ohne-duplicates)
         korrigiert-ids (into #{} (map :antwort/id antworten-mit-korrekturen))
-        antworten-ohne-korrekturen (remove #(contains? korrigiert-ids (:antwort/id %)) antworten-ohne-duplicates)]
+        antworten-ohne-korrekturen (remove #(contains? korrigiert-ids (:antwort/id %)) antworten-ohne-user-id)]
     antworten-ohne-korrekturen))
 
 
@@ -105,5 +106,6 @@
   [korrektur-map antworten]
   (let [korrekturen-with-antwort-id (flatten (map #(unpack-map-in-map :korrektur/antwort %) korrektur-map))
         antworten-mit-korrekturen (map #(merge % (get-antwort-with-given-id (:antwort/id %) antworten)) korrekturen-with-antwort-id)
+        antworten-ohne-studi (map #(dissoc % :user/id) antworten-mit-korrekturen)
         antwort-ids-for-this-korrektor (into #{} (map :antwort/id antworten))]
-    (filter #(contains? antwort-ids-for-this-korrektor (:antwort/id %)) antworten-mit-korrekturen)))
+    (filter #(contains? antwort-ids-for-this-korrektor (:antwort/id %)) antworten-ohne-studi)))
