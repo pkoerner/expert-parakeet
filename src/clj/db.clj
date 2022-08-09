@@ -69,7 +69,7 @@
              @conn [:user/id user-id])))
 
 
-(defn antworten-von-test
+(defn bewertete-antworten-von-test
   [user-id test-id]
   (mapv first
         (d/q '[:find (pull ?a [:antwort/punkte
@@ -78,7 +78,8 @@
                :where
                [?a :antwort/user ?u]
                [?a :antwort/frage ?f]
-               [?t :test/fragen ?f]]
+               [?t :test/fragen ?f]
+               [?a :antwort/punkte]]
              @conn [:user/id user-id] [:test/id test-id])))
 
 

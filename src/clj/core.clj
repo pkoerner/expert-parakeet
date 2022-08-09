@@ -37,7 +37,7 @@
            (GET "/user/:user-id/kurse" [user-id]
                 (response (domain/kurse-mit-gesamt-punkten
                             (db/kurse-von-studierendem user-id)
-                            (partial db/antworten-von-test user-id))))
+                            (partial db/bewertete-antworten-von-test user-id))))
 
            (GET "/korrektur/:user-id" [user-id]
                 (response
@@ -53,6 +53,7 @@
                        (domain/sortierte-antworten-von-freitext-fragen db/antworten-von-frage)
                        (domain/antworten-korrigiert (db/korrekturen-von-korrektorin-korrigiert user-id))
                        (domain/timestamp-to-datum-and-uhrzeit)))))
+
   (route/not-found "Not Found"))
 
 
