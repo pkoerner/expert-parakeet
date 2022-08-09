@@ -83,7 +83,7 @@
 (defn test-by-id
   [id]
   (d/pull @conn
-          [:test/id {:test/fragen [:frage/id :frage/frage-text :frage/punkte :frage/typ]}]
+          [:test/id {:test/fragen [:frage/id :frage/frage-text :frage/punkte :frage/typ :frage/choices]}]
           [:test/id id]))
 
 
