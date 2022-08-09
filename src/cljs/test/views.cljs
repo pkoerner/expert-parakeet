@@ -40,7 +40,7 @@
      [[title :src (at)
        :label (str frage-text " - " punkte " Punkte")
        :level :level2]
-      (doall (for [[choice-id choice-text] (map vector (range (count choices)) choices)]
+      (doall (for [[choice-id choice-text] (map vector (range (count choices)) (shuffle choices))]
                ^{:key choice-id}
                [radio-button :src (at)
                 :label choice-text
@@ -75,7 +75,7 @@
                              (swap! antwort conj choice-text)
                              (swap! antwort disj choice-text))
                            (rf/dispatch [:frage/beantworten id @antwort]))]))
-         choices)]]]))
+         (shuffle choices))]]]))
 
 
 (defn Questions
