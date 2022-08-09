@@ -107,3 +107,21 @@
         antworten-ohne-studi (map #(dissoc % :user/id) antworten-mit-korrekturen)
         antwort-ids-for-this-korrektor (into #{} (map :antwort/id antworten))]
     (filter #(contains? antwort-ids-for-this-korrektor (:antwort/id %)) antworten-ohne-studi)))
+
+
+(defn korrekturen-into-antwort
+  [korrekturen-von-antwort antwort]
+  (let [korrekturen (korrekturen-von-antwort (:antwort/id antwort))
+        korrekturen-sorted (reverse (sort-by :korrektur/timestamp korrekturen))]
+    (if (first korrekturen-sorted)
+      (merge antwort (first korrekturen-sorted))
+      (assoc antwort :korrektur/id nil))))
+
+
+(defn antworten-fuer-korrektur-ansicht
+  [[antwort-map]]
+  (let [antwort-unpacked-frage-nested (merge antwort-map (:antwort/frage antwort-map))
+        antwort-unpacked-nested (merge antwort-unpacked-frage-nested (:antwort/user antwort-unpacked-frage-nested))
+        antwort-unpacked (select-keys antwort-unpacked-nested [:user/id :frage/frage-text :frage/punkte :frage/loesung
+                                                               :antwort/antwort-text :antwort/punkte :antwort/id])]
+    antwort-unpacked))

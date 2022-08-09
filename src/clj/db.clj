@@ -189,6 +189,36 @@
        @db/conn))
 
 
+(defn antworten-fuer-korrektur
+  [antwort-id]
+  (mapv first
+        (d/q '[:find (pull ?antwort [:antwort/id
+                                     :antwort/punkte
+                                     :antwort/antwort-text
+                                     {:antwort/frage [:frage/frage-text :frage/punkte :frage/loesung]}
+                                     {:antwort/user [:user/id]}])
+               :in $ ?antwort
+               :where
+               [?antwort :antwort/frage ?frage]
+               [?frage :frage/typ ?typ]
+               [(= ?typ :frage.typ/text)]]
+             @conn [:antwort/id antwort-id])))
+
+
+(defn korrekturen-von-antwort
+  [antwort-id]
+  (map
+    #(zipmap [:korrektur/korrektur-text :korrektur/timestamp] %)
+    (d/q '[:find ?korr-text ?timestamp
+           :in $ ?antwort-id
+           :where
+           [?antwort :antwort/id ?antwort-id]
+           [?korrektur :korrektur/antwort ?antwort ?tx]
+           [?tx :db/txInstant ?timestamp]
+           [?korrektur :korrektur/korrektur-text ?korr-text]]
+         @conn antwort-id)))
+
+
 (comment 
   (set! *print-length* 5)
 

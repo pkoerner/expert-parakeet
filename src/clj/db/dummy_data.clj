@@ -29,7 +29,7 @@
     :frage/choices #{"Lasagne" "Eis" "Schnecken" "Pasta"}
     :frage/multiple-choice-loesung #{"Lasagne" "Eis" "Pasta"}
     :frage/punkte 1}
-   {:frage/id "3"
+   {:frage/id "6"
     :frage/frage-text "Nächste Frage gefällig?"
     :frage/typ :frage.typ/text
     :frage/loesungskriterien "Lösung"
@@ -42,7 +42,7 @@
     :test/fragen [[:frage/id "1"] [:frage/id "3"] [:frage/id "4"] [:frage/id "5"]]}
    {:test/id "2"
     :test/name "Test 2"
-    :test/fragen [[:frage/id "1"]]}])
+    :test/fragen [[:frage/id "1"] [:frage/id "6"]]}])
 
 
 (def faecher

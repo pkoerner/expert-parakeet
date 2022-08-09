@@ -54,7 +54,14 @@
                        (domain/freitext-fragen)
                        (domain/sortierte-antworten-von-freitext-fragen db/antworten-von-frage)
                        (domain/antworten-korrigiert (db/korrekturen-von-korrektorin-korrigiert user-id))
-                       (domain/timestamp-to-datum-and-uhrzeit)))))
+                       (domain/timestamp-to-datum-and-uhrzeit))))
+           (GET "/antwort-fuer-korrektur/:aid" [aid]
+             (response
+               (->> (db/antworten-fuer-korrektur aid)
+                    (domain/antworten-fuer-korrektur-ansicht)
+                    (domain/korrekturen-into-antwort db/korrekturen-von-antwort))))
+           (POST "/korrektur-fuer-antwort/:aid" [aid]
+             (println "Neue Korrektur für Antwort" aid)))
   (GET "/api/access-token" request (str (extract-token request)))
   (GET "/api/session" request (str (:session request)))
   (route/not-found "Not Found"))

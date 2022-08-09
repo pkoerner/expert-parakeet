@@ -32,8 +32,7 @@
 
 
 (defn show-kurs
-  [{_id :kurs/id
-    jahr :kurs/jahr
+  [{jahr :kurs/jahr
     semester :kurs/semester
     fach :kurs/fach
     tests :kurs/tests}]

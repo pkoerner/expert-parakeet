@@ -1,7 +1,11 @@
 (ns router
   (:require
     [korrektur-uebersicht.views :as korr]
+<<<<<<< HEAD
     [orga.frage-erstellen.views :as frage-erstln]
+=======
+    [korrektur.views :as korrektur]
+>>>>>>> Feat: No framework for korrektur
     [re-frame.core :as re-frame]
     [reitit.coercion.spec :as rss]
     [reitit.core :as r]
@@ -87,7 +91,18 @@
      :link-text "Neue Frage erstellen"
      :controllers
      [{:start #(re-frame/dispatch [:frage-erstellen/init])
-       :stop  #(re-frame/dispatch [:frage-erstellen/entfernen])}]}]])
+       :stop  #(re-frame/dispatch [:frage-erstellen/entfernen])}]}]
+   ["antwort-fuer-korrektur/:aid"
+    {:name      ::korrektur
+     :view      korrektur/overview
+     :link-text "Korrektur"
+     :parameters {:path {:aid int?}}
+     :controllers
+     [{:parameters {:path [:aid]}
+       :start (fn [params]
+                (re-frame/dispatch [:korrektur/laden (get-in params [:path :aid])]))
+       :stop (fn [_]
+               (re-frame/dispatch [:korrektur/entfernen]))}]}]])
 
 
 (defn on-navigate
