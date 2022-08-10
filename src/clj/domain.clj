@@ -35,3 +35,77 @@
          (update kurs :kurs/tests (partial map (partial test-punkte test->antwort))))
        kurse))
 
+
+;; changes a map that has a coll in it (as var) to a coll of maps
+;; all maps have the keys and vals of the outer map and the keys and vals of one inner map
+(defn unpack-map-in-map
+  [key-of-coll input-map]
+  (let [map-without-coll (dissoc input-map key-of-coll)]
+    (map
+      #(merge map-without-coll %)
+      (key-of-coll input-map))))
+
+
+(defn freitext-fragen
+  [kurse-mit-inneren-tests]
+  (let [tests-mit-inneren-fragen (flatten (map (partial unpack-map-in-map :kurs/tests) kurse-mit-inneren-tests))
+        fragen-mit-innerem-fach (flatten (map (partial unpack-map-in-map :test/fragen) tests-mit-inneren-fragen))
+        fragen (map #(dissoc (assoc % :fach/fachtitel (:fach/fachtitel (:kurs/fach %))) :kurs/fach) fragen-mit-innerem-fach)
+        nur-freitext-fragen (filter #(= :frage.typ/text (:frage/typ %)) fragen)]
+    nur-freitext-fragen))
+
+
+(defn sortierte-antworten-von-freitext-fragen
+  [fct-antworten-von-frage freitext-fragen]
+  (let [freitext-fragen-mit-inneren-antworten (map #(assoc % :frage/antworten (fct-antworten-von-frage (:frage/id %))) freitext-fragen)
+        antworten (flatten (map (partial unpack-map-in-map :frage/antworten) freitext-fragen-mit-inneren-antworten))]
+    (sort-by :antwort/timestamp antworten)))
+
+
+(defn remove-antworten-with-identical-user-frage-test-id
+  [antworten]
+  (let [antworten-vec (vec antworten)]
+    (loop [a []
+           i 0
+           prev-ids #{}]
+      (if (= i (count antworten))
+        a
+        (let [current-ids {:user/id (:user/id (get antworten-vec i)), :frage/id (:frage/id (get antworten-vec i)),
+                           :test/id (:test/id (get antworten-vec i)), :kurs/id (:kurs/id (get antworten-vec i))}]
+          (if (contains? prev-ids current-ids)
+            (recur a (inc i) prev-ids)
+            (recur (conj a (get antworten-vec i)) (inc i) (conj prev-ids current-ids))))))))
+
+
+(defn antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id
+  [antworten-mit-korrekturen antworten]
+  (let [antworten-ohne-duplicates (reverse (remove-antworten-with-identical-user-frage-test-id (reverse antworten)))
+        antworten-ohne-user-id (map #(dissoc % :user/id) antworten-ohne-duplicates)
+        korrigiert-ids (into #{} (map :antwort/id antworten-mit-korrekturen))
+        antworten-ohne-korrekturen (remove #(contains? korrigiert-ids (:antwort/id %)) antworten-ohne-user-id)]
+    antworten-ohne-korrekturen))
+
+
+(defn timestamp-to-datum-and-uhrzeit
+  [antwort-map]
+  (map
+    #(let [date (:antwort/timestamp %)]
+       (dissoc
+         (assoc % :antwort/datum (.format (java.text.SimpleDateFormat. "dd.MM.yyyy") date)
+                :antwort/uhrzeit (.format (java.text.SimpleDateFormat. "HH:mm") date))
+         :antwort/timestamp))
+    antwort-map))
+
+
+(defn get-antwort-with-given-id
+  [id antworten]
+  (first (filter #(= id (:antwort/id %)) antworten)))
+
+
+(defn antworten-korrigiert
+  [korrektur-map antworten]
+  (let [korrekturen-with-antwort-id (flatten (map #(unpack-map-in-map :korrektur/antwort %) korrektur-map))
+        antworten-mit-korrekturen (map #(merge % (get-antwort-with-given-id (:antwort/id %) antworten)) korrekturen-with-antwort-id)
+        antworten-ohne-studi (map #(dissoc % :user/id) antworten-mit-korrekturen)
+        antwort-ids-for-this-korrektor (into #{} (map :antwort/id antworten))]
+    (filter #(contains? antwort-ids-for-this-korrektor (:antwort/id %)) antworten-ohne-studi)))

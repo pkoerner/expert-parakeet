@@ -11,7 +11,9 @@
 (rf/reg-event-db
   :init-db
   (fn [db _]
-    (assoc db :user {:id 0 :name "Test_User"})))
+    (assoc db
+           :user {:id 0 :name "Test_User"}
+           :korrektor {:id 1 :name "Test_Korrektor"})))
 
 
 ;; Default event for HTTP Failure

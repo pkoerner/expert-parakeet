@@ -80,6 +80,56 @@
              @conn [:user/id user-id] [:test/id test-id])))
 
 
+(defn fragen-fuer-user
+  [korrektorin-id]
+  (mapv first
+        (d/q '[:find (pull ?kurs [:kurs/semester
+                                  :kurs/jahr
+                                  {:kurs/fach [:fach/fachtitel]}
+                                  {:kurs/tests [:test/id :test/name
+                                                {:test/fragen [:frage/id :frage/typ]}]}])
+               :in $ ?korr
+               :where
+               [?korr :user/kurse ?kurs]]
+             @conn [:user/id korrektorin-id])))
+
+
+(defn antworten-von-frage
+  [frage-id]
+  (map
+    #(zipmap [:antwort/id :user/id :antwort/timestamp] %)
+    (d/q '[:find ?antwort-id ?user-id ?timestamp
+           :in $ ?frage-id
+           :where
+           [?frage :frage/id ?frage-id]
+           [?antwort :antwort/frage ?frage]
+           [?antwort :antwort/id ?antwort-id ?tx]
+           [?tx :db/txInstant ?timestamp]
+           [?antwort :antwort/user ?user]
+           [?user :user/id ?user-id]]
+         @conn frage-id)))
+
+
+(defn alle-antworten-mit-korrekturen
+  []
+  (mapv first
+        (d/q '[:find (pull ?antwort [:antwort/id])
+               :in $
+               :where
+               [?korrektur :korrektur/antwort ?antwort]]
+             @conn)))
+
+
+(defn korrekturen-von-korrektorin-korrigiert
+  [korrektorin-id]
+  (mapv first
+        (d/q '[:find (pull ?k [{:korrektur/antwort [:antwort/id]}])
+               :in $ ?korr
+               :where
+               [?k :korrektur/korrektor ?korr]]
+             @conn [:user/id korrektorin-id])))
+
+
 (defn test-by-id
   [id]
   (d/pull @conn

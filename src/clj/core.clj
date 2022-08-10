@@ -38,7 +38,22 @@
            (GET "/user/:uid/kurse" [uid :<< as-int]
                 (response (domain/kurse-mit-gesamt-punkten
                             (db/kurse-von-studierendem uid)
-                            (partial db/antworten-von-test uid)))))
+                            (partial db/antworten-von-test uid))))
+
+           (GET "/korrektur/:uid" [uid :<< as-int]
+                (response
+                  (->> (db/fragen-fuer-user uid)
+                       (domain/freitext-fragen)
+                       (domain/sortierte-antworten-von-freitext-fragen db/antworten-von-frage)
+                       (domain/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id (db/alle-antworten-mit-korrekturen))
+                       (domain/timestamp-to-datum-and-uhrzeit))))
+           (GET "/bisherige-korrekturen/:uid" [uid :<< as-int]
+                (response
+                  (->> (db/fragen-fuer-user uid)
+                       (domain/freitext-fragen)
+                       (domain/sortierte-antworten-von-freitext-fragen db/antworten-von-frage)
+                       (domain/antworten-korrigiert (db/korrekturen-von-korrektorin-korrigiert uid))
+                       (domain/timestamp-to-datum-and-uhrzeit)))))
   (route/not-found "Not Found"))
 
 

@@ -72,6 +72,15 @@
                 :antwort/punkte]))
 
 
+(s/def :korrektur/korrektor ::user)
+(s/def :korrektur/antwort ::antwort)
+(s/def :korrektur/korrektur-text string?)
+
+
+(s/def ::korrektur
+  (s/keys :req [:korrektur/korrektor :korrektur/antwort :korrektur/korrektur-text]))
+
+
 (s/def :test/id pos-int?)
 (s/def :test/name string?)
 (s/def :test/fragen (s/coll-of ::frage))

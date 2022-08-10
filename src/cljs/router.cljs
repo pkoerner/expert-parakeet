@@ -1,5 +1,6 @@
 (ns router
   (:require
+    [korrektur-uebersicht.views :as korr]
     [re-frame.core :as re-frame]
     [reitit.coercion.spec :as rss]
     [reitit.core :as r]
@@ -54,6 +55,20 @@
      :controllers
      [{:start #(re-frame/dispatch [:kurse/laden])
        :stop  #(re-frame/dispatch [:kurse/entfernen])}]}]
+   ["korrektur-uebersicht"
+    {:name      ::korrektur-overview
+     :view      korr/overview
+     :link-text "Korrektur-Übersicht"
+     :controllers
+     [{:start #(re-frame/dispatch [:korrektur-uebersicht/hole-unkorrigierte-antworten])
+       :stop  #(re-frame/dispatch [:korrektur-uebersicht/entferne-unkorrigierte-antworten])}]}]
+   ["bisherige-korrekturen"
+    {:name      ::bisherige-korekturen
+     :view      korr/previous-corrections
+     :link-text "Korrektur-Übersicht"
+     :controllers
+     [{:start #(re-frame/dispatch [:korrektur-uebersicht/hole-korrigierte-antworten])
+       :stop  #(re-frame/dispatch [:korrektur-uebersicht/entferne-korrigierte-antworten])}]}]
    ["test/:id"
     {:name      ::test
      :view      test/Root
@@ -110,7 +125,7 @@
   [{:keys [router]}]
   (let [current-route @(re-frame/subscribe [::current-route])]
     [:div
-     [nav {:dests [::overview] :router router :current-route current-route}]
+     [nav {:dests [::overview ::korrektur-overview] :router router :current-route current-route}]
      (when current-route
        [(-> current-route :data :view)])]))
 
