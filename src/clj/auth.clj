@@ -69,7 +69,8 @@
 
 (defn extract-token
   [request]
-  (get-in request [:oauth2/access-tokens :github :token]))
+  (-> request
+      (get-in [:oauth2/access-tokens :github :token])))
 
 
 ;; API Call zu der Github API
@@ -116,8 +117,10 @@
       ;; Der logged-in call darf nicht abgefangen werden,
       ;; daher wird dieser hier gehandhabt
       "/api/logged-in" (logged-in request)
+      ;; Status der session
+      "/api/is-logged-in" (api-is-logged-in request)
       ;; Prüfen ob der Nutzer eingeloggt ist
-      (if (:id (:session request))
+      (if (is-logged-in request)
         ;; Nutzer darf alles machen
         (handler request)
         ;; Nutzer muss sich authentifizieren

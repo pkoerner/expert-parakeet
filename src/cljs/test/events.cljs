@@ -13,7 +13,8 @@
                    :uri             (str vars/base-url "/test/" test-id)
                    :timeout         8000
                    :response-format (ajax/transit-response-format)
-                   :on-success      [:test/angekommen]}}))
+                   :on-success      [:test/angekommen]
+                   :with-credentials true}}))
 
 
 (rf/reg-event-db
@@ -58,7 +59,8 @@
                      :params          antworten
                      :format          (ajax/transit-request-format)
                      :response-format (ajax/transit-response-format)
-                     :on-success      [:antworten/erfolgreich-gesendet]}})))
+                     :on-success      [:antworten/erfolgreich-gesendet]
+                     :with-credentials true}})))
 
 
 (rf/reg-event-db

@@ -68,11 +68,14 @@
 (def app
   (-> routes
       wrap-authentication
-      wrap-format ; handle content negotiation
-      (wrap-defaults (assoc-in site-defaults [:session :cookie-attrs :same-site] :lax))
-      wrap-params
       (wrap-cors :access-control-allow-origin allowed-origins
-                 :access-control-allow-methods allowed-methods)))
+                 :access-control-allow-methods allowed-methods
+                 :access-control-allow-credentials "true")
+      wrap-format ; handle content negotiation
+      (wrap-defaults (-> site-defaults
+                         (assoc-in [:session :cookie-attrs :same-site] :none)
+                         (assoc-in [:session :cookie-attrs :secure] true)))
+      wrap-params))
 
 
 (def app-dev (wrap-reload #'app))
