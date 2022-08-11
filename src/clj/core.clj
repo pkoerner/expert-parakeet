@@ -55,12 +55,22 @@
 (def allowed-headers #{:accept :content-type})
 
 
+(defn wrap-params-user
+  [handler]
+  (fn [request]
+    (handler
+      (if-let [user (get-in request [:session :user])]
+        (assoc-in request [:params :user] user)
+        request))))
+
+
 (def app
   (-> routes
       wrap-authentication
       wrap-format ; handle content negotiation
       (wrap-defaults (assoc-in site-defaults [:session :cookie-attrs :same-site] :lax))
       wrap-params
+      wrap-params-user
       (wrap-cors :access-control-allow-origin allowed-origins
                  :access-control-allow-methods allowed-methods)))
 

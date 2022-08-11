@@ -85,12 +85,11 @@
   [request]
   (let [github-data (github-user-data-from-token (extract-token request))]
     {:status 200
-     :headers {"Content-Type" "text/plain"}
-     :session (merge (:session request) github-data)
+     :session (assoc (:session request) :user github-data)
      ;; Hier werden für demonstrationszwecke ein paar Daten angezeigt
      ;; Der frontend code könnte hier die Bestätigung bekommen,
      ;; dass der Login funktioniert hat
-     :body (str github-data)}))
+     :body request}))
 
 
 (defn wrap-authentication-routes
@@ -101,7 +100,7 @@
       ;; daher wird dieser hier gehandhabt
       "/api/logged-in" (logged-in request)
       ;; Prüfen ob der Nutzer eingeloggt ist
-      (if (:id (:session request))
+      (if (:user (:session request))
         ;; Nutzer darf alles machen
         (handler request)
         ;; Nutzer muss sich authentifizieren
