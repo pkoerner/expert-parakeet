@@ -3,6 +3,11 @@
     [clojure.spec.alpha :as s]))
 
 
+(defn distinct-coll?
+  [x]
+  (= (distinct x) x))
+
+
 (s/def :frage/id string?)
 (s/def :frage/typ #{:frage.typ/text :frage.typ/single-choice :frage.typ/multiple-choice})
 (s/def :frage/frage-text string?)
@@ -58,14 +63,18 @@
 (s/def :antwort/id string?)
 (s/def :antwort/user ::user)
 (s/def :antwort/frage ::frage)
-(s/def :antwort/antwort-text string?)
+
+
+(s/def :antwort/antwort
+  (s/and (s/coll-of string?)
+         distinct-coll?))
+
+
 (s/def :antwort/punkte pos-int?)
 
 
 (s/def ::antwort
-  (s/keys :req [:antwort/id :antwort/user
-                :antwort/antwort-text :antwort/frage
-                :antwort/punkte]))
+  (s/keys :req [:antwort/user :antwort/antwort-text :antwort/frage]))
 
 
 (s/def :korrektur/korrektor ::user)

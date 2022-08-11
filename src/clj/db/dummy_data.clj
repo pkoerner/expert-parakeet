@@ -82,42 +82,42 @@
   [{:antwort/id "1"
     :antwort/frage [:frage/id "1"]
     :antwort/user [:user/id "0"]
-    :antwort/antwort-text "Antwort"
+    :antwort/antwort ["Antwort"]
     :antwort/punkte 4}
    {:antwort/id "2"
     :antwort/frage [:frage/id "3"]
     :antwort/user [:user/id "3"]
-    :antwort/antwort-text "Antwort"
+    :antwort/antwort ["Antwort"]
     :antwort/punkte 1}
    {:antwort/id "3"
     :antwort/frage [:frage/id "1"]
     :antwort/user [:user/id "2"]
-    :antwort/antwort-text "Korrigierte Antwort"
+    :antwort/antwort ["Korrigierte Antwort"]
     :antwort/punkte 5}
    {:antwort/id "4"
     :antwort/frage [:frage/id "2"]
     :antwort/user [:user/id "0"]
-    :antwort/antwort-text "Bool Antwort"
+    :antwort/antwort ["Bool Antwort"]
     :antwort/punkte 1}
    {:antwort/id "5"
     :antwort/frage [:frage/id "3"]
     :antwort/user [:user/id "0"]
-    :antwort/antwort-text "Antwort"
+    :antwort/antwort ["Antwort"]
     :antwort/punkte 0}
    {:antwort/id "6"
     :antwort/frage [:frage/id "3"]
     :antwort/user [:user/id "2"]
-    :antwort/antwort-text "Antwort"
+    :antwort/antwort ["Antwort"]
     :antwort/punkte 0}
    {:antwort/id "7"
     :antwort/frage [:frage/id "3"]
     :antwort/user [:user/id "3"]
-    :antwort/antwort-text "Korrigierte Antwort"
+    :antwort/antwort ["Korrigierte Antwort"]
     :antwort/punkte 0}
    {:antwort/id "8"
     :antwort/frage [:frage/id "2"]
     :antwort/user [:user/id "0"]
-    :antwort/antwort-text "Bool Antwort"
+    :antwort/antwort ["Bool Antwort"]
     :antwort/punkte 0}])
 
 

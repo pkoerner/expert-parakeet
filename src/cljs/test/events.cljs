@@ -32,8 +32,8 @@
 
 (rf/reg-event-db
   :frage/beantworten
-  (fn [db [_ frage-id antwort-text]]
-    (assoc-in db [:antworten frage-id] antwort-text)))
+  (fn [db [_ frage-id antwort]]
+    (assoc-in db [:antworten frage-id] antwort)))
 
 
 (rf/reg-event-fx

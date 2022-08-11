@@ -26,7 +26,7 @@
                    :db/index true}]
      :antwort/user
      :antwort/frage
-     :antwort/antwort-text
+     :antwort/antwort
      :antwort/punkte]))
 
 

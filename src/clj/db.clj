@@ -169,7 +169,7 @@
                                 :antwort/id id
                                 :antwort/frage [:frage/id frage-id]
                                 :antwort/user [:user/id user-id]
-                                :antwort/antwort-text antwort}])
+                                :antwort/antwort antwort}])
         db-after (:db-after tx-result)]
     (d/pull db-after [:antwort/id {:antwort/frage [:frage/id]}] [:antwort/id id])))
 
@@ -177,15 +177,14 @@
 (defn user-add-antworten
   [user-id antworten]
   (mapv
-    #(let [frage-id (get-in % [:antwort/frage :frage/id])
-           text (:antwort/antwort-text %)]
-       (db/user-add-antwort user-id frage-id text))
+    (fn [[frage-id antwort]]
+      (db/user-add-antwort user-id frage-id antwort))
     antworten))
 
 
 (defn all-antwort
   []
-  (d/q '[:find (pull ?e [:antwort/id :antwort/user :antwort/frage :antwort/antwort-text])
+  (d/q '[:find (pull ?e [:antwort/id :antwort/user :antwort/frage :antwort/antwort])
          :where [?e :antwort/id]]
        @db/conn))
 
