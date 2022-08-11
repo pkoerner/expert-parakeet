@@ -1,7 +1,7 @@
 (ns db
   (:require
     [datahike.api :as d]
-    [db.dummy-data :refer [dummy-data]]
+    [db.dummy-data :as dummy-data]
     [db.schema :refer [schema]]
     [nano-id.core :refer [nano-id]]))
 
@@ -38,7 +38,7 @@
 (def conn (create-conn))
 
 
-(do (d/transact conn dummy-data) nil)
+(do (d/transact conn dummy-data/dummy-data) nil)
 
 
 ;; provide the db attr of the id you want to check for collisions
