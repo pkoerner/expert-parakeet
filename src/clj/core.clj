@@ -9,7 +9,7 @@
     [muuntaja.middleware :refer [wrap-format]]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.cors :refer [wrap-cors]]
-    [ring.middleware.defaults :refer :all]
+    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
     [ring.middleware.params :refer [wrap-params]]
     [ring.middleware.reload :refer [wrap-reload]]
     [ring.util.response :refer [response]]))
@@ -42,9 +42,11 @@
                             (db/kurse-von-studierendem uid)
                             (partial db/antworten-von-test uid))))
 
-           (GET "/api/access-token" request (str (extract-token request)))
+           (GET "/request" r (response r))
 
-           (GET "/api/session" request (str (:session request))))
+           (GET "/access-token" request (str (extract-token request)))
+
+           (GET "/session" request (str (:session request))))
   (route/not-found "Not Found"))
 
 
