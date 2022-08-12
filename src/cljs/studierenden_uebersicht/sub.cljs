@@ -8,7 +8,3 @@
   (fn [db _] (:kurse db)))
 
 
-(rf/reg-sub
-  :user
-  (fn [db _] (get-in db [:user :name])))
-

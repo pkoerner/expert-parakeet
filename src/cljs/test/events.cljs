@@ -32,17 +32,19 @@
 
 (rf/reg-event-db
   :frage/beantworten
-  (fn [db [_ frage-id antwort-text]]
-    (assoc-in db [:antworten frage-id] antwort-text)))
+  (fn [db [_ frage-id antwort]]
+    (assoc-in db [:antworten frage-id] antwort)))
 
 
 (rf/reg-event-fx
   :antworten/senden
   (fn [{:keys [db]} _]
-    (let [test-id (get-in db [:test :test/id])
+    ;; TODO: should use an interceptor that injects subscriptoins for user-id
+    ;; and antworten
+    (let [user-id @(rf/subscribe [:user-id])
           antworten (:antworten db)]
       {:http-xhrio  {:method          :post
-                     :uri             (str vars/base-url "/test/" test-id "/antwort")
+                     :uri             (str vars/base-url "/user/" user-id "/antworten")
                      :params          antworten
                      :format          (ajax/transit-request-format)
                      :response-format (ajax/transit-response-format)

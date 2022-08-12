@@ -9,6 +9,16 @@
 
 
 (rf/reg-sub
+  :user
+  (fn [db _] (get-in db [:user :name])))
+
+
+(rf/reg-sub
+  :user-id
+  (fn [db _] (get-in db [:user :id])))
+
+
+(rf/reg-sub
   :laedt
   (fn [db _] (:laedt db)))
 

@@ -26,7 +26,7 @@
                    :placeholder "Der Sinn des Lebens ist 42 weil..."
                    ;; :change-on-blur? false
                    :on-change (fn [val]
-                                (rf/dispatch [:frage/beantworten id val])
+                                (rf/dispatch [:frage/beantworten id [val]])
                                 (reset! antwort val))]]]]]))
 
 
@@ -47,7 +47,7 @@
                 :value choice-text
                 :model antwort
                 :on-change (fn [val]
-                             (rf/dispatch [:frage/beantworten id val])
+                             (rf/dispatch [:frage/beantworten id [val]])
                              (reset! antwort val))]))]]))
 
 

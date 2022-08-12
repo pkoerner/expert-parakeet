@@ -1,6 +1,5 @@
 (ns core
   (:require
-    [compojure.coercions :refer [as-int]]
     [compojure.core :refer [GET POST defroutes context]]
     [compojure.route :as route]
     [db :as db]
@@ -19,41 +18,42 @@
            ;; maybe better route /tests
            (GET "/test" []
                 (response (db/all-tests)))
-           (GET "/test/:id" [id :<< as-int]
+           (GET "/test/:id" [id]
                 (response (db/test-by-id id)))
            ;; fragen
            ;; do we need these route, why can't we embed the questions in the test
            (GET "/frage" []
                 (response (db/all-fragen)))
-           (GET "/frage/:id" [id :<< as-int]
+           (GET "/frage/:id" [id]
                 (response (db/frage-by-id id)))
 
            (GET "/antwort" []
                 (response (db/all-antwort)))
            ;; antworten
-           ;; maybe better route /test/:test-id/antworten
-           (POST "/test/:test-id/antwort" [test-id :<< as-int]
-                 (println "Neue Antworten für Test" test-id))
+           (POST "/user/:user-id/antworten" [user-id :as r]
+                 (let [antworten (:body-params r)]
+                   (response (db/user-add-antworten user-id antworten))))
 
-           (GET "/user/:uid/kurse" [uid :<< as-int]
+           (GET "/user/:user-id/kurse" [user-id]
                 (response (domain/kurse-mit-gesamt-punkten
-                            (db/kurse-von-studierendem uid)
-                            (partial db/antworten-von-test uid))))
+                            (db/kurse-von-studierendem user-id)
+                            (partial db/bewertete-antworten-von-test user-id))))
 
-           (GET "/korrektur/:uid" [uid :<< as-int]
+           (GET "/korrektur/:user-id" [user-id]
                 (response
-                  (->> (db/fragen-fuer-user uid)
+                  (->> (db/fragen-fuer-user user-id)
                        (domain/freitext-fragen)
                        (domain/sortierte-antworten-von-freitext-fragen db/antworten-von-frage)
                        (domain/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id (db/alle-antworten-mit-korrekturen))
                        (domain/timestamp-to-datum-and-uhrzeit))))
-           (GET "/bisherige-korrekturen/:uid" [uid :<< as-int]
+           (GET "/bisherige-korrekturen/:user-id" [user-id]
                 (response
-                  (->> (db/fragen-fuer-user uid)
+                  (->> (db/fragen-fuer-user user-id)
                        (domain/freitext-fragen)
                        (domain/sortierte-antworten-von-freitext-fragen db/antworten-von-frage)
-                       (domain/antworten-korrigiert (db/korrekturen-von-korrektorin-korrigiert uid))
+                       (domain/antworten-korrigiert (db/korrekturen-von-korrektorin-korrigiert user-id))
                        (domain/timestamp-to-datum-and-uhrzeit)))))
+
   (route/not-found "Not Found"))
 
 
