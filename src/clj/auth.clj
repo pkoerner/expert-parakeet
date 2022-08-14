@@ -89,8 +89,8 @@
 (defn logged-in
   [request]
   (let [github-data (github-user-data-from-token (extract-token request))]
-    {:status 200
-     :headers {"Content-Type" "text/plain"}
+    {:status 307
+     :headers {"Content-Type" "text/plain", "Location" "http://localhost:8082/"}
      :session (assoc (:session request) :user github-data)
      ;; Hier werden für demonstrationszwecke ein paar Daten angezeigt
      ;; Der frontend code könnte hier die Bestätigung bekommen,
