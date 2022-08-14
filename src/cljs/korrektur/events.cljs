@@ -18,10 +18,11 @@
 
 (rf/reg-event-db
   :korrektur/angekommen
-  (fn [db [_ test]]
-    (-> db
-        (assoc :loading false)
-        (assoc :korrektur test))))
+  (fn [db [_ korrektur]]
+    (let [k (assoc korrektur :korrektur/punkte (str (:antwort/punkte korrektur)))]
+      (-> db
+          (assoc :loading false)
+          (assoc :korrektur k)))))
 
 
 (rf/reg-event-db
@@ -46,10 +47,11 @@
   :korrektur/senden
   (fn [{:keys [db]} _]
     (let [antwort-id (get-in db [:korrektur :antwort/id])
-          korrektur (select-keys (:korrektur db) [:antwort/id :korrektur/korrektur-text :korrektur/punkte])]
+          korrektur (select-keys (:korrektur db) [:korrektur/korrektur-text :korrektur/punkte])
+          korrektur-korrektor (assoc korrektur :korrektor/id (get-in db [:korrektor :id]))]
       {:http-xhrio  {:method          :post
                      :uri             (str vars/base-url "/korrektur-fuer-antwort/" antwort-id)
-                     :params          korrektur
+                     :params          korrektur-korrektor
                      :format          (ajax/transit-request-format)
                      :response-format (ajax/transit-response-format)
                      :on-success      [:korrektur/erfolgreich-gesendet]}})))
@@ -57,5 +59,5 @@
 
 (rf/reg-event-db
   :korrektur/erfolgreich-gesendet
-  (fn [db _]
-    (assoc-in db [:korrektur :gesendet] true)))
+  (fn [db [_ result]]
+    (assoc-in db [:korrektur :gesendet] result)))

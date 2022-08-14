@@ -18,7 +18,7 @@
 
 
 (defn korrektur-form
-  [{ant-punkte :antwort/punkte frag-punkte :frage/punkte :as m}]
+  [{frag-punkte :frage/punkte :as m}]
   [:div
    [:p "Korrekturtext: "
     [:input
@@ -28,7 +28,7 @@
    [:p "Punkte: "
     [:input
      {:type "number"
-      :value (get m :korrektur/punkte ant-punkte)
+      :value (get m :korrektur/punkte 0)
       :on-change #(rf/dispatch [:korrektur/punkte (-> % .-target .-value)])}]
     (str " von " frag-punkte)]
    [:p
@@ -41,7 +41,7 @@
   [gesendet]
   ;; Add more precise error handling
   (if gesendet
-    [:p {:style {:color "green"}} "Korrektur abgesendet"]
+    [:p {:style {:color "green"}} (str "Korrektur abgesendet " gesendet)]
     [:p]))
 
 
@@ -53,7 +53,7 @@
      [:p (str "Lösungsvorschlag: ")]
      [:p (:frage/loesungskriterien korrektur)]
      [:p (str "Antwort:")]
-     [:p (:antwort/antwort-text korrektur)]
+     [:p (:antwort/antwort korrektur)]
      [korrektur-form korrektur]
      [korrektur-erfolgreich (:gesendet korrektur)]]))
 

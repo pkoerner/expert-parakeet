@@ -120,7 +120,33 @@
 
 (defn antworten-fuer-korrektur-ansicht
   [[antwort-map]]
-  (let [antwort-unpacked-frage-nested (merge antwort-map (:antwort/frage antwort-map))
+  (let [antwort-unpacked-frage-nested (update (merge antwort-map (:antwort/frage antwort-map)) :antwort/antwort first)
         antwort-unpacked (select-keys antwort-unpacked-frage-nested [:user/id :frage/frage-text :frage/punkte :frage/loesung
-                                                                     :antwort/antwort-text :antwort/punkte :antwort/id])]
+                                                                     :antwort/antwort :antwort/punkte :antwort/id])]
     antwort-unpacked))
+
+
+(defn check-incoming-korrektur
+  [korrektur passende-antwort]
+  (if-not (first passende-antwort)
+    (assoc korrektur :error :keine-passende-antwort)
+    (let [frage-punkte (get-in (first passende-antwort) [:antwort/frage :frage/punkte])]
+      (cond
+        (not frage-punkte)
+        (assoc korrektur :error :keine-passende-antwort)
+        (or (not (:korrektur/korrektur-text korrektur)) (empty? (:korrektur/korrektur-text korrektur)))
+        (assoc korrektur :error :korrektur-text-missing)
+        (or (not (:korrektur/punkte korrektur)) (empty? (:korrektur/punkte korrektur)))
+        (assoc korrektur :error :korrektur-punkte-missing)
+        (not (nat-int? (read-string (:korrektur/punkte korrektur))))
+        (assoc korrektur :error :punkte-invalid)
+        (> (read-string (:korrektur/punkte korrektur)) frage-punkte)
+        (assoc korrektur :error :punkte-zu-viel)
+        :else (update korrektur :korrektur/punkte read-string)))))
+
+
+(defn add-korrektur-if-no-error
+  [add-korrektur-fct ant-id korrektur]
+  (if (:error korrektur)
+    korrektur
+    (add-korrektur-fct ant-id korrektur)))

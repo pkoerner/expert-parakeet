@@ -60,8 +60,11 @@
                (->> (db/antworten-fuer-korrektur aid)
                     (domain/antworten-fuer-korrektur-ansicht)
                     (domain/korrekturen-into-antwort db/korrekturen-von-antwort))))
-           (POST "/korrektur-fuer-antwort/:aid" [aid]
-             (println "Neue Korrektur für Antwort" aid)))
+           (POST "/korrektur-fuer-antwort/:aid" [aid :as r]
+             (let [korrektur (:body-params r)]
+               (response
+                 (->> (domain/check-incoming-korrektur korrektur (db/antworten-fuer-korrektur aid))
+                      (domain/add-korrektur-if-no-error db/korrektor-add-korrektur aid))))))
   (GET "/api/access-token" request (str (extract-token request)))
   (GET "/api/session" request (str (:session request)))
   (route/not-found "Not Found"))
