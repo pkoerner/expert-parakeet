@@ -1,7 +1,7 @@
 (ns router
   (:require
-    [dozent.frage-erstellen.views :as frage-erstln]
     [korrektur-uebersicht.views :as korr]
+    [orga.frage-erstellen.views :as frage-erstln]
     [re-frame.core :as re-frame]
     [reitit.coercion.spec :as rss]
     [reitit.core :as r]

@@ -1,81 +1,66 @@
 (ns test.views
   (:require
-    [re-com.core :refer [at v-box box gap button label input-textarea line title radio-button checkbox throbber]]
+    [re-com.core :refer [at v-box box gap button input-textarea line title radio-button checkbox throbber]]
     [re-frame.core :as rf]
     [reagent.core :as reagent]
     [test.events]))
 
 
-(defn TextQuestion
-  [{frage-text :frage/frage-text punkte :frage/punkte id :frage/id}]
-  (let [antwort (reagent/atom "")]
+(defn textfrage-beantworten-body
+  [frage-id initial antwort-in-db-fkt]
+  (let [antwort (reagent/atom initial)]
     [v-box
      :src (at)
-     :attr {:key (str id)}
+     :attr {:key (str frage-id)}
      :gap "5px"
      :children
-     [[title
-       :label (str frage-text " - " punkte " Punkte")
-       :level :level2]
-      [label
-       :label "Antwort"]
-      [v-box
-       :children [[input-textarea
-                   :src (at)
-                   :model antwort
-                   :placeholder "Der Sinn des Lebens ist 42 weil..."
-                   ;; :change-on-blur? false
-                   :on-change (fn [val]
-                                (rf/dispatch [:frage/beantworten id [val]])
-                                (reset! antwort val))]]]]]))
+     [[input-textarea
+       :src (at)
+       :model antwort
+       :placeholder "Der Sinn des Lebens ist 42 weil..."
+       ;; :change-on-blur? false
+       :on-change (fn [val]
+                    (antwort-in-db-fkt val)
+                    (reset! antwort val))]]]))
 
 
-(defn SingleChoiceQuestion
-  [{frage-text :frage/frage-text punkte :frage/punkte id :frage/id choices :frage/choices}]
-  (let [antwort (reagent/atom nil)]
+(defn single-choice-beantworten-body
+  [frage-id choices initial antwort-in-db-fkt]
+  (let [antwort (reagent/atom initial)]
     [v-box :src (at)
-     :attr {:key (str id)}
+     :attr {:key (str frage-id)}
      :gap "5px"
      :children
-     [[title :src (at)
-       :label (str frage-text " - " punkte " Punkte")
-       :level :level2]
-      (doall (for [[choice-id choice-text] (map vector (range (count choices)) (shuffle choices))]
-               ^{:key choice-id}
-               [radio-button :src (at)
-                :label choice-text
-                :value choice-text
-                :model antwort
-                :on-change (fn [val]
-                             (rf/dispatch [:frage/beantworten id [val]])
-                             (reset! antwort val))]))]]))
+     (mapv
+       (fn [choice-idx choice-text]
+         [radio-button :src (at)
+          :attr {:key (str choice-idx)}
+          :label choice-text
+          :value choice-text
+          :model antwort
+          :on-change (fn [val]
+                       (antwort-in-db-fkt val)
+                       (reset! antwort val))])
+       (range (count choices)) choices)]))
 
 
-(defn MultipleChoiceQuestion
-  [{frage-text :frage/frage-text punkte :frage/punkte id :frage/id choices :frage/choices}]
-  (let [antwort (reagent/atom #{})]
-    [v-box :src (at)
-     :attr {:key (str id)}
-     :gap "5px"
-     :children
-     [[title :src (at)
-       :label (str frage-text " - " punkte " Punkte")
-       :level :level2]
-      [v-box :src (at)
-       :children
-       (mapv
-         (fn [choice-text]
-           (let [model (reagent/atom false)]
-             [checkbox :src (at)
-              :model model                      ; required
-              :label choice-text
-              :on-change (fn [val]
-                           (reset! model val)
-                           (if val
-                             (swap! antwort conj choice-text)
-                             (swap! antwort disj choice-text))
-                           (rf/dispatch [:frage/beantworten id @antwort]))]))
-         (shuffle choices))]]]))
+(defn multiple-choice-beantworten-body
+  [frage-id choices initial antwort-in-db-fkt]
+  [v-box :src (at)
+   :attr {:key (str frage-id)}
+   :gap "5px"
+   :children
+   (mapv
+     (fn [choice-idx choice-text]
+       (let [model (reagent/atom (contains? initial choice-text))]
+         [checkbox :src (at)
+          :model model
+          :attr {:key choice-idx}
+          :label choice-text
+          :on-change (fn [val]
+                       (reset! model val)
+                       (antwort-in-db-fkt val choice-text))]))
+     (range (count choices)) choices)])
 
 
 (defn Questions
@@ -85,13 +70,28 @@
      :src (at)
      :children
      (conj
-       (mapv (fn [frage]
+       (mapv
+         (fn [frage]
+           [v-box :src (at)
+            :children
+            [[title :src (at)
+              :label (str (:frage/frage-text frage) " - " (:frage/punkte frage) " Punkte")
+              :level :level2]
+             (let [save-ans-to-db-fkt
+                   (fn [antwort] (rf/dispatch [:frage/beantworten (:frage/id frage) antwort]))]
                (cond
-                 (= (:frage/typ frage) :frage.typ/text) (TextQuestion frage)
-                 (= (:frage/typ frage) :frage.typ/single-choice) (SingleChoiceQuestion frage)
-                 (= (:frage/typ frage) :frage.typ/multiple-choice) (MultipleChoiceQuestion frage)
-                 :else [:label "Fragentyp nicht implementiert"]))
-             @(rf/subscribe [:fragen]))
+                 (= (:frage/typ frage) :frage.typ/text)
+                 (textfrage-beantworten-body (:frage/id frage) "" save-ans-to-db-fkt) ; "" is initial value
+                 (= (:frage/typ frage) :frage.typ/single-choice)
+                 (single-choice-beantworten-body (:frage/id frage) (shuffle (:frage/choices frage))
+                                                 nil save-ans-to-db-fkt)
+                 (= (:frage/typ frage) :frage.typ/multiple-choice)
+                 (multiple-choice-beantworten-body
+                   (:frage/id frage) (shuffle (:frage/choices frage)) #{}
+                   (fn [in-answer? choice-text]
+                     (rf/dispatch [:frage/multiple-choice-beantworten (:frage/id frage) in-answer? choice-text])))
+                 :else [:label "Fragentyp nicht implementiert"]))]])
+         @(rf/subscribe [:fragen]))
        [gap
         :size "10px"]
        [button

@@ -4,7 +4,8 @@
     [orga.frage-erstellen.sub]
     [re-com.core :as rc :refer [at v-box h-box]]
     [re-frame.core :as rf]
-    [reagent.core :as reagent]))
+    [reagent.core :as reagent]
+    [test.views :refer [single-choice-beantworten-body multiple-choice-beantworten-body textfrage-beantworten-body]]))
 
 
 (defn fragentyp-auswaehlen
@@ -25,7 +26,7 @@
        :tabs tabs
        :on-change (fn [typ]
                     (reset! frage-typ typ)
-                    (rf/dispatch [:frage-erstellen/update :frage/frage-typ typ]))]]]))
+                    (rf/dispatch [:frage-erstellen/update :frage/typ typ]))]]]))
 
 
 (defn frage-text-input
@@ -62,102 +63,124 @@
        :width "300px"
        :on-change (fn [val]
                     (reset! punkte val)
-                    (rf/dispatch [:frage-erstellen/update :frage/frage-punkte val]))])]])
+                    (rf/dispatch [:frage-erstellen/update :frage/punkte val]))])]])
 
 
-(defn choices-hinzufuegen
+(defn choices-list
+  []
+  [v-box :src (at)
+   :children
+   [[rc/title :src (at)
+     :level :level2
+     :label "Auswahlmöglichkeiten:"]
+    [v-box :src (at)
+     :gap "5px"
+     :children
+     (let [choices @(rf/subscribe [:frage-erstellen/choices])]
+       (mapv
+         (fn [choice-idx choice-text]
+           [h-box :src (at)
+            :attr {:key choice-idx}
+            :gap "10px"
+            :children
+            [[rc/label :label (str "- " choice-text)]
+             [rc/md-icon-button :src (at)
+              :md-icon-name "zmdi-minus"
+              :emphasise? true
+              :on-click #(rf/dispatch [:frage-erstellen/remove-choice choice-idx choice-text])]]])
+         (range (count choices)) choices))]]])
+
+
+(defn add-new-choice
+  [current-choice-text-atom]
+  (rf/dispatch [:frage-erstellen/add-choice @current-choice-text-atom])
+  (reset! current-choice-text-atom "")
+  (. (. js/document (getElementById "add-choice-inp")) focus))
+
+
+(defn choice-hinzufuegen
   []
   (let [current-choice-text (reagent/atom "")]
-    [v-box :src (at)
+    [h-box :src (at)
+     :attr {:key "add choice"}
+     :align :center
+     :gap "10px"
      :children
-     [[rc/title :src (at)
-       :level :level2
-       :label "Auswahlmöglichkeiten:"]
-      [:ul
-       (conj (for [choice @(rf/subscribe [:frage/choices])]
-               [:li {:key choice} choice])    ; add delete button
-             [:li
-              [h-box :src (at)
-               :align :center
-               :gap "5px"
-               :children
-               [[rc/input-text :src (at)
-                 :model current-choice-text
-                 :width "300px"
-                 :on-change #(reset! current-choice-text %)]
-                [rc/md-icon-button :src (at)
-                 :md-icon-name "zmdi-plus"
-                 :emphasise?   true
-                 :on-click     #(rf/dispatch [:frage-erstellen/add-choice @current-choice-text])]]]])]]]))
+     [[rc/input-text :src (at)
+       :attr {:id           "add-choice-inp"
+              :on-key-press (fn [e]
+                              (when (= 13 (.-charCode e)) ; enter
+                                (add-new-choice current-choice-text)))}
+       :model current-choice-text
+       :width "300px"
+       :change-on-blur? false
+       :on-change #(reset! current-choice-text %)]
+      [rc/md-icon-button :src (at)
+       :md-icon-name "zmdi-plus"
+       :emphasise? true
+       :on-click #(add-new-choice current-choice-text)]]]))
 
 
 (defn single-choice-erstellen
   []
   [v-box :src (at)
+   :gap "10px"
    :children
-   [[choices-hinzufuegen]
+   [[choices-list]
+    [choice-hinzufuegen]
     [rc/title
      :level :level2
      :label "Musterlösung:"]
-    [v-box
-     :gap "5px"
-     :children
-     (let [choices @(rf/subscribe [:frage/choices])
-           antwort (reagent/atom nil)]
-       (doall (for [[choice-id choice-text] (map vector (range (count choices)) choices)]
-                ^{:key choice-id}
-                [rc/radio-button :src (at)
-                 :label choice-text
-                 :value choice-text
-                 :model antwort
-                 :on-change (fn [val]
-                              (rf/dispatch [:frage-erstellen/update :frage/single-choice-loesung val])
-                              (reset! antwort val))])))]]])
+    [single-choice-beantworten-body 1 @(rf/subscribe [:frage-erstellen/choices]) ; 1 is dummy id
+     @(rf/subscribe [:frage-erstellen/single-choice-loesung])         ; initial value for radio buttons
+     (fn [antwort] (rf/dispatch [:frage-erstellen/update :frage/single-choice-loesung antwort]))]]])
 
 
 (defn multiple-choice-erstellen
   []
   [v-box :src (at)
+   :gap "10px"
    :children
-   [[choices-hinzufuegen]
+   [[choices-list]
+    [choice-hinzufuegen]
     [rc/title
      :level :level2
      :label "Musterlösung:"]
-    [v-box
-     :gap "5px"
-     :children
-     (let [antwort (reagent/atom #{})
-           choices @(rf/subscribe [:frage/choices])]
-       (mapv
-         (fn [choice-text]
-           (let [model (reagent/atom false)]
-             (rc/checkbox :src (at)
-                          :attr {:key choice-text}
-                          :model model
-                          :label choice-text
-                          :on-change
-                          (fn [val]
-                            (reset! model val)
-                            (if val
-                              (swap! antwort conj choice-text)
-                              (swap! antwort disj choice-text))
-                            (rf/dispatch [:frage-erstellen/update :frage/multiple-choice-loesung @antwort])))))
-         choices))]]])
+    [multiple-choice-beantworten-body 1 @(rf/subscribe [:frage-erstellen/choices])
+     @(rf/subscribe [:frage-erstellen/multiple-choice-loesung])       ; initial value for checkboxes
+     (fn [in-answer? choice-text]
+       (rf/dispatch [:frage-erstellen/multiple-choice-lsg-update in-answer? choice-text]))]]])
 
 
-(defn text-erstellen
-      []
-      [v-box :src (at)
-       :children
-       [[rc/title
-         :level :level2
-         :label "Lösungskriterien (sichtbar für Korrektoren):"]
-        (let [model (reagent/atom nil)]
-             [rc/input-textarea :src (at)
-              :model model
-              :on-change (fn [val] (reset! model val)
-                             (rf/dispatch [:frage-erstellen/update :frage/loesungskriterien val]))])
-        ]])
+(defn text-frage-erstellen
+  []
+  [v-box :src (at)
+   :children
+   [[rc/title
+     :level :level2
+     :label "Lösungskriterien (sichtbar für Korrektoren):"]
+    [textfrage-beantworten-body 1
+     @(rf/subscribe [:frage-erstellen/loesungskriterien])
+     (fn [antwort] (rf/dispatch [:frage-erstellen/update :frage/loesungskriterien antwort]))]]])
+
+
+
+(defn can-erstellen?
+  []
+  (let [frage @(rf/subscribe [:frage-erstellen/frage])
+        typ (:frage/typ frage)]
+    (and
+      (not (empty? (:frage/frage-text frage)))
+      (not (empty? (:frage/punkte frage)))
+      (cond                                                 ; hat loesung?
+        (= typ :frage.typ/single-choice) (:frage/single-choice-loesung frage)
+        (= typ :frage.typ/text) true
+        (= typ :frage.typ/multiple-choice) true)         ; spaeter: zuordnungsfrage braucht zuordnungsmap als loesung
+      (cond                                                 ; hat choices
+        (or (= typ :frage.typ/single-choice)
+            (= typ :frage.typ/multiple-choice)) (not (empty? (:frage/choices frage)))
+        (= typ :frage.typ/text) true))))
+
 
 (defn frage-erstellen
   []
@@ -171,9 +194,15 @@
     [rc/line]
     [fragentyp-auswaehlen]
     [frage-text-input]
-    (let [typ @(rf/subscribe [:frage/typ])]
+    [punkte-input]
+    (let [typ @(rf/subscribe [:frage-erstellen/typ])]
       (cond (= typ :frage.typ/single-choice) [single-choice-erstellen]
             (= typ :frage.typ/multiple-choice) [multiple-choice-erstellen]
-            (= typ :frage.typ/text) [text-erstellen]
+            (= typ :frage.typ/text) [text-frage-erstellen]
             :else [:h1 "not implemented"]))
-    [punkte-input]]])
+    [rc/button :src (at)
+     :class "button-primary"
+     :on-click #(rf/dispatch [:frage-erstellen/erstellen])
+     :disabled? (not (can-erstellen?))
+     :label "Erstellen"]]])
+

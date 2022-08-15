@@ -36,6 +36,16 @@
     (assoc-in db [:antworten frage-id] antwort)))
 
 
+(rf/reg-event-db
+  :frage/multiple-choice-beantworten
+  (fn [db [_ frage-id in-answer? choice-text]]
+    (if (not (get-in db [:antworten frage-id]))
+      (assoc-in db [:antworten frage-id] #{choice-text})  ; init antwort as set, in-answer? must be true if antwort is not initialised
+      (if in-answer?
+        (update-in db [:antworten frage-id] conj choice-text)
+        (update-in db [:antworten frage-id] disj choice-text)))))
+
+
 (rf/reg-event-fx
   :antworten/senden
   (fn [{:keys [db]} _]
