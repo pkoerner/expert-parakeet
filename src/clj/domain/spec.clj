@@ -3,6 +3,8 @@
     [clojure.spec.alpha :as s]))
 
 
+;; Frage
+
 (s/def :frage/id string?)
 (s/def :frage/typ #{:frage.typ/text :frage.typ/single-choice :frage.typ/multiple-choice})
 (s/def :frage/frage-text string?)
@@ -47,6 +49,8 @@
         :multiple-choice :frage/multiple-choice))
 
 
+;; User
+
 (s/def :user/id string?)
 (s/def :user/kurse (s/coll-of ::kurs))
 
@@ -54,6 +58,8 @@
 (s/def ::user
   (s/keys :req [:user/id :user/kurse]))
 
+
+;; Antwort
 
 (s/def :antwort/id string?)
 (s/def :antwort/user ::user)
@@ -71,6 +77,8 @@
   (s/keys :req [:antwort/user :antwort/antwort-text :antwort/frage]))
 
 
+;; Kerrektur
+
 (s/def :korrektur/korrektor ::user)
 (s/def :korrektur/antwort ::antwort)
 (s/def :korrektur/korrektur-text string?)
@@ -79,6 +87,8 @@
 (s/def ::korrektur
   (s/keys :req [:korrektur/korrektor :korrektur/antwort :korrektur/korrektur-text]))
 
+
+;; Test
 
 (s/def :test/id string?)
 (s/def :test/name string?)
@@ -89,6 +99,8 @@
   (s/keys :req [:test/id :test/name :test/fragen]))
 
 
+;; Fach
+
 (s/def :fach/id string?)
 (s/def :fach/fachtitel string?)
 (s/def :fach/tests (s/coll-of ::test))
@@ -98,6 +110,8 @@
   (s/keys :req [:fach/id :fach/fachtitel
                 :fach/tests]))
 
+
+;; Kurs
 
 (s/def :kurs/id string?)
 (s/def :kurs/fach ::fach)
