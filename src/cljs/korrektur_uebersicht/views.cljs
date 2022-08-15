@@ -36,7 +36,7 @@
   [:p
    [:input
     {:type  "button"
-     :value (str test-name ", beantwortet um " uhrzeit ", " datum " (" fachtitel ", " semester ", " jahr ")")
+     :value (str test-name ", beantwortet um " uhrzeit ", " datum " (" fachtitel ", " semester ", " jahr ", Antwort-Id " antwort-id ")")
      :on-click #(rf/dispatch [:router/push-state {:name :router/korrektur
                                                   :path-params {:aid antwort-id}}])}]])
 

@@ -8,7 +8,7 @@
 (rf/reg-event-fx
   :korrektur/laden
   (fn [{:keys [db]} [_ antwort-id]]
-    {:db          (assoc db :loading true)
+    {:db          (assoc db :laedt true)
      :http-xhrio  {:method          :get
                    :uri             (str vars/base-url "/antwort-fuer-korrektur/" antwort-id)
                    :timeout         8000
@@ -21,7 +21,7 @@
   (fn [db [_ korrektur]]
     (let [k (assoc korrektur :korrektur/punkte (str (:antwort/punkte korrektur)))]
       (-> db
-          (assoc :loading false)
+          (assoc :laedt false)
           (assoc :korrektur k)))))
 
 
@@ -54,10 +54,20 @@
                      :params          korrektur-korrektor
                      :format          (ajax/transit-request-format)
                      :response-format (ajax/transit-response-format)
-                     :on-success      [:korrektur/erfolgreich-gesendet]}})))
+                     :on-success      [:korrektur/erfolgreich-gesendet]
+                     :on-failure      [:korrektur/nicht-gesendet]}})))
 
 
 (rf/reg-event-db
   :korrektur/erfolgreich-gesendet
   (fn [db [_ result]]
     (assoc-in db [:korrektur :gesendet] result)))
+
+
+(rf/reg-event-db
+  :korrektur/nicht-gesendet
+  (fn [db [_ result]]
+    (-> db
+        (assoc :laedt false)
+        (assoc-in [:korrektur :gesendet :error] :backend-not-responding)
+        (assoc-in [:korrektur :gesendet :status] (:status result)))))

@@ -221,32 +221,32 @@
 
 (t/deftest test-antworten-fuer-korrektur-ansicht
   (t/testing "Eine Antwort aufbereiten"
-    (let [input [{:antwort/id 0, :antwort/antwort ["Antwort"], :antwort/punkte 5,
+    (let [input [{:antwort/id "0", :antwort/antwort ["Antwort"], :antwort/punkte 5,
                   :antwort/frage {:frage/frage-text "Fragetext", :frage/punkte 6, :frage/loesungskriterien "Loesung"}}]
-          output {:antwort/id 0, :antwort/antwort "Antwort", :antwort/punkte 5, :frage/frage-text "Fragetext",
+          output {:antwort/id "0", :antwort/antwort "Antwort", :antwort/punkte 5, :frage/frage-text "Fragetext",
                   :frage/punkte 6, :frage/loesungskriterien "Loesung"}]
       (t/is output (d/antworten-fuer-korrektur-ansicht input)))))
 
 
 (t/deftest test-korrekturen-into-antwort
   (t/testing "Keine Korrektur vorhanden"
-    (let [antwort {:antwort/id 0}
+    (let [antwort {:antwort/id "0"}
           korrekturen-fct (fn [_id] [])
           result (merge antwort {:korrektur/id nil})]
       (t/is result (d/korrekturen-into-antwort korrekturen-fct antwort))))
   (t/testing "Eine Korrektur vorhanden"
-    (let [antwort {:antwort/id 0}
-          korrektur {:korrektur/id 0 :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
+    (let [antwort {:antwort/id "0"}
+          korrektur {:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
           korrekturen-fct (fn [_id] (conj [] korrektur))
           result (merge antwort korrektur)]
       (t/is result (d/korrekturen-into-antwort korrekturen-fct antwort))))
   (t/testing "Mehrere Korrekturen vorhanden"
-    (let [antwort {:antwort/id 0}
+    (let [antwort {:antwort/id "0"}
           korrekturen-fct (fn [_id]
-                            [{:korrektur/id 0 :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-03")}
-                             {:korrektur/id 0 :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
-                             {:korrektur/id 0 :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04")}])
-          result (merge antwort {:korrektur/id 0 :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")})]
+                            [{:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-03")}
+                             {:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
+                             {:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04")}])
+          result (merge antwort {:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")})]
       (t/is result (d/korrekturen-into-antwort korrekturen-fct antwort)))))
 
 

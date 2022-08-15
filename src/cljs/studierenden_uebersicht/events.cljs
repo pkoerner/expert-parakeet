@@ -13,8 +13,7 @@
                    :uri             (str vars/base-url "/user/" (get-in db [:user :id]) "/kurse")
                    :timeout         8000
                    :response-format (ajax/transit-response-format)
-                   :on-success      [:kurse/angekommen]
-                   :with-credentials true}}))
+                   :on-success      [:kurse/angekommen]}}))
 
 
 (rf/reg-event-db

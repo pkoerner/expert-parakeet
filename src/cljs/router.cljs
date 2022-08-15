@@ -1,11 +1,8 @@
 (ns router
   (:require
     [korrektur-uebersicht.views :as korr]
-<<<<<<< HEAD
-    [orga.frage-erstellen.views :as frage-erstln]
-=======
     [korrektur.views :as korrektur]
->>>>>>> Feat: No framework for korrektur
+    [orga.frage-erstellen.views :as frage-erstln]
     [re-frame.core :as re-frame]
     [reitit.coercion.spec :as rss]
     [reitit.core :as r]

@@ -37,12 +37,27 @@
              :on-click #(rf/dispatch [:korrektur/senden])}]]])
 
 
+(defn error-handling
+  [error status]
+  (case error
+    :keine-passende-antwort "Antwort, die korrigiert werden sollte, nicht vorhanden."
+    :korrektur-text-missing "Korrekturtext angeben."
+    :korrektur-punkte-missing "Punkte angeben."
+    :punkte-invalid "Eingabe keine gültige Punktzahl."
+    :punkte-zu-viel "Angegebene Punktzahl zu groß."
+    :backend-not-responding (str "Servererror (Statuscode " status ").")))
+
+
 (defn korrektur-erfolgreich
   [gesendet]
-  ;; Add more precise error handling
-  (if gesendet
-    [:p {:style {:color "green"}} (str "Korrektur abgesendet " gesendet)]
-    [:p]))
+  (if-not gesendet
+    [:p]
+    (if-not (:error gesendet)
+      [:p {:style {:color "green"}}
+       (str "Korrektur \"" (:korrektur/korrektur-text gesendet) "\" ("
+            (get-in gesendet [:korrektur/antwort :antwort/punkte]) " Punkte) erfolgreich gespeichert.")]
+      [:p {:style {:color "red"}}
+       (str "Error: " (error-handling (:error gesendet) (:status gesendet)))])))
 
 
 (defn show-antwort-to-korrigieren
@@ -50,6 +65,7 @@
   (let [korrektur @(rf/subscribe [:korrektur/erhalten])]
     [:div
      [:h2 (str (:frage/frage-text korrektur) " - " (:frage/punkte korrektur) " Punkte")]
+     [:p (str "Antwort-Id " (:antwort/id korrektur))]
      [:p (str "Lösungsvorschlag: ")]
      [:p (:frage/loesungskriterien korrektur)]
      [:p (str "Antwort:")]
