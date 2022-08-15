@@ -164,21 +164,20 @@
      (fn [antwort] (rf/dispatch [:frage-erstellen/update :frage/loesungskriterien antwort]))]]])
 
 
-
 (defn can-erstellen?
   []
   (let [frage @(rf/subscribe [:frage-erstellen/frage])
         typ (:frage/typ frage)]
     (and
-      (not (empty? (:frage/frage-text frage)))
-      (not (empty? (:frage/punkte frage)))
+      (seq (:frage/frage-text frage))
+      (seq (:frage/punkte frage))
       (cond                                                 ; hat loesung?
         (= typ :frage.typ/single-choice) (:frage/single-choice-loesung frage)
         (= typ :frage.typ/text) true
         (= typ :frage.typ/multiple-choice) true)         ; spaeter: zuordnungsfrage braucht zuordnungsmap als loesung
       (cond                                                 ; hat choices
         (or (= typ :frage.typ/single-choice)
-            (= typ :frage.typ/multiple-choice)) (not (empty? (:frage/choices frage)))
+            (= typ :frage.typ/multiple-choice)) (seq (:frage/choices frage))
         (= typ :frage.typ/text) true))))
 
 
