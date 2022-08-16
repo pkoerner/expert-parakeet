@@ -26,9 +26,18 @@
                    :db/index true}]
      :antwort/user
      :antwort/frage
+     :antwort/frage-id
      :antwort/antwort
      :antwort/punkte]))
 
+(def versuch-schema
+  (spectomic/datomic-schema
+    [[:versuch/id {:db/unique :db.unique/identity
+                   :db/index true}]
+     :versuch/test
+     :versuch/abgabe-zeit
+     :versuch/user
+     :versuch/antworten]))
 
 (def korrektur-schema
   (spectomic/datomic-schema
@@ -71,4 +80,4 @@
 
 
 (def schema
-  (concat frage-schema antwort-schema korrektur-schema test-schema user-schema fach-schema kurs-schema))
+  (concat frage-schema antwort-schema versuch-schema korrektur-schema test-schema user-schema fach-schema kurs-schema))

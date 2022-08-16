@@ -8,6 +8,7 @@
 
 (def id-len 10)
 
+(defn now [] (java.util.Date.))
 
 ;; use mem db
 
@@ -83,6 +84,37 @@
              @conn [:user/id user-id] [:test/id test-id])))
 
 
+(defn versuche-von-test
+  [user-id test-id]
+  (d/q '[:find (pull ?v [:versuch/id
+                         {:versuch/test [:test/id]}
+                         :versuch/abgabe-zeit
+                         {:versuch/antworten [:antwort/frage-id :antwort/antwort :antwort/punkte]}])
+         :in $ ?u ?t
+         :where 
+         [?v :versuch/user ?u]
+         [?v :versuch/test ?t]] 
+       @conn [:user/id user-id] [:test/id test-id]))
+
+
+(defn add-versuch
+  [user-id test-id antworten]
+  (let [id (generate-id :versuch/id)
+        tx-result (d/transact conn
+                              [{:versuch/id id
+                                :versuch/test [:test/id test-id]
+                                :versuch/abgabe-zeit (now)
+                                :versuch/user [:user/id user-id]
+                                :versuch/antworten antworten}])
+        db-after (:db-after tx-result)]
+    (d/pull db-after [:versuch/id 
+                      {:versuch/test [:test/id]}
+                      :versuch/abgabe-zeit
+                      {:versuch/antworten [:antwort/frage-id
+                                           :antwort/antwort]}]
+            [:versuch/id id])))
+
+
 (defn fragen-fuer-user
   [korrektorin-id]
   (mapv first
@@ -145,49 +177,6 @@
   (mapv first (d/q '[:find ?id
                      :where [_ :test/id ?id]]
                    @conn)))
-
-
-(defn all-fragen
-  []
-  (mapv first (d/q '[:find (pull ?e [:frage/id])
-                     :where [?e :frage/id]]
-                   @db/conn)))
-
-
-(defn frage-by-id
-  [id]
-  (d/pull @db/conn
-          [:frage/id :frage/frage-text :frage/punkte :frage/typ]
-          [:frage/id id]))
-
-
-(defn user-add-antwort
-  [user-id frage-id antwort]
-  (let [id (generate-id :antwort/id)
-        tx-result (d/transact conn
-                              [{:db/id -1
-                                :antwort/id id
-                                :antwort/frage [:frage/id frage-id]
-                                :antwort/user [:user/id user-id]
-                                :antwort/antwort antwort}])
-        db-after (:db-after tx-result)]
-    (d/pull db-after [:antwort/id {:antwort/frage [:frage/id]}] [:antwort/id id])))
-
-
-(defn user-add-antworten
-  [user-id antworten]
-  (mapv
-    (fn [[frage-id antwort]]
-      (db/user-add-antwort user-id frage-id antwort))
-    antworten))
-
-
-(defn all-antwort
-  []
-  (d/q '[:find (pull ?e [:antwort/id :antwort/user :antwort/frage :antwort/antwort])
-         :where [?e :antwort/id]]
-       @db/conn))
-
 
 (comment 
   (set! *print-length* 5)

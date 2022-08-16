@@ -22,19 +22,14 @@
                 (response (db/all-tests)))
            (GET "/test/:id" [id]
                 (response (db/test-by-id id)))
-           ;; fragen
-           ;; do we need these route, why can't we embed the questions in the test
-           (GET "/frage" []
-                (response (db/all-fragen)))
-           (GET "/frage/:id" [id]
-                (response (db/frage-by-id id)))
 
-           (GET "/antwort" []
-                (response (db/all-antwort)))
-           ;; antworten
-           (POST "/user/:user-id/antworten" [user-id :as r]
-                 (let [antworten (:body-params r)]
-                   (response (db/user-add-antworten user-id antworten))))
+
+           ;; versuche
+           (GET "/test/:test-id/versuche" [test-id user-id]
+                (response (db/versuche-von-test user-id test-id)))
+
+           (POST "/test/:test-id/versuche" [test-id user-id :as r]
+                 (response (db/add-versuch user-id test-id (:body-params r))))
 
            (GET "/user/:user-id/kurse" [user-id]
                 (response (domain/kurse-mit-gesamt-punkten

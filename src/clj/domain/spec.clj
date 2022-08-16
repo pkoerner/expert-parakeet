@@ -64,6 +64,7 @@
 (s/def :antwort/id string?)
 (s/def :antwort/user ::user)
 (s/def :antwort/frage ::frage)
+(s/def :antwort/frage-id :frage/id)
 
 
 (s/def :antwort/antwort
@@ -74,7 +75,7 @@
 
 
 (s/def ::antwort
-  (s/keys :req [:antwort/user :antwort/antwort-text :antwort/frage]))
+  (s/keys :req [:antwort/antwort-text :antwort/frage-id]))
 
 
 ;; Kerrektur
@@ -97,6 +98,18 @@
 
 (s/def ::test
   (s/keys :req [:test/id :test/name :test/fragen]))
+
+
+;; Versuch
+
+(s/def :versuch/id string?)
+(s/def :versuch/test ::test)
+(s/def :versuch/abgabe-zeit inst?)
+(s/def :versuch/user ::user)
+(s/def :versuch/antworten (s/coll-of ::antwort))
+
+(s/def ::versuch
+  (s/keys :req [:versuch/id :versuch/test :versuch/user :versuch/abgabe-zeit :versuch/antworten]))
 
 
 ;; Fach
