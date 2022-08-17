@@ -1,6 +1,7 @@
 (ns router
   (:require
     [korrektur-uebersicht.views :as korr]
+    [orga.frage-erstellen.views :as frage-erstln]
     [re-frame.core :as re-frame]
     [reitit.coercion.spec :as rss]
     [reitit.core :as r]
@@ -79,7 +80,14 @@
        :start (fn [params]
                 (re-frame/dispatch [:test/laden (get-in params [:path :id])]))
        :stop (fn [_]
-               (re-frame/dispatch [:test/entfernen]))}]}]])
+               (re-frame/dispatch [:test/entfernen]))}]}]
+   ["frage/erstellen"
+    {:name      ::frage-erstellen
+     :view      frage-erstln/frage-erstellen
+     :link-text "Neue Frage erstellen"
+     :controllers
+     [{:start #(re-frame/dispatch [:frage-erstellen/init])
+       :stop  #(re-frame/dispatch [:frage-erstellen/entfernen])}]}]])
 
 
 (defn on-navigate
@@ -125,7 +133,7 @@
   [{:keys [router]}]
   (let [current-route @(re-frame/subscribe [::current-route])]
     [:div
-     [nav {:dests [::overview ::korrektur-overview] :router router :current-route current-route}]
+     [nav {:dests [::overview ::korrektur-overview ::frage-erstellen] :router router :current-route current-route}]
      (when current-route
        [(-> current-route :data :view)])]))
 
