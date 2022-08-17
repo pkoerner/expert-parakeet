@@ -39,9 +39,13 @@
 (def tests
   [{:test/id "1"
     :test/name "Test 1"
+    :test/start "00:00, 12 Aug 2022"
+    :test/ende "00:00, 15 Aug 2022"
     :test/fragen [[:frage/id "1"] [:frage/id "3"] [:frage/id "4"] [:frage/id "5"]]}
    {:test/id "2"
     :test/name "Test 2"
+    :test/start "00:00, 16 Aug 2022"
+    :test/ende "00:00, 30 Aug 2022"
     :test/fragen [[:frage/id "1"]]}])
 
 
@@ -64,7 +68,12 @@
     :kurs/fach [:fach/id "1"]
     :kurs/jahr 2001
     :kurs/semester "SoSe"
-    :kurs/tests [[:test/id "1"] [:test/id "2"]]}])
+    :kurs/tests [[:test/id "1"] [:test/id "2"]]}
+   {:kurs/id "3"
+    :kurs/fach [:fach/id "1"]
+    :kurs/jahr 2002
+    :kurs/semester "SoSe"
+    :kurs/tests [[:test/id "2"]]}])
 
 
 (def user

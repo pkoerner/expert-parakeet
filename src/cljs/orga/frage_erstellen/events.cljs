@@ -54,7 +54,7 @@
 
 (rf/reg-event-fx
   :frage-erstellen/erstellen
-  (fn [{:keys [db]} _]
+  (fn [{:keys [db]}]
     (let [typ (get-in db [:frage :frage/typ])
           frage
           (apply assoc
@@ -73,6 +73,7 @@
                           (if (nil? multiple-choice-lsg)
                             #{}
                             (set multiple-choice-lsg)))]))] ; choices kann coll sein, mult-choi-lsg muss set!
-      (print frage))))
-
+      (rf/dispatch [:test-erstellen/update :frage-erstellen? false])
+      (rf/dispatch [:test-erstellen/fragen-hinzufuegen [frage]])
+      (rf/dispatch [:frage-erstellen/init]))))  ; reset frage Felder
 

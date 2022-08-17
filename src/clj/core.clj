@@ -20,8 +20,16 @@
            ;; maybe better route /tests
            (GET "/test" []
                 (response (db/all-tests)))
+           (POST "/test" [:as r]
+                 (let [body (:body-params r)]
+                   (response (db/add-test (:test-name body) (:kurs-id body)
+                                          (:fragen body) (:start body) (:ende body)))))
            (GET "/test/:id" [id]
                 (response (db/test-by-id id)))
+
+           (GET "/kurs/:id" [id]
+                (response (db/kurs-by-id id)))
+
            ;; fragen
            ;; do we need these route, why can't we embed the questions in the test
            (GET "/frage" []
@@ -35,6 +43,12 @@
            (POST "/user/:user-id/antworten" [user-id :as r]
                  (let [antworten (:body-params r)]
                    (response (db/user-add-antworten user-id antworten))))
+
+           (GET "/fach" []
+                (response (db/all-faecher)))
+
+           (GET "/kurs/for-fach/:fach-id" [fach-id]
+                (response (db/kurse-for-fach fach-id)))
 
            (GET "/user/:user-id/kurse" [user-id]
                 (response (domain/kurse-mit-gesamt-punkten

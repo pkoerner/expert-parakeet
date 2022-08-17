@@ -42,6 +42,8 @@
     [[:test/id {:db/unique :db.unique/identity
                 :db/index true}]
      :test/name
+     :test/start
+     :test/ende
      :test/fragen]))
 
 

@@ -82,6 +82,8 @@
 
 (s/def :test/id string?)
 (s/def :test/name string?)
+(s/def :test/start string?)
+(s/def :test/ende string?)
 (s/def :test/fragen (s/coll-of ::frage))
 
 

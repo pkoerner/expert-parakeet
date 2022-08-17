@@ -133,7 +133,8 @@
      :label "Musterlösung:"]
     [single-choice-beantworten-body 1 @(rf/subscribe [:frage-erstellen/choices]) ; 1 is dummy id
      @(rf/subscribe [:frage-erstellen/single-choice-loesung])         ; initial value for radio buttons
-     (fn [antwort] (rf/dispatch [:frage-erstellen/update :frage/single-choice-loesung antwort]))]]])
+     (fn [antwort] (rf/dispatch [:frage-erstellen/update :frage/single-choice-loesung antwort]))
+     false]]])
 
 
 (defn multiple-choice-erstellen
@@ -149,7 +150,8 @@
     [multiple-choice-beantworten-body 1 @(rf/subscribe [:frage-erstellen/choices])
      @(rf/subscribe [:frage-erstellen/multiple-choice-loesung])       ; initial value for checkboxes
      (fn [in-answer? choice-text]
-       (rf/dispatch [:frage-erstellen/multiple-choice-lsg-update in-answer? choice-text]))]]])
+       (rf/dispatch [:frage-erstellen/multiple-choice-lsg-update in-answer? choice-text]))
+     false]]])
 
 
 (defn text-frage-erstellen
