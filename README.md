@@ -1,5 +1,7 @@
 # How to run
 
+First [setup authentification](./authentification.md)
+
 Run Backend:
 
 ```shell

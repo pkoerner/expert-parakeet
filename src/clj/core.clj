@@ -1,5 +1,6 @@
 (ns core
   (:require
+    [auth :refer [extract-token wrap-authentication]]
     [compojure.core :refer [GET POST defroutes context]]
     [compojure.route :as route]
     [db :as db]
@@ -7,6 +8,7 @@
     [muuntaja.middleware :refer [wrap-format]]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.cors :refer [wrap-cors]]
+    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
     [ring.middleware.params :refer [wrap-params]]
     [ring.middleware.reload :refer [wrap-reload]]
     [ring.util.response :refer [response]]))
@@ -53,7 +55,8 @@
                        (domain/sortierte-antworten-von-freitext-fragen db/antworten-von-frage)
                        (domain/antworten-korrigiert (db/korrekturen-von-korrektorin-korrigiert user-id))
                        (domain/timestamp-to-datum-and-uhrzeit)))))
-
+  (GET "/api/access-token" request (str (extract-token request)))
+  (GET "/api/session" request (str (:session request)))
   (route/not-found "Not Found"))
 
 
@@ -64,10 +67,15 @@
 
 (def app
   (-> routes
-      wrap-format ; handle content negotiation
-      wrap-params
+      wrap-authentication
       (wrap-cors :access-control-allow-origin allowed-origins
-                 :access-control-allow-methods allowed-methods)))
+                 :access-control-allow-methods allowed-methods
+                 :access-control-allow-credentials "true")
+      wrap-format ; handle content negotiation
+      (wrap-defaults (-> site-defaults
+                         (assoc-in [:session :cookie-attrs :same-site] :none)
+                         (assoc-in [:session :cookie-attrs :secure] true)))
+      wrap-params))
 
 
 (def app-dev (wrap-reload #'app))

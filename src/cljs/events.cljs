@@ -17,10 +17,16 @@
 
 
 ;; Default event for HTTP Failure
-(rf/reg-event-db
+(rf/reg-event-fx
   :http-no-on-failure
-  (fn [db fail]
-    (-> db
-        (assoc :laedt false)
-        (assoc :error fail))))
+  (fn [cofx [_ fail]]
+    {:db (-> (:db cofx)
+             (assoc :laedt false)
+             (assoc :error fail))
+     :start-oauth2-github true}))
 
+
+;; Start the OAuth2 flow
+(rf/reg-fx
+  :start-oauth2-github
+  (fn [_] (set! (.-location js/window) "http://localhost:8081/api/oauth2/github")))
