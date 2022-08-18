@@ -31,6 +31,9 @@
            (POST "/test/:test-id/versuche" [test-id user-id :as r]
                  (response (db/add-versuch user-id test-id (:body-params r))))
 
+           (GET "/versuch/:versuch-id" [versuch-id user-id]
+                (response (db/versuch-mit-id versuch-id)))
+
            (GET "/user/:user-id/kurse" [user-id]
                 (response (domain/kurse-mit-gesamt-punkten
                             (db/kurse-von-studierendem user-id)

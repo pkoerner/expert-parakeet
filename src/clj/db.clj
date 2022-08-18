@@ -111,10 +111,17 @@
     (d/pull db-after [:versuch/id 
                       {:versuch/test [:test/id]}
                       :versuch/abgabe-zeit
-                      {:versuch/antworten [:antwort/frage-id
-                                           :antwort/antwort]}]
+                      :versuch/status]
             [:versuch/id id])))
 
+(defn versuch-mit-id
+  [versuch-id]
+  (d/pull @conn [:versuch/id 
+                 {:versuch/test [:test/id]}
+                 :versuch/abgabe-zeit
+                 {:versuch/antworten [:antwort/frage-id
+                                      :antwort/antwort]}]
+          [:versuch/id versuch-id]))
 
 (defn fragen-fuer-user
   [korrektorin-id]
