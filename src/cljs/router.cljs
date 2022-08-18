@@ -72,15 +72,26 @@
        :stop  #(re-frame/dispatch [:korrektur-uebersicht/entferne-korrigierte-antworten])}]}]
    ["test/:id"
     {:name      ::test
-     :view      test/Root
+     :view      test/overview
      :link-text "Test"
-     :parameters {:path {:id int?}}
      :controllers
      [{:parameters {:path [:id]}
-       :start (fn [params]
-                (re-frame/dispatch [:test/laden (get-in params [:path :id])]))
-       :stop (fn [_]
-               (re-frame/dispatch [:test/entfernen]))}]}]
+       :start #(re-frame/dispatch [:versuche/laden (get-in % [:path :id])])
+       :stop #(re-frame/dispatch [:versuche/entfernen])}]}]
+   ["test/:id/versuch"
+    {:name      ::test-neuer-versuch
+     :view      test/neuer-versuch
+     :controllers
+     [{:parameters {:path [:id]}
+       :start #(re-frame/dispatch [:test/laden (get-in % [:path :id])])
+       :stop #(re-frame/dispatch [:test/entfernen])}]}]
+   ["versuch/:id"
+    {:name      ::versuch-ueberpruefen
+     :view      test/versuch-ueberpruefen
+     :controllers
+     [{:parameters {:path [:id]}
+       :start #(re-frame/dispatch [:versuch/laden (get-in % [:path :id])])
+       :stop #(re-frame/dispatch [:versuch/entfernen])}]}]
    ["frage/erstellen"
     {:name      ::frage-erstellen
      :view      frage-erstln/frage-erstellen

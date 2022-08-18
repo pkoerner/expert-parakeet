@@ -4,11 +4,6 @@
 
 
 (rf/reg-sub
-  :fragen
-  (fn [db _] (get-in db [:test :test/fragen])))
-
-
-(rf/reg-sub
   :user
   (fn [db _] (get-in db [:user :name])))
 
@@ -22,7 +17,3 @@
   :laedt
   (fn [db _] (:laedt db)))
 
-
-(rf/reg-sub
-  :antworten/gesendet
-  (fn [db _] (:gesendet db)))

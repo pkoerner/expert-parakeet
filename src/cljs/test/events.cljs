@@ -48,23 +48,81 @@
 
 
 (rf/reg-event-fx
-  :antworten/senden
-  (fn [{:keys [db]} _]
+  :versuch/senden
+  (fn [_ [_ test-id]]
     ;; TODO: should use an interceptor that injects subscriptoins for user-id
     ;; and antworten
     (let [user-id @(rf/subscribe [:user-id])
-          antworten (:antworten db)]
+          antworten @(rf/subscribe [:antworten])]
       {:http-xhrio  {:method          :post
-                     :uri             (str vars/base-url "/user/" user-id "/antworten")
+                     :uri             (str vars/base-url "/test/" test-id "/versuche?user-id=" user-id)
                      :params          antworten
                      :format          (ajax/transit-request-format)
                      :response-format (ajax/transit-response-format)
-                     :on-success      [:antworten/erfolgreich-gesendet]
-                     :with-credentials true}})))
+                     :with-credentials true
+                     :on-success      [:versuch/erfolgreich-gesendet]}
+      :push-state  {:name :router/test
+                     :path-params {:id test-id}}})))
 
 
 (rf/reg-event-db
-  :antworten/erfolgreich-gesendet
+  :versuch/erfolgreich-gesendet
   (fn [db _]
-    (assoc db :gesendet true)))
+    (assoc-in db [:test :gesendet] true)))
+
+
+(rf/reg-event-fx
+  :versuche/laden
+  (fn [{:keys [db]} [_ test-id]]
+    {:db          (assoc db :laedt true)
+     :http-xhrio  {:method          :get
+                   :uri             (str vars/base-url "/test/" test-id "/versuche")
+                   ;; TODO: use interceptor
+                   :params          {:user-id (get-in db [:user :id])}
+                   :timeout         8000
+                   :response-format (ajax/transit-response-format)
+                   :with-credentials true
+                   :on-success      [:versuche/angekommen]}}))
+
+
+(rf/reg-event-db
+  :versuche/angekommen
+  (fn [db [_ antworten]]
+    (-> db
+        (assoc :laedt false)
+        (assoc :versuche antworten))))
+
+
+(rf/reg-event-db
+  :versuche/entfernen
+  (fn [db _]
+    (dissoc db :antworten)))
+
+
+(rf/reg-event-fx
+  :versuch/laden
+  (fn [{:keys [db]} [_ versuch-id]]
+    {:db          (assoc db :laedt true)
+     :http-xhrio  {:method          :get
+                   :uri             (str vars/base-url "/versuch/" versuch-id)
+                   ;; TODO: use interceptor
+                   :params          {:user-id (get-in db [:user :id])}
+                   :timeout         8000
+                   :response-format (ajax/transit-response-format)
+                   :with-credentials true
+                   :on-success      [:versuch/angekommen]}}))
+
+
+(rf/reg-event-db
+  :versuch/angekommen
+  (fn [db [_ antworten]]
+    (-> db
+        (assoc :laedt false)
+        (assoc :versuche antworten))))
+
+
+(rf/reg-event-db
+  :versuch/entfernen
+  (fn [db _]
+    (dissoc db :antworten)))
 

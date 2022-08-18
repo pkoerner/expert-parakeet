@@ -3,7 +3,8 @@
     [re-com.core :refer [at v-box box gap button input-textarea line title radio-button checkbox throbber]]
     [re-frame.core :as rf]
     [reagent.core :as reagent]
-    [test.events]))
+    [test.events]
+    [test.subs]))
 
 
 (defn textfrage-beantworten-body
@@ -97,24 +98,11 @@
        [button
         :src (at)
         :class "button-primary"
-        :on-click #(rf/dispatch [:antworten/senden])
-        :disabled? (rf/subscribe [:antworten/gesendet])
+        :on-click #(rf/dispatch [:versuch/senden @(rf/subscribe [:test-id])])
         :label "Abschicken"])]))
 
 
-;; not in use
-;; for debugging
-(defn Corrections
-  []
-  [v-box
-   :children
-   (mapv (fn [c]
-           [title :label (str "Correction: " c)
-            :level :level2])
-         @(rf/subscribe [:corrections]))])
-
-
-(defn Root
+(defn neuer-versuch
   []
   [box
    :padding "15px"
@@ -129,4 +117,94 @@
        [throbber]
        [Questions])]]])
 
+
+(defn versuch-row
+  [n versuch]
+  [:tr
+   [:td n]
+   [:td (get versuch :versuch/status "Nicht Bewertet")]
+   [:td (get versuch :versuch/punkte 0)]
+   [:td [:a {:on-click
+             #(rf/dispatch [:router/push-state
+                            {:name :router/versuch-ueberpruefen
+                             :path-params {:id (:versuch/id versuch)}}])}
+         "Überprüfen"]]])
+
+
+(defn versuche-tabelle
+  []
+  (let [versuche @(rf/subscribe [:versuche])]
+     [:table
+     [:thead
+      [:tr
+       [:th "Versuch"]
+       [:th "Status"]
+       [:th "Punkte"]
+       [:th "Überprüfen"]]]
+     (into [:tbody] (map versuch-row (rest (range)) versuche))]))
+
+
+(defn overview
+  []
+  [:div
+   [:h2 "Test Name"]
+   [:a
+    {:on-click #(rf/dispatch [:router/push-state
+                              {:name :router/test-neuer-versuch
+                               :path-params {:id 1}}])}
+    "Neue Versuch starten"]
+   [versuche-tabelle]])
+
+
+(defn fragen-beantwortet
+  []
+  (fn []
+    [v-box
+     :src (at)
+     :children
+     (conj
+       (mapv
+         (fn [data]
+           [v-box :src (at)
+            :children
+            [[title :src (at)
+              :label (str (:frage/frage-text data) " - " (:frage/punkte data) " Punkte")
+              :level :level2]
+             (let [frage-id (:frage/id data)
+                   choices (shuffle (:frage/choices data))
+                   antwort (:antwort/antwort data)
+                   save-ans-to-db-fkt
+                   (fn [antwort] (rf/dispatch [:frage/beantworten frage-id antwort]))
+                   save-multiple-choise 
+                   (fn [in-answer? choice-text]
+                     (rf/dispatch [:frage/multiple-choice-beantworten frage-id in-answer? choice-text]))]
+               (case (:frage/typ data)
+                 :frage.typ/text (textfrage-beantworten-body 
+                                   frage-id antwort
+                                   save-ans-to-db-fkt)
+                 :frage.typ/single-choice (single-choice-beantworten-body 
+                                            frage-id choices antwort 
+                                            save-ans-to-db-fkt)
+                 :frage.typ/multiple-choice (multiple-choice-beantworten-body 
+                                              frage-id choices antwort
+                                              save-multiple-choise)
+                 [:label "Fragentyp nicht implementiert"]))]])
+         @(rf/subscribe [:fragen-mit-antworten]))
+       )]))
+
+
+(defn versuch-ueberpruefen
+  []
+  [box
+   :padding "15px"
+   :child
+   [v-box
+    :size "auto"
+    :gap "15px"
+    :children
+    [[title :label "Test" :level :level1]
+     [line]
+     (if @(rf/subscribe [:laedt])
+       [throbber]
+       [fragen-beantwortet])]]])
 
