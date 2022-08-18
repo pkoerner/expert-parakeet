@@ -86,15 +86,16 @@
 
 (defn versuche-von-test
   [user-id test-id]
-  (d/q '[:find (pull ?v [:versuch/id
-                         {:versuch/test [:test/id]}
-                         :versuch/abgabe-zeit
-                         {:versuch/antworten [:antwort/frage-id :antwort/antwort :antwort/punkte]}])
-         :in $ ?u ?t
-         :where 
-         [?v :versuch/user ?u]
-         [?v :versuch/test ?t]] 
-       @conn [:user/id user-id] [:test/id test-id]))
+  (mapv first 
+        (d/q '[:find (pull ?v [:versuch/id
+                               {:versuch/test [:test/id]}
+                               :versuch/abgabe-zeit
+                               {:versuch/antworten [:antwort/frage-id :antwort/antwort :antwort/punkte]}])
+               :in $ ?u ?t
+               :where 
+               [?v :versuch/user ?u]
+               [?v :versuch/test ?t]] 
+             @conn [:user/id user-id] [:test/id test-id])))
 
 
 (defn add-versuch
