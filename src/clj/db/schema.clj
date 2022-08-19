@@ -30,6 +30,7 @@
      :antwort/antwort
      :antwort/punkte]))
 
+
 (def versuch-schema
   (spectomic/datomic-schema
     [[:versuch/id {:db/unique :db.unique/identity
@@ -38,6 +39,7 @@
      :versuch/abgabe-zeit
      :versuch/user
      :versuch/antworten]))
+
 
 (def korrektur-schema
   (spectomic/datomic-schema

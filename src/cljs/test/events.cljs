@@ -61,7 +61,7 @@
                      :response-format (ajax/transit-response-format)
                      :with-credentials true
                      :on-success      [:versuch/erfolgreich-gesendet]}
-      :push-state  {:name :router/test
+       :push-state  {:name :router/test
                      :path-params {:id test-id}}})))
 
 
@@ -112,10 +112,13 @@
                    :with-credentials true
                    :on-success      [:versuch/angekommen]}}))
 
+
 (defn antworten->map
   [antworten]
-  (into {} (map (fn [a] [(:antwort/frage-id a) 
-                         (:antwort/antwort a)]) antworten)))
+  (into {} (map (fn [a]
+                  [(:antwort/frage-id a)
+                   (:antwort/antwort a)]) antworten)))
+
 
 (rf/reg-event-db
   :versuch/angekommen

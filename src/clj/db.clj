@@ -8,7 +8,11 @@
 
 (def id-len 10)
 
-(defn now [] (java.util.Date.))
+
+(defn now
+  []
+  (java.util.Date.))
+
 
 ;; use mem db
 
@@ -86,15 +90,15 @@
 
 (defn versuche-von-test
   [user-id test-id]
-  (mapv first 
+  (mapv first
         (d/q '[:find (pull ?v [:versuch/id
                                {:versuch/test [:test/id]}
                                :versuch/abgabe-zeit
                                {:versuch/antworten [:antwort/frage-id :antwort/antwort :antwort/punkte]}])
                :in $ ?u ?t
-               :where 
+               :where
                [?v :versuch/user ?u]
-               [?v :versuch/test ?t]] 
+               [?v :versuch/test ?t]]
              @conn [:user/id user-id] [:test/id test-id])))
 
 
@@ -108,21 +112,23 @@
                                 :versuch/user [:user/id user-id]
                                 :versuch/antworten antworten}])
         db-after (:db-after tx-result)]
-    (d/pull db-after [:versuch/id 
+    (d/pull db-after [:versuch/id
                       {:versuch/test [:test/id]}
                       :versuch/abgabe-zeit
                       :versuch/status]
             [:versuch/id id])))
 
+
 (defn versuch-mit-id
   [versuch-id]
-  (d/pull @conn [:versuch/id 
+  (d/pull @conn [:versuch/id
                  {:versuch/test [:test/id
                                  {:test/fragen [:frage/id :frage/typ :frage/punkte :frage/choices :frage/frage-text]}]}
                  :versuch/abgabe-zeit
                  {:versuch/antworten [:antwort/frage-id
                                       :antwort/antwort]}]
           [:versuch/id versuch-id]))
+
 
 (defn fragen-fuer-user
   [korrektorin-id]
@@ -186,6 +192,7 @@
   (mapv first (d/q '[:find ?id
                      :where [_ :test/id ?id]]
                    @conn)))
+
 
 (comment 
   (set! *print-length* 5)

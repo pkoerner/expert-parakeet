@@ -135,7 +135,7 @@
 (defn versuche-tabelle
   []
   (let [versuche @(rf/subscribe [:versuche/sorted-by-date])]
-     [:table
+    [:table
      [:thead
       [:tr
        [:th "Versuch"]
@@ -177,22 +177,21 @@
                    antwort (:antwort/antwort data)
                    save-ans-to-db-fkt
                    (fn [antwort] (rf/dispatch [:frage/beantworten frage-id antwort]))
-                   save-multiple-choise 
+                   save-multiple-choise
                    (fn [in-answer? choice-text]
                      (rf/dispatch [:frage/multiple-choice-beantworten frage-id in-answer? choice-text]))]
                (case (:frage/typ data)
-                 :frage.typ/text (textfrage-beantworten-body 
+                 :frage.typ/text (textfrage-beantworten-body
                                    frage-id (first antwort)
                                    save-ans-to-db-fkt)
-                 :frage.typ/single-choice (single-choice-beantworten-body 
-                                            frage-id choices (first antwort) 
+                 :frage.typ/single-choice (single-choice-beantworten-body
+                                            frage-id choices (first antwort)
                                             save-ans-to-db-fkt)
-                 :frage.typ/multiple-choice (multiple-choice-beantworten-body 
+                 :frage.typ/multiple-choice (multiple-choice-beantworten-body
                                               frage-id choices antwort
                                               save-multiple-choise)
                  [:label "Fragentyp nicht implementiert"]))]])
-         @(rf/subscribe [:fragen-mit-antworten]))
-       )]))
+         @(rf/subscribe [:fragen-mit-antworten])))]))
 
 
 (defn versuch-ueberpruefen

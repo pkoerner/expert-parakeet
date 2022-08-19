@@ -108,6 +108,7 @@
 (s/def :versuch/user ::user)
 (s/def :versuch/antworten (s/coll-of ::antwort))
 
+
 (s/def ::versuch
   (s/keys :req [:versuch/id :versuch/test :versuch/user :versuch/abgabe-zeit :versuch/antworten]))
 
