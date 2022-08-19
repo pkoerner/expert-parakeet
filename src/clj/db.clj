@@ -117,7 +117,8 @@
 (defn versuch-mit-id
   [versuch-id]
   (d/pull @conn [:versuch/id 
-                 {:versuch/test [:test/id]}
+                 {:versuch/test [:test/id
+                                 {:test/fragen [:frage/id :frage/typ :frage/punkte :frage/choices :frage/frage-text]}]}
                  :versuch/abgabe-zeit
                  {:versuch/antworten [:antwort/frage-id
                                       :antwort/antwort]}]

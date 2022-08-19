@@ -180,10 +180,10 @@
                      (rf/dispatch [:frage/multiple-choice-beantworten frage-id in-answer? choice-text]))]
                (case (:frage/typ data)
                  :frage.typ/text (textfrage-beantworten-body 
-                                   frage-id antwort
+                                   frage-id (first antwort)
                                    save-ans-to-db-fkt)
                  :frage.typ/single-choice (single-choice-beantworten-body 
-                                            frage-id choices antwort 
+                                            frage-id choices (first antwort) 
                                             save-ans-to-db-fkt)
                  :frage.typ/multiple-choice (multiple-choice-beantworten-body 
                                               frage-id choices antwort

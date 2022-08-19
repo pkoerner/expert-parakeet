@@ -112,13 +112,18 @@
                    :with-credentials true
                    :on-success      [:versuch/angekommen]}}))
 
+(defn antworten->map
+  [antworten]
+  (into {} (map (fn [a] [(:antwort/frage-id a) 
+                         (:antwort/antwort a)]) antworten)))
 
 (rf/reg-event-db
   :versuch/angekommen
-  (fn [db [_ antworten]]
+  (fn [db [_ versuch]]
     (-> db
         (assoc :laedt false)
-        (assoc :versuche antworten))))
+        (assoc :antworten (antworten->map (:versuch/antworten versuch)))
+        (assoc :test (:versuch/test versuch)))))
 
 
 (rf/reg-event-db
