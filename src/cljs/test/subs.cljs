@@ -7,6 +7,12 @@
   :versuche
   (fn [db _] (:versuche db)))
 
+(rf/reg-sub 
+  :versuche/sorted-by-date
+  :<- [:versuche]
+  (fn [versuche _]
+    (sort-by :versuch/abgabe-zeit versuche)))
+
 (rf/reg-sub
   :test-id
   (fn [db _] (get-in db [:test :test/id])))

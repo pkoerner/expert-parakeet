@@ -123,6 +123,7 @@
   [:tr
    [:td n]
    [:td (get versuch :versuch/status "Nicht Bewertet")]
+   [:td (str (:versuch/abgabe-zeit versuch))]
    [:td (get versuch :versuch/punkte 0)]
    [:td [:a {:on-click
              #(rf/dispatch [:router/push-state
@@ -133,12 +134,13 @@
 
 (defn versuche-tabelle
   []
-  (let [versuche @(rf/subscribe [:versuche])]
+  (let [versuche @(rf/subscribe [:versuche/sorted-by-date])]
      [:table
      [:thead
       [:tr
        [:th "Versuch"]
        [:th "Status"]
+       [:th "abgegeben am"]
        [:th "Punkte"]
        [:th "Überprüfen"]]]
      (into [:tbody] (map versuch-row (rest (range)) versuche))]))
