@@ -26,5 +26,5 @@ export OAUTH_CLIENT_ID OAUTH_CLIENT_SECRET
 And then run
 
 ```shell
-make run
+make backend
 ```
