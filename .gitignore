@@ -1,3 +1,4 @@
+.gitignore
 .idea
 .clj-kondo
 .cpcache
@@ -6,3 +7,4 @@
 .shadow-cljs/
 node_modules/
 resources/public/js/
+.env
