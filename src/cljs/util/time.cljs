@@ -4,6 +4,7 @@
     [cljs-time.format :as format]))
 
 
+;; todo: in java time umwandeln
 (def time-format "HH:mm, dd MMM yyyy")
 
 
