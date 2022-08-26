@@ -8,7 +8,7 @@
     [muuntaja.middleware :refer [wrap-format]]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.cors :refer [wrap-cors]]
-    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+    [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
     [ring.middleware.params :refer [wrap-params]]
     [ring.middleware.reload :refer [wrap-reload]]
     [ring.util.response :refer [response]]))
@@ -82,7 +82,7 @@
                  :access-control-allow-methods allowed-methods
                  :access-control-allow-credentials "true")
       wrap-format ; handle content negotiation
-      (wrap-defaults (-> site-defaults
+      (wrap-defaults (-> api-defaults
                          (assoc-in [:session :cookie-attrs :same-site] :none)
                          (assoc-in [:session :cookie-attrs :secure] true)))
       wrap-params))
