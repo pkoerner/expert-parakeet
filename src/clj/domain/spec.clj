@@ -68,7 +68,7 @@
 
 
 (s/def ::antwort
-  (s/keys :req [:antwort/user :antwort/antwort-text :antwort/frage]))
+  (s/keys :req [:antwort/user :antwort/antwort :antwort/frage]))
 
 
 (s/def :korrektur/korrektor ::user)

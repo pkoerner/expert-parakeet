@@ -217,3 +217,96 @@
           antworten [{:antwort/id "0"}, {:antwort/id "1"}, {:antwort/id "2"}]
           result [{:antwort/id "0"}, {:antwort/id "1"}, {:antwort/id "2"}]]
       (t/is (= result (d/antworten-korrigiert korrigierte-antworten antworten))))))
+
+
+(t/deftest test-antworten-fuer-korrektur-ansicht
+  (t/testing "Eine Antwort aufbereiten"
+    (let [input [{:antwort/id "0", :antwort/antwort ["Antwort"], :antwort/punkte 5,
+                  :antwort/frage {:frage/frage-text "Fragetext", :frage/punkte 6, :frage/loesungskriterien "Loesung"}}]
+          output {:antwort/id "0", :antwort/antwort "Antwort", :antwort/punkte 5, :frage/frage-text "Fragetext",
+                  :frage/punkte 6, :frage/loesungskriterien "Loesung"}]
+      (t/is output (d/antworten-fuer-korrektur-ansicht input)))))
+
+
+(t/deftest test-korrekturen-into-antwort
+  (t/testing "Keine Korrektur vorhanden"
+    (let [antwort {:antwort/id "0"}
+          korrekturen-fct (fn [_id] [])
+          result (merge antwort {:korrektur/id nil})]
+      (t/is result (d/korrekturen-into-antwort korrekturen-fct antwort))))
+  (t/testing "Eine Korrektur vorhanden"
+    (let [antwort {:antwort/id "0"}
+          korrektur {:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
+          korrekturen-fct (fn [_id] (conj [] korrektur))
+          result (merge antwort korrektur)]
+      (t/is result (d/korrekturen-into-antwort korrekturen-fct antwort))))
+  (t/testing "Mehrere Korrekturen vorhanden"
+    (let [antwort {:antwort/id "0"}
+          korrekturen-fct (fn [_id]
+                            [{:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-03")}
+                             {:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
+                             {:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04")}])
+          result (merge antwort {:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")})]
+      (t/is result (d/korrekturen-into-antwort korrekturen-fct antwort)))))
+
+
+(t/deftest test-check-incoming-korrektur
+  (t/testing "Input is fine"
+    (let [korrektur-input {:korrektur/korrektur-text "Gut!" :korrektur/punkte "3" :korrektor/id "1"}
+          antwort-input [{:antwort/id "0" :antwort/punkte 0 :antwort/antwort "So ist das"
+                          :antwort/frage {:frage/frage-text "Frage" :frage/punkte 4 :frage/loesungskriterien "Kriterien"}}]
+          result {:korrektur/korrektur-text "Gut!" :korrektur/punkte 3 :korrektor/id "1"}]
+      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+  (t/testing "Keine Antwort"
+    (let [korrektur-input {:korrektur/korrektur-text "Gut!" :korrektur/punkte "3" :korrektor/id "1"}
+          antwort-input []
+          result (merge korrektur-input {:error :keine-passende-antwort})]
+      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+  (t/testing "Corrupted Antwort"
+    (let [korrektur-input {:korrektur/korrektur-text "Gut!" :korrektur/punkte "3" :korrektor/id "1"}
+          antwort-input [{:antwort/id "0" :antwort/punkte 0 :antwort/antwort "So ist das"
+                          :antwort/frage {}}]
+          result (merge korrektur-input {:error :keine-passende-antwort})]
+      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+  (t/testing "Keine Korrektur 1"
+    (let [korrektur-input {:korrektur/punkte "3" :korrektor/id "1"}
+          antwort-input [{:antwort/id "0" :antwort/punkte 0 :antwort/antwort "So ist das"
+                          :antwort/frage {:frage/frage-text "Frage" :frage/punkte 4 :frage/loesungskriterien "Kriterien"}}]
+          result (merge korrektur-input {:error :korrektur-text-missing})]
+      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+  (t/testing "Keine Korrektur 2"
+    (let [korrektur-input {:korrektur/korrektur-text "" :korrektur/punkte "3" :korrektor/id "1"}
+          antwort-input [{:antwort/id "0" :antwort/punkte 0 :antwort/antwort "So ist das"
+                          :antwort/frage {:frage/frage-text "Frage" :frage/punkte 4 :frage/loesungskriterien "Kriterien"}}]
+          result (merge korrektur-input {:error :korrektur-text-missing})]
+      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+  (t/testing "Keine Punkte 1"
+    (let [korrektur-input {:korrektur/korrektur-text "Gut!", :korrektor/id "1"}
+          antwort-input [{:antwort/id "0" :antwort/punkte 0 :antwort/antwort "So ist das"
+                          :antwort/frage {:frage/frage-text "Frage" :frage/punkte 4 :frage/loesungskriterien "Kriterien"}}]
+          result (merge korrektur-input {:error :korrektur-punkte-missing})]
+      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+  (t/testing "Keine Punkte 2"
+    (let [korrektur-input {:korrektur/korrektur-text "Gut!" :korrektur/punkte "" :korrektor/id "1"}
+          antwort-input [{:antwort/id "0" :antwort/punkte 0 :antwort/antwort "So ist das"
+                          :antwort/frage {:frage/frage-text "Frage" :frage/punkte 4 :frage/loesungskriterien "Kriterien"}}]
+          result (merge korrektur-input {:error :korrektur-punkte-missing})]
+      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+  (t/testing "Punkte invalid 1"
+    (let [korrektur-input {:korrektur/korrektur-text "Gut!" :korrektur/punkte "hallo" :korrektor/id "1"}
+          antwort-input [{:antwort/id "0" :antwort/punkte 0 :antwort/antwort "So ist das"
+                          :antwort/frage {:frage/frage-text "Frage" :frage/punkte 4 :frage/loesungskriterien "Kriterien"}}]
+          result (merge korrektur-input {:error :punkte-invalid})]
+      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+  (t/testing "Punkte invalid 2"
+    (let [korrektur-input {:korrektur/korrektur-text "Gut!" :korrektur/punkte "-10" :korrektor/id "1"}
+          antwort-input [{:antwort/id "0" :antwort/punkte 0 :antwort/antwort "So ist das"
+                          :antwort/frage {:frage/frage-text "Frage" :frage/punkte 4 :frage/loesungskriterien "Kriterien"}}]
+          result (merge korrektur-input {:error :punkte-invalid})]
+      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+  (t/testing "Zu viele Punkte"
+    (let [korrektur-input {:korrektur/korrektur-text "Gut!" :korrektur/punkte "10" :korrektor/id "1"}
+          antwort-input [{:antwort/id "0" :antwort/punkte 0 :antwort/antwort "So ist das"
+                          :antwort/frage {:frage/frage-text "Frage" :frage/punkte 4 :frage/loesungskriterien "Kriterien"}}]
+          result (merge korrektur-input {:error :punkte-zu-viel})]
+      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input)))))

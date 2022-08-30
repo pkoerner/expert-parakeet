@@ -31,14 +31,14 @@
 
 
 (defn show-antwort
-  [{_antwort-id :antwort/id test-name :test/name datum :antwort/datum uhrzeit :antwort/uhrzeit fachtitel :fach/fachtitel
+  [{antwort-id :antwort/id test-name :test/name datum :antwort/datum uhrzeit :antwort/uhrzeit fachtitel :fach/fachtitel
     semester :kurs/semester jahr :kurs/jahr}]
   [:p
    [:input
     {:type  "button"
-     :value (str test-name ", beantwortet um " uhrzeit ", " datum " (" fachtitel ", " semester ", " jahr ")")
-     ;; :on-click #(rf/dispatch [])
-     }]])
+     :value (str test-name ", beantwortet um " uhrzeit ", " datum " (" fachtitel ", " semester ", " jahr ", Antwort-Id " antwort-id ")")
+     :on-click #(rf/dispatch [:router/push-state {:name :router/korrektur
+                                                  :path-params {:aid antwort-id}}])}]])
 
 
 (defn show-antworten
