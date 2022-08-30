@@ -1,3 +1,3 @@
 (ns vars)
 
-(def base-url "http://localhost:8081/api")
+(def base-url "http://localhost:8082/api")

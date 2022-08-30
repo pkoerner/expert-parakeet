@@ -29,4 +29,4 @@
 ;; Start the OAuth2 flow
 (rf/reg-fx
   :start-oauth2-github
-  (fn [_] (set! (.-location js/window) "http://localhost:8081/api/oauth2/github")))
+  (fn [_] (set! (.-location js/window) "http://localhost:8082/api/oauth2/github")))
