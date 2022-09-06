@@ -11,7 +11,8 @@
     [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
     [ring.middleware.params :refer [wrap-params]]
     [ring.middleware.reload :refer [wrap-reload]]
-    [ring.util.response :refer [response]]))
+    [ring.util.response :refer [response]]
+    [util.time :as time]))
 
 
 (defroutes routes
@@ -20,14 +21,31 @@
            ;; maybe better route /tests
            (GET "/test" []
                 (response (db/all-tests)))
+
+           (POST "/test" [:as r]
+                 (let [{:keys [test-name kurs-id punkte-grenze fragen start ende]} (:body-params r)]
+                   (response (db/add-test test-name kurs-id (read-string punkte-grenze)
+                                          fragen (time/of start) (time/of ende)))))
+
            (GET "/test/:id" [id]
                 (response (db/test-by-id id)))
+
            ;; fragen
            ;; do we need these route, why can't we embed the questions in the test
            (GET "/frage" []
                 (response (db/all-fragen)))
            (GET "/frage/:id" [id]
                 (response (db/frage-by-id id)))
+
+           (GET "/fach" []
+                (response (db/all-faecher)))
+
+
+           (GET "/kurs/:id" [id]
+                (response (db/kurs-by-id id)))
+
+           (GET "/kurs/for-fach/:fach-id" [fach-id]
+                (response (db/kurse-for-fach fach-id)))
 
            (GET "/antwort" []
                 (response (db/all-antwort)))

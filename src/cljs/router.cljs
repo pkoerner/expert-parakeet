@@ -2,7 +2,7 @@
   (:require
     [korrektur-uebersicht.views :as korr]
     [korrektur.views :as korrektur]
-    [orga.frage-erstellen.views :as frage-erstln]
+    [orga.test-erstellen.views :as test-erstln]
     [re-frame.core :as re-frame]
     [reitit.coercion.spec :as rss]
     [reitit.core :as r]
@@ -75,20 +75,20 @@
     {:name      ::test
      :view      test/Root
      :link-text "Test"
-     :parameters {:path {:id int?}}
+     :parameters {:path {:id string?}}
      :controllers
      [{:parameters {:path [:id]}
        :start (fn [params]
                 (re-frame/dispatch [:test/laden (get-in params [:path :id])]))
        :stop (fn [_]
                (re-frame/dispatch [:test/entfernen]))}]}]
-   ["frage/erstellen"
-    {:name      ::frage-erstellen
-     :view      frage-erstln/frage-erstellen
-     :link-text "Neue Frage erstellen"
+   ["test-erstellen"
+    {:name      ::test-erstellen
+     :view      test-erstln/test-erstellen
+     :link-text "Neuen Test erstellen"
      :controllers
-     [{:start #(re-frame/dispatch [:frage-erstellen/init])
-       :stop  #(re-frame/dispatch [:frage-erstellen/entfernen])}]}]
+     [{:start #(re-frame/dispatch [:test-erstellen/init])
+       :stop  #(re-frame/dispatch [:test-erstellen/entfernen])}]}]
    ["antwort-fuer-korrektur/:aid"
     {:name      ::korrektur
      :view      korrektur/overview
@@ -145,7 +145,7 @@
   [{:keys [router]}]
   (let [current-route @(re-frame/subscribe [::current-route])]
     [:div
-     [nav {:dests [::overview ::korrektur-overview ::frage-erstellen] :router router :current-route current-route}]
+     [nav {:dests [::overview ::korrektur-overview ::test-erstellen] :router router :current-route current-route}]
      (when current-route
        [(-> current-route :data :view)])]))
 

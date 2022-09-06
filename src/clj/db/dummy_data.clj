@@ -1,4 +1,6 @@
-(ns db.dummy-data)
+(ns db.dummy-data
+  (:require
+    [util.time :as time]))
 
 
 (def fragen
@@ -37,12 +39,18 @@
 
 
 (def tests
-  [{:test/id "1"
-    :test/name "Test 1"
-    :test/fragen [[:frage/id "1"] [:frage/id "3"] [:frage/id "4"] [:frage/id "5"]]}
+  [{:test/id    "1"
+    :test/name  "Test 1"
+    :test/start (time/of {:jahr 2022 :monat 8 :tag 15 :stunde 0 :minute 0}) ; is java.util.Date
+    :test/ende (time/of {:jahr 2022 :monat 10 :tag 15 :stunde 0 :minute 0})
+    :test/fragen [[:frage/id "1"] [:frage/id "3"] [:frage/id "4"] [:frage/id "5"]]
+    :test/bestehensgrenze 0}
    {:test/id "2"
     :test/name "Test 2"
-    :test/fragen [[:frage/id "1"] [:frage/id "6"]]}])
+    :test/start (time/of {:jahr 2022 :monat 8 :tag 20 :stunde 0 :minute 0})
+    :test/ende (time/of {:jahr 2022 :monat 8 :tag 30 :stunde 0 :minute 0})
+    :test/fragen [[:frage/id "1"] [:frage/id "6"]]
+    :test/bestehensgrenze 7}])
 
 
 (def faecher

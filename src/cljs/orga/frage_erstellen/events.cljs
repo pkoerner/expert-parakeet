@@ -1,12 +1,13 @@
 (ns orga.frage-erstellen.events
   (:require
+    [cljs.tools.reader.edn :as edn]
     [re-frame.core :as rf]))
 
 
 (rf/reg-event-db
   :frage-erstellen/init
   (fn [db _]
-    (assoc db :frage {:frage/typ :frage.typ/single-choice})))
+    (assoc db :frage {})))
 
 
 (rf/reg-event-db
@@ -59,7 +60,7 @@
           frage
           (apply assoc
                  {:frage/frage-text (get-in db [:frage :frage/frage-text])
-                  :frage/punkte     (get-in db [:frage :frage/punkte])
+                  :frage/punkte     (edn/read-string (get-in db [:frage :frage/punkte]))
                   :frage/typ        typ}
                  (cond (= typ :frage.typ/text)
                        [:frage/loesungskriterien (get-in db [:frage :frage/loesungskriterien])]
@@ -73,6 +74,7 @@
                           (if (nil? multiple-choice-lsg)
                             #{}
                             (set multiple-choice-lsg)))]))] ; choices kann coll sein, mult-choi-lsg muss set!
-      (print frage))))
+      (rf/dispatch [:test-erstellen/update :frage-erstellen? false])
+      (rf/dispatch [:test-erstellen/fragen-hinzufuegen [frage]]))))
 
 
