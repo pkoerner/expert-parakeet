@@ -3,7 +3,7 @@
 
 (defn test-max-punkte
   [test]
-  (apply + (map :frage/punkte (:test/fragen test))))
+  (apply + (map :question/points (:test/fragen test))))
 
 
 ;; TODO: wir müssen noch entscheiden ob der beste oder
@@ -12,7 +12,7 @@
   [antworten]
   ;; nimmt nur die bestbewertete Antwort
   (->> antworten
-       (group-by #(get-in % [:antwort/frage :frage/id]))
+       (group-by #(get-in % [:antwort/frage :question/id]))
        (map (fn [[_ antworten]]
               (apply max (map :antwort/punkte antworten))))
        (apply +)))
@@ -49,13 +49,13 @@
   (let [tests-mit-inneren-fragen (flatten (map (partial unpack-map-in-map :kurs/tests) kurse-mit-inneren-tests))
         fragen-mit-innerem-fach (flatten (map (partial unpack-map-in-map :test/fragen) tests-mit-inneren-fragen))
         fragen (map #(dissoc (assoc % :fach/fachtitel (:fach/fachtitel (:kurs/fach %))) :kurs/fach) fragen-mit-innerem-fach)
-        nur-freitext-fragen (filter #(= :frage.typ/text (:frage/typ %)) fragen)]
+        nur-freitext-fragen (filter #(= :question.type/free-text (:question/type %)) fragen)]
     nur-freitext-fragen))
 
 
 (defn sortierte-antworten-von-freitext-fragen
   [fct-antworten-von-frage freitext-fragen]
-  (let [freitext-fragen-mit-inneren-antworten (map #(assoc % :frage/antworten (fct-antworten-von-frage (:frage/id %))) freitext-fragen)
+  (let [freitext-fragen-mit-inneren-antworten (map #(assoc % :frage/antworten (fct-antworten-von-frage (:question/id %))) freitext-fragen)
         antworten (flatten (map (partial unpack-map-in-map :frage/antworten) freitext-fragen-mit-inneren-antworten))]
     (sort-by :antwort/timestamp antworten)))
 
@@ -68,7 +68,7 @@
            prev-ids #{}]
       (if (= i (count antworten))
         a
-        (let [current-ids {:user/id (:user/id (get antworten-vec i)), :frage/id (:frage/id (get antworten-vec i)),
+        (let [current-ids {:user/id (:user/id (get antworten-vec i)), :question/id (:question/id (get antworten-vec i)),
                            :test/id (:test/id (get antworten-vec i)), :kurs/id (:kurs/id (get antworten-vec i))}]
           (if (contains? prev-ids current-ids)
             (recur a (inc i) prev-ids)
@@ -121,7 +121,7 @@
 (defn antworten-fuer-korrektur-ansicht
   [[antwort-map]]
   (let [antwort-unpacked-frage-nested (update (merge antwort-map (:antwort/frage antwort-map)) :antwort/antwort first)
-        antwort-unpacked (select-keys antwort-unpacked-frage-nested [:user/id :frage/frage-text :frage/punkte :frage/loesung
+        antwort-unpacked (select-keys antwort-unpacked-frage-nested [:user/id :question/question-statement :question/points :frage/loesung
                                                                      :antwort/antwort :antwort/punkte :antwort/id])]
     antwort-unpacked))
 
@@ -130,7 +130,7 @@
   [korrektur passende-antwort]
   (if-not (first passende-antwort)
     (assoc korrektur :error :keine-passende-antwort)
-    (let [frage-punkte (get-in (first passende-antwort) [:antwort/frage :frage/punkte])]
+    (let [frage-punkte (get-in (first passende-antwort) [:antwort/frage :question/points])]
       (cond
         (not frage-punkte)
         (assoc korrektur :error :keine-passende-antwort)

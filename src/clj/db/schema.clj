@@ -8,13 +8,13 @@
   (spectomic/datomic-schema
     [[:frage/id {:db/unique :db.unique/identity
                  :db/index true}]
-     :frage/typ ; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/on-prem/best-practices.html#idents-for-enumerated-types)
-     :frage/frage-text
-     :frage/punkte
-     :frage/loesungskriterien
-     :frage/choices
-     :frage/single-choice-loesung
-     :frage/multiple-choice-loesung]))
+     :question/type ; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/on-prem/best-practices.html#idents-for-enumerated-types)
+     :question/question-statement
+     :question/points
+     :question/evaluation-criteria
+     :question/possible-solutions
+     :question/single-choice-solution
+     :question/multiple-choice-solution]))
 
 
 ;; manche Felder bleiben leer (abhaengig vom Fragentyp)

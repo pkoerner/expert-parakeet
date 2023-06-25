@@ -4,53 +4,47 @@
 
 
 (def fragen
-  [{:frage/id "1"
-    :frage/typ :frage.typ/text
-    :frage/frage-text "Wie geht es dir heute?"
-    :frage/loesungskriterien "Student schreibt Worte (7P)"
-    :frage/punkte 7}
-   {:frage/id "2"
-    :frage/typ :frage.typ/text
-    :frage/frage-text "Fühlen sie sich prüfungsbereit?"
-    :frage/loesungskriterien "Lösungskriterien"
-    :frage/punkte 1}
-   {:frage/id "3"
-    :frage/typ :frage.typ/text
-    :frage/frage-text "Nächste Frage gefällig?"
-    :frage/loesungskriterien "Studi muss freudig Ja sagen."
-    :frage/punkte 5}
-   {:frage/id "4"
-    :frage/typ :frage.typ/single-choice
-    :frage/frage-text "Was ist die Hauptstadt von Italien?"
-    :frage/choices #{"Wien" "Venedig" "Rom" "Pizza"}
-    :frage/single-choice-loesung "Rom"
-    :frage/punkte 1}
-   {:frage/id "5"
-    :frage/typ :frage.typ/multiple-choice
-    :frage/frage-text "Was ist gut?"
-    :frage/choices #{"Lasagne" "Eis" "Schnecken" "Pasta"}
-    :frage/multiple-choice-loesung #{"Lasagne" "Eis" "Pasta"}
-    :frage/punkte 1}
-   {:frage/id "6"
-    :frage/frage-text "Nächste Frage gefällig?"
-    :frage/typ :frage.typ/text
-    :frage/loesungskriterien "Lösung"
-    :frage/punkte 1}])
+  [{:question/id "1"
+    :question/type :question.type/free-text
+    :question/question-statement "Wie geht es dir heute?"
+    :question/evaluation-criteria "Student schreibt Worte (7P)"
+    :question/points 7}
+   {:question/id "2"
+    :question/type :question.type/free-text
+    :question/question-statement "Fühlen sie sich prüfungsbereit?"
+    :question/evaluation-criteria "Lösungskriterien"
+    :question/points 1}
+   {:question/id "3"
+    :question/type :question.type/free-text
+    :question/question-statement "Nächste Frage gefällig?"
+    :question/evaluation-criteria "Studi muss freudig Ja sagen."
+    :question/points 5}
+   {:question/id "4"
+    :question/type :question.type/single-choice
+    :question/question-statement "Was ist die Hauptstadt von Italien?"
+    :question/possible-solutions #{"Wien" "Venedig" "Rom" "Pizza"}
+    :question/single-choice-solution "Rom"
+    :question/points 1}
+   {:question/id "5"
+    :question/type :question.type/multiple-choice
+    :question/question-statement "Was ist gut?"
+    :question/possible-solutions #{"Lasagne" "Eis" "Schnecken" "Pasta"}
+    :question/multiple-choice-solution #{"Lasagne" "Eis" "Pasta"}
+    :question/points 1}
+   {:question/id "6"
+    :question/question-statement "Nächste Frage gefällig?"
+    :question/type :question.type/free-text
+    :question/evaluation-criteria "Lösung"
+    :question/points 1}])
 
 
 (def tests
-  [{:test/id    "1"
-    :test/name  "Test 1"
-    :test/start (time/of {:jahr 2022 :monat 8 :tag 15 :stunde 0 :minute 0}) ; is java.util.Date
-    :test/ende (time/of {:jahr 2022 :monat 10 :tag 15 :stunde 0 :minute 0})
-    :test/fragen [[:frage/id "1"] [:frage/id "3"] [:frage/id "4"] [:frage/id "5"]]
-    :test/bestehensgrenze 0}
+  [{:test/id "1"
+    :test/name "Test 1"
+    :test/fragen [[:question/id "1"] [:question/id "3"] [:question/id "4"] [:question/id "5"]]}
    {:test/id "2"
     :test/name "Test 2"
-    :test/start (time/of {:jahr 2022 :monat 8 :tag 20 :stunde 0 :minute 0})
-    :test/ende (time/of {:jahr 2022 :monat 8 :tag 30 :stunde 0 :minute 0})
-    :test/fragen [[:frage/id "1"] [:frage/id "6"]]
-    :test/bestehensgrenze 7}])
+    :test/fragen [[:question/id "1"] [:question/id "6"]]}])
 
 
 (def faecher
@@ -86,42 +80,42 @@
 
 (def antworten
   [{:antwort/id "1"
-    :antwort/frage [:frage/id "1"]
+    :antwort/frage [:question/id "1"]
     :antwort/user [:user/id "0"]
     :antwort/antwort ["Antwort"]
     :antwort/punkte 4}
    {:antwort/id "2"
-    :antwort/frage [:frage/id "3"]
+    :antwort/frage [:question/id "3"]
     :antwort/user [:user/id "3"]
     :antwort/antwort ["Antwort"]
     :antwort/punkte 1}
    {:antwort/id "3"
-    :antwort/frage [:frage/id "1"]
+    :antwort/frage [:question/id "1"]
     :antwort/user [:user/id "2"]
     :antwort/antwort ["Korrigierte Antwort"]
     :antwort/punkte 5}
    {:antwort/id "4"
-    :antwort/frage [:frage/id "2"]
+    :antwort/frage [:question/id "2"]
     :antwort/user [:user/id "0"]
     :antwort/antwort ["Bool Antwort"]
     :antwort/punkte 1}
    {:antwort/id "5"
-    :antwort/frage [:frage/id "3"]
+    :antwort/frage [:question/id "3"]
     :antwort/user [:user/id "0"]
     :antwort/antwort ["Antwort"]
     :antwort/punkte 0}
    {:antwort/id "6"
-    :antwort/frage [:frage/id "3"]
+    :antwort/frage [:question/id "3"]
     :antwort/user [:user/id "2"]
     :antwort/antwort ["Antwort"]
     :antwort/punkte 0}
    {:antwort/id "7"
-    :antwort/frage [:frage/id "3"]
+    :antwort/frage [:question/id "3"]
     :antwort/user [:user/id "3"]
     :antwort/antwort ["Korrigierte Antwort"]
     :antwort/punkte 0}
    {:antwort/id "8"
-    :antwort/frage [:frage/id "2"]
+    :antwort/frage [:question/id "2"]
     :antwort/user [:user/id "0"]
     :antwort/antwort ["Bool Antwort"]
     :antwort/punkte 0}])

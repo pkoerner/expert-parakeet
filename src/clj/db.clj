@@ -62,7 +62,7 @@
                                :kurs/semester
                                {:kurs/tests [:test/id :test/name
                                              {:test/fragen [:frage/id
-                                                            :frage/punkte]}]}])
+                                                            :question/points]}]}])
                :in $ ?u
                :where
                [?u :user/kurse ?k]]
@@ -73,7 +73,7 @@
   [user-id test-id]
   (mapv first
         (d/q '[:find (pull ?a [:antwort/punkte
-                               {:antwort/frage [:frage/id :frage/typ]}])
+                               {:antwort/frage [:frage/id :question/type]}])
                :in $ ?u ?t
                :where
                [?a :antwort/user ?u]
@@ -90,7 +90,7 @@
                                   :kurs/jahr
                                   {:kurs/fach [:fach/fachtitel]}
                                   {:kurs/tests [:test/id :test/name
-                                                {:test/fragen [:frage/id :frage/typ]}]}])
+                                                {:test/fragen [:frage/id :question/type]}]}])
                :in $ ?korr
                :where
                [?korr :user/kurse ?kurs]]
@@ -136,8 +136,7 @@
 (defn test-by-id
   [id]
   (d/pull @conn
-          [:test/id :test/name :test/start :test/ende :test/bestehensgrenze
-           {:test/fragen [:frage/id :frage/frage-text :frage/punkte :frage/typ :frage/choices]}]
+          [:test/id {:test/fragen [:frage/id :question/question-statement :question/points :question/type :question/possible-solutions]}]
           [:test/id id]))
 
 
@@ -227,7 +226,7 @@
 (defn frage-by-id
   [id]
   (d/pull @db/conn
-          [:frage/id :frage/frage-text :frage/punkte :frage/typ]
+          [:frage/id :question/question-statement :question/points :question/type]
           [:frage/id id]))
 
 
@@ -316,11 +315,11 @@
         (d/q '[:find (pull ?antwort [:antwort/id
                                      :antwort/punkte
                                      :antwort/antwort
-                                     {:antwort/frage [:frage/frage-text :frage/punkte :frage/loesungskriterien]}])
+                                     {:antwort/frage [:question/question-statement :question/points :frage/loesungskriterien]}])
                :in $ ?antwort
                :where
                [?antwort :antwort/frage ?frage]
-               [?frage :frage/typ ?typ]
+               [?frage :question/type ?typ]
                [(= ?typ :frage.typ/text)]]
              @conn [:antwort/id antwort-id])))
 
@@ -363,6 +362,6 @@
 
 (comment 
   (d/pull @conn [:test/fragen] [:test/id 1])
-  (d/pull @conn [:test/id {:test/fragen [:frage/frage-text]}] [:test/id 1])
-  (d/pull @conn [:frage/frage-text] [:frage/id 1])
+  (d/pull @conn [:test/id {:test/fragen [:question/question-statement]}] [:test/id 1])
+  (d/pull @conn [:question/question-statement] [:frage/id 1])
   )

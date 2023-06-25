@@ -1,50 +1,50 @@
 (ns domain.spec
   (:require
-    [clojure.spec.alpha :as s]))
+   [clojure.spec.alpha :as s]))
 
 
-(s/def :frage/id string?)
-(s/def :frage/typ #{:frage.typ/text :frage.typ/single-choice :frage.typ/multiple-choice})
-(s/def :frage/frage-text string?)
-(s/def :frage/punkte int?)
+(s/def :question/id string?)
+(s/def :question/type #{:question.type/free-text :question.type/single-choice :question.type/multiple-choice})
+(s/def :question/question-statement string?)
+(s/def :question/points int?)
 
 
-(s/def :frage/loesungskriterien string?)
+(s/def :question/evaluation-criteria string?)
 
 
-(s/def :frage/text
+(s/def :question/question
   (s/and
-    (s/keys :req [:frage/id :frage/typ :frage/frage-text :frage/punkte
-                  :frage/loesungskriterien])
-    #(= (:frage/typ %) :frage.typ/text)))
+   (s/keys :req [:question/id :question/type :question/question-statement :question/points
+                 :question/evaluation-criteria])
+   #(= (:question/type %) :question.type/free-text)))
 
 
-(s/def :frage/choices (s/coll-of string?))
+(s/def :question/possible-solutions (s/coll-of string?))
 
-(s/def :frage/single-choice-loesung string?)
+(s/def :question/single-choice-solution string?)
 
 
-(s/def :frage/single-choice
+(s/def :question/single-choice-question
   (s/and
-    (s/keys :req [:frage/id :frage/typ :frage/frage-text :frage/punkte
-                  :frage/choices :frage/single-choice-loesung])
-    #(= (:frage/typ %) :frage.typ/single-choice)))
+   (s/keys :req [:question/id :question/type :question/question-statement :question/points
+                 :question/possible-solutions :question/single-choice-solution])
+   #(= (:question/type %) :question.type/single-choice)))
 
 
-(s/def :frage/multiple-choice-loesung (s/coll-of string?))
+(s/def :question/multiple-choice-solution (s/coll-of string?))
 
 
-(s/def :frage/multiple-choice
+(s/def :question/multiple-choice-question
   (s/and
-    (s/keys :req [:frage/id :frage/typ :frage/frage-text :frage/punkte
-                  :frage/choices :frage/multiple-choice-loesung])
-    #(= (:frage/typ %) :frage.typ/multiple-choice)))
+   (s/keys :req [:question/id :question/type :question/question-statement :question/points
+                 :question/possible-solutions :question/multiple-choice-solution])
+   #(= (:question/type %) :question.type/multiple-choice)))
 
 
-(s/def ::frage
-  (s/or :text :frage/text
-        :single-choice :frage/single-choice
-        :multiple-choice :frage/multiple-choice))
+(s/def ::question
+  (s/or :free-text :question/question ; text -> free-text
+        :single-choice :question/single-choice-question
+        :multiple-choice :question/multiple-choice-question))
 
 
 (s/def :user/id string?)
@@ -57,7 +57,7 @@
 
 (s/def :antwort/id string?)
 (s/def :antwort/user ::user)
-(s/def :antwort/frage ::frage)
+(s/def :antwort/frage ::question)
 
 
 (s/def :antwort/antwort
@@ -82,10 +82,7 @@
 
 (s/def :test/id string?)
 (s/def :test/name string?)
-(s/def :test/start inst?)
-(s/def :test/ende inst?)
-(s/def :test/fragen (s/coll-of ::frage))
-(s/def :test/bestehensgrenze int?)
+(s/def :test/fragen (s/coll-of ::question))
 
 
 (s/def ::test
