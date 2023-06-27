@@ -3,7 +3,7 @@
     [util.time :as time]))
 
 
-(def fragen
+(def questions
   [{:question/id "1"
     :question/type :question.type/free-text
     :question/question-statement "Wie geht es dir heute?"
@@ -38,7 +38,7 @@
     :question/points 1}])
 
 
-(def tests
+(def question-sets
   [{:question-set/id "1"
     :question-set/name "Test 1"
     :question-set/questions [[:question/id "1"] [:question/id "3"] [:question/id "4"] [:question/id "5"]]}
@@ -47,14 +47,14 @@
     :question-set/questions [[:question/id "1"] [:question/id "6"]]}])
 
 
-(def faecher
+(def classes
   [{:class/id "0"
     :class/class-name "ProPra I"}
    {:class/id "1"
     :class/class-name "Fach 2"}])
 
 
-(def kurse
+(def courses
   [{:course/id "1"
     :course/class [:class/id "0"]
     :course/year 2000
@@ -67,7 +67,7 @@
     :course/question-sets [[:question-set/id "1"] [:question-set/id "2"]]}])
 
 
-(def user
+(def users
   [{:user/id "0"
     :user/courses [[:course/id "1"] [:course/id "2"]]}
    {:user/id "1"
@@ -78,7 +78,7 @@
     :user/courses [[:course/id "2"]]}])
 
 
-(def antworten
+(def answers
   [{:answer/id "1"
     :answer/question [:question/id "1"]
     :answer/user [:user/id "0"]
@@ -121,7 +121,7 @@
     :answer/points 0}])
 
 
-(def korrekturen
+(def corrections
   [{:correction/answer [:answer/id "3"]
     :correction/corrector [:user/id "1"]
     :corrector/feedback "Superb!"}
@@ -132,10 +132,10 @@
 
 (def dummy-data
   (concat
-    fragen
-    tests
-    faecher
-    kurse
-    user
-    antworten
-    korrekturen))
+    questions
+    question-sets
+    classes
+    courses
+    users
+    answers
+    corrections))
