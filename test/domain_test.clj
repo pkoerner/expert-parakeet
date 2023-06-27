@@ -93,11 +93,11 @@
   (t/testing "Remove one frage"
     (let [input-map [{:course/semester "WiSe", :course/year 2000, :course/class {:class/class-name "Fach 1"},
                       :course/question-sets [{:question-set/id "1", :question-set/name "Test 1",
-                                    :question-set/questions [{:question/id "2", :question/type :frage.typ/bool},{:question/id "3",:question/type :question.type/free-text}]}]},
+                                              :question-set/questions [{:question/id "2", :question/type :frage.typ/bool},{:question/id "3",:question/type :question.type/free-text}]}]},
                      {:course/semester "SoSe", :course/year 2001, :course/class {:class/class-name "Fach 2"},
                       :course/question-sets [{:question-set/id "1", :question-set/name "Test 1",
-                                    :question-set/questions [{:question/id "2", :question/type :frage.typ/bool},{:question/id "3", :question/type :question.type/free-text}]},
-                                   {:question-set/id "2", :question-set/name "Test 2", :question-set/questions [{:question/id "1", :question/type :question.type/free-text}]}]}]
+                                              :question-set/questions [{:question/id "2", :question/type :frage.typ/bool},{:question/id "3", :question/type :question.type/free-text}]},
+                                             {:question-set/id "2", :question-set/name "Test 2", :question-set/questions [{:question/id "1", :question/type :question.type/free-text}]}]}]
           result-map [{:course/semester "WiSe", :course/year 2000, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"},
                       {:course/semester "SoSe", :course/year 2001, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"},
                       {:course/semester "SoSe", :course/year 2001, :question-set/id "2", :question-set/name "Test 2", :question/id "1", :question/type :question.type/free-text, :class/class-name "Fach 2"}]]
@@ -105,22 +105,22 @@
   (t/testing "No fragen for one test"
     (let [input-map [{:course/semester "WiSe", :course/year 2000, :course/class {:class/class-name "Fach 1"},
                       :course/question-sets [{:question-set/id "1", :question-set/name "Test 1",
-                                    :question-set/questions []}]},
+                                              :question-set/questions []}]},
                      {:course/semester "SoSe", :course/year 2001, :course/class {:class/class-name "Fach 2"},
                       :course/question-sets [{:question-set/id "1", :question-set/name "Test 1",
-                                    :question-set/questions [{:question/id "2", :question/type :frage.typ/bool},{:question/id "3", :question/type :question.type/free-text}]},
-                                   {:question-set/id "2", :question-set/name "Test 2", :question-set/questions [{:question/id "1", :question/type :question.type/free-text}]}]}]
+                                              :question-set/questions [{:question/id "2", :question/type :frage.typ/bool},{:question/id "3", :question/type :question.type/free-text}]},
+                                             {:question-set/id "2", :question-set/name "Test 2", :question-set/questions [{:question/id "1", :question/type :question.type/free-text}]}]}]
           result-map [{:course/semester "SoSe", :course/year 2001, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"},
                       {:course/semester "SoSe", :course/year 2001, :question-set/id "2", :question-set/name "Test 2", :question/id "1", :question/type :question.type/free-text, :class/class-name "Fach 2"}]]
       (t/is (= result-map (d/freitext-fragen input-map)))))
   (t/testing "Only bool fragen for one test"
     (let [input-map [{:course/semester "WiSe", :course/year 2000, :course/class {:class/class-name "Fach 1"},
                       :course/question-sets [{:question-set/id "1", :question-set/name "Test 1",
-                                    :question-set/questions [{:question/id "2", :question/type :frage.typ/bool},{:question/id "3",:question/type :frage.typ/bool}]}]},
+                                              :question-set/questions [{:question/id "2", :question/type :frage.typ/bool},{:question/id "3",:question/type :frage.typ/bool}]}]},
                      {:course/semester "SoSe", :course/year 2001, :course/class {:class/class-name "Fach 2"},
                       :course/question-sets [{:question-set/id "1", :question-set/name "Test 1",
-                                    :question-set/questions [{:question/id "2", :question/type :frage.typ/bool},{:question/id "3", :question/type :question.type/free-text}]},
-                                   {:question-set/id "2", :question-set/name "Test 2", :question-set/questions [{:question/id "1", :question/type :question.type/free-text}]}]}]
+                                              :question-set/questions [{:question/id "2", :question/type :frage.typ/bool},{:question/id "3", :question/type :question.type/free-text}]},
+                                             {:question-set/id "2", :question-set/name "Test 2", :question-set/questions [{:question/id "1", :question/type :question.type/free-text}]}]}]
           result-map [{:course/semester "SoSe", :course/year 2001, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"},
                       {:course/semester "SoSe", :course/year 2001, :question-set/id "2", :question-set/name "Test 2", :question/id "1", :question/type :question.type/free-text, :class/class-name "Fach 2"}]]
       (t/is (= result-map (d/freitext-fragen input-map))))))
