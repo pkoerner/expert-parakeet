@@ -80,7 +80,7 @@
                [?a :answer/question ?f]
                [?t :question-set/questions ?f]
                [?a :answer/points]]
-             @conn [:user/id user-id] [:kurs test-id])))
+             @conn [:user/id user-id] [:question-set/id test-id])))
 
 
 (defn fragen-fuer-user
