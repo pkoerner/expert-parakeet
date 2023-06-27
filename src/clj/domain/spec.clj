@@ -1,6 +1,6 @@
 (ns domain.spec
   (:require
-   [clojure.spec.alpha :as s]))
+    [clojure.spec.alpha :as s]))
 
 
 (s/def :question/id string?)
@@ -14,9 +14,9 @@
 
 (s/def :question/question
   (s/and
-   (s/keys :req [:question/id :question/type :question/question-statement :question/points
-                 :question/evaluation-criteria])
-   #(= (:question/type %) :question.type/free-text)))
+    (s/keys :req [:question/id :question/type :question/question-statement :question/points
+                  :question/evaluation-criteria])
+    #(= (:question/type %) :question.type/free-text)))
 
 
 (s/def :question/possible-solutions (s/coll-of string?))
@@ -26,9 +26,9 @@
 
 (s/def :question/single-choice-question
   (s/and
-   (s/keys :req [:question/id :question/type :question/question-statement :question/points
-                 :question/possible-solutions :question/single-choice-solution])
-   #(= (:question/type %) :question.type/single-choice)))
+    (s/keys :req [:question/id :question/type :question/question-statement :question/points
+                  :question/possible-solutions :question/single-choice-solution])
+    #(= (:question/type %) :question.type/single-choice)))
 
 
 (s/def :question/multiple-choice-solution (s/coll-of string?))
@@ -36,9 +36,9 @@
 
 (s/def :question/multiple-choice-question
   (s/and
-   (s/keys :req [:question/id :question/type :question/question-statement :question/points
-                 :question/possible-solutions :question/multiple-choice-solution])
-   #(= (:question/type %) :question.type/multiple-choice)))
+    (s/keys :req [:question/id :question/type :question/question-statement :question/points
+                  :question/possible-solutions :question/multiple-choice-solution])
+    #(= (:question/type %) :question.type/multiple-choice)))
 
 
 (s/def ::question
@@ -96,7 +96,7 @@
 (s/def :answer/answer
   (s/and (s/coll-of string?)))
 
-
+graded-answers-of-question-set
 (s/def :answer/points pos-int?)
 
 
@@ -104,7 +104,7 @@
   (s/keys :req [:answer/user :answer/answer :answer/question]))
 
 
-(s/def :correction/corrector ::user) ;; No distinction between autograding and human corrector
+(s/def :correction/corrector ::user) ; No distinction between autograding and human corrector
 (s/def :correction/answer ::answer)
 (s/def :corrector/feedback string?)
 
