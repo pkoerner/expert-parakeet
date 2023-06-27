@@ -22,54 +22,55 @@
 
 (def antwort-schema
   (spectomic/datomic-schema
-    [[:antwort/id {:db/unique :db.unique/identity
+    [[:answer/id {:db/unique :db.unique/identity
                    :db/index true}]
-     :antwort/user
-     :antwort/frage
-     :antwort/antwort
-     :antwort/punkte]))
+     :answer/user
+     :answer/question
+     :answer/answer
+     :answer/points]))
 
 
 (def korrektur-schema
   (spectomic/datomic-schema
-    [:korrektur/korrektor
-     :korrektur/antwort
-     :korrektur/korrektur-text]))
+    [:correction/corrector
+     :correction/answer
+     :corrector/feedback]))
 
 
 (def test-schema
   (spectomic/datomic-schema
-    [[:test/id {:db/unique :db.unique/identity
+    [[:question-set/id {:db/unique :db.unique/identity
                 :db/index true}]
-     :test/name
-     :test/start
-     :test/ende
-     :test/fragen
-     :test/bestehensgrenze]))
+     :question-set/name
+     :question-set/start
+     :question-set/end
+     :question-set/questions
+     :question-set/passing-score]))
 
 
 (def user-schema
   (spectomic/datomic-schema
     [[:user/id {:db/unique :db.unique/identity
                 :db/index true}]
-     :user/kurse]))
+     :user/courses]))
 
 
 (def fach-schema
   (spectomic/datomic-schema
-    [[:fach/id {:db/unique :db.unique/identity
+    [[:class/id {:db/unique :db.unique/identity
                 :db/index true}]
-     :fach/fachtitel]))
+     :class/class-name
+     :class/question-sets]))
 
 
 (def kurs-schema
   (spectomic/datomic-schema
-    [[:kurs/id {:db/unique :db.unique/identity
+    [[:course/id {:db/unique :db.unique/identity
                 :db/index true}]
-     :kurs/fach
-     :kurs/jahr
-     :kurs/semester
-     :kurs/tests]))
+     :course/class
+     :course/year
+     :course/semester
+     :course/question-sets]))
 
 
 (def schema

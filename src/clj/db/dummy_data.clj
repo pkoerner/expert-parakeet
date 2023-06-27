@@ -39,95 +39,95 @@
 
 
 (def tests
-  [{:test/id "1"
-    :test/name "Test 1"
-    :test/fragen [[:question/id "1"] [:question/id "3"] [:question/id "4"] [:question/id "5"]]}
-   {:test/id "2"
-    :test/name "Test 2"
-    :test/fragen [[:question/id "1"] [:question/id "6"]]}])
+  [{:question-set/id "1"
+    :question-set/name "Test 1"
+    :question-set/questions [[:question/id "1"] [:question/id "3"] [:question/id "4"] [:question/id "5"]]}
+   {:question-set/id "2"
+    :question-set/name "Test 2"
+    :question-set/questions [[:question/id "1"] [:question/id "6"]]}])
 
 
 (def faecher
-  [{:fach/id "0"
-    :fach/fachtitel "ProPra I"}
-   {:fach/id "1"
-    :fach/fachtitel "Fach 2"}])
+  [{:class/id "0"
+    :class/class-name "ProPra I"}
+   {:class/id "1"
+    :class/class-name "Fach 2"}])
 
 
 (def kurse
-  [{:kurs/id "1"
-    :kurs/fach [:fach/id "0"]
-    :kurs/jahr 2000
-    :kurs/semester "WiSe"
-    :kurs/tests [[:test/id "1"]]}
-   {:kurs/id "2"
-    :kurs/fach [:fach/id "1"]
-    :kurs/jahr 2001
-    :kurs/semester "SoSe"
-    :kurs/tests [[:test/id "1"] [:test/id "2"]]}])
+  [{:course/id "1"
+    :course/class [:class/id "0"]
+    :course/year 2000
+    :course/semester "WiSe"
+    :course/question-sets [[:question-set/id "1"]]}
+   {:course/id "2"
+    :course/class [:class/id "1"]
+    :course/year 2001
+    :course/semester "SoSe"
+    :course/question-sets [[:question-set/id "1"] [:question-set/id "2"]]}])
 
 
 (def user
   [{:user/id "0"
-    :user/kurse [[:kurs/id "1"] [:kurs/id "2"]]}
+    :user/courses [[:course/id "1"] [:course/id "2"]]}
    {:user/id "1"
-    :user/kurse [[:kurs/id "1"] [:kurs/id "2"]]}
+    :user/courses [[:course/id "1"] [:course/id "2"]]}
    {:user/id "2"
-    :user/kurse [[:kurs/id "1"]]}
+    :user/courses [[:course/id "1"]]}
    {:user/id "3"
-    :user/kurse [[:kurs/id "2"]]}])
+    :user/courses [[:course/id "2"]]}])
 
 
 (def antworten
-  [{:antwort/id "1"
-    :antwort/frage [:question/id "1"]
-    :antwort/user [:user/id "0"]
-    :antwort/antwort ["Antwort"]
-    :antwort/punkte 4}
-   {:antwort/id "2"
-    :antwort/frage [:question/id "3"]
-    :antwort/user [:user/id "3"]
-    :antwort/antwort ["Antwort"]
-    :antwort/punkte 1}
-   {:antwort/id "3"
-    :antwort/frage [:question/id "1"]
-    :antwort/user [:user/id "2"]
-    :antwort/antwort ["Korrigierte Antwort"]
-    :antwort/punkte 5}
-   {:antwort/id "4"
-    :antwort/frage [:question/id "2"]
-    :antwort/user [:user/id "0"]
-    :antwort/antwort ["Bool Antwort"]
-    :antwort/punkte 1}
-   {:antwort/id "5"
-    :antwort/frage [:question/id "3"]
-    :antwort/user [:user/id "0"]
-    :antwort/antwort ["Antwort"]
-    :antwort/punkte 0}
-   {:antwort/id "6"
-    :antwort/frage [:question/id "3"]
-    :antwort/user [:user/id "2"]
-    :antwort/antwort ["Antwort"]
-    :antwort/punkte 0}
-   {:antwort/id "7"
-    :antwort/frage [:question/id "3"]
-    :antwort/user [:user/id "3"]
-    :antwort/antwort ["Korrigierte Antwort"]
-    :antwort/punkte 0}
-   {:antwort/id "8"
-    :antwort/frage [:question/id "2"]
-    :antwort/user [:user/id "0"]
-    :antwort/antwort ["Bool Antwort"]
-    :antwort/punkte 0}])
+  [{:answer/id "1"
+    :answer/question [:question/id "1"]
+    :answer/user [:user/id "0"]
+    :answer/answer ["Antwort"]
+    :answer/points 4}
+   {:answer/id "2"
+    :answer/question [:question/id "3"]
+    :answer/user [:user/id "3"]
+    :answer/answer ["Antwort"]
+    :answer/points 1}
+   {:answer/id "3"
+    :answer/question [:question/id "1"]
+    :answer/user [:user/id "2"]
+    :answer/answer ["Korrigierte Antwort"]
+    :answer/points 5}
+   {:answer/id "4"
+    :answer/question [:question/id "2"]
+    :answer/user [:user/id "0"]
+    :answer/answer ["Bool Antwort"]
+    :answer/points 1}
+   {:answer/id "5"
+    :answer/question [:question/id "3"]
+    :answer/user [:user/id "0"]
+    :answer/answer ["Antwort"]
+    :answer/points 0}
+   {:answer/id "6"
+    :answer/question [:question/id "3"]
+    :answer/user [:user/id "2"]
+    :answer/answer ["Antwort"]
+    :answer/points 0}
+   {:answer/id "7"
+    :answer/question [:question/id "3"]
+    :answer/user [:user/id "3"]
+    :answer/answer ["Korrigierte Antwort"]
+    :answer/points 0}
+   {:answer/id "8"
+    :answer/question [:question/id "2"]
+    :answer/user [:user/id "0"]
+    :answer/answer ["Bool Antwort"]
+    :answer/points 0}])
 
 
 (def korrekturen
-  [{:korrektur/antwort [:antwort/id "3"]
-    :korrektur/korrektor [:user/id "1"]
-    :korrektur/korrektur-text "Superb!"}
-   {:korrektur/antwort [:antwort/id "7"]
-    :korrektur/korrektor [:user/id "1"]
-    :korrektur/korrektur-text "Superb!"}])
+  [{:correction/answer [:answer/id "3"]
+    :correction/corrector [:user/id "1"]
+    :corrector/feedback "Superb!"}
+   {:correction/answer [:answer/id "7"]
+    :correction/corrector [:user/id "1"]
+    :corrector/feedback "Superb!"}])
 
 
 (def dummy-data

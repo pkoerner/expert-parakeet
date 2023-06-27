@@ -3,7 +3,7 @@
 
 (defn test-max-punkte
   [test]
-  (apply + (map :question/points (:test/fragen test))))
+  (apply + (map :question/points (:question-set/questions test))))
 
 
 ;; TODO: wir müssen noch entscheiden ob der beste oder
@@ -12,9 +12,9 @@
   [antworten]
   ;; nimmt nur die bestbewertete Antwort
   (->> antworten
-       (group-by #(get-in % [:antwort/frage :question/id]))
+       (group-by #(get-in % [:answer/question :question/id]))
        (map (fn [[_ antworten]]
-              (apply max (map :antwort/punkte antworten))))
+              (apply max (map :answer/points antworten))))
        (apply +)))
 
 
@@ -23,14 +23,14 @@
   (-> test
       (assoc :test/max-punkte (test-max-punkte test))
       (assoc :test/erreichte-punkte (test-erreichte-punkte
-                                      (test->antwort (:test/id test))))
-      (select-keys [:test/id :test/name :test/max-punkte :test/erreichte-punkte])))
+                                      (test->antwort (:question-set/id test))))
+      (select-keys [:question-set/id :question-set/name :test/max-punkte :test/erreichte-punkte])))
 
 
 (defn kurse-mit-gesamt-punkten
   [kurse test->antwort]
   (map (fn [kurs]
-         (update kurs :kurs/tests (partial map (partial test-punkte test->antwort))))
+         (update kurs :course/question-sets (partial map (partial test-punkte test->antwort))))
        kurse))
 
 
@@ -46,9 +46,9 @@
 
 (defn freitext-fragen
   [kurse-mit-inneren-tests]
-  (let [tests-mit-inneren-fragen (flatten (map (partial unpack-map-in-map :kurs/tests) kurse-mit-inneren-tests))
-        fragen-mit-innerem-fach (flatten (map (partial unpack-map-in-map :test/fragen) tests-mit-inneren-fragen))
-        fragen (map #(dissoc (assoc % :fach/fachtitel (:fach/fachtitel (:kurs/fach %))) :kurs/fach) fragen-mit-innerem-fach)
+  (let [tests-mit-inneren-fragen (flatten (map (partial unpack-map-in-map :course/question-sets) kurse-mit-inneren-tests))
+        fragen-mit-innerem-fach (flatten (map (partial unpack-map-in-map :question-set/questions) tests-mit-inneren-fragen))
+        fragen (map #(dissoc (assoc % :class/class-name (:class/class-name (:course/class %))) :course/class) fragen-mit-innerem-fach)
         nur-freitext-fragen (filter #(= :question.type/free-text (:question/type %)) fragen)]
     nur-freitext-fragen))
 
@@ -69,7 +69,7 @@
       (if (= i (count antworten))
         a
         (let [current-ids {:user/id (:user/id (get antworten-vec i)), :question/id (:question/id (get antworten-vec i)),
-                           :test/id (:test/id (get antworten-vec i)), :kurs/id (:kurs/id (get antworten-vec i))}]
+                           :question-set/id (:question-set/id (get antworten-vec i)), :course/id (:course/id (get antworten-vec i))}]
           (if (contains? prev-ids current-ids)
             (recur a (inc i) prev-ids)
             (recur (conj a (get antworten-vec i)) (inc i) (conj prev-ids current-ids))))))))
@@ -79,8 +79,8 @@
   [antworten-mit-korrekturen antworten]
   (let [antworten-ohne-duplicates (reverse (remove-antworten-with-identical-user-frage-test-id (reverse antworten)))
         antworten-ohne-user-id (map #(dissoc % :user/id) antworten-ohne-duplicates)
-        korrigiert-ids (into #{} (map :antwort/id antworten-mit-korrekturen))
-        antworten-ohne-korrekturen (remove #(contains? korrigiert-ids (:antwort/id %)) antworten-ohne-user-id)]
+        korrigiert-ids (into #{} (map :answer/id antworten-mit-korrekturen))
+        antworten-ohne-korrekturen (remove #(contains? korrigiert-ids (:answer/id %)) antworten-ohne-user-id)]
     antworten-ohne-korrekturen))
 
 
@@ -97,21 +97,21 @@
 
 (defn get-antwort-with-given-id
   [id antworten]
-  (first (filter #(= id (:antwort/id %)) antworten)))
+  (first (filter #(= id (:answer/id %)) antworten)))
 
 
 (defn antworten-korrigiert
   [korrektur-map antworten]
-  (let [korrekturen-with-antwort-id (flatten (map #(unpack-map-in-map :korrektur/antwort %) korrektur-map))
-        antworten-mit-korrekturen (map #(merge % (get-antwort-with-given-id (:antwort/id %) antworten)) korrekturen-with-antwort-id)
+  (let [korrekturen-with-antwort-id (flatten (map #(unpack-map-in-map :correction/answer %) korrektur-map))
+        antworten-mit-korrekturen (map #(merge % (get-antwort-with-given-id (:answer/id %) antworten)) korrekturen-with-antwort-id)
         antworten-ohne-studi (map #(dissoc % :user/id) antworten-mit-korrekturen)
-        antwort-ids-for-this-korrektor (into #{} (map :antwort/id antworten))]
-    (filter #(contains? antwort-ids-for-this-korrektor (:antwort/id %)) antworten-ohne-studi)))
+        antwort-ids-for-this-korrektor (into #{} (map :answer/id antworten))]
+    (filter #(contains? antwort-ids-for-this-korrektor (:answer/id %)) antworten-ohne-studi)))
 
 
 (defn korrekturen-into-antwort
   [korrekturen-von-antwort antwort]
-  (let [korrekturen (korrekturen-von-antwort (:antwort/id antwort))
+  (let [korrekturen (korrekturen-von-antwort (:answer/id antwort))
         korrekturen-sorted (reverse (sort-by :korrektur/timestamp korrekturen))]
     (if (first korrekturen-sorted)
       (merge antwort (first korrekturen-sorted))
@@ -120,9 +120,9 @@
 
 (defn antworten-fuer-korrektur-ansicht
   [[antwort-map]]
-  (let [antwort-unpacked-frage-nested (update (merge antwort-map (:antwort/frage antwort-map)) :antwort/antwort first)
+  (let [antwort-unpacked-frage-nested (update (merge antwort-map (:answer/question antwort-map)) :answer/answer first)
         antwort-unpacked (select-keys antwort-unpacked-frage-nested [:user/id :question/question-statement :question/points :frage/loesung
-                                                                     :antwort/antwort :antwort/punkte :antwort/id])]
+                                                                     :answer/answer :answer/points :answer/id])]
     antwort-unpacked))
 
 
@@ -130,11 +130,11 @@
   [korrektur passende-antwort]
   (if-not (first passende-antwort)
     (assoc korrektur :error :keine-passende-antwort)
-    (let [frage-punkte (get-in (first passende-antwort) [:antwort/frage :question/points])]
+    (let [frage-punkte (get-in (first passende-antwort) [:answer/question :question/points])]
       (cond
         (not frage-punkte)
         (assoc korrektur :error :keine-passende-antwort)
-        (or (not (:korrektur/korrektur-text korrektur)) (empty? (:korrektur/korrektur-text korrektur)))
+        (or (not (:corrector/feedback korrektur)) (empty? (:corrector/feedback korrektur)))
         (assoc korrektur :error :korrektur-text-missing)
         (or (not (:korrektur/punkte korrektur)) (empty? (:korrektur/punkte korrektur)))
         (assoc korrektur :error :korrektur-punkte-missing)

@@ -56,59 +56,59 @@
 (defn kurse-von-studierendem
   [user-id]
   (mapv first
-        (d/q '[:find (pull ?k [:kurs/id
-                               {:kurs/fach [:fach/fachtitel]}
-                               :kurs/jahr
-                               :kurs/semester
-                               {:kurs/tests [:test/id :test/name
-                                             {:test/fragen [:frage/id
+        (d/q '[:find (pull ?k [:course/id
+                               {:course/class [:class/class-name]}
+                               :course/year
+                               :course/semester
+                               {:course/question-sets [:question-set/id :question-set/name
+                                             {:question-set/questions [:frage/id
                                                             :question/points]}]}])
                :in $ ?u
                :where
-               [?u :user/kurse ?k]]
+               [?u :user/courses ?k]]
              @conn [:user/id user-id])))
 
 
 (defn bewertete-antworten-von-test
   [user-id test-id]
   (mapv first
-        (d/q '[:find (pull ?a [:antwort/punkte
-                               {:antwort/frage [:frage/id :question/type]}])
+        (d/q '[:find (pull ?a [:answer/points
+                               {:answer/question [:frage/id :question/type]}])
                :in $ ?u ?t
                :where
-               [?a :antwort/user ?u]
-               [?a :antwort/frage ?f]
-               [?t :test/fragen ?f]
-               [?a :antwort/punkte]]
-             @conn [:user/id user-id] [:test/id test-id])))
+               [?a :answer/user ?u]
+               [?a :answer/question ?f]
+               [?t :question-set/questions ?f]
+               [?a :answer/points]]
+             @conn [:user/id user-id] [:question-set/id test-id])))
 
 
 (defn fragen-fuer-user
   [korrektorin-id]
   (mapv first
-        (d/q '[:find (pull ?kurs [:kurs/semester
-                                  :kurs/jahr
-                                  {:kurs/fach [:fach/fachtitel]}
-                                  {:kurs/tests [:test/id :test/name
-                                                {:test/fragen [:frage/id :question/type]}]}])
+        (d/q '[:find (pull ?kurs [:course/semester
+                                  :course/year
+                                  {:course/class [:class/class-name]}
+                                  {:course/question-sets [:question-set/id :question-set/name
+                                                {:question-set/questions [:frage/id :question/type]}]}])
                :in $ ?korr
                :where
-               [?korr :user/kurse ?kurs]]
+               [?korr :user/courses ?kurs]]
              @conn [:user/id korrektorin-id])))
 
 
 (defn antworten-von-frage
   [frage-id]
   (map
-    #(zipmap [:antwort/id :user/id :antwort/timestamp] %)
+    #(zipmap [:answer/id :user/id :antwort/timestamp] %)
     (d/q '[:find ?antwort-id ?user-id ?timestamp
            :in $ ?frage-id
            :where
            [?frage :frage/id ?frage-id]
-           [?antwort :antwort/frage ?frage]
-           [?antwort :antwort/id ?antwort-id ?tx]
+           [?antwort :answer/question ?frage]
+           [?antwort :answer/id ?antwort-id ?tx]
            [?tx :db/txInstant ?timestamp]
-           [?antwort :antwort/user ?user]
+           [?antwort :answer/user ?user]
            [?user :user/id ?user-id]]
          @conn frage-id)))
 
@@ -116,34 +116,34 @@
 (defn alle-antworten-mit-korrekturen
   []
   (mapv first
-        (d/q '[:find (pull ?antwort [:antwort/id])
+        (d/q '[:find (pull ?antwort [:answer/id])
                :in $
                :where
-               [?korrektur :korrektur/antwort ?antwort]]
+               [?korrektur :correction/answer ?antwort]]
              @conn)))
 
 
 (defn korrekturen-von-korrektorin-korrigiert
   [korrektorin-id]
   (mapv first
-        (d/q '[:find (pull ?k [{:korrektur/antwort [:antwort/id]}])
+        (d/q '[:find (pull ?k [{:correction/answer [:answer/id]}])
                :in $ ?korr
                :where
-               [?k :korrektur/korrektor ?korr]]
+               [?k :correction/corrector ?korr]]
              @conn [:user/id korrektorin-id])))
 
 
 (defn test-by-id
   [id]
   (d/pull @conn
-          [:test/id {:test/fragen [:frage/id :question/question-statement :question/points :question/type :question/possible-solutions]}]
-          [:test/id id]))
+          [:question-set/id {:question-set/questions [:frage/id :question/question-statement :question/points :question/type :question/possible-solutions]}]
+          [:question-set/id id]))
 
 
 (defn all-tests
   []
   (mapv first (d/q '[:find ?id
-                     :where [_ :test/id ?id]]
+                     :where [_ :question-set/id ?id]]
                    @conn)))
 
 
@@ -267,9 +267,9 @@
                                    [{:db/id                 -1
                                      :test/id               id
                                      :test/name             test-name
-                                     :test/start            start
-                                     :test/ende             ende
-                                     :test/bestehensgrenze bestehensgrenze
+                                     :question-set/start            start
+                                     :question-set/end             ende
+                                     :question-set/passing-score bestehensgrenze
                                      :test/fragen (mapv (fn [f-id] [:frage/id f-id]) fragen-ids)}])
         kurs (kurs-by-id kurs-id)
         _tx-result-kurs (d/transact conn [{:db/id         -1
@@ -283,15 +283,15 @@
 
 (defn user-add-antwort
   [user-id frage-id antwort]
-  (let [id (generate-id :antwort/id)
+  (let [id (generate-id :answer/id)
         tx-result (d/transact conn
                               [{:db/id -1
-                                :antwort/id id
-                                :antwort/frage [:frage/id frage-id]
-                                :antwort/user [:user/id user-id]
-                                :antwort/antwort antwort}])
+                                :answer/id id
+                                :answer/question [:frage/id frage-id]
+                                :answer/user [:user/id user-id]
+                                :answer/answer antwort}])
         db-after (:db-after tx-result)]
-    (d/pull db-after [:antwort/id {:antwort/frage [:frage/id]}] [:antwort/id id])))
+    (d/pull db-after [:answer/id {:answer/question [:frage/id]}] [:answer/id id])))
 
 
 (defn user-add-antworten
@@ -304,52 +304,52 @@
 
 (defn all-antwort
   []
-  (d/q '[:find (pull ?e [:antwort/id :antwort/user :antwort/frage :antwort/antwort])
-         :where [?e :antwort/id]]
+  (d/q '[:find (pull ?e [:answer/id :answer/user :answer/question :answer/answer])
+         :where [?e :answer/id]]
        @db/conn))
 
 
 (defn antworten-fuer-korrektur
   [antwort-id]
   (mapv first
-        (d/q '[:find (pull ?antwort [:antwort/id
-                                     :antwort/punkte
-                                     :antwort/antwort
-                                     {:antwort/frage [:question/question-statement :question/points :frage/loesungskriterien]}])
+        (d/q '[:find (pull ?antwort [:answer/id
+                                     :answer/points
+                                     :answer/answer
+                                     {:answer/question [:question/question-statement :question/points :frage/loesungskriterien]}])
                :in $ ?antwort
                :where
-               [?antwort :antwort/frage ?frage]
+               [?antwort :answer/question ?frage]
                [?frage :question/type ?typ]
                [(= ?typ :frage.typ/text)]]
-             @conn [:antwort/id antwort-id])))
+             @conn [:answer/id antwort-id])))
 
 
 (defn korrekturen-von-antwort
   [antwort-id]
   (map
-    #(zipmap [:korrektur/korrektur-text :korrektur/timestamp] %)
+    #(zipmap [:corrector/feedback :korrektur/timestamp] %)
     (d/q '[:find ?korr-text ?timestamp
            :in $ ?antwort-id
            :where
-           [?antwort :antwort/id ?antwort-id]
-           [?korrektur :korrektur/antwort ?antwort ?tx]
+           [?antwort :answer/id ?antwort-id]
+           [?korrektur :correction/answer ?antwort ?tx]
            [?tx :db/txInstant ?timestamp]
-           [?korrektur :korrektur/korrektur-text ?korr-text]]
+           [?korrektur :corrector/feedback ?korr-text]]
          @conn antwort-id)))
 
 
 (defn korrektor-add-korrektur
-  [ant-id {text :korrektur/korrektur-text punkte :korrektur/punkte korr-id :korrektor/id}]
+  [ant-id {text :corrector/feedback punkte :korrektur/punkte korr-id :korrektor/id}]
   (let [tx-result (d/transact conn
                               [{:db/id -1
-                                :korrektur/korrektur-text text
-                                :korrektur/korrektor [:user/id korr-id]
-                                :korrektur/antwort [:antwort/id ant-id]}
-                               {:antwort/id ant-id
-                                :antwort/punkte punkte}])
+                                :corrector/feedback text
+                                :correction/corrector [:user/id korr-id]
+                                :correction/answer [:answer/id ant-id]}
+                               {:answer/id ant-id
+                                :answer/points punkte}])
         db-after (:db-after tx-result)
         ids (:tempids tx-result)]
-    (d/pull db-after [:korrektur/korrektur-text {:korrektur/antwort [:antwort/punkte]}] (get ids -1))))
+    (d/pull db-after [:corrector/feedback {:correction/answer [:answer/points]}] (get ids -1))))
 
 
 (comment 
@@ -361,7 +361,7 @@
 
 
 (comment 
-  (d/pull @conn [:test/fragen] [:test/id 1])
-  (d/pull @conn [:test/id {:test/fragen [:question/question-statement]}] [:test/id 1])
+  (d/pull @conn [:question-set/questions] [:question-set/id 1])
+  (d/pull @conn [:question-set/id {:question-set/questions [:question/question-statement]}] [:question-set/id 1])
   (d/pull @conn [:question/question-statement] [:frage/id 1])
   )

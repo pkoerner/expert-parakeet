@@ -47,48 +47,71 @@
         :multiple-choice :question/multiple-choice-question))
 
 
+(s/def :question-set/id string?)
+(s/def :question-set/name string?)
+(s/def :question-set/questions (s/coll-of ::question))
+
+(s/def ::question-set
+  (s/keys :req [:question-set/id :question-set/name 
+                :question-set/start :question-set/end
+                :question-set/questions :question-set/passing-score]))
+
+
+(s/def :class/id string?)
+(s/def :class/class-name string?)
+(s/def :class/question-sets (s/coll-of ::question-set))
+
+
+(s/def ::class
+  (s/keys :req [:class/id :class/class-name
+                :class/question-sets]))
+
+
+(s/def :course/id string?)
+(s/def :course/class ::class)
+(s/def :course/year pos-int?)
+(s/def :course/semester string?)
+(s/def :course/question-sets (s/coll-of ::question-set))
+
+
+(s/def ::course
+  (s/keys :req [:course/id :course/class
+                :course/year :course/semester
+                :course/question-sets]))
+
+
 (s/def :user/id string?)
-(s/def :user/kurse (s/coll-of ::kurs))
+(s/def :user/courses (s/coll-of ::course))
 
 
 (s/def ::user
-  (s/keys :req [:user/id :user/kurse]))
+  (s/keys :req [:user/id :user/courses]))
 
 
-(s/def :antwort/id string?)
-(s/def :antwort/user ::user)
-(s/def :antwort/frage ::question)
+(s/def :answer/id string?)
+(s/def :answer/user ::user)
+(s/def :answer/question ::question)
 
 
-(s/def :antwort/antwort
+(s/def :answer/answer
   (s/and (s/coll-of string?)))
 
 
-(s/def :antwort/punkte pos-int?)
+(s/def :answer/points pos-int?)
 
 
-(s/def ::antwort
-  (s/keys :req [:antwort/user :antwort/antwort :antwort/frage]))
+(s/def ::answer
+  (s/keys :req [:answer/user :answer/answer :answer/question]))
 
 
-(s/def :korrektur/korrektor ::user)
-(s/def :korrektur/antwort ::antwort)
-(s/def :korrektur/korrektur-text string?)
+(s/def :correction/corrector ::user) ;; No distinction between autograding and human corrector
+(s/def :correction/answer ::answer)
+(s/def :corrector/feedback string?)
+
+(s/def ::correction
+  (s/keys :req [:correction/corrector :correction/answer :corrector/feedback]))
 
 
-(s/def ::korrektur
-  (s/keys :req [:korrektur/korrektor :korrektur/antwort :korrektur/korrektur-text]))
-
-
-(s/def :test/id string?)
-(s/def :test/name string?)
-(s/def :test/fragen (s/coll-of ::question))
-
-
-(s/def ::test
-  (s/keys :req [:test/id :test/name
-                :test/start :test/ende
-                :test/fragen :test/bestehensgrenze]))
 
 
 (s/def :fach/id string?)
@@ -110,3 +133,4 @@
   (s/keys :req [:kurs/id :kurs/fach
                 :kurs/jahr :kurs/semester
                 :kurs/tests]))
+
