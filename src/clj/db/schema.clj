@@ -7,7 +7,7 @@
 (def question-schema
   (spectomic/datomic-schema
     [[:question/id {:db/unique :db.unique/identity
-                 :db/index true}]
+                    :db/index true}]
      :question/type ; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/on-prem/best-practices.html#idents-for-enumerated-types)
      :question/question-statement
      :question/points
@@ -23,7 +23,7 @@
 (def answer-schema
   (spectomic/datomic-schema
     [[:answer/id {:db/unique :db.unique/identity
-                   :db/index true}]
+                  :db/index true}]
      :answer/user
      :answer/question
      :answer/answer
@@ -40,7 +40,7 @@
 (def question-set-schema
   (spectomic/datomic-schema
     [[:question-set/id {:db/unique :db.unique/identity
-                :db/index true}]
+                        :db/index true}]
      :question-set/name
      :question-set/start
      :question-set/end
@@ -58,7 +58,7 @@
 (def class-schema
   (spectomic/datomic-schema
     [[:class/id {:db/unique :db.unique/identity
-                :db/index true}]
+                 :db/index true}]
      :class/class-name
      :class/question-sets]))
 
@@ -66,7 +66,7 @@
 (def course-schema
   (spectomic/datomic-schema
     [[:course/id {:db/unique :db.unique/identity
-                :db/index true}]
+                  :db/index true}]
      :course/class
      :course/year
      :course/semester
