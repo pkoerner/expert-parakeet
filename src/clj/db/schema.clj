@@ -10,7 +10,7 @@
                  :db/index true}]
      :question/type ; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/on-prem/best-practices.html#idents-for-enumerated-types)
      :question/question-statement
-     :question/pointsfrage
+     :question/points
      :question/evaluation-criteria
      :question/possible-solutions
      :question/single-choice-solution
