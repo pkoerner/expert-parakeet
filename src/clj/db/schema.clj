@@ -4,13 +4,13 @@
     [provisdom.spectomic.core :as spectomic]))
 
 
-(def frage-schema
+(def question-schema
   (spectomic/datomic-schema
-    [[:frage/id {:db/unique :db.unique/identity
+    [[:question/id {:db/unique :db.unique/identity
                  :db/index true}]
      :question/type ; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/on-prem/best-practices.html#idents-for-enumerated-types)
      :question/question-statement
-     :question/points
+     :question/pointsfrage
      :question/evaluation-criteria
      :question/possible-solutions
      :question/single-choice-solution
@@ -20,7 +20,7 @@
 ;; manche Felder bleiben leer (abhaengig vom Fragentyp)
 
 
-(def antwort-schema
+(def answer-schema
   (spectomic/datomic-schema
     [[:answer/id {:db/unique :db.unique/identity
                    :db/index true}]
@@ -30,14 +30,14 @@
      :answer/points]))
 
 
-(def korrektur-schema
+(def correction-schema
   (spectomic/datomic-schema
     [:correction/corrector
      :correction/answer
      :corrector/feedback]))
 
 
-(def test-schema
+(def question-set-schema
   (spectomic/datomic-schema
     [[:question-set/id {:db/unique :db.unique/identity
                 :db/index true}]
@@ -55,7 +55,7 @@
      :user/courses]))
 
 
-(def fach-schema
+(def class-schema
   (spectomic/datomic-schema
     [[:class/id {:db/unique :db.unique/identity
                 :db/index true}]
@@ -63,7 +63,7 @@
      :class/question-sets]))
 
 
-(def kurs-schema
+(def course-schema
   (spectomic/datomic-schema
     [[:course/id {:db/unique :db.unique/identity
                 :db/index true}]
@@ -73,5 +73,5 @@
      :course/question-sets]))
 
 
-(def schema
-  (concat frage-schema antwort-schema korrektur-schema test-schema user-schema fach-schema kurs-schema))
+(def db-schema
+  (concat question-schema answer-schema correction-schema question-set-schema user-schema class-schema course-schema))

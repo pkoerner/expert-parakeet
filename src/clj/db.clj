@@ -2,7 +2,7 @@
   (:require
     [datahike.api :as d]
     [db.dummy-data :as dummy-data]
-    [db.schema :refer [schema]]
+    [db.schema :refer [db-schema]]
     [nano-id.core :refer [nano-id]]))
 
 
@@ -14,7 +14,7 @@
 (def cfg
   {:store {:backend :mem
            :id "expert-db"}
-   :initial-tx schema})
+   :initial-tx db-schema})
 
 
 ;; use file db
@@ -61,7 +61,7 @@
                                :course/year
                                :course/semester
                                {:course/question-sets [:question-set/id :question-set/name
-                                             {:question-set/questions [:frage/id
+                                             {:question-set/questions [:question/id
                                                             :question/points]}]}])
                :in $ ?u
                :where
@@ -73,14 +73,14 @@
   [user-id test-id]
   (mapv first
         (d/q '[:find (pull ?a [:answer/points
-                               {:answer/question [:frage/id :question/type]}])
+                               {:answer/question [:question/id :question/type]}])
                :in $ ?u ?t
                :where
                [?a :answer/user ?u]
                [?a :answer/question ?f]
                [?t :question-set/questions ?f]
                [?a :answer/points]]
-             @conn [:user/id user-id] [:question-set/id test-id])))
+             @conn [:user/id user-id] [:kurs test-id])))
 
 
 (defn fragen-fuer-user
@@ -90,7 +90,7 @@
                                   :course/year
                                   {:course/class [:class/class-name]}
                                   {:course/question-sets [:question-set/id :question-set/name
-                                                {:question-set/questions [:frage/id :question/type]}]}])
+                                                {:question-set/questions [:question/id :question/type]}]}])
                :in $ ?korr
                :where
                [?korr :user/courses ?kurs]]
@@ -104,7 +104,7 @@
     (d/q '[:find ?antwort-id ?user-id ?timestamp
            :in $ ?frage-id
            :where
-           [?frage :frage/id ?frage-id]
+           [?frage :question/id ?frage-id]
            [?antwort :answer/question ?frage]
            [?antwort :answer/id ?antwort-id ?tx]
            [?tx :db/txInstant ?timestamp]
@@ -136,7 +136,7 @@
 (defn test-by-id
   [id]
   (d/pull @conn
-          [:question-set/id {:question-set/questions [:frage/id :question/question-statement :question/points :question/type :question/possible-solutions]}]
+          [:question-set/id {:question-set/questions [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]}]
           [:question-set/id id]))
 
 
@@ -174,8 +174,8 @@
 
 (defn all-fragen
   []
-  (mapv first (d/q '[:find (pull ?e [:frage/id])
-                     :where [?e :frage/id]]
+  (mapv first (d/q '[:find (pull ?e [:question/id])
+                     :where [?e :question/id]]
                    @db/conn)))
 
 
@@ -226,8 +226,8 @@
 (defn frage-by-id
   [id]
   (d/pull @db/conn
-          [:frage/id :question/question-statement :question/points :question/type]
-          [:frage/id id]))
+          [:question/id :question/question-statement :question/points :question/type]
+          [:question/id id]))
 
 
 (defn add-frage
@@ -287,11 +287,11 @@
         tx-result (d/transact conn
                               [{:db/id -1
                                 :answer/id id
-                                :answer/question [:frage/id frage-id]
+                                :answer/question [:question/id frage-id]
                                 :answer/user [:user/id user-id]
                                 :answer/answer antwort}])
         db-after (:db-after tx-result)]
-    (d/pull db-after [:answer/id {:answer/question [:frage/id]}] [:answer/id id])))
+    (d/pull db-after [:answer/id {:answer/question [:question/id]}] [:answer/id id])))
 
 
 (defn user-add-antworten
@@ -357,11 +357,11 @@
 
   (ffirst (d/q '[:find (count ?e)
                  :where 
-                 [?e :frage/id]] @conn)))
+                 [?e :question/id]] @conn)))
 
 
 (comment 
   (d/pull @conn [:question-set/questions] [:question-set/id 1])
   (d/pull @conn [:question-set/id {:question-set/questions [:question/question-statement]}] [:question-set/id 1])
-  (d/pull @conn [:question/question-statement] [:frage/id 1])
+  (d/pull @conn [:question/question-statement] [:question/id 1])
   )
