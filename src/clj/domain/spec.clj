@@ -96,7 +96,7 @@
 (s/def :answer/answer
   (s/and (s/coll-of string?)))
 
-graded-answers-of-question-set
+
 (s/def :answer/points pos-int?)
 
 
@@ -106,31 +106,12 @@ graded-answers-of-question-set
 
 (s/def :correction/corrector ::user) ; No distinction between autograding and human corrector
 (s/def :correction/answer ::answer)
-(s/def :corrector/feedback string?)
+(s/def :correction/feedback string?)
 
 (s/def ::correction
-  (s/keys :req [:correction/corrector :correction/answer :corrector/feedback]))
+   (s/keys :req [:correction/corrector :correction/answer :correction/feedback]))
 
 
 
 
-(s/def :fach/id string?)
-(s/def :fach/fachtitel string?)
-
-
-(s/def ::fach
-  (s/keys :req [:fach/id :fach/fachtitel]))
-
-
-(s/def :kurs/id string?)
-(s/def :kurs/fach ::fach)
-(s/def :kurs/jahr pos-int?)
-(s/def :kurs/semester string?)
-(s/def :kurs/tests (s/coll-of ::test))
-
-
-(s/def ::kurs
-  (s/keys :req [:kurs/id :kurs/fach
-                :kurs/jahr :kurs/semester
-                :kurs/tests]))
-
+ 

@@ -73,19 +73,19 @@
 
 (t/deftest test-remove-antworten-with-identical-user-frage-id
   (t/testing "No removal"
-    (let [provided-list [{:question/id "1", :question-set/id "2", :user/id "0", :antwort/timestamp "2022-08-03T00:00:00Z"}
-                         {:question/id "2", :question-set/id "3", :user/id "6", :antwort/timestamp "2022-08-02T00:00:00Z"}
-                         {:question/id "3", :question-set/id "4", :user/id "2", :antwort/timestamp "2022-08-01T00:00:00Z"}]]
+    (let [provided-list [{:question/id "1", :question-set/id "2", :user/id "0", :answer/timestamp "2022-08-03T00:00:00Z"}
+                         {:question/id "2", :question-set/id "3", :user/id "6", :answer/timestamp "2022-08-02T00:00:00Z"}
+                         {:question/id "3", :question-set/id "4", :user/id "2", :answer/timestamp "2022-08-01T00:00:00Z"}]]
       (t/is (= provided-list (d/remove-antworten-with-identical-user-frage-test-id provided-list)))))
   (t/testing "Two removals"
-    (let [provided-list [{:question/id "1", :question-set/id "2", :user/id "0", :antwort/timestamp "2022-08-05T00:00:00Z"}
-                         {:question/id "2", :question-set/id "3", :user/id "6", :antwort/timestamp "2022-08-04T00:00:00Z"}
-                         {:question/id "1", :question-set/id "2", :user/id "0", :antwort/timestamp "2022-08-03T00:00:00Z"}
-                         {:question/id "2", :question-set/id "3", :user/id "6", :antwort/timestamp "2022-08-02T00:00:00Z"}
-                         {:question/id "3", :question-set/id "4", :user/id "2", :antwort/timestamp "2022-08-01T00:00:00Z"}]
-          expected-result [{:question/id "1", :question-set/id "2", :user/id "0", :antwort/timestamp "2022-08-05T00:00:00Z"}
-                           {:question/id "2", :question-set/id "3", :user/id "6", :antwort/timestamp "2022-08-04T00:00:00Z"}
-                           {:question/id "3", :question-set/id "4", :user/id "2", :antwort/timestamp "2022-08-01T00:00:00Z"}]]
+    (let [provided-list [{:question/id "1", :question-set/id "2", :user/id "0", :answer/timestamp "2022-08-05T00:00:00Z"}
+                         {:question/id "2", :question-set/id "3", :user/id "6", :answer/timestamp "2022-08-04T00:00:00Z"}
+                         {:question/id "1", :question-set/id "2", :user/id "0", :answer/timestamp "2022-08-03T00:00:00Z"}
+                         {:question/id "2", :question-set/id "3", :user/id "6", :answer/timestamp "2022-08-02T00:00:00Z"}
+                         {:question/id "3", :question-set/id "4", :user/id "2", :answer/timestamp "2022-08-01T00:00:00Z"}]
+          expected-result [{:question/id "1", :question-set/id "2", :user/id "0", :answer/timestamp "2022-08-05T00:00:00Z"}
+                           {:question/id "2", :question-set/id "3", :user/id "6", :answer/timestamp "2022-08-04T00:00:00Z"}
+                           {:question/id "3", :question-set/id "4", :user/id "2", :answer/timestamp "2022-08-01T00:00:00Z"}]]
       (t/is (= expected-result (d/remove-antworten-with-identical-user-frage-test-id provided-list))))))
 
 
@@ -128,34 +128,34 @@
 
 (t/deftest test-sortierte-antworten-von-freitext-fragen
   (t/testing "Korrekt sortiert"
-    (let [antworten [{:answer/id "1", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04")},
-                     {:answer/id "1", :user/id "0", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07")},
-                     {:answer/id "2", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")},
-                     {:answer/id "3", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-06")}]
+    (let [antworten [{:answer/id "1", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04")},
+                     {:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07")},
+                     {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")},
+                     {:answer/id "3", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-06")}]
           antwort-fct (fn [_id] antworten)
           freitext-fragen [{:course/semester "WiSe", :course/year 2000, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"}]
-          result [{:answer/id "1", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04"), :course/semester "WiSe", :course/year 2000,
+          result [{:answer/id "1", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04"), :course/semester "WiSe", :course/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"}
-                  {:answer/id "2", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "WiSe", :course/year 2000,
+                  {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "WiSe", :course/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"},
-                  {:answer/id "3", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-06"), :course/semester "WiSe", :course/year 2000,
+                  {:answer/id "3", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-06"), :course/semester "WiSe", :course/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"}
-                  {:answer/id "1", :user/id "0", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "WiSe", :course/year 2000,
+                  {:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "WiSe", :course/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"}]]
       (t/is (= result (d/sortierte-antworten-von-freitext-fragen antwort-fct freitext-fragen)))))
   (t/testing "Two fragen, two antworten"
-    (let [antworten [{:answer/id "1", :user/id "0", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07")},
-                     {:answer/id "2", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}]
+    (let [antworten [{:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07")},
+                     {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}]
           antwort-fct (fn [_id] antworten)
           freitext-fragen [{:course/semester "WiSe", :course/year 2000, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"},
                            {:course/semester "SoSe", :course/year 2001, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"}]
-          result [{:answer/id "2", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "WiSe", :course/year 2000,
+          result [{:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "WiSe", :course/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"},
-                  {:answer/id "2", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "SoSe", :course/year 2001,
+                  {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "SoSe", :course/year 2001,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"},
-                  {:answer/id "1", :user/id "0", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "WiSe", :course/year 2000,
+                  {:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "WiSe", :course/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"},
-                  {:answer/id "1", :user/id "0", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "SoSe", :course/year 2001,
+                  {:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "SoSe", :course/year 2001,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"}]]
       (t/is (= result (d/sortierte-antworten-von-freitext-fragen antwort-fct freitext-fragen))))))
 
@@ -163,37 +163,37 @@
 (t/deftest test-antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id
   (t/testing "Korrigierte Antworten werden entfernt"
     (let [antworten-mit-korrekturen [{:answer/id "3"} {:answer/id "2"} {:answer/id "0"}]
-          antworten [{:answer/id "0", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "WiSe", :course/year 2000,
+          antworten [{:answer/id "0", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "WiSe", :course/year 2000,
                       :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"},
-                     {:answer/id "1", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "SoSe", :course/year 2001,
+                     {:answer/id "1", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "SoSe", :course/year 2001,
                       :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"},
-                     {:answer/id "2", :user/id "0", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "WiSe", :course/year 2000,
+                     {:answer/id "2", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "WiSe", :course/year 2000,
                       :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"},
-                     {:answer/id "3", :user/id "0", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "SoSe", :course/year 2001,
+                     {:answer/id "3", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "SoSe", :course/year 2001,
                       :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"}]
-          result [{:answer/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "SoSe", :course/year 2001,
+          result [{:answer/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "SoSe", :course/year 2001,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"}]]
       (t/is (= result (d/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id antworten-mit-korrekturen antworten)))))
   (t/testing "Antworten mit gleicher User, frage, test ID werden entfernt"
     (let [antworten-mit-korrekturen []
-          antworten [{:answer/id "0", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "WiSe", :course/year 2000,
+          antworten [{:answer/id "0", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "WiSe", :course/year 2000,
                       :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"},
-                     {:answer/id "1", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "SoSe", :course/year 2001,
+                     {:answer/id "1", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "SoSe", :course/year 2001,
                       :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"},
-                     {:answer/id "2", :user/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "WiSe", :course/year 2000,
+                     {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "WiSe", :course/year 2000,
                       :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"},
-                     {:answer/id "3", :user/id "0", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "SoSe", :course/year 2001,
+                     {:answer/id "3", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "SoSe", :course/year 2001,
                       :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"}]
-          result [{:answer/id "2", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "WiSe", :course/year 2000,
+          result [{:answer/id "2", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "WiSe", :course/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"},
-                  {:answer/id "3", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "SoSe", :course/year 2001,
+                  {:answer/id "3", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "SoSe", :course/year 2001,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"}]]
       (t/is (= result (d/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id antworten-mit-korrekturen antworten)))))
   (t/testing "Unkorrigierte Frage und eine jüngere korrigierte Frage"
     (let [antworten-mit-korrekturen [{:answer/id "1"}]
-          antworten [{:answer/id "0", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "WiSe", :course/year 2000,
+          antworten [{:answer/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "WiSe", :course/year 2000,
                       :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"},
-                     {:answer/id "1", :antwort/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-06"), :course/semester "WiSe", :course/year 2000,
+                     {:answer/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-06"), :course/semester "WiSe", :course/year 2000,
                       :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"}]
           result []]
       (t/is (= result (d/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id antworten-mit-korrekturen antworten))))))
@@ -236,34 +236,34 @@
       (t/is result (d/korrekturen-into-antwort korrekturen-fct antwort))))
   (t/testing "Eine Korrektur vorhanden"
     (let [antwort {:answer/id "0"}
-          korrektur {:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
+          korrektur {:korrektur/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
           korrekturen-fct (fn [_id] (conj [] korrektur))
           result (merge antwort korrektur)]
       (t/is result (d/korrekturen-into-antwort korrekturen-fct antwort))))
   (t/testing "Mehrere Korrekturen vorhanden"
     (let [antwort {:answer/id "0"}
           korrekturen-fct (fn [_id]
-                            [{:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-03")}
-                             {:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
-                             {:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04")}])
-          result (merge antwort {:korrektur/id "0" :korrektur/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")})]
+                            [{:korrektur/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-03")}
+                             {:korrektur/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
+                             {:korrektur/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04")}])
+          result (merge antwort {:korrektur/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")})]
       (t/is result (d/korrekturen-into-antwort korrekturen-fct antwort)))))
 
 
 (t/deftest test-check-incoming-korrektur
   (t/testing "Input is fine"
-    (let [korrektur-input {:corrector/feedback "Gut!" :korrektur/punkte "3" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "3" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
-          result {:corrector/feedback "Gut!" :korrektur/punkte 3 :korrektor/id "1"}]
+          result {:correction/feedback "Gut!" :korrektur/punkte 3 :korrektor/id "1"}]
       (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
   (t/testing "Keine Antwort"
-    (let [korrektur-input {:corrector/feedback "Gut!" :korrektur/punkte "3" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "3" :korrektor/id "1"}
           antwort-input []
           result (merge korrektur-input {:error :keine-passende-antwort})]
       (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
   (t/testing "Corrupted Antwort"
-    (let [korrektur-input {:corrector/feedback "Gut!" :korrektur/punkte "3" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "3" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {}}]
           result (merge korrektur-input {:error :keine-passende-antwort})]
@@ -275,37 +275,37 @@
           result (merge korrektur-input {:error :korrektur-text-missing})]
       (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
   (t/testing "Keine Korrektur 2"
-    (let [korrektur-input {:corrector/feedback "" :korrektur/punkte "3" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "" :korrektur/punkte "3" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge korrektur-input {:error :korrektur-text-missing})]
       (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
   (t/testing "Keine Punkte 1"
-    (let [korrektur-input {:corrector/feedback "Gut!", :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!", :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge korrektur-input {:error :korrektur-punkte-missing})]
       (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
   (t/testing "Keine Punkte 2"
-    (let [korrektur-input {:corrector/feedback "Gut!" :korrektur/punkte "" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge korrektur-input {:error :korrektur-punkte-missing})]
       (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
   (t/testing "Punkte invalid 1"
-    (let [korrektur-input {:corrector/feedback "Gut!" :korrektur/punkte "hallo" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "hallo" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge korrektur-input {:error :punkte-invalid})]
       (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
   (t/testing "Punkte invalid 2"
-    (let [korrektur-input {:corrector/feedback "Gut!" :korrektur/punkte "-10" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "-10" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge korrektur-input {:error :punkte-invalid})]
       (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
   (t/testing "Zu viele Punkte"
-    (let [korrektur-input {:corrector/feedback "Gut!" :korrektur/punkte "10" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "10" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge korrektur-input {:error :punkte-zu-viel})]

@@ -34,7 +34,7 @@
   (spectomic/datomic-schema
     [:correction/corrector
      :correction/answer
-     :corrector/feedback]))
+     :correction/feedback]))
 
 
 (def question-set-schema

@@ -57,7 +57,7 @@
   [fct-antworten-von-frage freitext-fragen]
   (let [freitext-fragen-mit-inneren-antworten (map #(assoc % :frage/antworten (fct-antworten-von-frage (:question/id %))) freitext-fragen)
         antworten (flatten (map (partial unpack-map-in-map :frage/antworten) freitext-fragen-mit-inneren-antworten))]
-    (sort-by :antwort/timestamp antworten)))
+    (sort-by :answer/timestamp antworten)))
 
 
 (defn remove-antworten-with-identical-user-frage-test-id
@@ -87,11 +87,11 @@
 (defn timestamp-to-datum-and-uhrzeit
   [antwort-map]
   (map
-    #(let [date (:antwort/timestamp %)]
+    #(let [date (:answer/timestamp %)]
        (dissoc
          (assoc % :antwort/datum (.format (java.text.SimpleDateFormat. "dd.MM.yyyy") date)
                 :antwort/uhrzeit (.format (java.text.SimpleDateFormat. "HH:mm") date))
-         :antwort/timestamp))
+         :answer/timestamp))
     antwort-map))
 
 
@@ -112,7 +112,7 @@
 (defn korrekturen-into-antwort
   [korrekturen-von-antwort antwort]
   (let [korrekturen (korrekturen-von-antwort (:answer/id antwort))
-        korrekturen-sorted (reverse (sort-by :korrektur/timestamp korrekturen))]
+        korrekturen-sorted (reverse (sort-by :correction/timestamp korrekturen))]
     (if (first korrekturen-sorted)
       (merge antwort (first korrekturen-sorted))
       antwort)))
@@ -134,7 +134,7 @@
       (cond
         (not frage-punkte)
         (assoc korrektur :error :keine-passende-antwort)
-        (or (not (:corrector/feedback korrektur)) (empty? (:corrector/feedback korrektur)))
+        (or (not (:correction/feedback korrektur)) (empty? (:correction/feedback korrektur)))
         (assoc korrektur :error :korrektur-text-missing)
         (or (not (:korrektur/punkte korrektur)) (empty? (:korrektur/punkte korrektur)))
         (assoc korrektur :error :korrektur-punkte-missing)

@@ -124,10 +124,10 @@
 (def corrections
   [{:correction/answer [:answer/id "3"]
     :correction/corrector [:user/id "1"]
-    :corrector/feedback "Superb!"}
+    :correction/feedback "Superb!"}
    {:correction/answer [:answer/id "7"]
     :correction/corrector [:user/id "1"]
-    :corrector/feedback "Superb!"}])
+    :correction/feedback "Superb!"}])
 
 
 (def dummy-data
