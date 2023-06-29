@@ -92,7 +92,7 @@
            (GET "/antwort-fuer-korrektur/:aid" [aid]
                 (response
                   (->> (db/get-answers-for-correction aid)
-                       (domain/antworten-fuer-korrektur-ansicht)
+                       (domain/answers-for-correction-view)
                        (domain/merge-latest-correction-with-answer db/get-corrections-of-answer))))
            (POST "/korrektur-fuer-antwort/:aid" [aid :as r]
                  (let [korrektur (:body-params r)]

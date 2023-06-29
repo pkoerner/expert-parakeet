@@ -225,7 +225,7 @@
                   :answer/question {:question/question-statement "Fragetext", :question/points 6, :question/evaluation-criteria "Loesung"}}]
           output {:answer/id "0", :answer/answer "Antwort", :answer/points 5, :question/question-statement "Fragetext",
                   :question/points 6, :question/evaluation-criteria "Loesung"}]
-      (t/is output (d/antworten-fuer-korrektur-ansicht input)))))
+      (t/is output (d/answers-for-correction-view input)))))
 
 
 (t/deftest test-korrekturen-into-antwort
