@@ -80,7 +80,7 @@
                   (->> (db/get-questions-for-user user-id)
                        (domain/extract-free-text-questions)
                        (domain/sort-answers-of-free-text-questions-by-timestamp db/get-answers-for-question)
-                       (domain/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id (db/get-all-answers-with-corrections))
+                       (domain/uncorrected-answers-with-distinct-ids (db/get-all-answers-with-corrections))
                        (domain/timestamp-to-datum-and-uhrzeit))))
            (GET "/bisherige-korrekturen/:user-id" [user-id]
                 (response

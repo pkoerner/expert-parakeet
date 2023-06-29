@@ -95,13 +95,15 @@
             (recur (conj a (get answers-vec i)) (inc i) (conj prev-ids current-ids))))))))
 
 
-(defn antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id
-  [antworten-mit-korrekturen antworten]
-  (let [antworten-ohne-duplicates (reverse (answers-with-distinct-ids (reverse antworten)))
-        antworten-ohne-user-id (map #(dissoc % :user/id) antworten-ohne-duplicates)
-        korrigiert-ids (into #{} (map :answer/id antworten-mit-korrekturen))
-        antworten-ohne-korrekturen (remove #(contains? korrigiert-ids (:answer/id %)) antworten-ohne-user-id)]
-    antworten-ohne-korrekturen))
+(defn uncorrected-answers-with-distinct-ids
+  "Takes a collection of already corrected answers `corrected-answers` and a collection of `answers` as input.
+   Returns one answer per question. For the question no answer has been corrected."
+  [corrected-answers answers]
+  (let [distinct-answers (reverse (answers-with-distinct-ids (reverse answers)))
+        answers-without-user-id (map #(dissoc % :user/id) distinct-answers)
+        corrected-answers-ids (into #{} (map :answer/id corrected-answers))
+        answers-without-correction (remove #(contains? corrected-answers-ids (:answer/id %)) answers-without-user-id)]
+    answers-without-correction))
 
 
 (defn timestamp-to-datum-and-uhrzeit

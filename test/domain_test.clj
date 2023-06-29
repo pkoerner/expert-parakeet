@@ -173,7 +173,7 @@
                       :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"}]
           result [{:answer/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "SoSe", :course/year 2001,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"}]]
-      (t/is (= result (d/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id antworten-mit-korrekturen antworten)))))
+      (t/is (= result (d/uncorrected-answers-with-distinct-ids antworten-mit-korrekturen antworten)))))
   (t/testing "Antworten mit gleicher User, frage, test ID werden entfernt"
     (let [antworten-mit-korrekturen []
           antworten [{:answer/id "0", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "WiSe", :course/year 2000,
@@ -188,7 +188,7 @@
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"},
                   {:answer/id "3", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "SoSe", :course/year 2001,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"}]]
-      (t/is (= result (d/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id antworten-mit-korrekturen antworten)))))
+      (t/is (= result (d/uncorrected-answers-with-distinct-ids antworten-mit-korrekturen antworten)))))
   (t/testing "Unkorrigierte Frage und eine jüngere korrigierte Frage"
     (let [antworten-mit-korrekturen [{:answer/id "1"}]
           antworten [{:answer/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course/semester "WiSe", :course/year 2000,
@@ -196,7 +196,7 @@
                      {:answer/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-06"), :course/semester "WiSe", :course/year 2000,
                       :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"}]
           result []]
-      (t/is (= result (d/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id antworten-mit-korrekturen antworten))))))
+      (t/is (= result (d/uncorrected-answers-with-distinct-ids antworten-mit-korrekturen antworten))))))
 
 
 (t/deftest test-antworten-korrigiert
