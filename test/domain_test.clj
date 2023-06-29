@@ -142,7 +142,7 @@
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"}
                   {:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "WiSe", :course/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"}]]
-      (t/is (= result (d/sortierte-antworten-von-freitext-fragen antwort-fct freitext-fragen)))))
+      (t/is (= result (d/sort-answers-of-free-text-questions-by-timestamp antwort-fct freitext-fragen)))))
   (t/testing "Two fragen, two antworten"
     (let [antworten [{:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07")},
                      {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}]
@@ -157,7 +157,7 @@
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 1"},
                   {:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course/semester "SoSe", :course/year 2001,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :class/class-name "Fach 2"}]]
-      (t/is (= result (d/sortierte-antworten-von-freitext-fragen antwort-fct freitext-fragen))))))
+      (t/is (= result (d/sort-answers-of-free-text-questions-by-timestamp antwort-fct freitext-fragen))))))
 
 
 (t/deftest test-antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id

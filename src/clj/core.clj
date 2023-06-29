@@ -79,14 +79,14 @@
                 (response
                   (->> (db/get-questions-for-user user-id)
                        (domain/extract-free-text-questions)
-                       (domain/sortierte-antworten-von-freitext-fragen db/get-answers-for-question)
+                       (domain/sort-answers-of-free-text-questions-by-timestamp db/get-answers-for-question)
                        (domain/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id (db/get-all-answers-with-corrections))
                        (domain/timestamp-to-datum-and-uhrzeit))))
            (GET "/bisherige-korrekturen/:user-id" [user-id]
                 (response
                   (->> (db/get-questions-for-user user-id)
                        (domain/extract-free-text-questions)
-                       (domain/sortierte-antworten-von-freitext-fragen db/get-answers-for-question)
+                       (domain/sort-answers-of-free-text-questions-by-timestamp db/get-answers-for-question)
                        (domain/antworten-korrigiert (db/get-all-corrections-of-corrector user-id))
                        (domain/timestamp-to-datum-and-uhrzeit))))
            (GET "/antwort-fuer-korrektur/:aid" [aid]

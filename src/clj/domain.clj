@@ -66,11 +66,13 @@
     only-free-text-questions))
 
 
-(defn sortierte-antworten-von-freitext-fragen
-  [fct-antworten-von-frage freitext-fragen]
-  (let [freitext-fragen-mit-inneren-antworten (map #(assoc % :frage/antworten (fct-antworten-von-frage (:question/id %))) freitext-fragen)
-        antworten (flatten (map (partial unpack-map-in-map :frage/antworten) freitext-fragen-mit-inneren-antworten))]
-    (sort-by :answer/timestamp antworten)))
+(defn sort-answers-of-free-text-questions-by-timestamp
+  "Sorts the answers of the provided free-text-questions by timestamp.
+   Uses the `question-set->answer` function to determine which answers should be used from the questions."
+  [question-set->answer free-text-questions]
+  (let [free-text-questions-with-inner-answers (map #(assoc % :frage/antworten (question-set->answer (:question/id %))) free-text-questions)
+        answers (flatten (map (partial unpack-map-in-map :frage/antworten) free-text-questions-with-inner-answers))]
+    (sort-by :answer/timestamp answers)))
 
 
 (defn remove-antworten-with-identical-user-frage-test-id
