@@ -74,25 +74,30 @@
         answers (flatten (map (partial unpack-map-in-map :frage/antworten) free-text-questions-with-inner-answers))]
     (sort-by :answer/timestamp answers)))
 
-
-(defn remove-antworten-with-identical-user-frage-test-id
-  [antworten]
-  (let [antworten-vec (vec antworten)]
+;; previous name was "remove-answers-with-identical-user-and-questions-question-set-id"
+(defn answers-with-distinct-ids
+  "Takes a collection of `answers` as input. 
+   It only keeps one answer for each test by comparing the 
+   `:user/id`, `:question/id`, `:question-set/id`, and `:course/id` of every question. 
+   It does this without considering the timestamp or points.
+   It is practicly random."
+  [answers]
+  (let [answers-vec (vec answers)]
     (loop [a []
            i 0
            prev-ids #{}]
-      (if (= i (count antworten))
+      (if (= i (count answers))
         a
-        (let [current-ids {:user/id (:user/id (get antworten-vec i)), :question/id (:question/id (get antworten-vec i)),
-                           :question-set/id (:question-set/id (get antworten-vec i)), :course/id (:course/id (get antworten-vec i))}]
+        (let [current-ids {:user/id (:user/id (get answers-vec i)), :question/id (:question/id (get answers-vec i)),
+                           :question-set/id (:question-set/id (get answers-vec i)), :course/id (:course/id (get answers-vec i))}]
           (if (contains? prev-ids current-ids)
             (recur a (inc i) prev-ids)
-            (recur (conj a (get antworten-vec i)) (inc i) (conj prev-ids current-ids))))))))
+            (recur (conj a (get answers-vec i)) (inc i) (conj prev-ids current-ids))))))))
 
 
 (defn antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id
   [antworten-mit-korrekturen antworten]
-  (let [antworten-ohne-duplicates (reverse (remove-antworten-with-identical-user-frage-test-id (reverse antworten)))
+  (let [antworten-ohne-duplicates (reverse (answers-with-distinct-ids (reverse antworten)))
         antworten-ohne-user-id (map #(dissoc % :user/id) antworten-ohne-duplicates)
         korrigiert-ids (into #{} (map :answer/id antworten-mit-korrekturen))
         antworten-ohne-korrekturen (remove #(contains? korrigiert-ids (:answer/id %)) antworten-ohne-user-id)]

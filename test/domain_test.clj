@@ -76,7 +76,7 @@
     (let [provided-list [{:question/id "1", :question-set/id "2", :user/id "0", :answer/timestamp "2022-08-03T00:00:00Z"}
                          {:question/id "2", :question-set/id "3", :user/id "6", :answer/timestamp "2022-08-02T00:00:00Z"}
                          {:question/id "3", :question-set/id "4", :user/id "2", :answer/timestamp "2022-08-01T00:00:00Z"}]]
-      (t/is (= provided-list (d/remove-antworten-with-identical-user-frage-test-id provided-list)))))
+      (t/is (= provided-list (d/answers-with-distinct-ids provided-list)))))
   (t/testing "Two removals"
     (let [provided-list [{:question/id "1", :question-set/id "2", :user/id "0", :answer/timestamp "2022-08-05T00:00:00Z"}
                          {:question/id "2", :question-set/id "3", :user/id "6", :answer/timestamp "2022-08-04T00:00:00Z"}
@@ -86,7 +86,7 @@
           expected-result [{:question/id "1", :question-set/id "2", :user/id "0", :answer/timestamp "2022-08-05T00:00:00Z"}
                            {:question/id "2", :question-set/id "3", :user/id "6", :answer/timestamp "2022-08-04T00:00:00Z"}
                            {:question/id "3", :question-set/id "4", :user/id "2", :answer/timestamp "2022-08-01T00:00:00Z"}]]
-      (t/is (= expected-result (d/remove-antworten-with-identical-user-frage-test-id provided-list))))))
+      (t/is (= expected-result (d/answers-with-distinct-ids provided-list))))))
 
 
 (t/deftest test-freitext-fragen
