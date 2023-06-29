@@ -98,7 +98,7 @@
                  (let [korrektur (:body-params r)]
                    (response
                      (->> (domain/validate-incoming-correction korrektur (db/get-answers-for-correction aid))
-                          (domain/add-korrektur-if-no-error db/add-correction! aid))))))
+                          (domain/add-correction-if-no-error db/add-correction! aid))))))
   (GET "/api/access-token" request (str (extract-token request)))
   (GET "/api/session" request (str (:session request)))
   (route/not-found "Not Found"))

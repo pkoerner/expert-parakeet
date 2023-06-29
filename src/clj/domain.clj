@@ -154,7 +154,7 @@
   [[answer]]
   (let [answer-unpacked-question-nested (update (merge answer (:answer/question answer)) :answer/answer first)
         answer-unpacked (select-keys answer-unpacked-question-nested [:user/id :question/question-statement :question/points :frage/loesung
-                                                                     :answer/answer :answer/points :answer/id])]
+                                                                      :answer/answer :answer/points :answer/id])]
     answer-unpacked))
 
 
@@ -192,8 +192,11 @@
         :else (update correction :correction/points read-string)))))
 
 
-(defn add-korrektur-if-no-error
-  [add-korrektur-fct ant-id korrektur]
-  (if (:error korrektur)
-    korrektur
-    (add-korrektur-fct ant-id korrektur)))
+(defn add-correction-if-no-error
+  "Takes a function as argument, taking an answer-id and a correction.
+   If the correction has an error, the correction is returned, 
+   otherwise `add-correction-fun` is called."
+  [add-correction-fun answer-id correction]
+  (if (:error correction)
+    correction
+    (add-correction-fun answer-id correction)))
