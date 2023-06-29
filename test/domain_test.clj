@@ -45,8 +45,8 @@
   (t/testing "Zwei Fragen in Test"
     (let [test {:question-set/id "1", :question-set/name "Test 1", :question-set/questions [{:question/id "2", :question/points 10},{:question/id "3", :question/points 2}]}
           antwort-fct (fn [& _args] [{:answer/points 10, :answer/question {:question/id "2", :question/type :frage.typ/bool}}])]
-      (t/is (= (d/test-punkte antwort-fct test)
-               {:question-set/id "1" :question-set/name "Test 1" :test/max-punkte 12 :test/erreichte-punkte 10})))))
+      (t/is (= (d/calc-question-set-points antwort-fct test)
+               {:question-set/id "1" :question-set/name "Test 1" :question-set/max-points 12 :question-set/achived-points 10})))))
 
 
 (t/deftest test-unpack-map-in-map

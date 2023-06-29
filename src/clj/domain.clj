@@ -23,19 +23,22 @@
        (apply +)))
 
 
-(defn test-punkte
-  [test->antwort test]
-  (-> test
-      (assoc :test/max-punkte (calc-max-points-of-question-set test))
-      (assoc :test/erreichte-punkte (calc-achieved-points
-                                      (test->antwort (:question-set/id test))))
-      (select-keys [:question-set/id :question-set/name :test/max-punkte :test/erreichte-punkte])))
+(defn calc-question-set-points
+  "This function calculates the points a student achived in a qeustion-set.
+   The `question-set->answer` function defines which answers of the question-setshould be considered for the calculation.
+   :return: Contains the maximal achivable points as well as the achived points."
+  [question-set->answer question-set]
+  (-> question-set
+      (assoc :question-set/max-points (calc-max-points-of-question-set test))
+      (assoc :question-set/achived-points (calc-achieved-points
+                                     (question-set->answer (:question-set/id question-set))))
+      (select-keys [:question-set/id :question-set/name :question-set/max-points :question-set/achived-points])))
 
 
 (defn kurse-mit-gesamt-punkten
   [kurse test->antwort]
   (map (fn [kurs]
-         (update kurs :course/question-sets (partial map (partial test-punkte test->antwort))))
+         (update kurs :course/question-sets (partial map (partial calc-question-set-points test->antwort))))
        kurse))
 
 
@@ -45,8 +48,8 @@
   [key-of-coll input-map]
   (let [map-without-coll (dissoc input-map key-of-coll)]
     (map
-      #(merge map-without-coll %)
-      (key-of-coll input-map))))
+     #(merge map-without-coll %)
+     (key-of-coll input-map))))
 
 
 (defn freitext-fragen
@@ -92,12 +95,12 @@
 (defn timestamp-to-datum-and-uhrzeit
   [antwort-map]
   (map
-    #(let [date (:answer/timestamp %)]
-       (dissoc
-         (assoc % :antwort/datum (.format (java.text.SimpleDateFormat. "dd.MM.yyyy") date)
-                :antwort/uhrzeit (.format (java.text.SimpleDateFormat. "HH:mm") date))
-         :answer/timestamp))
-    antwort-map))
+   #(let [date (:answer/timestamp %)]
+      (dissoc
+       (assoc % :antwort/datum (.format (java.text.SimpleDateFormat. "dd.MM.yyyy") date)
+              :antwort/uhrzeit (.format (java.text.SimpleDateFormat. "HH:mm") date))
+       :answer/timestamp))
+   antwort-map))
 
 
 (defn get-antwort-with-given-id

@@ -21,8 +21,8 @@
 (defn show-test
   [{id :test/id
     name :test/name
-    max-punkte :test/max-punkte
-    erreichte-punkte :test/erreichte-punkte}]
+    max-punkte :question-set/max-points
+    erreichte-punkte :question-set/achived-points}]
   [:p
    [:input
     {:type "button"
