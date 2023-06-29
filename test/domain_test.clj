@@ -233,13 +233,13 @@
     (let [antwort {:answer/id "0"}
           korrekturen-fct (fn [_id] [])
           result (merge antwort {:korrektur/id nil})]
-      (t/is result (d/korrekturen-into-antwort korrekturen-fct antwort))))
+      (t/is result (d/merge-latest-correction-with-answer korrekturen-fct antwort))))
   (t/testing "Eine Korrektur vorhanden"
     (let [antwort {:answer/id "0"}
           korrektur {:korrektur/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
           korrekturen-fct (fn [_id] (conj [] korrektur))
           result (merge antwort korrektur)]
-      (t/is result (d/korrekturen-into-antwort korrekturen-fct antwort))))
+      (t/is result (d/merge-latest-correction-with-answer korrekturen-fct antwort))))
   (t/testing "Mehrere Korrekturen vorhanden"
     (let [antwort {:answer/id "0"}
           korrekturen-fct (fn [_id]
@@ -247,7 +247,7 @@
                              {:korrektur/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
                              {:korrektur/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04")}])
           result (merge antwort {:korrektur/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")})]
-      (t/is result (d/korrekturen-into-antwort korrekturen-fct antwort)))))
+      (t/is result (d/merge-latest-correction-with-answer korrekturen-fct antwort)))))
 
 
 (t/deftest test-check-incoming-korrektur

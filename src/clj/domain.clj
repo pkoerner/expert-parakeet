@@ -136,13 +136,15 @@
     (filter #(contains? answer-ids-for-corrector (:answer/id %)) answers-without-user)))
 
 
-(defn korrekturen-into-antwort
-  [korrekturen-von-antwort antwort]
-  (let [korrekturen (korrekturen-von-antwort (:answer/id antwort))
-        korrekturen-sorted (reverse (sort-by :correction/timestamp korrekturen))]
-    (if (first korrekturen-sorted)
-      (merge antwort (first korrekturen-sorted))
-      antwort)))
+(defn merge-latest-correction-with-answer
+  "Takes a col of corrections of an answer and the answer as input.
+   Merges the newest correction of the provided col with the provided answer."
+  [corrections-of-answer answer]
+  (let [corrections (corrections-of-answer (:answer/id answer))
+        sorted-corrections (reverse (sort-by :correction/timestamp corrections))]
+    (if (first sorted-corrections)
+      (merge answer (first sorted-corrections))
+      answer)))
 
 
 (defn antworten-fuer-korrektur-ansicht
