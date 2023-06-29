@@ -204,19 +204,19 @@
     (let [korrigierte-antworten [{:correction/answer {:answer/id "1"}}]
           antworten [{:answer/id "0"}, {:answer/id "1"}, {:answer/id "2"}]
           result [{:answer/id "1"}]]
-      (t/is (= result (d/antworten-korrigiert korrigierte-antworten antworten)))))
+      (t/is (= result (d/corrected-answers korrigierte-antworten antworten)))))
   (t/testing "Keine passende Korrektur"
     (let [korrigierte-antworten [{:correction/answer {:answer/id "4"}}]
           antworten [{:answer/id "0"}, {:answer/id "1"}, {:answer/id "2"}]
           result []]
-      (t/is (= result (d/antworten-korrigiert korrigierte-antworten antworten)))))
+      (t/is (= result (d/corrected-answers korrigierte-antworten antworten)))))
   (t/testing "Alles korrigiert"
     (let [korrigierte-antworten [{:correction/answer {:answer/id "0"}}
                                  {:correction/answer {:answer/id "1"}}
                                  {:correction/answer {:answer/id "2"}}]
           antworten [{:answer/id "0"}, {:answer/id "1"}, {:answer/id "2"}]
           result [{:answer/id "0"}, {:answer/id "1"}, {:answer/id "2"}]]
-      (t/is (= result (d/antworten-korrigiert korrigierte-antworten antworten))))))
+      (t/is (= result (d/corrected-answers korrigierte-antworten antworten))))))
 
 
 (t/deftest test-antworten-fuer-korrektur-ansicht

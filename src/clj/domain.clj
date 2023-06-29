@@ -29,9 +29,9 @@
    :return: Contains the maximal achivable points as well as the achived points."
   [question-set->answer question-set]
   (-> question-set
-      (assoc :question-set/max-points (calc-max-points-of-question-set test))
+      (assoc :question-set/max-points (calc-max-points-of-question-set question-set))
       (assoc :question-set/achived-points (calc-achieved-points
-                                     (question-set->answer (:question-set/id question-set))))
+                                           (question-set->answer (:question-set/id question-set))))
       (select-keys [:question-set/id :question-set/name :question-set/max-points :question-set/achived-points])))
 
 
@@ -125,13 +125,15 @@
   (first (filter #(= id (:answer/id %)) answers)))
 
 
-(defn antworten-korrigiert
-  [korrektur-map antworten]
-  (let [korrekturen-with-antwort-id (flatten (map #(unpack-map-in-map :correction/answer %) korrektur-map))
-        antworten-mit-korrekturen (map #(merge % (get-answer-by-id (:answer/id %) antworten)) korrekturen-with-antwort-id)
-        antworten-ohne-studi (map #(dissoc % :user/id) antworten-mit-korrekturen)
-        antwort-ids-for-this-korrektor (into #{} (map :answer/id antworten))]
-    (filter #(contains? antwort-ids-for-this-korrektor (:answer/id %)) antworten-ohne-studi)))
+(defn corrected-answers
+  "Takes a col of corrections and a col of answers.
+   Returns only the answers that have already been corrected without the user in the map."
+  [corrections answers]
+  (let [corrections-with-answer-id (flatten (map #(unpack-map-in-map :correction/answer %) corrections))
+        answers-with-corrections (map #(merge % (get-answer-by-id (:answer/id %) answers)) corrections-with-answer-id)
+        answers-without-user (map #(dissoc % :user/id) answers-with-corrections)
+        answer-ids-for-corrector (into #{} (map :answer/id answers))]
+    (filter #(contains? answer-ids-for-corrector (:answer/id %)) answers-without-user)))
 
 
 (defn korrekturen-into-antwort

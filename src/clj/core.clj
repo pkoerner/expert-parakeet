@@ -87,7 +87,7 @@
                   (->> (db/get-questions-for-user user-id)
                        (domain/extract-free-text-questions)
                        (domain/sort-answers-of-free-text-questions-by-timestamp db/get-answers-for-question)
-                       (domain/antworten-korrigiert (db/get-all-corrections-of-corrector user-id))
+                       (domain/corrected-answers (db/get-all-corrections-of-corrector user-id))
                        (domain/timestamp-to-date-and-time))))
            (GET "/antwort-fuer-korrektur/:aid" [aid]
                 (response
