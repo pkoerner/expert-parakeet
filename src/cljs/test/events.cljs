@@ -10,7 +10,7 @@
   (fn [{:keys [db]} [_ test-id]]
     {:db          (assoc db :laedt true)
      :http-xhrio  {:method          :get
-                   :uri             (str vars/base-url "/test/" test-id)
+                   :uri             (str vars/base-url "/question-sets/" test-id)
                    :timeout         8000
                    :response-format (ajax/transit-response-format)
                    :on-success      [:test/angekommen]}}))
@@ -54,7 +54,7 @@
     (let [user-id @(rf/subscribe [:user-id])
           antworten (:antworten db)]
       {:http-xhrio  {:method          :post
-                     :uri             (str vars/base-url "/user/" user-id "/antworten")
+                     :uri             (str vars/base-url "/user/" user-id "/answers")
                      :params          antworten
                      :format          (ajax/transit-request-format)
                      :response-format (ajax/transit-response-format)
