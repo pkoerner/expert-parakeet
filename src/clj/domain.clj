@@ -55,13 +55,15 @@
      (key-of-coll input-map))))
 
 
-(defn freitext-fragen
-  [kurse-mit-inneren-tests]
-  (let [tests-mit-inneren-fragen (flatten (map (partial unpack-map-in-map :course/question-sets) kurse-mit-inneren-tests))
-        fragen-mit-innerem-fach (flatten (map (partial unpack-map-in-map :question-set/questions) tests-mit-inneren-fragen))
-        fragen (map #(dissoc (assoc % :class/class-name (:class/class-name (:course/class %))) :course/class) fragen-mit-innerem-fach)
-        nur-freitext-fragen (filter #(= :question.type/free-text (:question/type %)) fragen)]
-    nur-freitext-fragen))
+(defn extract-free-text-questions
+  "Takes as input multiple courses containing their questions. 
+   Extracts all free text questions from each course and returns them."
+  [courses-with-inner-question-sets]
+  (let [question-sets-with-inner-questions (flatten (map (partial unpack-map-in-map :course/question-sets) courses-with-inner-question-sets))
+        questions-with-inner-course (flatten (map (partial unpack-map-in-map :question-set/questions) question-sets-with-inner-questions))
+        questions (map #(dissoc (assoc % :class/class-name (:class/class-name (:course/class %))) :course/class) questions-with-inner-course)
+        only-free-text-questions (filter #(= :question.type/free-text (:question/type %)) questions)]
+    only-free-text-questions))
 
 
 (defn sortierte-antworten-von-freitext-fragen
