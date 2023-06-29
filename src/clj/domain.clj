@@ -106,15 +106,17 @@
     answers-without-correction))
 
 
-(defn timestamp-to-datum-and-uhrzeit
-  [antwort-map]
+(defn timestamp-to-date-and-time
+  "Takes an answer with a timestamp. 
+   Removes the timestamp and assocs the date and the time of the timestamp to the answer."
+  [answer]
   (map
    #(let [date (:answer/timestamp %)]
       (dissoc
-       (assoc % :antwort/datum (.format (java.text.SimpleDateFormat. "dd.MM.yyyy") date)
-              :antwort/uhrzeit (.format (java.text.SimpleDateFormat. "HH:mm") date))
+       (assoc % :answer/date (.format (java.text.SimpleDateFormat. "dd.MM.yyyy") date)
+              :answer/time (.format (java.text.SimpleDateFormat. "HH:mm") date))
        :answer/timestamp))
-   antwort-map))
+   answer))
 
 
 (defn get-antwort-with-given-id

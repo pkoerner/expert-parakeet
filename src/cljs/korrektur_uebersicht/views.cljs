@@ -31,7 +31,7 @@
 
 
 (defn show-antwort
-  [{antwort-id :antwort/id test-name :test/name datum :antwort/datum uhrzeit :antwort/uhrzeit fachtitel :fach/fachtitel
+  [{antwort-id :antwort/id test-name :test/name datum :answer/date uhrzeit :answer/time fachtitel :fach/fachtitel
     semester :kurs/semester jahr :kurs/jahr}]
   [:p
    [:input
