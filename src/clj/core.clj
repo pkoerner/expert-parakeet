@@ -19,7 +19,8 @@
   (context "/api" []
            ;; tests
            ;; maybe better route /tests
-           (GET "/test" []
+           ;; for consistency /question-sets would be better
+           (GET "/question-sets" []
                 (response (db/get-all-question-sets)))
 
            (POST "/test" [:as r]
@@ -27,13 +28,13 @@
                    (response (db/add-test test-name kurs-id (read-string punkte-grenze)
                                           fragen (time/of start) (time/of ende)))))
     
-           (GET "/test/:id" [id]
+           (GET "/question-sets/:id" [id]
                 (response (db/get-question-set-by-id id)))
            ;; fragen
            ;; do we need these route, why can't we embed the questions in the test
-           (GET "/frage" []
+           (GET "/question" []
                 (response (db/get-all-questions)))
-           (GET "/frage/:id" [id]
+           (GET "/question/:id" [id]
                 (response (db/get-question-by-id id)))
 
            (GET "/fach" []
@@ -46,14 +47,15 @@
            (GET "/kurs/for-fach/:fach-id" [fach-id]
                 (response (db/kurse-for-fach fach-id)))
 
-           (GET "/antwort" []
+           ;; Changing /antwort to /answers as we query for all answers from db
+           (GET "/answers" []
                 (response (db/get-all-answers)))
            ;; antworten
-           (POST "/user/:user-id/antworten" [user-id :as r]
-                 (let [antworten (:body-params r)]
-                   (response (db/add-multiple-user-answers! user-id antworten))))
+           (POST "/user/:user-id/answers" [user-id :as r]
+                 (let [answers (:body-params r)]
+                   (response (db/add-multiple-user-answers! user-id answers))))
 
-           (GET "/user/:user-id/kurse" [user-id]
+           (GET "/user/:user-id/courses" [user-id]
                 (response (domain/courses-with-total-points
                             (db/get-courses-of-student user-id)
                             (partial db/get-graded-answers-of-question-set user-id))))
@@ -75,30 +77,30 @@
                  (let [body (:body-params r)]
                    (response (db/add-kurs (:fach-id body) (read-string (:jahr body)) (:semester body)))))
 
-           (GET "/korrektur/:user-id" [user-id]
+           (GET "/correction/:user-id" [user-id]
                 (response
                   (->> (db/get-questions-for-user user-id)
                        (domain/extract-free-text-questions)
                        (domain/sort-answers-of-free-text-questions-by-timestamp db/get-answers-for-question)
                        (domain/uncorrected-answers-with-distinct-ids (db/get-all-answers-with-corrections))
                        (domain/timestamp-to-date-and-time))))
-           (GET "/bisherige-korrekturen/:user-id" [user-id]
+           (GET "/corrections-to-date/:user-id" [user-id]
                 (response
                   (->> (db/get-questions-for-user user-id)
                        (domain/extract-free-text-questions)
                        (domain/sort-answers-of-free-text-questions-by-timestamp db/get-answers-for-question)
                        (domain/corrected-answers (db/get-all-corrections-of-corrector user-id))
                        (domain/timestamp-to-date-and-time))))
-           (GET "/antwort-fuer-korrektur/:aid" [aid]
+           (GET "/answer-to-correction/:ans-id" [ans-id]
                 (response
-                  (->> (db/get-answers-for-correction aid)
+                  (->> (db/get-answers-for-correction ans-id)
                        (domain/answers-for-correction-view)
                        (domain/merge-latest-correction-with-answer db/get-corrections-of-answer))))
-           (POST "/korrektur-fuer-antwort/:aid" [aid :as r]
+           (POST "/answer-to-correction/:ans-id" [ans-id :as r]
                  (let [korrektur (:body-params r)]
                    (response
-                     (->> (domain/validate-incoming-correction korrektur (db/get-answers-for-correction aid))
-                          (domain/add-correction-if-no-error db/add-correction! aid))))))
+                     (->> (domain/validate-incoming-correction korrektur (db/get-answers-for-correction ans-id))
+                          (domain/add-correction-if-no-error db/add-correction! ans-id))))))
   (GET "/api/access-token" request (str (extract-token request)))
   (GET "/api/session" request (str (:session request)))
   (route/not-found "Not Found"))
