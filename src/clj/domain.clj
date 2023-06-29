@@ -59,7 +59,7 @@
 
 
 (defn extract-free-text-questions
-  "Takes as input multiple courses containing their questions. 
+  "Takes as input multiple courses containing their question-sets. 
    Extracts all free text questions from each course and returns them."
   [courses-with-inner-question-sets]
   (let [question-sets-with-inner-questions (flatten (map (partial unpack-map-in-map :course/question-sets) courses-with-inner-question-sets))
