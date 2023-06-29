@@ -119,15 +119,16 @@
    answer))
 
 
-(defn get-antwort-with-given-id
-  [id antworten]
-  (first (filter #(= id (:answer/id %)) antworten)))
+(defn get-answer-by-id
+  "Takes a col of answers and returns the first answer from that col with the provided id."
+  [id answers]
+  (first (filter #(= id (:answer/id %)) answers)))
 
 
 (defn antworten-korrigiert
   [korrektur-map antworten]
   (let [korrekturen-with-antwort-id (flatten (map #(unpack-map-in-map :correction/answer %) korrektur-map))
-        antworten-mit-korrekturen (map #(merge % (get-antwort-with-given-id (:answer/id %) antworten)) korrekturen-with-antwort-id)
+        antworten-mit-korrekturen (map #(merge % (get-answer-by-id (:answer/id %) antworten)) korrekturen-with-antwort-id)
         antworten-ohne-studi (map #(dissoc % :user/id) antworten-mit-korrekturen)
         antwort-ids-for-this-korrektor (into #{} (map :answer/id antworten))]
     (filter #(contains? antwort-ids-for-this-korrektor (:answer/id %)) antworten-ohne-studi)))
