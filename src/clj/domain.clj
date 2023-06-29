@@ -158,23 +158,38 @@
     answer-unpacked))
 
 
-(defn check-incoming-korrektur
-  [korrektur passende-antwort]
-  (if-not (first passende-antwort)
-    (assoc korrektur :error :keine-passende-antwort)
-    (let [frage-punkte (get-in (first passende-antwort) [:answer/question :question/points])]
+(defn validate-incoming-correction
+  "Takes a `correction` and a col of answers as input.
+   Checks if the answer is 'valid' and returns the correction with points if it is valid
+   and else the correction with an `:error` entry.
+   
+   Possible `:error` entries are:
+   * `:keine-passende-antwort`: `:question/points` in the `:answer/question` was empty.
+   * `:korrektur-text-missing`: `:correction/feedback` was empty.
+   * `:korrektur-punkte-missing`: `:correction/points` was empty.
+   * `:punkte-invalid`: `:correction/points` was not a natural number.
+   * `:punkte-zu-viel`: `:correctino/points` was higher than the maximum question points."
+  [correction fitting-answers]
+  (if-not (first fitting-answers)
+    (assoc correction :error :keine-passende-antwort)
+    (let [question-points (get-in (first fitting-answers) [:answer/question :question/points])]
       (cond
-        (not frage-punkte)
-        (assoc korrektur :error :keine-passende-antwort)
-        (or (not (:correction/feedback korrektur)) (empty? (:correction/feedback korrektur)))
-        (assoc korrektur :error :korrektur-text-missing)
-        (or (not (:korrektur/punkte korrektur)) (empty? (:korrektur/punkte korrektur)))
-        (assoc korrektur :error :korrektur-punkte-missing)
-        (not (nat-int? (read-string (:korrektur/punkte korrektur))))
-        (assoc korrektur :error :punkte-invalid)
-        (> (read-string (:korrektur/punkte korrektur)) frage-punkte)
-        (assoc korrektur :error :punkte-zu-viel)
-        :else (update korrektur :korrektur/punkte read-string)))))
+        (not question-points)
+        (assoc correction :error :keine-passende-antwort)
+
+        (or (not (:correction/feedback correction)) (empty? (:correction/feedback correction)))
+        (assoc correction :error :korrektur-text-missing)
+
+        (or (not (:correction/points correction)) (empty? (:correction/points correction)))
+        (assoc correction :error :korrektur-punkte-missing)
+
+        (not (nat-int? (read-string (:correction/points correction))))
+        (assoc correction :error :punkte-invalid)
+
+        (> (read-string (:correction/points correction)) question-points)
+        (assoc correction :error :punkte-zu-viel)
+
+        :else (update correction :correction/points read-string)))))
 
 
 (defn add-korrektur-if-no-error

@@ -97,7 +97,7 @@
            (POST "/korrektur-fuer-antwort/:aid" [aid :as r]
                  (let [korrektur (:body-params r)]
                    (response
-                     (->> (domain/check-incoming-korrektur korrektur (db/get-answers-for-correction aid))
+                     (->> (domain/validate-incoming-correction korrektur (db/get-answers-for-correction aid))
                           (domain/add-korrektur-if-no-error db/add-correction! aid))))))
   (GET "/api/access-token" request (str (extract-token request)))
   (GET "/api/session" request (str (:session request)))

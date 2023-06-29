@@ -28,8 +28,8 @@
    [:p "Punkte: "
     [:input
      {:type "number"
-      :value (get m :korrektur/punkte 0)
-      :on-change #(rf/dispatch [:korrektur/punkte (-> % .-target .-value)])}]
+      :value (get m :correction/points 0)
+      :on-change #(rf/dispatch [:correction/points (-> % .-target .-value)])}]
     (str " von " frag-punkte)]
    [:p
     [:input {:type  "button"

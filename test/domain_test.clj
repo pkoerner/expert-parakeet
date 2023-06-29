@@ -252,61 +252,61 @@
 
 (t/deftest test-check-incoming-korrektur
   (t/testing "Input is fine"
-    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "3" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :correction/points "3" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
-          result {:correction/feedback "Gut!" :korrektur/punkte 3 :korrektor/id "1"}]
-      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+          result {:correction/feedback "Gut!" :correction/points 3 :korrektor/id "1"}]
+      (t/is result (d/validate-incoming-correction korrektur-input antwort-input))))
   (t/testing "Keine Antwort"
-    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "3" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :correction/points "3" :korrektor/id "1"}
           antwort-input []
           result (merge korrektur-input {:error :keine-passende-antwort})]
-      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+      (t/is result (d/validate-incoming-correction korrektur-input antwort-input))))
   (t/testing "Corrupted Antwort"
-    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "3" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :correction/points "3" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {}}]
           result (merge korrektur-input {:error :keine-passende-antwort})]
-      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+      (t/is result (d/validate-incoming-correction korrektur-input antwort-input))))
   (t/testing "Keine Korrektur 1"
-    (let [korrektur-input {:korrektur/punkte "3" :korrektor/id "1"}
+    (let [korrektur-input {:correction/points "3" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge korrektur-input {:error :korrektur-text-missing})]
-      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+      (t/is result (d/validate-incoming-correction korrektur-input antwort-input))))
   (t/testing "Keine Korrektur 2"
-    (let [korrektur-input {:correction/feedback "" :korrektur/punkte "3" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "" :correction/points "3" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge korrektur-input {:error :korrektur-text-missing})]
-      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+      (t/is result (d/validate-incoming-correction korrektur-input antwort-input))))
   (t/testing "Keine Punkte 1"
     (let [korrektur-input {:correction/feedback "Gut!", :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge korrektur-input {:error :korrektur-punkte-missing})]
-      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+      (t/is result (d/validate-incoming-correction korrektur-input antwort-input))))
   (t/testing "Keine Punkte 2"
-    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :correction/points "" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge korrektur-input {:error :korrektur-punkte-missing})]
-      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+      (t/is result (d/validate-incoming-correction korrektur-input antwort-input))))
   (t/testing "Punkte invalid 1"
-    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "hallo" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :correction/points "hallo" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge korrektur-input {:error :punkte-invalid})]
-      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+      (t/is result (d/validate-incoming-correction korrektur-input antwort-input))))
   (t/testing "Punkte invalid 2"
-    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "-10" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :correction/points "-10" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge korrektur-input {:error :punkte-invalid})]
-      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input))))
+      (t/is result (d/validate-incoming-correction korrektur-input antwort-input))))
   (t/testing "Zu viele Punkte"
-    (let [korrektur-input {:correction/feedback "Gut!" :korrektur/punkte "10" :korrektor/id "1"}
+    (let [korrektur-input {:correction/feedback "Gut!" :correction/points "10" :korrektor/id "1"}
           antwort-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                           :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge korrektur-input {:error :punkte-zu-viel})]
-      (t/is result (d/check-incoming-korrektur korrektur-input antwort-input)))))
+      (t/is result (d/validate-incoming-correction korrektur-input antwort-input)))))
