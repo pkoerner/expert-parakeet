@@ -54,7 +54,7 @@
                    (response (db/add-multiple-user-answers! user-id antworten))))
 
            (GET "/user/:user-id/kurse" [user-id]
-                (response (domain/kurse-mit-gesamt-punkten
+                (response (domain/courses-with-total-points
                             (db/get-courses-of-student user-id)
                             (partial db/get-graded-answers-of-question-set user-id))))
 

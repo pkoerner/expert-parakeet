@@ -35,11 +35,13 @@
       (select-keys [:question-set/id :question-set/name :question-set/max-points :question-set/achived-points])))
 
 
-(defn kurse-mit-gesamt-punkten
-  [kurse test->antwort]
-  (map (fn [kurs]
-         (update kurs :course/question-sets (partial map (partial calc-question-set-points test->antwort))))
-       kurse))
+(defn courses-with-total-points
+  "Updatest the input courses and calculates the total number of achived points in it.
+   The `question-set->answer` function is used to determine which answers for a question set should be used."
+  [courses question-set->answer]
+  (map (fn [course]
+         (update course :course/question-sets (partial map (partial calc-question-set-points question-set->answer))))
+       courses))
 
 
 ;; changes a map that has a coll in it (as var) to a coll of maps
