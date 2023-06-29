@@ -2,6 +2,9 @@
 
 
 (defn calc-max-points-of-question-set
+  "This funtion calculates the maximal
+   achievable number of points for
+   a question set."
   [question-set]
   (apply + (map :question/points (:question-set/questions question-set))))
 
