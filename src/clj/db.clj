@@ -1,9 +1,9 @@
 (ns db
   (:require
-   [datahike.api :as d]
-   [db.dummy-data :as dummy-data]
-   [db.schema :refer [db-schema]]
-   [nano-id.core :refer [nano-id]]))
+    [datahike.api :as d]
+    [db.dummy-data :as dummy-data]
+    [db.schema :refer [db-schema]]
+    [nano-id.core :refer [nano-id]]))
 
 
 (def id-len 10)
@@ -101,17 +101,17 @@
   "Fetches all answers of all users for one question."
   [question-id]
   (map
-   #(zipmap [:answer/id :user/id :answer/timestamp] %)
-   (d/q '[:find ?answer-id ?user-id ?timestamp
-          :in $ ?question-id
-          :where
-          [?frage :question/id ?question-id]
-          [?answer :answer/question ?frage]
-          [?answer :answer/id ?answer-id ?tx]
-          [?tx :db/txInstant ?timestamp]
-          [?answer :answer/user ?user]
-          [?user :user/id ?user-id]]
-        @conn question-id)))
+    #(zipmap [:answer/id :user/id :answer/timestamp] %)
+    (d/q '[:find ?answer-id ?user-id ?timestamp
+           :in $ ?question-id
+           :where
+           [?frage :question/id ?question-id]
+           [?answer :answer/question ?frage]
+           [?answer :answer/id ?answer-id ?tx]
+           [?tx :db/txInstant ?timestamp]
+           [?answer :answer/user ?user]
+           [?user :user/id ?user-id]]
+         @conn question-id)))
 
 
 (defn get-all-answers-with-corrections
@@ -302,9 +302,9 @@
    and an answer."
   [user-id answers]
   (mapv
-   (fn [[question-id answer]]
-     (db/add-user-answer! user-id question-id answer))
-   answers))
+    (fn [[question-id answer]]
+      (db/add-user-answer! user-id question-id answer))
+    answers))
 
 
 (defn get-all-answers
@@ -332,15 +332,15 @@
 (defn get-corrections-of-answer
   [answer-id]
   (map
-   #(zipmap [:correction/feedback :correction/timestamp] %)
-   (d/q '[:find ?corr-feedback ?timestamp
-          :in $ ?answer-id
-          :where
-          [?answer :answer/id ?answer-id]
-          [?correction :correction/answer ?answer ?tx]
-          [?tx :db/txInstant ?timestamp]
-          [?correction :correction/feedback ?corr-feedback]]
-        @conn answer-id)))
+    #(zipmap [:correction/feedback :correction/timestamp] %)
+    (d/q '[:find ?corr-feedback ?timestamp
+           :in $ ?answer-id
+           :where
+           [?answer :answer/id ?answer-id]
+           [?correction :correction/answer ?answer ?tx]
+           [?tx :db/txInstant ?timestamp]
+           [?correction :correction/feedback ?corr-feedback]]
+         @conn answer-id)))
 
 
 (defn add-correction!

@@ -31,7 +31,7 @@
   (-> question-set
       (assoc :question-set/max-points (calc-max-points-of-question-set question-set))
       (assoc :question-set/achived-points (calc-achieved-points
-                                           (question-set->answer (:question-set/id question-set))))
+                                            (question-set->answer (:question-set/id question-set))))
       (select-keys [:question-set/id :question-set/name :question-set/max-points :question-set/achived-points])))
 
 
@@ -44,15 +44,15 @@
        courses))
 
 
-; (Look into tests for clarification.)
+;; (Look into tests for clarification.)
 (defn unpack-map-in-map
   "Takes a map `input-map` and a key in that map `key-of-coll` under which a collection of maps can be found.
    Each map in that collection gets all key-value pairs from the outer map and only the collection is returned."
   [key-of-coll input-map]
   (let [map-without-coll (dissoc input-map key-of-coll)]
     (map
-     #(merge map-without-coll %)
-     (key-of-coll input-map))))
+      #(merge map-without-coll %)
+      (key-of-coll input-map))))
 
 
 (defn extract-free-text-questions
@@ -73,6 +73,7 @@
   (let [free-text-questions-with-inner-answers (map #(assoc % :frage/antworten (question-set->answer (:question/id %))) free-text-questions)
         answers (flatten (map (partial unpack-map-in-map :frage/antworten) free-text-questions-with-inner-answers))]
     (sort-by :answer/timestamp answers)))
+
 
 ;; previous name was "remove-answers-with-identical-user-and-questions-question-set-id"
 (defn answers-with-distinct-ids
@@ -111,12 +112,12 @@
    Removes the timestamp and assocs the date and the time of the timestamp to the answer."
   [answer]
   (map
-   #(let [date (:answer/timestamp %)]
-      (dissoc
-       (assoc % :answer/date (.format (java.text.SimpleDateFormat. "dd.MM.yyyy") date)
-              :answer/time (.format (java.text.SimpleDateFormat. "HH:mm") date))
-       :answer/timestamp))
-   answer))
+    #(let [date (:answer/timestamp %)]
+       (dissoc
+         (assoc % :answer/date (.format (java.text.SimpleDateFormat. "dd.MM.yyyy") date)
+                :answer/time (.format (java.text.SimpleDateFormat. "HH:mm") date))
+         :answer/timestamp))
+    answer))
 
 
 (defn get-answer-by-id
