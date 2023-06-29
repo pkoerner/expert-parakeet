@@ -40,11 +40,11 @@
 (defn error-handling
   [error status]
   (case error
-    :keine-passende-antwort "Antwort, die korrigiert werden sollte, nicht vorhanden."
-    :korrektur-text-missing "Korrekturtext angeben."
-    :korrektur-punkte-missing "Punkte angeben."
-    :punkte-invalid "Eingabe keine gültige Punktzahl."
-    :punkte-zu-viel "Angegebene Punktzahl zu groß."
+    :no-fitting-answer "Antwort, die korrigiert werden sollte, nicht vorhanden."
+    :correction-feedback-missing "Korrekturtext angeben."
+    :correction-points-missing "Punkte angeben."
+    :invalid-points "Eingabe keine gültige Punktzahl."
+    :exceeding-number-of-points "Angegebene Punktzahl zu groß."
     :backend-not-responding (str "Servererror (Statuscode " status ").")))
 
 

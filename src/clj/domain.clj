@@ -168,30 +168,30 @@
    and else the correction with an `:error` entry.
    
    Possible `:error` entries are:
-   * `:keine-passende-antwort`: `:question/points` in the `:answer/question` was empty.
-   * `:korrektur-text-missing`: `:correction/feedback` was empty.
-   * `:korrektur-punkte-missing`: `:correction/points` was empty.
-   * `:punkte-invalid`: `:correction/points` was not a natural number.
-   * `:punkte-zu-viel`: `:correctino/points` was higher than the maximum question points."
+   * `:no-fitting-answer`: `:question/points` in the `:answer/question` was empty.
+   * `:correction-feedback-missing`: `:correction/feedback` was empty.
+   * `:correction-points-missing`: `:correction/points` was empty.
+   * `:invalid-points`: `:correction/points` was not a natural number.
+   * `:exceeding-number-of-points`: `:correctino/points` was higher than the maximum question points."
   [correction fitting-answers]
   (if-not (first fitting-answers)
-    (assoc correction :error :keine-passende-antwort)
+    (assoc correction :error :no-fitting-answer)
     (let [question-points (get-in (first fitting-answers) [:answer/question :question/points])]
       (cond
         (not question-points)
-        (assoc correction :error :keine-passende-antwort)
+        (assoc correction :error :no-fitting-answer)
 
         (or (not (:correction/feedback correction)) (empty? (:correction/feedback correction)))
-        (assoc correction :error :korrektur-text-missing)
+        (assoc correction :error :correction-feedback-missing)
 
         (or (not (:correction/points correction)) (empty? (:correction/points correction)))
-        (assoc correction :error :korrektur-punkte-missing)
+        (assoc correction :error :correction-points-missing)
 
         (not (nat-int? (read-string (:correction/points correction))))
-        (assoc correction :error :punkte-invalid)
+        (assoc correction :error :invalid-points)
 
         (> (read-string (:correction/points correction)) question-points)
-        (assoc correction :error :punkte-zu-viel)
+        (assoc correction :error :exceeding-number-of-points)
 
         :else (update correction :correction/points read-string)))))
 
