@@ -44,9 +44,10 @@
        courses))
 
 
-;; changes a map that has a coll in it (as var) to a coll of maps
-;; all maps have the keys and vals of the outer map and the keys and vals of one inner map
+; (Look into tests for clarification.)
 (defn unpack-map-in-map
+  "Takes a map `input-map` and a key in that map `key-of-coll` under which a collection of maps can be found.
+   Each map in that collection gets all key-value pairs from the outer map and only the collection is returned."
   [key-of-coll input-map]
   (let [map-without-coll (dissoc input-map key-of-coll)]
     (map
