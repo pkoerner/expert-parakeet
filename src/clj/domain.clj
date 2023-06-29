@@ -1,16 +1,21 @@
 (ns domain)
 
 
-(defn test-max-punkte
-  [test]
-  (apply + (map :question/points (:question-set/questions test))))
+(defn calc-max-points-of-question-set
+  [question-set]
+  (apply + (map :question/points (:question-set/questions question-set))))
 
 
 ;; TODO: wir müssen noch entscheiden ob der beste oder
 ;; der letzte Versuch gewertet wird.
-(defn test-erreichte-punkte
+;; They apparently decided to use the first one.
+;; The function calculates the sum of max. values
+(defn calc-achieved-points
+  "This function calculates the sum
+   of points of answers. For each
+   question the answer with the
+   highest points is taken."
   [antworten]
-  ;; nimmt nur die bestbewertete Antwort
   (->> antworten
        (group-by #(get-in % [:answer/question :question/id]))
        (map (fn [[_ antworten]]
@@ -21,8 +26,8 @@
 (defn test-punkte
   [test->antwort test]
   (-> test
-      (assoc :test/max-punkte (test-max-punkte test))
-      (assoc :test/erreichte-punkte (test-erreichte-punkte
+      (assoc :test/max-punkte (calc-max-points-of-question-set test))
+      (assoc :test/erreichte-punkte (calc-achieved-points
                                       (test->antwort (:question-set/id test))))
       (select-keys [:question-set/id :question-set/name :test/max-punkte :test/erreichte-punkte])))
 

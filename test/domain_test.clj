@@ -21,7 +21,7 @@
     [punkte (gen/list gen/nat)]
     (let [test (frage-from-punkte punkte)
           expected-result (apply + punkte)]
-      (= expected-result (d/test-max-punkte test)))))
+      (= expected-result (d/calc-max-points-of-question-set test)))))
 
 
 (t/deftest test-test-erreichte-punkte
@@ -29,16 +29,16 @@
     (let [input [{:answer/points 10, :answer/question {:question/id "2", :question/type :frage.typ/bool}}
                  {:answer/points 4, :answer/question {:question/id "3", :question/type :question.type/free-text}}
                  {:answer/points 1, :answer/question {:question/id "5", :question/type :frage.typ/bool}}]]
-      (t/is (= 15 (d/test-erreichte-punkte input)))))
+      (t/is (= 15 (d/calc-achieved-points input)))))
   (t/testing "Zwei Antworten für die gleiche Frage"
     (let [input [{:answer/points 10, :answer/question {:question/id "2", :question/type :frage.typ/bool}}
                  {:answer/points 4, :answer/question {:question/id "3", :question/type :question.type/free-text}}
                  {:answer/points 1, :answer/question {:question/id "2", :question/type :frage.typ/bool}}
                  {:answer/points 5, :answer/question {:question/id "3", :question/type :question.type/free-text}}]]
-      (t/is (= 15 (d/test-erreichte-punkte input)))))
+      (t/is (= 15 (d/calc-achieved-points input)))))
   (t/testing "Keine Antworten"
     (let [input []]
-      (t/is (= 0 (d/test-erreichte-punkte input))))))
+      (t/is (= 0 (d/calc-achieved-points input))))))
 
 
 (t/deftest test-test-punkte
