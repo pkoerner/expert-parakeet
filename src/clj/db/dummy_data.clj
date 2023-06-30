@@ -47,11 +47,9 @@
 
 (def faecher
   [{:fach/id "0"
-    :fach/fachtitel "Fach 1"
-    :fach/tests []}
+    :fach/fachtitel "ProPra I"}
    {:fach/id "1"
-    :fach/fachtitel "Fach 2"
-    :fach/tests []}])
+    :fach/fachtitel "Fach 2"}])
 
 
 (def kurse

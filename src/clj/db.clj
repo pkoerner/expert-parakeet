@@ -154,6 +154,57 @@
                    @db/conn)))
 
 
+(defn all-faecher
+  []
+  (mapv first (d/q '[:find (pull ?e [:fach/id :fach/fachtitel])
+                     :where [?e :fach/id]]
+                   @db/conn)))
+
+
+(defn add-fach
+  [fach-name]
+  (let [id (generate-id :fach/id)
+        tx-result (d/transact conn
+                              [{:db/id -1
+                                :fach/id id
+                                :fach/fachtitel fach-name}])
+        db-after (:db-after tx-result)]
+    (d/pull db-after [:fach/id :fach/fachtitel]
+            [:fach/id id])))
+
+
+(defn all-kurse
+  []
+  (mapv first (d/q '[:find (pull ?e [:kurs/id {:kurs/fach [:fach/id :fach/fachtitel]} :kurs/jahr
+                                     :kurs/semester :kurs/jahr {:kurs/tests [:test/id]}])
+                     :where [?e :kurs/id]]
+                   @db/conn)))
+
+
+(defn kurs-by-id
+  [id]
+  (d/pull @conn
+          [:kurs/id {:kurs/fach [:fach/id :fach/fachtitel]}
+           :kurs/jahr :kurs/semester
+           {:kurs/tests [:test/id :test/name]}]
+          [:kurs/id id]))
+
+
+(defn add-kurs
+  [fach-id jahr semester]
+  (let [id (generate-id :kurs/id)
+        tx-result (d/transact conn
+                              [{:db/id     -1
+                                :kurs/id   id
+                                :kurs/fach [:fach/id fach-id]
+                                :kurs/jahr jahr
+                                :kurs/semester semester
+                                :kurs/tests []}])
+        db-after (:db-after tx-result)]
+    (d/pull db-after [:kurs/id :kurs/fach :kurs/jahr :kurs/semester :kurs/tests]
+            [:kurs/id id])))
+
+
 (defn frage-by-id
   [id]
   (d/pull @db/conn
