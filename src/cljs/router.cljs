@@ -1,19 +1,19 @@
 (ns router
   (:require
-   [korrektur-uebersicht.views :as korr]
-   [korrektur.views :as korrektur] 
-   [orga.test-erstellen.views :as test-erstln]
-   [orga.fach-erstellen.views :as fach-erstln]
-   [orga.frage-erstellen.views :as frage-erstln]
-   [orga.kurs-erstellen.views :as kurs-erstln]
-   [re-frame.core :as re-frame]
-   [reitit.coercion.spec :as rss]
-   [reitit.core :as r]
-   [reitit.frontend :as rf]
-   [reitit.frontend.controllers :as rfc]
-   [reitit.frontend.easy :as rfe]
-   [studierenden-uebersicht.views :as stud]
-   [test.views :as test]))
+    [korrektur-uebersicht.views :as korr]
+    [korrektur.views :as korrektur]
+    [orga.fach-erstellen.views :as fach-erstln]
+    [orga.frage-erstellen.views :as frage-erstln]
+    [orga.kurs-erstellen.views :as kurs-erstln]
+    [orga.test-erstellen.views :as test-erstln]
+    [re-frame.core :as re-frame]
+    [reitit.coercion.spec :as rss]
+    [reitit.core :as r]
+    [reitit.frontend :as rf]
+    [reitit.frontend.controllers :as rfc]
+    [reitit.frontend.easy :as rfe]
+    [studierenden-uebersicht.views :as stud]
+    [test.views :as test]))
 
 
 (def href rfe/href)
@@ -88,7 +88,7 @@
    ["test-erstellen"
     {:name      ::test-erstellen
      :view      test-erstln/test-erstellen
-     :link-text "Neuen Test erstellen"}
+     :link-text "Neuen Test erstellen"}]
    ["fach/erstellen"
     {:name      ::fach-erstellen
      :view      fach-erstln/fach-erstellen
