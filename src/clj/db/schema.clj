@@ -58,7 +58,7 @@
 (def course-schema
   (spectomic/datomic-schema
     [[:course/id {:db/unique :db.unique/identity
-                 :db/index true}]
+                  :db/index true}]
      :course/course-name
      :course/question-sets]))
 
@@ -66,7 +66,7 @@
 (def course-iteration-schema
   (spectomic/datomic-schema
     [[:course-iteration/id {:db/unique :db.unique/identity
-                  :db/index true}]
+                            :db/index true}]
      :course-iteration/course
      :course-iteration/year
      :course-iteration/semester

@@ -61,8 +61,8 @@
                                :course-iteration/year
                                :course-iteration/semester
                                {:course-iteration/question-sets [:question-set/id :question-set/name
-                                                       {:question-set/questions [:question/id
-                                                                                 :question/points]}]}])
+                                                                 {:question-set/questions [:question/id
+                                                                                           :question/points]}]}])
                :in $ ?u
                :where
                [?u :user/course-iterations ?k]]
@@ -87,10 +87,10 @@
   [corrector-id]
   (mapv first
         (d/q '[:find (pull ?course-iteration [:course-iteration/semester
-                                    :course-iteration/year
-                                    {:course-iteration/course [:course/course-name]}
-                                    {:course-iteration/question-sets [:question-set/id :question-set/name
-                                                            {:question-set/questions [:question/id :question/type]}]}])
+                                              :course-iteration/year
+                                              {:course-iteration/course [:course/course-name]}
+                                              {:course-iteration/question-sets [:question-set/id :question-set/name
+                                                                                {:question-set/questions [:question/id :question/type]}]}])
                :in $ ?corr
                :where
                [?corr :user/course-iterations ?course-iteration]]
@@ -223,6 +223,7 @@
         db-after (:db-after tx-result)]
     (d/pull db-after [:kurs/id :kurs/fach :kurs/jahr :kurs/semester :kurs/tests]
             [:kurs/id id])))
+
 
 (defn get-question-by-id
   [id]

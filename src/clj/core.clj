@@ -27,7 +27,7 @@
                  (let [{:keys [test-name kurs-id punkte-grenze fragen start ende]} (:body-params r)]
                    (response (db/add-test test-name kurs-id (read-string punkte-grenze)
                                           fragen (time/of start) (time/of ende)))))
-    
+
            (GET "/question-sets/:id" [id]
                 (response (db/get-question-set-by-id id)))
            ;; fragen

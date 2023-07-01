@@ -51,8 +51,9 @@
 (s/def :question-set/name string?)
 (s/def :question-set/questions (s/coll-of ::question))
 
+
 (s/def ::question-set
-  (s/keys :req [:question-set/id :question-set/name 
+  (s/keys :req [:question-set/id :question-set/name
                 :question-set/start :question-set/end
                 :question-set/questions :question-set/passing-score]))
 
@@ -108,10 +109,8 @@
 (s/def :correction/answer ::answer)
 (s/def :correction/feedback string?)
 
+
 (s/def ::correction
-   (s/keys :req [:correction/corrector :correction/answer :correction/feedback]))
+  (s/keys :req [:correction/corrector :correction/answer :correction/feedback]))
 
 
-
-
- 
