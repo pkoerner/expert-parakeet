@@ -87,7 +87,7 @@
    ["test-erstellen"
     {:name      ::test-erstellen
      :view      test-erstln/test-erstellen
-     :link-text "Neuen Test erstellen"
+     :link-text "Neuen Test erstellen"}
    ["fach/erstellen"
     {:name      ::fach-erstellen
      :view      fach-erstln/fach-erstellen
