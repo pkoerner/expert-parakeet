@@ -27,8 +27,8 @@
 
 
 (defn calc-question-set-points
-  "This function calculates the points a student achived in a qeustion-set.
-   The `question-set->answer` function defines which answers of the question-setshould be considered for the calculation.
+  "This function calculates the points a student achieved in a question-set.
+   The `question-set->answer` function defines which answers of the question-set should be considered for the calculation.
    :return: Contains the maximal achivable points as well as the achived points."
   [question-set->answer question-set]
   (-> question-set
