@@ -57,35 +57,35 @@
                 :question-set/questions :question-set/passing-score]))
 
 
-(s/def :class/id string?)
-(s/def :class/class-name string?)
-(s/def :class/question-sets (s/coll-of ::question-set))
-
-
-(s/def ::class
-  (s/keys :req [:class/id :class/class-name
-                :class/question-sets]))
-
-
 (s/def :course/id string?)
-(s/def :course/class ::class)
-(s/def :course/year pos-int?)
-(s/def :course/semester string?)
+(s/def :course/course-name string?)
 (s/def :course/question-sets (s/coll-of ::question-set))
 
 
 (s/def ::course
-  (s/keys :req [:course/id :course/class
-                :course/year :course/semester
+  (s/keys :req [:course/id :course/course-name
                 :course/question-sets]))
 
 
+(s/def :course-iteration/id string?)
+(s/def :course-iteration/course ::course)
+(s/def :course-iteration/year pos-int?)
+(s/def :course-iteration/semester string?)
+(s/def :course-iteration/question-sets (s/coll-of ::question-set))
+
+
+(s/def ::course-iteration
+  (s/keys :req [:course-iteration/id :course-iteration/course
+                :course-iteration/year :course-iteration/semester
+                :course-iteration/question-sets]))
+
+
 (s/def :user/id string?)
-(s/def :user/courses (s/coll-of ::course))
+(s/def :user/course-iterations (s/coll-of ::course-iteration))
 
 
 (s/def ::user
-  (s/keys :req [:user/id :user/courses]))
+  (s/keys :req [:user/id :user/course-iterations]))
 
 
 (s/def :answer/id string?)

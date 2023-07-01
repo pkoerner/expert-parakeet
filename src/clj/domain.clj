@@ -38,13 +38,13 @@
       (select-keys [:question-set/id :question-set/name :question-set/max-points :question-set/achived-points])))
 
 
-(defn courses-with-total-points
-  "Updatest the input courses and calculates the total number of achived points in it.
+(defn course-iterations-with-total-points
+  "Updatest the input course-iterations and calculates the total number of achived points in it.
    The `question-set->answer` function is used to determine which answers for a question set should be used."
-  [courses question-set->answer]
-  (map (fn [course]
-         (update course :course/question-sets (partial map (partial calc-question-set-points question-set->answer))))
-       courses))
+  [course-iterations question-set->answer]
+  (map (fn [course-iteration]
+         (update course-iteration :course-iteration/question-sets (partial map (partial calc-question-set-points question-set->answer))))
+       course-iterations))
 
 
 ;; (Look into tests for clarification.)
@@ -59,12 +59,12 @@
 
 
 (defn extract-free-text-questions
-  "Takes as input multiple courses containing their question-sets. 
-   Extracts all free text questions from each course and returns them."
-  [courses-with-inner-question-sets]
-  (let [question-sets-with-inner-questions (flatten (map (partial unpack-map-in-map :course/question-sets) courses-with-inner-question-sets))
-        questions-with-inner-course (flatten (map (partial unpack-map-in-map :question-set/questions) question-sets-with-inner-questions))
-        questions (map #(dissoc (assoc % :class/class-name (:class/class-name (:course/class %))) :course/class) questions-with-inner-course)
+  "Takes as input multiple course-iterations containing their question-sets. 
+   Extracts all free text questions from each course-iteration and returns them."
+  [course-iterations-with-inner-question-sets]
+  (let [question-sets-with-inner-questions (flatten (map (partial unpack-map-in-map :course-iteration/question-sets) course-iterations-with-inner-question-sets))
+        questions-with-inner-course-iteration (flatten (map (partial unpack-map-in-map :question-set/questions) question-sets-with-inner-questions))
+        questions (map #(dissoc (assoc % :course/course-name (:course/course-name (:course-iteration/course %))) :course-iteration/course) questions-with-inner-course-iteration)
         only-free-text-questions (filter #(= :question.type/free-text (:question/type %)) questions)]
     only-free-text-questions))
 
@@ -82,7 +82,7 @@
 (defn answers-with-distinct-ids
   "Takes a collection of `answers` as input. 
    It only keeps one answer for each test by comparing the 
-   `:user/id`, `:question/id`, `:question-set/id`, and `:course/id` of every question. 
+   `:user/id`, `:question/id`, `:question-set/id`, and `:course-iteration/id` of every question. 
    It does this without considering the timestamp or points.
    It is practicly random."
   [answers]
@@ -93,7 +93,7 @@
       (if (= i (count answers))
         a
         (let [current-ids {:user/id (:user/id (get answers-vec i)), :question/id (:question/id (get answers-vec i)),
-                           :question-set/id (:question-set/id (get answers-vec i)), :course/id (:course/id (get answers-vec i))}]
+                           :question-set/id (:question-set/id (get answers-vec i)), :course-iteration/id (:course-iteration/id (get answers-vec i))}]
           (if (contains? prev-ids current-ids)
             (recur a (inc i) prev-ids)
             (recur (conj a (get answers-vec i)) (inc i) (conj prev-ids current-ids))))))))

@@ -53,19 +53,19 @@
       id)))
 
 
-(defn get-courses-of-student
+(defn get-course-iterations-of-student
   [user-id]
   (mapv first
-        (d/q '[:find (pull ?k [:course/id
-                               {:course/class [:class/class-name]}
-                               :course/year
-                               :course/semester
-                               {:course/question-sets [:question-set/id :question-set/name
+        (d/q '[:find (pull ?k [:course-iteration/id
+                               {:course-iteration/course [:course/course-name]}
+                               :course-iteration/year
+                               :course-iteration/semester
+                               {:course-iteration/question-sets [:question-set/id :question-set/name
                                                        {:question-set/questions [:question/id
                                                                                  :question/points]}]}])
                :in $ ?u
                :where
-               [?u :user/courses ?k]]
+               [?u :user/course-iterations ?k]]
              @conn [:user/id user-id])))
 
 
@@ -86,14 +86,14 @@
 (defn get-questions-for-user
   [corrector-id]
   (mapv first
-        (d/q '[:find (pull ?course [:course/semester
-                                    :course/year
-                                    {:course/class [:class/class-name]}
-                                    {:course/question-sets [:question-set/id :question-set/name
+        (d/q '[:find (pull ?course-iteration [:course-iteration/semester
+                                    :course-iteration/year
+                                    {:course-iteration/course [:course/course-name]}
+                                    {:course-iteration/question-sets [:question-set/id :question-set/name
                                                             {:question-set/questions [:question/id :question/type]}]}])
                :in $ ?corr
                :where
-               [?corr :user/courses ?course]]
+               [?corr :user/course-iterations ?course-iteration]]
              @conn [:user/id corrector-id])))
 
 

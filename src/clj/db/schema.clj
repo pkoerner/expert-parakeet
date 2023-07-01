@@ -52,26 +52,26 @@
   (spectomic/datomic-schema
     [[:user/id {:db/unique :db.unique/identity
                 :db/index true}]
-     :user/courses]))
-
-
-(def class-schema
-  (spectomic/datomic-schema
-    [[:class/id {:db/unique :db.unique/identity
-                 :db/index true}]
-     :class/class-name
-     :class/question-sets]))
+     :user/course-iterations]))
 
 
 (def course-schema
   (spectomic/datomic-schema
     [[:course/id {:db/unique :db.unique/identity
-                  :db/index true}]
-     :course/class
-     :course/year
-     :course/semester
+                 :db/index true}]
+     :course/course-name
      :course/question-sets]))
 
 
+(def course-iteration-schema
+  (spectomic/datomic-schema
+    [[:course-iteration/id {:db/unique :db.unique/identity
+                  :db/index true}]
+     :course-iteration/course
+     :course-iteration/year
+     :course-iteration/semester
+     :course-iteration/question-sets]))
+
+
 (def db-schema
-  (concat question-schema answer-schema correction-schema question-set-schema user-schema class-schema course-schema))
+  (concat question-schema answer-schema correction-schema question-set-schema user-schema course-schema course-iteration-schema))

@@ -55,9 +55,9 @@
                  (let [answers (:body-params r)]
                    (response (db/add-multiple-user-answers! user-id answers))))
 
-           (GET "/user/:user-id/courses" [user-id]
-                (response (domain/courses-with-total-points
-                            (db/get-courses-of-student user-id)
+           (GET "/user/:user-id/course-iterations" [user-id]
+                (response (domain/course-iterations-with-total-points
+                            (db/get-course-iterations-of-student user-id)
                             (partial db/get-graded-answers-of-question-set user-id))))
 
            (GET "/fach" []

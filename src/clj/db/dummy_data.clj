@@ -47,35 +47,37 @@
     :question-set/questions [[:question/id "1"] [:question/id "6"]]}])
 
 
-(def classes
-  [{:class/id "0"
-    :class/class-name "ProPra I"}
-   {:class/id "1"
-    :class/class-name "Fach 2"}])
-
-
 (def courses
-  [{:course/id "1"
-    :course/class [:class/id "0"]
-    :course/year 2000
-    :course/semester "WiSe"
-    :course/question-sets [[:question-set/id "1"]]}
-   {:course/id "2"
-    :course/class [:class/id "1"]
-    :course/year 2001
-    :course/semester "SoSe"
-    :course/question-sets [[:question-set/id "1"] [:question-set/id "2"]]}])
+  [{:course/id "0"
+    :course/course-name "Fach 1"
+    :course/question-sets []}
+   {:course/id "1"
+    :course/course-name "Fach 2"
+    :course/question-sets []}])
+
+
+(def course-iterations
+  [{:course-iteration/id "1"
+    :course-iteration/course [:course/id "0"]
+    :course-iteration/year 2000
+    :course-iteration/semester "WiSe"
+    :course-iteration/question-sets [[:question-set/id "1"]]}
+   {:course-iteration/id "2"
+    :course-iteration/course [:course/id "1"]
+    :course-iteration/year 2001
+    :course-iteration/semester "SoSe"
+    :course-iteration/question-sets [[:question-set/id "1"] [:question-set/id "2"]]}])
 
 
 (def users
   [{:user/id "0"
-    :user/courses [[:course/id "1"] [:course/id "2"]]}
+    :user/course-iterations [[:course-iteration/id "1"] [:course-iteration/id "2"]]}
    {:user/id "1"
-    :user/courses [[:course/id "1"] [:course/id "2"]]}
+    :user/course-iterations [[:course-iteration/id "1"] [:course-iteration/id "2"]]}
    {:user/id "2"
-    :user/courses [[:course/id "1"]]}
+    :user/course-iterations [[:course-iteration/id "1"]]}
    {:user/id "3"
-    :user/courses [[:course/id "2"]]}])
+    :user/course-iterations [[:course-iteration/id "2"]]}])
 
 
 (def answers
@@ -134,8 +136,8 @@
   (concat
     questions
     question-sets
-    classes
     courses
+    course-iterations
     users
     answers
     corrections))
