@@ -57,6 +57,7 @@
                 :question-set/start :question-set/end
                 :question-set/questions :question-set/passing-score]))
 
+
 ;; TODO: remove comment once we moved to MA
 ;; old entity was called: fach
 (s/def :course/id string?)
@@ -67,6 +68,7 @@
 (s/def ::course
   (s/keys :req [:course/id :course/course-name
                 :course/question-sets]))
+
 
 ;; TODO: remove comment once we moved to MA
 ;; old entity was called: kurs
