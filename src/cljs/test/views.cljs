@@ -25,7 +25,7 @@
 
 
 (defn single-choice-beantworten-body
-  [frage-id choices initial antwort-in-db-fkt]
+  [frage-id choices initial antwort-in-db-fkt disabled?]
   (let [antwort (reagent/atom initial)]
     [v-box :src (at)
      :attr {:key (str frage-id)}
@@ -38,6 +38,7 @@
           :label choice-text
           :value choice-text
           :model antwort
+          :disabled? disabled?
           :on-change (fn [val]
                        (antwort-in-db-fkt val)
                        (reset! antwort val))])
@@ -45,7 +46,7 @@
 
 
 (defn multiple-choice-beantworten-body
-  [frage-id choices initial antwort-in-db-fkt]
+  [frage-id choices initial antwort-in-db-fkt disabled?]
   [v-box :src (at)
    :attr {:key (str frage-id)}
    :gap "5px"
@@ -57,6 +58,7 @@
           :model model
           :attr {:key choice-idx}
           :label choice-text
+          :disabled? disabled?
           :on-change (fn [val]
                        (reset! model val)
                        (antwort-in-db-fkt val choice-text))]))
@@ -84,12 +86,13 @@
                  (textfrage-beantworten-body (:frage/id frage) "" save-ans-to-db-fkt) ; "" is initial value
                  (= (:frage/typ frage) :frage.typ/single-choice)
                  (single-choice-beantworten-body (:frage/id frage) (shuffle (:frage/choices frage))
-                                                 nil save-ans-to-db-fkt)
+                                                 nil save-ans-to-db-fkt false)
                  (= (:frage/typ frage) :frage.typ/multiple-choice)
                  (multiple-choice-beantworten-body
                    (:frage/id frage) (shuffle (:frage/choices frage)) #{}
                    (fn [in-answer? choice-text]
-                     (rf/dispatch [:frage/multiple-choice-beantworten (:frage/id frage) in-answer? choice-text])))
+                     (rf/dispatch [:frage/multiple-choice-beantworten (:frage/id frage) in-answer? choice-text]))
+                   false)
                  :else [:label "Fragentyp nicht implementiert"]))]])
          @(rf/subscribe [:fragen]))
        [gap

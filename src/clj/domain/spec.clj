@@ -82,11 +82,16 @@
 
 (s/def :test/id string?)
 (s/def :test/name string?)
+(s/def :test/start inst?)
+(s/def :test/ende inst?)
 (s/def :test/fragen (s/coll-of ::frage))
+(s/def :test/bestehensgrenze int?)
 
 
 (s/def ::test
-  (s/keys :req [:test/id :test/name :test/fragen]))
+  (s/keys :req [:test/id :test/name
+                :test/start :test/ende
+                :test/fragen :test/bestehensgrenze]))
 
 
 (s/def :fach/id string?)

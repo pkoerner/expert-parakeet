@@ -14,6 +14,7 @@
               {:id :frage.typ/multiple-choice :label "multiple choice"}
               {:id :frage.typ/text :label "text"}]
         frage-typ (reagent/atom :frage.typ/single-choice)]
+    (rf/dispatch [:frage-erstellen/update :frage/typ :frage.typ/single-choice])
     [h-box
      :align :center
      :gap "10px"
@@ -133,7 +134,8 @@
      :label "Musterlösung:"]
     [single-choice-beantworten-body 1 @(rf/subscribe [:frage-erstellen/choices]) ; 1 is dummy id
      @(rf/subscribe [:frage-erstellen/single-choice-loesung])         ; initial value for radio buttons
-     (fn [antwort] (rf/dispatch [:frage-erstellen/update :frage/single-choice-loesung antwort]))]]])
+     (fn [antwort] (rf/dispatch [:frage-erstellen/update :frage/single-choice-loesung antwort]))
+     false]]])
 
 
 (defn multiple-choice-erstellen
@@ -149,7 +151,8 @@
     [multiple-choice-beantworten-body 1 @(rf/subscribe [:frage-erstellen/choices])
      @(rf/subscribe [:frage-erstellen/multiple-choice-loesung])       ; initial value for checkboxes
      (fn [in-answer? choice-text]
-       (rf/dispatch [:frage-erstellen/multiple-choice-lsg-update in-answer? choice-text]))]]])
+       (rf/dispatch [:frage-erstellen/multiple-choice-lsg-update in-answer? choice-text]))
+     false]]])
 
 
 (defn text-frage-erstellen
@@ -203,5 +206,5 @@
      :class "button-primary"
      :on-click #(rf/dispatch [:frage-erstellen/erstellen])
      :disabled? (not (can-erstellen?))
-     :label "Erstellen"]]])
+     :label "Frage erstellen"]]])
 

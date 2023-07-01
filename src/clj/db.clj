@@ -136,7 +136,8 @@
 (defn test-by-id
   [id]
   (d/pull @conn
-          [:test/id {:test/fragen [:frage/id :frage/frage-text :frage/punkte :frage/typ :frage/choices]}]
+          [:test/id :test/name :test/start :test/ende :test/bestehensgrenze
+           {:test/fragen [:frage/id :frage/frage-text :frage/punkte :frage/typ :frage/choices]}]
           [:test/id id]))
 
 
@@ -147,17 +148,35 @@
                    @conn)))
 
 
-(defn all-fragen
-  []
-  (mapv first (d/q '[:find (pull ?e [:frage/id])
-                     :where [?e :frage/id]]
-                   @db/conn)))
-
-
 (defn all-faecher
   []
   (mapv first (d/q '[:find (pull ?e [:fach/id :fach/fachtitel])
                      :where [?e :fach/id]]
+                   @db/conn)))
+
+
+(defn kurse-for-fach
+  [fach-id]
+  (mapv first (d/q '[:find (pull ?e [:kurs/id :kurs/semester :kurs/jahr
+                                     {:kurs/tests [:test/id
+                                                   :test/name
+                                                   {:test/fragen [:frage/id :frage/frage-text
+                                                                  :frage/punkte :frage/typ :frage/choices
+                                                                  :frage/loesungskriterien
+                                                                  :frage/single-choice-loesung
+                                                                  :frage/multiple-choice-loesung]}]}])
+                     :in $ ?fach-id
+                     :where
+                     [?f :fach/id ?fach-id]
+                     [?e :kurs/fach ?f]
+                     [?e :kurs/id]]
+                   @db/conn fach-id)))
+
+
+(defn all-fragen
+  []
+  (mapv first (d/q '[:find (pull ?e [:frage/id])
+                     :where [?e :frage/id]]
                    @db/conn)))
 
 
@@ -210,6 +229,57 @@
   (d/pull @db/conn
           [:frage/id :frage/frage-text :frage/punkte :frage/typ]
           [:frage/id id]))
+
+
+(defn add-frage
+  [frage]
+  (let [id (generate-id :frage/id)
+        typ (:frage/typ frage)
+        trans-map (apply assoc {:db/id        -1
+                                :frage/id     id
+                                :frage/typ    typ
+                                :frage/punkte (:frage/punkte frage)
+                                :frage/frage-text (:frage/frage-text frage)}
+                         (cond (= typ :frage.typ/text)
+                               [:frage/loesungskriterien (:frage/loesungskriterien frage)]
+                               (= typ :frage.typ/single-choice)
+                               [:frage/choices (:frage/choices frage)
+                                :frage/single-choice-loesung (:frage/single-choice-loesung frage)]
+                               (= typ :frage.typ/multiple-choice)
+                               [:frage/choices (:frage/choices frage)
+                                :frage/multiple-choice-loesung (:frage/multiple-choice-loesung frage)]))
+        tx-result (d/transact conn [trans-map])
+        db-after (:db-after tx-result)]
+    (d/pull db-after  [:frage/id :frage/frage-text :frage/punkte :frage/typ :frage/choices
+                       :frage/loesungskriterien :frage/single-choice-loesung
+                       :frage/multiple-choice-loesung]
+            [:frage/id id])))
+
+
+(defn add-test
+  [test-name kurs-id bestehensgrenze fragen start ende]
+  (let [id (generate-id :test/id)
+        fragen-ids (doall (map (fn [frage]
+                                 (if (:frage/id frage)
+                                   (:frage/id frage)
+                                   (:frage/id (add-frage frage)))) ; frage war noch nicht in db
+                               fragen))
+        tx-result-test (d/transact conn
+                                   [{:db/id                 -1
+                                     :test/id               id
+                                     :test/name             test-name
+                                     :test/start            start
+                                     :test/ende             ende
+                                     :test/bestehensgrenze bestehensgrenze
+                                     :test/fragen (mapv (fn [f-id] [:frage/id f-id]) fragen-ids)}])
+        kurs (kurs-by-id kurs-id)
+        _tx-result-kurs (d/transact conn [{:db/id         -1
+                                           :kurs/id       (:kurs/id kurs)
+                                           :kurs/semester (:kurs/semester kurs)
+                                           :kurs/jahr     (:kurs/jahr kurs)
+                                           :kurs/tests    (conj (:kurs/tests kurs) [:test/id id])}])
+        db-after (:db-after tx-result-test)]
+    (d/pull db-after [:test/id :test/name] [:test/id id])))
 
 
 (defn user-add-antwort

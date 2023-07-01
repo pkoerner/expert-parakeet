@@ -5,6 +5,7 @@
     [orga.fach-erstellen.views :as fach-erstln]
     [orga.frage-erstellen.views :as frage-erstln]
     [orga.kurs-erstellen.views :as kurs-erstln]
+    [orga.test-erstellen.views :as test-erstln]
     [re-frame.core :as re-frame]
     [reitit.coercion.spec :as rss]
     [reitit.core :as r]
@@ -77,13 +78,17 @@
     {:name      ::test
      :view      test/Root
      :link-text "Test"
-     :parameters {:path {:id int?}}
+     :parameters {:path {:id string?}}
      :controllers
      [{:parameters {:path [:id]}
        :start (fn [params]
                 (re-frame/dispatch [:test/laden (get-in params [:path :id])]))
        :stop (fn [_]
                (re-frame/dispatch [:test/entfernen]))}]}]
+   ["test-erstellen"
+    {:name      ::test-erstellen
+     :view      test-erstln/test-erstellen
+     :link-text "Neuen Test erstellen"}]
    ["fach/erstellen"
     {:name      ::fach-erstellen
      :view      fach-erstln/fach-erstellen
@@ -103,8 +108,8 @@
      :view      frage-erstln/frage-erstellen
      :link-text "Neue Frage erstellen"
      :controllers
-     [{:start #(re-frame/dispatch [:frage-erstellen/init])
-       :stop  #(re-frame/dispatch [:frage-erstellen/entfernen])}]}]
+     [{:start #(re-frame/dispatch [:test-erstellen/init])
+       :stop  #(re-frame/dispatch [:test-erstellen/entfernen])}]}]
    ["antwort-fuer-korrektur/:aid"
     {:name      ::korrektur
      :view      korrektur/overview
@@ -161,7 +166,7 @@
   [{:keys [router]}]
   (let [current-route @(re-frame/subscribe [::current-route])]
     [:div
-     [nav {:dests [::overview ::korrektur-overview ::fach-erstellen ::kurs-erstellen ::frage-erstellen]
+     [nav {:dests [::overview ::korrektur-overview ::test-erstellen ::fach-erstellen ::kurs-erstellen ::frage-erstellen]
            :router router
            :current-route current-route}]
      (when current-route
