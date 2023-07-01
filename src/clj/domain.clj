@@ -39,7 +39,7 @@
 
 
 (defn course-iterations-with-total-points
-  "Updatest the input course-iterations and calculates the total number of achived points in it.
+  "Updates the input course-iterations and calculates the total number of achived points in it.
    The `question-set->answer` function is used to determine which answers for a question set should be used."
   [course-iterations question-set->answer]
   (map (fn [course-iteration]
