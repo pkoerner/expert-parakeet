@@ -5,7 +5,7 @@
 
 (rf/reg-sub
   :fragen
-  (fn [db _] (get-in db [:test :test/fragen])))
+  (fn [db _] (get-in db [:test :question-set/questions])))
 
 
 (rf/reg-sub

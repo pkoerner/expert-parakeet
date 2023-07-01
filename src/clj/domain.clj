@@ -18,11 +18,11 @@
    of points of answers. For each
    question the answer with the
    highest points is taken."
-  [antworten]
-  (->> antworten
+  [answers]
+  (->> answers
        (group-by #(get-in % [:answer/question :question/id]))
-       (map (fn [[_ antworten]]
-              (apply max (map :answer/points antworten))))
+       (map (fn [[_ answers]]
+              (apply max (map :answer/points answers))))
        (apply +)))
 
 
@@ -73,15 +73,16 @@
   "Sorts the answers of the provided free-text-questions by timestamp.
    Uses the `question-set->answer` function to determine which answers should be used from the questions."
   [question-set->answer free-text-questions]
-  (let [free-text-questions-with-inner-answers (map #(assoc % :frage/antworten (question-set->answer (:question/id %))) free-text-questions)
-        answers (flatten (map (partial unpack-map-in-map :frage/antworten) free-text-questions-with-inner-answers))]
+  ;; The question/answers key does not exist outside of this function.
+  (let [free-text-questions-with-inner-answers (map #(assoc % :question/answers (question-set->answer (:question/id %))) free-text-questions)
+        answers (flatten (map (partial unpack-map-in-map :question/answers) free-text-questions-with-inner-answers))]
     (sort-by :answer/timestamp answers)))
 
 
 ;; previous name was "remove-answers-with-identical-user-and-questions-question-set-id"
 (defn answers-with-distinct-ids
   "Takes a collection of `answers` as input. 
-   It only keeps one answer for each test by comparing the 
+   It only keeps one answer for each question by comparing the 
    `:user/id`, `:question/id`, `:question-set/id`, and `:course-iteration/id` of every question. 
    It does this without considering the timestamp or points.
    It is practicly random."
@@ -157,7 +158,8 @@
    Merges the question of the answer with the answer and returns the `:question/answer` as a single string."
   [[answer]]
   (let [answer-unpacked-question-nested (update (merge answer (:answer/question answer)) :answer/answer first)
-        answer-unpacked (select-keys answer-unpacked-question-nested [:user/id :question/question-statement :question/points :frage/loesung
+        answer-unpacked (select-keys answer-unpacked-question-nested [:user/id
+                                                                      :question/question-statement :question/points :question/evaluation-criteria
                                                                       :answer/answer :answer/points :answer/id])]
     answer-unpacked))
 

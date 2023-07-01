@@ -151,7 +151,7 @@
                                 [rc/button :src (at)
                                  :class "button-primary"
                                  :on-click (fn [_]
-                                             (rf/dispatch [:test-erstellen/fragen-hinzufuegen (:test/fragen test)])
+                                             (rf/dispatch [:test-erstellen/fragen-hinzufuegen (:question-set/questions test)])
                                              (rf/dispatch [:test-erstellen/update :fragen-importieren? false]))
                                  :label (:test/name test)])
                               (:kurs/tests kurs))]]])

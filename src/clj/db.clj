@@ -70,7 +70,7 @@
 
 
 (defn get-graded-answers-of-question-set
-  [user-id test-id]
+  [user-id question-set-id]
   (mapv first
         (d/q '[:find (pull ?a [:answer/points
                                {:answer/question [:question/id :question/type]}])
@@ -80,7 +80,7 @@
                [?a :answer/question ?f]
                [?t :question-set/questions ?f]
                [?a :answer/points]]
-             @conn [:user/id user-id] [:question-set/id test-id])))
+             @conn [:user/id user-id] [:question-set/id question-set-id])))
 
 
 (defn get-questions-for-user
@@ -105,8 +105,8 @@
     (d/q '[:find ?answer-id ?user-id ?timestamp
            :in $ ?question-id
            :where
-           [?frage :question/id ?question-id]
-           [?answer :answer/question ?frage]
+           [?question :question/id ?question-id]
+           [?answer :answer/question ?question]
            [?answer :answer/id ?answer-id ?tx]
            [?tx :db/txInstant ?timestamp]
            [?answer :answer/user ?user]
@@ -175,7 +175,7 @@
                      :in $ ?course-id
                      :where
                      [?f :course/id ?course-id]
-                     [?e :course-iteration/fach ?f]
+                     [?e :course-iteration/course ?f]
                      [?e :course-iteration/id]]
                    @db/conn course-id)))
 
@@ -265,21 +265,21 @@
                                      (:question/id question)
                                      (:question/id (add-question! question)))) ; frage war noch nicht in db
                                  questions))
-        tx-result-test (d/transact conn
-                                   [{:db/id                      -1
-                                     :question-set/id            id
-                                     :question-set/name          question-set-name
-                                     :question-set/start         start
-                                     :question-set/end           end
-                                     :question-set/passing-score passing-score
-                                     :test/fragen (mapv (fn [q-id] [:question/id q-id]) question-ids)}])
+        tx-result-question-set (d/transact conn
+                                           [{:db/id                      -1
+                                             :question-set/id            id
+                                             :question-set/name          question-set-name
+                                             :question-set/start         start
+                                             :question-set/end           end
+                                             :question-set/passing-score passing-score
+                                             :question-set/questions (mapv (fn [q-id] [:question/id q-id]) question-ids)}])
         course-iteration (get-course-iteration-by-id course-iteration-id)
-        _tx-result-kurs (d/transact conn [{:db/id         -1
-                                           :course-iteration/id       (:course-iteration/id course-iteration)
-                                           :course-iteration/semester (:course-iteration/semester course-iteration)
-                                           :course-iteration/year     (:course-iteration/year course-iteration)
-                                           :course-iteration/question-sets    (conj (:course-iteration/question-sets course-iteration) [:question-set/id id])}])
-        db-after (:db-after tx-result-test)]
+        _tx-result-course-iteration (d/transact conn [{:db/id         -1
+                                                       :course-iteration/id       (:course-iteration/id course-iteration)
+                                                       :course-iteration/semester (:course-iteration/semester course-iteration)
+                                                       :course-iteration/year     (:course-iteration/year course-iteration)
+                                                       :course-iteration/question-sets    (conj (:course-iteration/question-sets course-iteration) [:question-set/id id])}])
+        db-after (:db-after tx-result-question-set)]
     (d/pull db-after [:question-set/id :question-set/name] [:question-set/id id])))
 
 

@@ -24,9 +24,9 @@
                 (response (db/get-all-question-sets)))
 
            (POST "/question-set" [:as r]
-                 (let [{:keys [test-name kurs-id punkte-grenze fragen start ende]} (:body-params r)]
-                   (response (db/add-question-set! test-name kurs-id (read-string punkte-grenze)
-                                                   fragen (time/of start) (time/of ende)))))
+                 (let [{:keys [question-set-name course-iteration-id passing-score questions start end]} (:body-params r)]
+                   (response (db/add-question-set! question-set-name course-iteration-id (read-string passing-score)
+                                                   questions (time/of start) (time/of end)))))
 
            (GET "/question-sets/:id" [id]
                 (response (db/get-question-set-by-id id)))
@@ -44,8 +44,8 @@
            (GET "/course-iteration/:id" [id]
                 (response (db/get-course-iteration-by-id id)))
 
-           (GET "/course-iteration/for-course/:course-id" [fach-id]
-                (response (db/get-course-iterations-of-course fach-id)))
+           (GET "/course-iteration/for-course/:course-id" [course-id]
+                (response (db/get-course-iterations-of-course course-id)))
 
            ;; Changing /antwort to /answers as we query for all answers from db
            (GET "/answers" []
@@ -64,15 +64,15 @@
                 (response (db/get-all-courses)))
 
            (POST "/course" [:as r]
-                 (let [fach-name (get-in r [:body-params :fach-name])]
-                   (response (db/add-course! fach-name))))
+                 (let [course-name (get-in r [:body-params :course-name])]
+                   (response (db/add-course! course-name))))
 
            (GET "/course-iteration" []
                 (response (db/get-all-courses)))
 
            (POST "/course-iteration" [:as r]
                  (let [body (:body-params r)]
-                   (response (db/add-course-iteration! (:fach-id body) (read-string (:jahr body)) (:semester body)))))
+                   (response (db/add-course-iteration! (:course-id body) (read-string (:year body)) (:semester body)))))
 
            (GET "/course-iteration/:id" [id]
                 (response (db/get-course-iteration-by-id id)))
@@ -97,9 +97,9 @@
                        (domain/answers-for-correction-view)
                        (domain/merge-latest-correction-with-answer db/get-corrections-of-answer))))
            (POST "/answer-to-correction/:ans-id" [ans-id :as r]
-                 (let [korrektur (:body-params r)]
+                 (let [correction (:body-params r)]
                    (response
-                     (->> (domain/validate-incoming-correction korrektur (db/get-answers-for-correction ans-id))
+                     (->> (domain/validate-incoming-correction correction (db/get-answers-for-correction ans-id))
                           (domain/add-correction-if-no-error db/add-correction! ans-id))))))
   (GET "/api/access-token" request (str (extract-token request)))
   (GET "/api/session" request (str (:session request)))
