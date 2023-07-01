@@ -96,12 +96,10 @@
 
 (s/def :fach/id string?)
 (s/def :fach/fachtitel string?)
-(s/def :fach/tests (s/coll-of ::test))
 
 
 (s/def ::fach
-  (s/keys :req [:fach/id :fach/fachtitel
-                :fach/tests]))
+  (s/keys :req [:fach/id :fach/fachtitel]))
 
 
 (s/def :kurs/id string?)

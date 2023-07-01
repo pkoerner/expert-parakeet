@@ -59,6 +59,23 @@
                             (db/kurse-von-studierendem user-id)
                             (partial db/bewertete-antworten-von-test user-id))))
 
+           (GET "/fach" []
+                (response (db/all-faecher)))
+
+           (POST "/fach" [:as r]
+                 (let [fach-name (get-in r [:body-params :fach-name])]
+                   (response (db/add-fach fach-name))))
+
+           (GET "/kurs" []
+                (response (db/all-kurse)))
+
+           (GET "/kurs/:id" [id]
+                (response (db/kurs-by-id id)))
+
+           (POST "/kurs" [:as r]
+                 (let [body (:body-params r)]
+                   (response (db/add-kurs (:fach-id body) (read-string (:jahr body)) (:semester body)))))
+
            (GET "/korrektur/:user-id" [user-id]
                 (response
                   (->> (db/fragen-fuer-user user-id)

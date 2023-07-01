@@ -2,7 +2,9 @@
   (:require
     [korrektur-uebersicht.views :as korr]
     [korrektur.views :as korrektur]
-    [orga.test-erstellen.views :as test-erstln]
+    [orga.fach-erstellen.views :as fach-erstln]
+    [orga.frage-erstellen.views :as frage-erstln]
+    [orga.kurs-erstellen.views :as kurs-erstln]
     [re-frame.core :as re-frame]
     [reitit.coercion.spec :as rss]
     [reitit.core :as r]
@@ -86,6 +88,24 @@
     {:name      ::test-erstellen
      :view      test-erstln/test-erstellen
      :link-text "Neuen Test erstellen"
+   ["fach/erstellen"
+    {:name      ::fach-erstellen
+     :view      fach-erstln/fach-erstellen
+     :link-text "Neues Fach erstellen"
+     :controllers
+     [{:start #(re-frame/dispatch [:fach-erstellen/init])
+       :stop  #(re-frame/dispatch [:fach-erstellen/entfernen])}]}]
+   ["kurs/erstellen"
+    {:name      ::kurs-erstellen
+     :view      kurs-erstln/kurs-erstellen
+     :link-text "Neuen Kurs erstellen"
+     :controllers
+     [{:start #(re-frame/dispatch [:kurs-erstellen/init])
+       :stop  #(re-frame/dispatch [:kurs-erstellen/entfernen])}]}]
+   ["frage/erstellen"
+    {:name      ::frage-erstellen
+     :view      frage-erstln/frage-erstellen
+     :link-text "Neue Frage erstellen"
      :controllers
      [{:start #(re-frame/dispatch [:test-erstellen/init])
        :stop  #(re-frame/dispatch [:test-erstellen/entfernen])}]}]
@@ -145,7 +165,9 @@
   [{:keys [router]}]
   (let [current-route @(re-frame/subscribe [::current-route])]
     [:div
-     [nav {:dests [::overview ::korrektur-overview ::test-erstellen] :router router :current-route current-route}]
+     [nav {:dests [::overview ::korrektur-overview ::test-erstellen ::fach-erstellen ::kurs-erstellen ::frage-erstellen]
+           :router router
+           :current-route current-route}]
      (when current-route
        [(-> current-route :data :view)])]))
 

@@ -59,8 +59,7 @@
   (spectomic/datomic-schema
     [[:fach/id {:db/unique :db.unique/identity
                 :db/index true}]
-     :fach/fachtitel
-     :fach/tests]))
+     :fach/fachtitel]))
 
 
 (def kurs-schema

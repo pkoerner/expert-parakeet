@@ -6,6 +6,10 @@ See [the GitHub documentation](https://docs.github.com/en/developers/apps/buildi
 
 Keep in mind that we need access to the users email address.
 
+Home URL: `http://localhost:8082/`
+
+Callback URL: `http://localhost:8081/api/oauth2/callback`
+
 ## Step 2: Create a `.env` file containing your OAUTH Client-ID + Client-Secret:
 
 ```
