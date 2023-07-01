@@ -155,7 +155,8 @@
 (defn answers-for-correction-view
   "Takes a col which contains one answer as input.
    In the answer `:question/answer` is a vector containing answers.
-   Merges the question of the answer with the answer and returns the `:question/answer` as a single string."
+   Merges the question of the answer with the answer and returns the `:question/answer` 
+   as a unnested map."
   [[answer]]
   (let [answer-unpacked-question-nested (update (merge answer (:answer/question answer)) :answer/answer first)
         answer-unpacked (select-keys answer-unpacked-question-nested [:user/id
