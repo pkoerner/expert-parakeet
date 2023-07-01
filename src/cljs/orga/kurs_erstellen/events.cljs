@@ -28,7 +28,7 @@
   :kurs-erstellen/lade-faecher
   (fn [_ _]
     {:http-xhrio  {:method          :get
-                   :uri             (str vars/base-url "/fach")
+                   :uri             (str vars/base-url "/course")
                    :timeout         8000
                    :response-format (ajax/transit-response-format)
                    :on-success      [:kurs-erstellen/update :faecher]
@@ -40,7 +40,7 @@
   (fn [{:keys [db]}]
     {:db         (assoc-in db [:kurs-erstellen :gesendet] true)
      :http-xhrio {:method          :post
-                  :uri             (str vars/base-url "/kurs")
+                  :uri             (str vars/base-url "/course-iteration")
                   :params          {:fach-id (get-in db [:kurs-erstellen :fach-id])
                                     :jahr (get-in db [:kurs-erstellen :jahr])
                                     :semester (get-in db [:kurs-erstellen :semester])}

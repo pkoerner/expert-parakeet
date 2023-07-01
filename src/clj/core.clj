@@ -23,7 +23,7 @@
            (GET "/question-sets" []
                 (response (db/get-all-question-sets)))
 
-           (POST "/test" [:as r]
+           (POST "/question-set" [:as r]
                  (let [{:keys [test-name kurs-id punkte-grenze fragen start ende]} (:body-params r)]
                    (response (db/add-question-set! test-name kurs-id (read-string punkte-grenze)
                                                    fragen (time/of start) (time/of ende)))))
@@ -37,14 +37,14 @@
            (GET "/question/:id" [id]
                 (response (db/get-question-by-id id)))
 
-           (GET "/fach" []
+           (GET "/course" []
                 (response (db/get-all-courses)))
 
 
-           (GET "/kurs/:id" [id]
+           (GET "/course-iteration/:id" [id]
                 (response (db/get-course-iteration-by-id id)))
 
-           (GET "/kurs/for-fach/:fach-id" [fach-id]
+           (GET "/course-iteration/for-course/:course-id" [fach-id]
                 (response (db/get-course-iterations-of-course fach-id)))
 
            ;; Changing /antwort to /answers as we query for all answers from db
@@ -60,22 +60,22 @@
                             (db/get-course-iterations-of-student user-id)
                             (partial db/get-graded-answers-of-question-set user-id))))
 
-           (GET "/fach" []
+           (GET "/course" []
                 (response (db/get-all-courses)))
 
-           (POST "/fach" [:as r]
+           (POST "/course" [:as r]
                  (let [fach-name (get-in r [:body-params :fach-name])]
                    (response (db/add-course! fach-name))))
 
-           (GET "/kurs" []
+           (GET "/course-iteration" []
                 (response (db/get-all-courses)))
 
-           (GET "/kurs/:id" [id]
-                (response (db/get-course-iteration-by-id id)))
-
-           (POST "/kurs" [:as r]
+           (POST "/course-iteration" [:as r]
                  (let [body (:body-params r)]
                    (response (db/add-course-iteration! (:fach-id body) (read-string (:jahr body)) (:semester body)))))
+
+           (GET "/course-iteration/:id" [id]
+                (response (db/get-course-iteration-by-id id)))
 
            (GET "/correction/:user-id" [user-id]
                 (response

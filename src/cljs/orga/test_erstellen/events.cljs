@@ -25,7 +25,7 @@
   (fn [{:keys [db]} _]
     {:db          (assoc-in db [:test-erstellen :laedt-faecher] true)
      :http-xhrio  {:method          :get
-                   :uri             (str vars/base-url "/fach")
+                   :uri             (str vars/base-url "/course")
                    :timeout         8000
                    :response-format (ajax/transit-response-format)
                    :on-success      [:test-erstellen/faecher-angekommen]}}))
@@ -81,7 +81,7 @@
   (fn [{:keys [db]}]
     {:db         db
      :http-xhrio {:method          :post
-                  :uri             (str vars/base-url "/test")
+                  :uri             (str vars/base-url "/question-set")
                   :params          {:test-name (get-in db [:test-erstellen :test-name])
                                     :start     (time/input->time-map (get-in db [:test-erstellen :start-datum])
                                                                      (get-in db [:test-erstellen :start-zeit]))
