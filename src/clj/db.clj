@@ -155,13 +155,6 @@
                    @db/conn)))
 
 
-(defn kurs-by-id
-  [id]
-  (d/pull @db/conn
-          [:kurs/id :kurs/semester :kurs/jahr {:kurs/tests [:test/id]}]
-          [:kurs/id id]))
-
-
 (defn kurse-for-fach
   [fach-id]
   (mapv first (d/q '[:find (pull ?e [:kurs/id :kurs/semester :kurs/jahr
