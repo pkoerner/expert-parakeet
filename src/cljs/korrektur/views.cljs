@@ -18,7 +18,7 @@
 
 
 (defn korrektur-form
-  [{frag-punkte :frage/punkte :as m}]
+  [{frag-punkte :question/points :as m}]
   [:div
    [:p "Korrekturtext: "
     [:input
@@ -64,10 +64,10 @@
   []
   (let [korrektur @(rf/subscribe [:korrektur/erhalten])]
     [:div
-     [:h2 (str (:frage/frage-text korrektur) " - " (:frage/punkte korrektur) " Punkte")]
+     [:h2 (str (:question/question-statement korrektur) " - " (:question/points korrektur) " Punkte")]
      [:p (str "Antwort-Id " (:antwort/id korrektur))]
      [:p (str "Lösungsvorschlag: ")]
-     [:p (:frage/loesungskriterien korrektur)]
+     [:p (:question/evaluation-criteria korrektur)]
      [:p (str "Antwort:")]
      [:p (:antwort/antwort korrektur)]
      [korrektur-form korrektur]

@@ -58,6 +58,7 @@
                 :question-set/questions :question-set/passing-score]))
 
 
+;; fach
 (s/def :course/id string?)
 (s/def :course/course-name string?)
 (s/def :course/question-sets (s/coll-of ::question-set))
@@ -68,6 +69,7 @@
                 :course/question-sets]))
 
 
+;; kurs
 (s/def :course-iteration/id string?)
 (s/def :course-iteration/course ::course)
 (s/def :course-iteration/year pos-int?)

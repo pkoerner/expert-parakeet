@@ -77,21 +77,21 @@
            [v-box :src (at)
             :children
             [[title :src (at)
-              :label (str (:frage/frage-text frage) " - " (:frage/punkte frage) " Punkte")
+              :label (str (:question/question-statement frage) " - " (:question/points frage) " Punkte")
               :level :level2]
              (let [save-ans-to-db-fkt
-                   (fn [antwort] (rf/dispatch [:frage/beantworten (:frage/id frage) antwort]))]
+                   (fn [antwort] (rf/dispatch [:frage/beantworten (:question/id frage) antwort]))]
                (cond
-                 (= (:frage/typ frage) :frage.typ/text)
-                 (textfrage-beantworten-body (:frage/id frage) "" save-ans-to-db-fkt) ; "" is initial value
-                 (= (:frage/typ frage) :frage.typ/single-choice)
-                 (single-choice-beantworten-body (:frage/id frage) (shuffle (:frage/choices frage))
+                 (= (:question/type frage) :question.type/free-text)
+                 (textfrage-beantworten-body (:question/id frage) "" save-ans-to-db-fkt) ; "" is initial value
+                 (= (:question/type frage) :question.type/single-choice)
+                 (single-choice-beantworten-body (:question/id frage) (shuffle (:question/possible-solutions frage))
                                                  nil save-ans-to-db-fkt false)
-                 (= (:frage/typ frage) :frage.typ/multiple-choice)
+                 (= (:question/type frage) :question.type/multiple-choice)
                  (multiple-choice-beantworten-body
-                   (:frage/id frage) (shuffle (:frage/choices frage)) #{}
+                   (:question/id frage) (shuffle (:question/possible-solutions frage)) #{}
                    (fn [in-answer? choice-text]
-                     (rf/dispatch [:frage/multiple-choice-beantworten (:frage/id frage) in-answer? choice-text]))
+                     (rf/dispatch [:frage/multiple-choice-beantworten (:question/id frage) in-answer? choice-text]))
                    false)
                  :else [:label "Fragentyp nicht implementiert"]))]])
          @(rf/subscribe [:fragen]))

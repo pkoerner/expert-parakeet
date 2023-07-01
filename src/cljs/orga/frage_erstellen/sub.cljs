@@ -10,24 +10,24 @@
 
 (rf/reg-sub
   :frage-erstellen/typ
-  (fn [db _] (get-in db [:frage :frage/typ])))
+  (fn [db _] (get-in db [:frage :question/type])))
 
 
 (rf/reg-sub
   :frage-erstellen/choices
-  (fn [db _] (get-in db [:frage :frage/choices])))
+  (fn [db _] (get-in db [:frage :question/possible-solutions])))
 
 
 (rf/reg-sub
   :frage-erstellen/single-choice-loesung
-  (fn [db _] (get-in db [:frage :frage/single-choice-loesung])))
+  (fn [db _] (get-in db [:frage :question/single-choice-solution])))
 
 
 (rf/reg-sub
   :frage-erstellen/multiple-choice-loesung
-  (fn [db _] (get-in db [:frage :frage/multiple-choice-loesung])))
+  (fn [db _] (get-in db [:frage :question/multiple-choice-solution])))
 
 
 (rf/reg-sub
   :frage-erstellen/loesungskriterien
-  (fn [db _] (get-in db [:frage :frage/loesungskriterien])))
+  (fn [db _] (get-in db [:frage :question/evaluation-criteria])))
