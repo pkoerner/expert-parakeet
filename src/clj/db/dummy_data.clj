@@ -1,6 +1,4 @@
-(ns db.dummy-data
-  (:require
-    [util.time :as time]))
+(ns db.dummy-data)
 
 
 (def questions
