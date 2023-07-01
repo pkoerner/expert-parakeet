@@ -187,12 +187,6 @@
                    @db/conn)))
 
 
-(defn all-faecher
-  []
-  (mapv first (d/q '[:find (pull ?e [:fach/id :fach/fachtitel])
-                     :where [?e :fach/id]]
-                   @db/conn)))
-
 
 (defn add-fach
   [fach-name]
