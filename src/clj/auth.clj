@@ -58,13 +58,13 @@
     :scopes           ["user:email"]
     ;; Start URL (die muss der Nutzer aufrufen)
     ;; -> initiiert alles und leitet den Nutzer an Github weiter
-    :launch-uri       "/api/oauth2/github"
+    :launch-uri       "/oauth2/github"
     ;; URL, an die Github uns weiter leitet -> im Query String liegt das Token
-    :redirect-uri     "/api/oauth2/github/callback"
+    :redirect-uri     "/oauth2/github/callback"
     ;; Die middleware leitet uns dort hin weiter, wenn alles geklappt hat
     ;; -> in dem Handler können wir Github nach der user-id fragen,
     ;;    die Matr.Nr. in der DB abfragen und alles in die Session speichern
-    :landing-uri      "/api/logged-in"}})
+    :landing-uri      "/oauth2/github/callback-success"}})
 
 
 (defn extract-token
@@ -90,7 +90,7 @@
   [request]
   (let [github-data (github-user-data-from-token (extract-token request))]
     {:status 307
-     :headers {"Content-Type" "text/plain", "Location" "http://localhost:8082/"}
+     :headers {"Content-Type" "text/plain", "Location" "/"}
      :session (assoc (:session request) :user github-data)
      ;; Hier werden für demonstrationszwecke ein paar Daten angezeigt
      ;; Der frontend code könnte hier die Bestätigung bekommen,
@@ -103,29 +103,20 @@
   (contains? (-> request :session) :user))
 
 
-(defn api-is-logged-in
-  [request]
-  {:status 200
-   :headers {"Content-Type" "text/plain"}
-   :body (str (is-logged-in request))})
-
-
 (defn wrap-authentication-routes
   [handler]
   (fn [request]
     (case (:uri request)
       ;; Der logged-in call darf nicht abgefangen werden,
       ;; daher wird dieser hier gehandhabt
-      "/api/logged-in" (logged-in request)
-      ;; Status der session
-      "/api/is-logged-in" (api-is-logged-in request)
+      "/oauth2/github/callback-success" (logged-in request)
       ;; Prüfen ob der Nutzer eingeloggt ist
       (if (is-logged-in request)
         ;; Nutzer darf alles machen
         (handler request)
         ;; Nutzer muss sich authentifizieren
         {:status 401
-         :body "Please login using github at localhost:8081/api/oauth2/github"}))))
+         :body "Unauthorized"}))))
 
 
 (defn wrap-authentication

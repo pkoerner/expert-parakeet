@@ -1,126 +1,36 @@
 (ns core
-  (:require
-    [auth :refer [extract-token wrap-authentication]]
-    [compojure.core :refer [GET POST defroutes context]]
-    [compojure.route :as route]
-    [db :as db]
-    [domain]
-    [muuntaja.middleware :refer [wrap-format]]
-    [ring.adapter.jetty :refer [run-jetty]]
-    [ring.middleware.cors :refer [wrap-cors]]
-    [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
-    [ring.middleware.params :refer [wrap-params]]
-    [ring.middleware.reload :refer [wrap-reload]]
-    [ring.util.response :refer [response]]
-    [util.time :as time]))
+  (:require [auth :refer [wrap-authentication]]
+            [compojure.core :refer [defroutes GET]]
+            [compojure.route :as route]
+            [domain]
+            [hiccup2.core :as h]
+            [ring.adapter.jetty :refer [run-jetty]]
+            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+            [ring.middleware.reload :refer [wrap-reload]]
+            [ring.util.response :refer [header response]]))
+
+(defn html-response [html] (-> html h/html str response (header "Content-Type" "text/html; charset=utf-8")))
+
+;; all routes that dont need authentication go here
+(defroutes public-routes
+  (GET "/" req (html-response
+                (if (auth/is-logged-in req)
+                  [:p (str "Hello, " (str (get-in req [:session :user :id])))] 
+                  [:a {:href "/oauth2/github"} "Login"])))) ; TODO remove route, just an example to show login working
 
 
-(defroutes routes
-  (context "/api" []
-           ;; tests
-           ;; maybe better route /tests
-           (GET "/test" []
-                (response (db/all-tests)))
-
-           (POST "/test" [:as r]
-                 (let [{:keys [test-name kurs-id punkte-grenze fragen start ende]} (:body-params r)]
-                   (response (db/add-test test-name kurs-id (read-string punkte-grenze)
-                                          fragen (time/of start) (time/of ende)))))
-
-           (GET "/test/:id" [id]
-                (response (db/test-by-id id)))
-
-           ;; fragen
-           ;; do we need these route, why can't we embed the questions in the test
-           (GET "/frage" []
-                (response (db/all-fragen)))
-           (GET "/frage/:id" [id]
-                (response (db/frage-by-id id)))
-
-           (GET "/fach" []
-                (response (db/all-faecher)))
-
-
-           (GET "/kurs/:id" [id]
-                (response (db/kurs-by-id id)))
-
-           (GET "/kurs/for-fach/:fach-id" [fach-id]
-                (response (db/kurse-for-fach fach-id)))
-
-           (GET "/antwort" []
-                (response (db/all-antwort)))
-           ;; antworten
-           (POST "/user/:user-id/antworten" [user-id :as r]
-                 (let [antworten (:body-params r)]
-                   (response (db/user-add-antworten user-id antworten))))
-
-           (GET "/user/:user-id/kurse" [user-id]
-                (response (domain/kurse-mit-gesamt-punkten
-                            (db/kurse-von-studierendem user-id)
-                            (partial db/bewertete-antworten-von-test user-id))))
-
-           (GET "/fach" []
-                (response (db/all-faecher)))
-
-           (POST "/fach" [:as r]
-                 (let [fach-name (get-in r [:body-params :fach-name])]
-                   (response (db/add-fach fach-name))))
-
-           (GET "/kurs" []
-                (response (db/all-kurse)))
-
-           (GET "/kurs/:id" [id]
-                (response (db/kurs-by-id id)))
-
-           (POST "/kurs" [:as r]
-                 (let [body (:body-params r)]
-                   (response (db/add-kurs (:fach-id body) (read-string (:jahr body)) (:semester body)))))
-
-           (GET "/korrektur/:user-id" [user-id]
-                (response
-                  (->> (db/fragen-fuer-user user-id)
-                       (domain/freitext-fragen)
-                       (domain/sortierte-antworten-von-freitext-fragen db/antworten-von-frage)
-                       (domain/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id (db/alle-antworten-mit-korrekturen))
-                       (domain/timestamp-to-datum-and-uhrzeit))))
-           (GET "/bisherige-korrekturen/:user-id" [user-id]
-                (response
-                  (->> (db/fragen-fuer-user user-id)
-                       (domain/freitext-fragen)
-                       (domain/sortierte-antworten-von-freitext-fragen db/antworten-von-frage)
-                       (domain/antworten-korrigiert (db/korrekturen-von-korrektorin-korrigiert user-id))
-                       (domain/timestamp-to-datum-and-uhrzeit))))
-           (GET "/antwort-fuer-korrektur/:aid" [aid]
-                (response
-                  (->> (db/antworten-fuer-korrektur aid)
-                       (domain/antworten-fuer-korrektur-ansicht)
-                       (domain/korrekturen-into-antwort db/korrekturen-von-antwort))))
-           (POST "/korrektur-fuer-antwort/:aid" [aid :as r]
-                 (let [korrektur (:body-params r)]
-                   (response
-                     (->> (domain/check-incoming-korrektur korrektur (db/antworten-fuer-korrektur aid))
-                          (domain/add-korrektur-if-no-error db/korrektor-add-korrektur aid))))))
-  (GET "/api/access-token" request (str (extract-token request)))
-  (GET "/api/session" request (str (:session request)))
+;; all routes that require authentication go here
+(defroutes private-routes
+  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
   (route/not-found "Not Found"))
 
 
-(def allowed-origins [#"http://localhost:8080" #"http://localhost:8081" #"http://localhost:8082" #"\*"])
-(def allowed-methods [:get :post :put :delete])
-(def allowed-headers #{:accept :content-type})
+(defroutes combined-routes
+  public-routes
+  (wrap-authentication private-routes))
 
-
-(def app
-  (-> routes
-      wrap-authentication
-      (wrap-cors :access-control-allow-origin allowed-origins
-                 :access-control-allow-methods allowed-methods
-                 :access-control-allow-credentials "true")
-      wrap-format ; handle content negotiation
-      (wrap-defaults (-> api-defaults
-                         (assoc-in [:session :cookie-attrs :same-site] :none)
-                         (assoc-in [:session :cookie-attrs :secure] true)))
-      wrap-params))
+;; oauth2 middleware callback requires cookie setting same site to be lax, see: https://github.com/weavejester/ring-oauth2
+(def app (-> combined-routes (wrap-defaults (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
 
 
 (def app-dev (wrap-reload #'app))
