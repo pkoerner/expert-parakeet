@@ -233,20 +233,20 @@
 (defn add-question!
   [question]
   (let [id (generate-id :question/id)
-        typ (:question/type question)
+        type (:question/type question)
         trans-map (apply assoc {:db/id        -1
                                 :question/id     id
-                                :question/type    typ
+                                :question/type    type
                                 :question/points (:question/points question)
                                 :question/question-statement (:question/question-statement question)}
-                         (cond (= typ :question.type/free-text)
+                         (cond (= type :question.type/free-text)
                                [:question/evaluation-criteria (:question/evaluation-criteria question)]
 
-                               (= typ :question.type/single-choice)
+                               (= type :question.type/single-choice)
                                [:question/possible-solutions (:question/possible-solutions question)
                                 :question/single-choice-solution (:question/single-choice-solution question)]
 
-                               (= typ :question.type/multiple-choice)
+                               (= type :question.type/multiple-choice)
                                [:question/possible-solutions (:question/possible-solutions question)
                                 :question/multiple-choice-solution (:question/multiple-choice-solution question)]))
         tx-result (d/transact conn [trans-map])
