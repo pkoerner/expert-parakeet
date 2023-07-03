@@ -2,7 +2,7 @@
   (:require
     [datahike.api :as d]
     [db.dummy-data :as dummy-data]
-    [db.schema :refer [schema]]
+    [db.schema :refer [db-schema]]
     [nano-id.core :refer [nano-id]]))
 
 
@@ -14,16 +14,16 @@
 (def cfg
   {:store {:backend :mem
            :id "expert-db"}
-   :initial-tx schema})
+   :initial-tx db-schema})
 
 
 ;; use file db
 
 
 #_(def cfg
-      {:store {:backend :file
-               :path "/tmp/expert-db"}
-       :initial-tx schema})
+    {:store {:backend :file
+             :path "/tmp/expert-db"}
+     :initial-tx schema})
 
 
 (defn create-conn
@@ -53,316 +53,320 @@
       id)))
 
 
-(defn kurse-von-studierendem
+(defn get-course-iterations-of-student
   [user-id]
   (mapv first
-        (d/q '[:find (pull ?k [:kurs/id
-                               {:kurs/fach [:fach/fachtitel]}
-                               :kurs/jahr
-                               :kurs/semester
-                               {:kurs/tests [:test/id :test/name
-                                             {:test/fragen [:frage/id
-                                                            :frage/punkte]}]}])
+        (d/q '[:find (pull ?k [:course-iteration/id
+                               {:course-iteration/course [:course/course-name]}
+                               :course-iteration/year
+                               :course-iteration/semester
+                               {:course-iteration/question-sets [:question-set/id :question-set/name
+                                                                 {:question-set/questions [:question/id
+                                                                                           :question/points]}]}])
                :in $ ?u
                :where
-               [?u :user/kurse ?k]]
+               [?u :user/course-iterations ?k]]
              @conn [:user/id user-id])))
 
 
-(defn bewertete-antworten-von-test
-  [user-id test-id]
+(defn get-graded-answers-of-question-set
+  [user-id question-set-id]
   (mapv first
-        (d/q '[:find (pull ?a [:antwort/punkte
-                               {:antwort/frage [:frage/id :frage/typ]}])
+        (d/q '[:find (pull ?a [:answer/points
+                               {:answer/question [:question/id :question/type]}])
                :in $ ?u ?t
                :where
-               [?a :antwort/user ?u]
-               [?a :antwort/frage ?f]
-               [?t :test/fragen ?f]
-               [?a :antwort/punkte]]
-             @conn [:user/id user-id] [:test/id test-id])))
+               [?a :answer/user ?u]
+               [?a :answer/question ?f]
+               [?t :question-set/questions ?f]
+               [?a :answer/points]]
+             @conn [:user/id user-id] [:question-set/id question-set-id])))
 
 
-(defn fragen-fuer-user
-  [korrektorin-id]
+(defn get-questions-for-user
+  [corrector-id]
   (mapv first
-        (d/q '[:find (pull ?kurs [:kurs/semester
-                                  :kurs/jahr
-                                  {:kurs/fach [:fach/fachtitel]}
-                                  {:kurs/tests [:test/id :test/name
-                                                {:test/fragen [:frage/id :frage/typ]}]}])
-               :in $ ?korr
+        (d/q '[:find (pull ?course-iteration [:course-iteration/semester
+                                              :course-iteration/year
+                                              {:course-iteration/course [:course/course-name]}
+                                              {:course-iteration/question-sets [:question-set/id :question-set/name
+                                                                                {:question-set/questions [:question/id :question/type]}]}])
+               :in $ ?corr
                :where
-               [?korr :user/kurse ?kurs]]
-             @conn [:user/id korrektorin-id])))
+               [?corr :user/course-iterations ?course-iteration]]
+             @conn [:user/id corrector-id])))
 
 
-(defn antworten-von-frage
-  [frage-id]
+(defn get-answers-for-question
+  "Fetches all answers of all users for one question."
+  [question-id]
   (map
-    #(zipmap [:antwort/id :user/id :antwort/timestamp] %)
-    (d/q '[:find ?antwort-id ?user-id ?timestamp
-           :in $ ?frage-id
+    #(zipmap [:answer/id :user/id :answer/timestamp] %)
+    (d/q '[:find ?answer-id ?user-id ?timestamp
+           :in $ ?question-id
            :where
-           [?frage :frage/id ?frage-id]
-           [?antwort :antwort/frage ?frage]
-           [?antwort :antwort/id ?antwort-id ?tx]
+           [?question :question/id ?question-id]
+           [?answer :answer/question ?question]
+           [?answer :answer/id ?answer-id ?tx]
            [?tx :db/txInstant ?timestamp]
-           [?antwort :antwort/user ?user]
+           [?answer :answer/user ?user]
            [?user :user/id ?user-id]]
-         @conn frage-id)))
+         @conn question-id)))
 
 
-(defn alle-antworten-mit-korrekturen
+(defn get-all-answers-with-corrections
+  "Fetches every answer with a correction from the database"
   []
   (mapv first
-        (d/q '[:find (pull ?antwort [:antwort/id])
+        (d/q '[:find (pull ?answer [:answer/id])
                :in $
                :where
-               [?korrektur :korrektur/antwort ?antwort]]
+               [?correction :correction/answer ?answer]]
              @conn)))
 
 
-(defn korrekturen-von-korrektorin-korrigiert
-  [korrektorin-id]
+(defn get-all-corrections-of-corrector
+  [corrector-id]
   (mapv first
-        (d/q '[:find (pull ?k [{:korrektur/antwort [:antwort/id]}])
+        (d/q '[:find (pull ?k [{:correction/answer [:answer/id]}])
                :in $ ?korr
                :where
-               [?k :korrektur/korrektor ?korr]]
-             @conn [:user/id korrektorin-id])))
+               [?k :correction/corrector ?korr]]
+             @conn [:user/id corrector-id])))
 
 
-(defn test-by-id
+(defn get-question-set-by-id
   [id]
   (d/pull @conn
-          [:test/id :test/name :test/start :test/ende :test/bestehensgrenze
-           {:test/fragen [:frage/id :frage/frage-text :frage/punkte :frage/typ :frage/choices]}]
-          [:test/id id]))
+          [:question-set/id {:question-set/questions [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]}]
+          [:question-set/id id]))
 
 
-(defn all-tests
+(defn get-all-question-sets
   []
   (mapv first (d/q '[:find ?id
-                     :where [_ :test/id ?id]]
+                     :where [_ :question-set/id ?id]]
                    @conn)))
 
 
-(defn all-faecher
+(defn get-all-courses
   []
-  (mapv first (d/q '[:find (pull ?e [:fach/id :fach/fachtitel])
-                     :where [?e :fach/id]]
+  (mapv first (d/q '[:find (pull ?e [:course-iteration/id {:course-iteration/course [:course/id :course/course-name]}
+                                     :course-iteration/year
+                                     :course-iteration/semester
+                                     :course-iteration/year
+                                     {:course-iteration/question-sets [:question-set/id]}])
+                     :where [?e :course-iteration/id]]
                    @db/conn)))
 
 
-(defn kurse-for-fach
-  [fach-id]
-  (mapv first (d/q '[:find (pull ?e [:kurs/id :kurs/semester :kurs/jahr
-                                     {:kurs/tests [:test/id
-                                                   :test/name
-                                                   {:test/fragen [:frage/id :frage/frage-text
-                                                                  :frage/punkte :frage/typ :frage/choices
-                                                                  :frage/loesungskriterien
-                                                                  :frage/single-choice-loesung
-                                                                  :frage/multiple-choice-loesung]}]}])
-                     :in $ ?fach-id
+(defn get-course-iterations-of-course
+  [course-id]
+  (mapv first (d/q '[:find (pull ?e [:course-iteration/id :course-iteration/semester :course-iteration/year
+                                     {:course-iteration/question-sets
+                                      [:question-set/id
+                                       :question-set/name
+                                       {:question-set/questions
+                                        [:question/id :question/question-statement
+                                         :question/points :question/type :question/possible-solutions
+                                         :question/evaluation-criteria
+                                         :question/single-choice-solution
+                                         :question/multiple-choice-solution]}]}])
+                     :in $ ?course-id
                      :where
-                     [?f :fach/id ?fach-id]
-                     [?e :kurs/fach ?f]
-                     [?e :kurs/id]]
-                   @db/conn fach-id)))
+                     [?f :course/id ?course-id]
+                     [?e :course-iteration/course ?f]
+                     [?e :course-iteration/id]]
+                   @db/conn course-id)))
 
 
-(defn all-fragen
+(defn get-all-questions
   []
-  (mapv first (d/q '[:find (pull ?e [:frage/id])
-                     :where [?e :frage/id]]
+  (mapv first (d/q '[:find (pull ?e [:question/id])
+                     :where [?e :question/id]]
                    @db/conn)))
 
 
-(defn add-fach
-  [fach-name]
-  (let [id (generate-id :fach/id)
+(defn add-course!
+  [course-name]
+  (let [id (generate-id :course/id)
         tx-result (d/transact conn
                               [{:db/id -1
-                                :fach/id id
-                                :fach/fachtitel fach-name}])
+                                :course/id id
+                                :course/course-name course-name}])
         db-after (:db-after tx-result)]
-    (d/pull db-after [:fach/id :fach/fachtitel]
-            [:fach/id id])))
+    (d/pull db-after [:course/id :course/course-name]
+            [:course/id id])))
 
 
-(defn all-kurse
-  []
-  (mapv first (d/q '[:find (pull ?e [:kurs/id {:kurs/fach [:fach/id :fach/fachtitel]} :kurs/jahr
-                                     :kurs/semester :kurs/jahr {:kurs/tests [:test/id]}])
-                     :where [?e :kurs/id]]
-                   @db/conn)))
-
-
-(defn kurs-by-id
-  [id]
+(defn get-course-iteration-by-id
+  [course-iteration-id]
   (d/pull @conn
-          [:kurs/id {:kurs/fach [:fach/id :fach/fachtitel]}
-           :kurs/jahr :kurs/semester
-           {:kurs/tests [:test/id :test/name]}]
-          [:kurs/id id]))
+          [:course-iteration/id {:course-iteration/course [:course/id :course/course-name]}
+           :course-iteration/year :course-iteration/semester
+           {:course-iteration/question-sets [:question-set/id :question-set/name]}]
+          [:course-iteration/id course-iteration-id]))
 
 
-(defn add-kurs
-  [fach-id jahr semester]
-  (let [id (generate-id :kurs/id)
+(defn add-course-iteration!
+  [course-id year semester]
+  (let [id (generate-id :course-iteration/id)
         tx-result (d/transact conn
                               [{:db/id     -1
-                                :kurs/id   id
-                                :kurs/fach [:fach/id fach-id]
-                                :kurs/jahr jahr
-                                :kurs/semester semester
-                                :kurs/tests []}])
+                                :course-iteration/id   id
+                                :course-iteration/course [:course/id course-id]
+                                :course-iteration/year year
+                                :course-iteration/semester semester
+                                :course-iteration/question-sets []}])
         db-after (:db-after tx-result)]
-    (d/pull db-after [:kurs/id :kurs/fach :kurs/jahr :kurs/semester :kurs/tests]
-            [:kurs/id id])))
+    (d/pull db-after [:course-iteration/id :course-iteration/course :course-iteration/year :course-iteration/semester :course-iteration/question-sets]
+            [:course-iteration/id id])))
 
 
-(defn frage-by-id
+(defn get-question-by-id
   [id]
   (d/pull @db/conn
-          [:frage/id :frage/frage-text :frage/punkte :frage/typ]
-          [:frage/id id]))
+          [:question/id :question/question-statement :question/points :question/type]
+          [:question/id id]))
 
 
-(defn add-frage
-  [frage]
-  (let [id (generate-id :frage/id)
-        typ (:frage/typ frage)
+(defn add-question!
+  [question]
+  (let [id (generate-id :question/id)
+        type (:question/type question)
         trans-map (apply assoc {:db/id        -1
-                                :frage/id     id
-                                :frage/typ    typ
-                                :frage/punkte (:frage/punkte frage)
-                                :frage/frage-text (:frage/frage-text frage)}
-                         (cond (= typ :frage.typ/text)
-                               [:frage/loesungskriterien (:frage/loesungskriterien frage)]
-                               (= typ :frage.typ/single-choice)
-                               [:frage/choices (:frage/choices frage)
-                                :frage/single-choice-loesung (:frage/single-choice-loesung frage)]
-                               (= typ :frage.typ/multiple-choice)
-                               [:frage/choices (:frage/choices frage)
-                                :frage/multiple-choice-loesung (:frage/multiple-choice-loesung frage)]))
+                                :question/id     id
+                                :question/type    type
+                                :question/points (:question/points question)
+                                :question/question-statement (:question/question-statement question)}
+                         (cond (= type :question.type/free-text)
+                               [:question/evaluation-criteria (:question/evaluation-criteria question)]
+
+                               (= type :question.type/single-choice)
+                               [:question/possible-solutions (:question/possible-solutions question)
+                                :question/single-choice-solution (:question/single-choice-solution question)]
+
+                               (= type :question.type/multiple-choice)
+                               [:question/possible-solutions (:question/possible-solutions question)
+                                :question/multiple-choice-solution (:question/multiple-choice-solution question)]))
         tx-result (d/transact conn [trans-map])
         db-after (:db-after tx-result)]
-    (d/pull db-after  [:frage/id :frage/frage-text :frage/punkte :frage/typ :frage/choices
-                       :frage/loesungskriterien :frage/single-choice-loesung
-                       :frage/multiple-choice-loesung]
-            [:frage/id id])))
+    (d/pull db-after  [:question/id :question/question-statement :question/points :question/type :question/possible-solutions
+                       :question/evaluation-criteria :question/single-choice-solution
+                       :question/multiple-choice-solution]
+            [:question/id id])))
 
 
-(defn add-test
-  [test-name kurs-id bestehensgrenze fragen start ende]
-  (let [id (generate-id :test/id)
-        fragen-ids (doall (map (fn [frage]
-                                 (if (:frage/id frage)
-                                   (:frage/id frage)
-                                   (:frage/id (add-frage frage)))) ; frage war noch nicht in db
-                               fragen))
-        tx-result-test (d/transact conn
-                                   [{:db/id                 -1
-                                     :test/id               id
-                                     :test/name             test-name
-                                     :test/start            start
-                                     :test/ende             ende
-                                     :test/bestehensgrenze bestehensgrenze
-                                     :test/fragen (mapv (fn [f-id] [:frage/id f-id]) fragen-ids)}])
-        kurs (kurs-by-id kurs-id)
-        _tx-result-kurs (d/transact conn [{:db/id         -1
-                                           :kurs/id       (:kurs/id kurs)
-                                           :kurs/semester (:kurs/semester kurs)
-                                           :kurs/jahr     (:kurs/jahr kurs)
-                                           :kurs/tests    (conj (:kurs/tests kurs) [:test/id id])}])
-        db-after (:db-after tx-result-test)]
-    (d/pull db-after [:test/id :test/name] [:test/id id])))
+(defn add-question-set!
+  [question-set-name course-iteration-id passing-score questions start end]
+  (let [id (generate-id :question-set/id)
+        question-ids (doall (map (fn [question]
+                                   (if (:question/id question)
+                                     (:question/id question)
+                                     (:question/id (add-question! question)))) ; frage war noch nicht in db
+                                 questions))
+        tx-result-question-set (d/transact conn
+                                           [{:db/id                      -1
+                                             :question-set/id            id
+                                             :question-set/name          question-set-name
+                                             :question-set/start         start
+                                             :question-set/end           end
+                                             :question-set/passing-score passing-score
+                                             :question-set/questions (mapv (fn [q-id] [:question/id q-id]) question-ids)}])
+        course-iteration (get-course-iteration-by-id course-iteration-id)
+        _tx-result-course-iteration (d/transact conn [{:db/id         -1
+                                                       :course-iteration/id       (:course-iteration/id course-iteration)
+                                                       :course-iteration/semester (:course-iteration/semester course-iteration)
+                                                       :course-iteration/year     (:course-iteration/year course-iteration)
+                                                       :course-iteration/question-sets    (conj (:course-iteration/question-sets course-iteration) [:question-set/id id])}])
+        db-after (:db-after tx-result-question-set)]
+    (d/pull db-after [:question-set/id :question-set/name] [:question-set/id id])))
 
 
-(defn user-add-antwort
-  [user-id frage-id antwort]
-  (let [id (generate-id :antwort/id)
+(defn add-user-answer!
+  "Adds an answer of a user to a question."
+  [user-id question-id answer]
+  (let [id (generate-id :answer/id)
         tx-result (d/transact conn
                               [{:db/id -1
-                                :antwort/id id
-                                :antwort/frage [:frage/id frage-id]
-                                :antwort/user [:user/id user-id]
-                                :antwort/antwort antwort}])
+                                :answer/id id
+                                :answer/question [:question/id question-id]
+                                :answer/user [:user/id user-id]
+                                :answer/answer answer}])
         db-after (:db-after tx-result)]
-    (d/pull db-after [:antwort/id {:antwort/frage [:frage/id]}] [:antwort/id id])))
+    (d/pull db-after [:answer/id {:answer/question [:question/id]}] [:answer/id id])))
 
 
-(defn user-add-antworten
-  [user-id antworten]
+(defn add-multiple-user-answers!
+  "Adds multiple answers of a user to multiple questions.
+   Remark: Answers has to be a collection of tuples containing a question-id
+   and an answer."
+  [user-id answers]
   (mapv
-    (fn [[frage-id antwort]]
-      (db/user-add-antwort user-id frage-id antwort))
-    antworten))
+    (fn [[question-id answer]]
+      (db/add-user-answer! user-id question-id answer))
+    answers))
 
 
-(defn all-antwort
+(defn get-all-answers
   []
-  (d/q '[:find (pull ?e [:antwort/id :antwort/user :antwort/frage :antwort/antwort])
-         :where [?e :antwort/id]]
+  (d/q '[:find (pull ?e [:answer/id :answer/user :answer/question :answer/answer])
+         :where [?e :answer/id]]
        @db/conn))
 
 
-(defn antworten-fuer-korrektur
-  [antwort-id]
+(defn get-answers-for-correction
+  [answer-id]
   (mapv first
-        (d/q '[:find (pull ?antwort [:antwort/id
-                                     :antwort/punkte
-                                     :antwort/antwort
-                                     {:antwort/frage [:frage/frage-text :frage/punkte :frage/loesungskriterien]}])
-               :in $ ?antwort
+        (d/q '[:find (pull ?answer [:answer/id
+                                    :answer/points
+                                    :answer/answer
+                                    {:answer/question [:question/question-statement :question/points :question/evaluation-criteria]}])
+               :in $ ?answer
                :where
-               [?antwort :antwort/frage ?frage]
-               [?frage :frage/typ ?typ]
-               [(= ?typ :frage.typ/text)]]
-             @conn [:antwort/id antwort-id])))
+               [?answer :answer/question ?question]
+               [?question :question/type ?type]
+               [(= ?type :question.type/free-text)]]
+             @conn [:answer/id answer-id])))
 
 
-(defn korrekturen-von-antwort
-  [antwort-id]
+(defn get-corrections-of-answer
+  [answer-id]
   (map
-    #(zipmap [:korrektur/korrektur-text :korrektur/timestamp] %)
-    (d/q '[:find ?korr-text ?timestamp
-           :in $ ?antwort-id
+    #(zipmap [:correction/feedback :correction/timestamp] %)
+    (d/q '[:find ?corr-feedback ?timestamp
+           :in $ ?answer-id
            :where
-           [?antwort :antwort/id ?antwort-id]
-           [?korrektur :korrektur/antwort ?antwort ?tx]
+           [?answer :answer/id ?answer-id]
+           [?correction :correction/answer ?answer ?tx]
            [?tx :db/txInstant ?timestamp]
-           [?korrektur :korrektur/korrektur-text ?korr-text]]
-         @conn antwort-id)))
+           [?correction :correction/feedback ?corr-feedback]]
+         @conn answer-id)))
 
 
-(defn korrektor-add-korrektur
-  [ant-id {text :korrektur/korrektur-text punkte :korrektur/punkte korr-id :korrektor/id}]
+(defn add-correction!
+  [ant-id {feedback :correction/feedback points :correction/points corr-id :corrector/id}]
   (let [tx-result (d/transact conn
                               [{:db/id -1
-                                :korrektur/korrektur-text text
-                                :korrektur/korrektor [:user/id korr-id]
-                                :korrektur/antwort [:antwort/id ant-id]}
-                               {:antwort/id ant-id
-                                :antwort/punkte punkte}])
+                                :correction/feedback feedback
+                                :correction/corrector [:user/id corr-id]
+                                :correction/answer [:answer/id ant-id]}
+                               {:answer/id ant-id
+                                :answer/points points}])
         db-after (:db-after tx-result)
         ids (:tempids tx-result)]
-    (d/pull db-after [:korrektur/korrektur-text {:korrektur/antwort [:antwort/punkte]}] (get ids -1))))
+    (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1))))
 
 
-(comment 
+(comment
   (set! *print-length* 5)
 
   (ffirst (d/q '[:find (count ?e)
-                 :where 
-                 [?e :frage/id]] @conn)))
+                 :where
+                 [?e :question/id]] @conn)))
 
 
-(comment 
-  (d/pull @conn [:test/fragen] [:test/id 1])
-  (d/pull @conn [:test/id {:test/fragen [:frage/frage-text]}] [:test/id 1])
-  (d/pull @conn [:frage/frage-text] [:frage/id 1])
-  )
+(comment
+  (d/pull @conn [:question-set/questions] [:question-set/id 1])
+  (d/pull @conn [:question-set/id {:question-set/questions [:question/question-statement]}] [:question-set/id 1])
+  (d/pull @conn [:question/question-statement] [:question/id 1]))

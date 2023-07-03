@@ -4,73 +4,74 @@
     [provisdom.spectomic.core :as spectomic]))
 
 
-(def frage-schema
+(def question-schema
   (spectomic/datomic-schema
-    [[:frage/id {:db/unique :db.unique/identity
-                 :db/index true}]
-     :frage/typ ; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/on-prem/best-practices.html#idents-for-enumerated-types)
-     :frage/frage-text
-     :frage/punkte
-     :frage/loesungskriterien
-     :frage/choices
-     :frage/single-choice-loesung
-     :frage/multiple-choice-loesung]))
+    [[:question/id {:db/unique :db.unique/identity
+                    :db/index true}]
+     :question/type ; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/on-prem/best-practices.html#idents-for-enumerated-types)
+     :question/question-statement
+     :question/points
+     :question/evaluation-criteria
+     :question/possible-solutions
+     :question/single-choice-solution
+     :question/multiple-choice-solution]))
 
 
 ;; manche Felder bleiben leer (abhaengig vom Fragentyp)
 
 
-(def antwort-schema
+(def answer-schema
   (spectomic/datomic-schema
-    [[:antwort/id {:db/unique :db.unique/identity
-                   :db/index true}]
-     :antwort/user
-     :antwort/frage
-     :antwort/antwort
-     :antwort/punkte]))
+    [[:answer/id {:db/unique :db.unique/identity
+                  :db/index true}]
+     :answer/user
+     :answer/question
+     :answer/answer
+     :answer/points]))
 
 
-(def korrektur-schema
+(def correction-schema
   (spectomic/datomic-schema
-    [:korrektur/korrektor
-     :korrektur/antwort
-     :korrektur/korrektur-text]))
+    [:correction/corrector
+     :correction/answer
+     :correction/feedback]))
 
 
-(def test-schema
+(def question-set-schema
   (spectomic/datomic-schema
-    [[:test/id {:db/unique :db.unique/identity
-                :db/index true}]
-     :test/name
-     :test/start
-     :test/ende
-     :test/fragen
-     :test/bestehensgrenze]))
+    [[:question-set/id {:db/unique :db.unique/identity
+                        :db/index true}]
+     :question-set/name
+     :question-set/start
+     :question-set/end
+     :question-set/questions
+     :question-set/passing-score]))
 
 
 (def user-schema
   (spectomic/datomic-schema
     [[:user/id {:db/unique :db.unique/identity
                 :db/index true}]
-     :user/kurse]))
+     :user/course-iterations]))
 
 
-(def fach-schema
+(def course-schema
   (spectomic/datomic-schema
-    [[:fach/id {:db/unique :db.unique/identity
-                :db/index true}]
-     :fach/fachtitel]))
+    [[:course/id {:db/unique :db.unique/identity
+                  :db/index true}]
+     :course/course-name
+     :course/question-sets]))
 
 
-(def kurs-schema
+(def course-iteration-schema
   (spectomic/datomic-schema
-    [[:kurs/id {:db/unique :db.unique/identity
-                :db/index true}]
-     :kurs/fach
-     :kurs/jahr
-     :kurs/semester
-     :kurs/tests]))
+    [[:course-iteration/id {:db/unique :db.unique/identity
+                            :db/index true}]
+     :course-iteration/course
+     :course-iteration/year
+     :course-iteration/semester
+     :course-iteration/question-sets]))
 
 
-(def schema
-  (concat frage-schema antwort-schema korrektur-schema test-schema user-schema fach-schema kurs-schema))
+(def db-schema
+  (concat question-schema answer-schema correction-schema question-set-schema user-schema course-schema course-iteration-schema))
