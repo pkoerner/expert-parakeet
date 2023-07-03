@@ -8,12 +8,6 @@ Run Backend:
 make backend
 ```
 
-Run Frontend:
-
-```shell
-make frontend
-```
-
 Tests:
 
 ```shell
