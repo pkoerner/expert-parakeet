@@ -19,7 +19,7 @@
 (rf/reg-event-db
   :korrektur/angekommen
   (fn [db [_ korrektur]]
-    (let [k (assoc korrektur :korrektur/punkte (str (:antwort/punkte korrektur)))]
+    (let [k (assoc korrektur :correction/points (str (:antwort/punkte korrektur)))]
       (-> db
           (assoc :laedt false)
           (assoc :korrektur k)))))
@@ -38,16 +38,16 @@
 
 
 (rf/reg-event-db
-  :korrektur/punkte
+  :correction/points
   (fn [db [_ korrektur-punkte]]
-    (assoc-in db [:korrektur :korrektur/punkte] korrektur-punkte)))
+    (assoc-in db [:korrektur :correction/points] korrektur-punkte)))
 
 
 (rf/reg-event-fx
   :korrektur/senden
   (fn [{:keys [db]} _]
     (let [antwort-id (get-in db [:korrektur :antwort/id])
-          korrektur (select-keys (:korrektur db) [:korrektur/korrektur-text :korrektur/punkte])
+          korrektur (select-keys (:korrektur db) [:korrektur/korrektur-text :correction/points])
           korrektur-korrektor (assoc korrektur :korrektor/id (get-in db [:korrektor :id]))]
       {:http-xhrio  {:method          :post
                      :uri             (str vars/base-url "/korrektur-fuer-antwort/" antwort-id)

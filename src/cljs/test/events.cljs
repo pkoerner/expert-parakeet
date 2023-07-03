@@ -54,7 +54,7 @@
     (let [user-id @(rf/subscribe [:user-id])
           antworten (:antworten db)]
       {:http-xhrio  {:method          :post
-                     :uri             (str vars/base-url "/user/" user-id "/antworten")
+                     :uri             (str vars/base-url "/user/" user-id "antworten")
                      :params          antworten
                      :format          (ajax/transit-request-format)
                      :response-format (ajax/transit-response-format)

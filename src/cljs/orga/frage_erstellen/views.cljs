@@ -10,11 +10,11 @@
 
 (defn fragentyp-auswaehlen
   []
-  (let [tabs [{:id :frage.typ/single-choice :label "single choice"}
-              {:id :frage.typ/multiple-choice :label "multiple choice"}
-              {:id :frage.typ/text :label "text"}]
-        frage-typ (reagent/atom :frage.typ/single-choice)]
-    (rf/dispatch [:frage-erstellen/update :frage/typ :frage.typ/single-choice])
+  (let [tabs [{:id :question.type/single-choice :label "single choice"}
+              {:id :question.type/multiple-choice :label "multiple choice"}
+              {:id :question.type/free-text :label "text"}]
+        frage-typ (reagent/atom :question.type/single-choice)]
+    (rf/dispatch [:frage-erstellen/update :question/type :question.type/single-choice])
     [h-box
      :align :center
      :gap "10px"
@@ -27,7 +27,7 @@
        :tabs tabs
        :on-change (fn [typ]
                     (reset! frage-typ typ)
-                    (rf/dispatch [:frage-erstellen/update :frage/typ typ]))]]]))
+                    (rf/dispatch [:frage-erstellen/update :question/type typ]))]]]))
 
 
 (defn frage-text-input
@@ -45,7 +45,7 @@
        :width "300px"
        :on-change (fn [val]
                     (reset! frage-text val)
-                    (rf/dispatch [:frage-erstellen/update :frage/frage-text val]))])]])
+                    (rf/dispatch [:frage-erstellen/update :question/question-statement val]))])]])
 
 
 (defn punkte-input
@@ -64,7 +64,7 @@
        :width "300px"
        :on-change (fn [val]
                     (reset! punkte val)
-                    (rf/dispatch [:frage-erstellen/update :frage/punkte val]))])]])
+                    (rf/dispatch [:frage-erstellen/update :question/points val]))])]])
 
 
 (defn choices-list
@@ -134,7 +134,7 @@
      :label "Musterlösung:"]
     [single-choice-beantworten-body 1 @(rf/subscribe [:frage-erstellen/choices]) ; 1 is dummy id
      @(rf/subscribe [:frage-erstellen/single-choice-loesung])         ; initial value for radio buttons
-     (fn [antwort] (rf/dispatch [:frage-erstellen/update :frage/single-choice-loesung antwort]))
+     (fn [antwort] (rf/dispatch [:frage-erstellen/update :question/single-choice-solution antwort]))
      false]]])
 
 
@@ -164,24 +164,24 @@
      :label "Lösungskriterien (sichtbar für Korrektoren):"]
     [textfrage-beantworten-body 1
      @(rf/subscribe [:frage-erstellen/loesungskriterien])
-     (fn [antwort] (rf/dispatch [:frage-erstellen/update :frage/loesungskriterien antwort]))]]])
+     (fn [antwort] (rf/dispatch [:frage-erstellen/update :question/evaluation-criteria antwort]))]]])
 
 
 (defn can-erstellen?
   []
   (let [frage @(rf/subscribe [:frage-erstellen/frage])
-        typ (:frage/typ frage)]
+        typ (:question/type frage)]
     (and
-      (seq (:frage/frage-text frage))
-      (seq (:frage/punkte frage))
+      (seq (:question/question-statement frage))
+      (seq (:question/points frage))
       (cond                                                 ; hat loesung?
-        (= typ :frage.typ/single-choice) (:frage/single-choice-loesung frage)
-        (= typ :frage.typ/text) true
-        (= typ :frage.typ/multiple-choice) true)         ; spaeter: zuordnungsfrage braucht zuordnungsmap als loesung
+        (= typ :question.type/single-choice) (:question/single-choice-solution frage)
+        (= typ :question.type/free-text) true
+        (= typ :question.type/multiple-choice) true)         ; spaeter: zuordnungsfrage braucht zuordnungsmap als loesung
       (cond                                                 ; hat choices
-        (or (= typ :frage.typ/single-choice)
-            (= typ :frage.typ/multiple-choice)) (seq (:frage/choices frage))
-        (= typ :frage.typ/text) true))))
+        (or (= typ :question.type/single-choice)
+            (= typ :question.type/multiple-choice)) (seq (:question/possible-solutions frage))
+        (= typ :question.type/free-text) true))))
 
 
 (defn frage-erstellen
@@ -198,9 +198,9 @@
     [frage-text-input]
     [punkte-input]
     (let [typ @(rf/subscribe [:frage-erstellen/typ])]
-      (cond (= typ :frage.typ/single-choice) [single-choice-erstellen]
-            (= typ :frage.typ/multiple-choice) [multiple-choice-erstellen]
-            (= typ :frage.typ/text) [text-frage-erstellen]
+      (cond (= typ :question.type/single-choice) [single-choice-erstellen]
+            (= typ :question.type/multiple-choice) [multiple-choice-erstellen]
+            (= typ :question.type/free-text) [text-frage-erstellen]
             :else [:h1 "not implemented"]))
     [rc/button :src (at)
      :class "button-primary"

@@ -25,19 +25,19 @@
 (rf/reg-event-db
   :frage-erstellen/multiple-choice-lsg-update
   (fn [db [_ in-answer? choice-text]]
-    (if (not (get-in db [:frage :frage/multiple-choice-loesung]))
-      (assoc-in db [:frage :frage/multiple-choice-loesung] #{choice-text})  ; init as set, in-answer must be true
+    (if (not (get-in db [:frage :question/multiple-choice-solution]))
+      (assoc-in db [:frage :question/multiple-choice-solution] #{choice-text})  ; init as set, in-answer must be true
       (if in-answer?
-        (update-in db [:frage :frage/multiple-choice-loesung] conj choice-text)
-        (update-in db [:frage :frage/multiple-choice-loesung] disj choice-text)))))
+        (update-in db [:frage :question/multiple-choice-solution] conj choice-text)
+        (update-in db [:frage :question/multiple-choice-solution] disj choice-text)))))
 
 
 (rf/reg-event-db
   :frage-erstellen/add-choice
   (fn [db [_ choice]]
-    (if (not (get-in db [:frage :frage/choices]))
-      (assoc-in db [:frage :frage/choices] [choice])      ; init as vector
-      (update-in db [:frage :frage/choices] conj choice))))
+    (if (not (get-in db [:frage :question/possible-solutions]))
+      (assoc-in db [:frage :question/possible-solutions] [choice])      ; init as vector
+      (update-in db [:frage :question/possible-solutions] conj choice))))
 
 
 (defn remove-idx
@@ -49,28 +49,28 @@
   :frage-erstellen/remove-choice
   (fn [db [_ choice-idx choice-text]]
     (-> db
-        (update-in [:frage :frage/choices] remove-idx choice-idx)
-        (update-in [:frage :frage/multiple-choice-loesung] disj choice-text))))
+        (update-in [:frage :question/possible-solutions] remove-idx choice-idx)
+        (update-in [:frage :question/multiple-choice-solution] disj choice-text))))
 
 
 (rf/reg-event-fx
   :frage-erstellen/erstellen
   (fn [{:keys [db]} _]
-    (let [typ (get-in db [:frage :frage/typ])
+    (let [typ (get-in db [:frage :question/type])
           frage
           (apply assoc
-                 {:frage/frage-text (get-in db [:frage :frage/frage-text])
-                  :frage/punkte     (edn/read-string (get-in db [:frage :frage/punkte]))
-                  :frage/typ        typ}
-                 (cond (= typ :frage.typ/text)
-                       [:frage/loesungskriterien (get-in db [:frage :frage/loesungskriterien])]
-                       (= typ :frage.typ/single-choice)
-                       [:frage/choices (get-in db [:frage :frage/choices])
-                        :frage/single-choice-loesung (get-in db [:frage :frage/single-choice-loesung])]
-                       (= typ :frage.typ/multiple-choice)
-                       [:frage/choices (get-in db [:frage :frage/choices])
-                        :frage/multiple-choice-loesung
-                        (let [multiple-choice-lsg (get-in db [:frage :frage/multiple-choice-loesung])]
+                 {:question/question-statement (get-in db [:frage :question/question-statement])
+                  :question/points     (edn/read-string (get-in db [:frage :question/points]))
+                  :question/type        typ}
+                 (cond (= typ :question.type/free-text)
+                       [:question/evaluation-criteria (get-in db [:frage :question/evaluation-criteria])]
+                       (= typ :question.type/single-choice)
+                       [:question/possible-solutions (get-in db [:frage :question/possible-solutions])
+                        :question/single-choice-solution (get-in db [:frage :question/single-choice-solution])]
+                       (= typ :question.type/multiple-choice)
+                       [:question/possible-solutions (get-in db [:frage :question/possible-solutions])
+                        :question/multiple-choice-solution
+                        (let [multiple-choice-lsg (get-in db [:frage :question/multiple-choice-solution])]
                           (if (nil? multiple-choice-lsg)
                             #{}
                             (set multiple-choice-lsg)))]))] ; choices kann coll sein, mult-choi-lsg muss set!

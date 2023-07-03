@@ -31,8 +31,8 @@
 
 
 (defn show-antwort
-  [{antwort-id :antwort/id test-name :test/name datum :antwort/datum uhrzeit :antwort/uhrzeit fachtitel :fach/fachtitel
-    semester :kurs/semester jahr :kurs/jahr}]
+  [{antwort-id :antwort/id test-name :question-set/name datum :answer/date uhrzeit :answer/time fachtitel :course/course-name
+    semester :course-iteration/semester jahr :course-iteration/year}]
   [:p
    [:input
     {:type  "button"

@@ -19,87 +19,88 @@
   (context "/api" []
            ;; tests
            ;; maybe better route /tests
-           (GET "/test" []
-                (response (db/all-tests)))
+           ;; for consistency /question-sets would be better
+           (GET "/question-sets" []
+                (response (db/get-all-question-sets)))
 
-           (POST "/test" [:as r]
-                 (let [{:keys [test-name kurs-id punkte-grenze fragen start ende]} (:body-params r)]
-                   (response (db/add-test test-name kurs-id (read-string punkte-grenze)
-                                          fragen (time/of start) (time/of ende)))))
+           (POST "/question-set" [:as r]
+                 (let [{:keys [question-set-name course-iteration-id passing-score questions start end]} (:body-params r)]
+                   (response (db/add-question-set! question-set-name course-iteration-id (read-string passing-score)
+                                                   questions (time/of start) (time/of end)))))
 
-           (GET "/test/:id" [id]
-                (response (db/test-by-id id)))
-
+           (GET "/question-sets/:id" [id]
+                (response (db/get-question-set-by-id id)))
            ;; fragen
            ;; do we need these route, why can't we embed the questions in the test
-           (GET "/frage" []
-                (response (db/all-fragen)))
-           (GET "/frage/:id" [id]
-                (response (db/frage-by-id id)))
+           (GET "/question" []
+                (response (db/get-all-questions)))
+           (GET "/question/:id" [id]
+                (response (db/get-question-by-id id)))
 
-           (GET "/fach" []
-                (response (db/all-faecher)))
+           (GET "/course" []
+                (response (db/get-all-courses)))
 
 
-           (GET "/kurs/:id" [id]
-                (response (db/kurs-by-id id)))
+           (GET "/course-iteration/:id" [id]
+                (response (db/get-course-iteration-by-id id)))
 
-           (GET "/kurs/for-fach/:fach-id" [fach-id]
-                (response (db/kurse-for-fach fach-id)))
+           (GET "/course-iteration/for-course/:course-id" [course-id]
+                (response (db/get-course-iterations-of-course course-id)))
 
-           (GET "/antwort" []
-                (response (db/all-antwort)))
+           ;; Changing /antwort to /answers as we query for all answers from db
+           (GET "/answers" []
+                (response (db/get-all-answers)))
            ;; antworten
-           (POST "/user/:user-id/antworten" [user-id :as r]
-                 (let [antworten (:body-params r)]
-                   (response (db/user-add-antworten user-id antworten))))
+           (POST "/user/:user-id/answers" [user-id :as r]
+                 (let [answers (:body-params r)]
+                   (response (db/add-multiple-user-answers! user-id answers))))
 
-           (GET "/user/:user-id/kurse" [user-id]
-                (response (domain/kurse-mit-gesamt-punkten
-                            (db/kurse-von-studierendem user-id)
-                            (partial db/bewertete-antworten-von-test user-id))))
+           (GET "/user/:user-id/course-iterations" [user-id]
+                (response (domain/course-iterations-with-total-points
+                            (db/get-course-iterations-of-student user-id)
+                            (partial db/get-graded-answers-of-question-set user-id))))
 
-           (GET "/fach" []
-                (response (db/all-faecher)))
+           (GET "/course" []
+                (response (db/get-all-courses)))
 
-           (POST "/fach" [:as r]
-                 (let [fach-name (get-in r [:body-params :fach-name])]
-                   (response (db/add-fach fach-name))))
+           (POST "/course" [:as r]
+                 (let [course-name (get-in r [:body-params :course-name])]
+                   (response (db/add-course! course-name))))
 
-           (GET "/kurs" []
-                (response (db/all-kurse)))
+           (GET "/course-iteration" []
+                (response (db/get-all-courses)))
 
-           (GET "/kurs/:id" [id]
-                (response (db/kurs-by-id id)))
-
-           (POST "/kurs" [:as r]
+           (POST "/course-iteration" [:as r]
                  (let [body (:body-params r)]
-                   (response (db/add-kurs (:fach-id body) (read-string (:jahr body)) (:semester body)))))
+                   (response (db/add-course-iteration! (:course-id body) (read-string (:year body)) (:semester body)))))
 
-           (GET "/korrektur/:user-id" [user-id]
+           (GET "/course-iteration/:id" [id]
+                (response (db/get-course-iteration-by-id id)))
+
+           (GET "/correction/:user-id" [user-id]
                 (response
-                  (->> (db/fragen-fuer-user user-id)
-                       (domain/freitext-fragen)
-                       (domain/sortierte-antworten-von-freitext-fragen db/antworten-von-frage)
-                       (domain/antworten-unkorrigiert-und-nur-eine-pro-user-frage-test-id (db/alle-antworten-mit-korrekturen))
-                       (domain/timestamp-to-datum-and-uhrzeit))))
-           (GET "/bisherige-korrekturen/:user-id" [user-id]
+                  (->> (db/get-questions-for-user user-id)
+                       (domain/extract-free-text-questions)
+                       (domain/sort-answers-of-free-text-questions-by-timestamp db/get-answers-for-question)
+                       (domain/uncorrected-answers-with-distinct-ids (db/get-all-answers-with-corrections))
+                       (domain/timestamp-to-date-and-time))))
+           (GET "/corrections-to-date/:user-id" [user-id]
                 (response
-                  (->> (db/fragen-fuer-user user-id)
-                       (domain/freitext-fragen)
-                       (domain/sortierte-antworten-von-freitext-fragen db/antworten-von-frage)
-                       (domain/antworten-korrigiert (db/korrekturen-von-korrektorin-korrigiert user-id))
-                       (domain/timestamp-to-datum-and-uhrzeit))))
-           (GET "/antwort-fuer-korrektur/:aid" [aid]
+                  (->> (db/get-questions-for-user user-id)
+                       (domain/extract-free-text-questions)
+                       (domain/sort-answers-of-free-text-questions-by-timestamp db/get-answers-for-question)
+                       (domain/corrected-answers (db/get-all-corrections-of-corrector user-id))
+                       (domain/timestamp-to-date-and-time))))
+           (GET "/answer-to-correction/:ans-id" [ans-id]
                 (response
-                  (->> (db/antworten-fuer-korrektur aid)
-                       (domain/antworten-fuer-korrektur-ansicht)
-                       (domain/korrekturen-into-antwort db/korrekturen-von-antwort))))
-           (POST "/korrektur-fuer-antwort/:aid" [aid :as r]
-                 (let [korrektur (:body-params r)]
+                  (->> (db/get-answers-for-correction ans-id)
+                       (domain/answers-for-correction-view)
+                       (domain/merge-latest-correction-with-answer db/get-corrections-of-answer))))
+           (POST "/answer-to-correction/:ans-id" [ans-id :as r]
+                 (let [correction (:body-params r)]
                    (response
-                     (->> (domain/check-incoming-korrektur korrektur (db/antworten-fuer-korrektur aid))
-                          (domain/add-korrektur-if-no-error db/korrektor-add-korrektur aid))))))
+                     (->> (domain/validate-incoming-correction correction (db/get-answers-for-correction ans-id))
+                          (domain/add-correction-if-no-error db/add-correction! ans-id))))))
   (GET "/api/access-token" request (str (extract-token request)))
   (GET "/api/session" request (str (:session request)))
   (route/not-found "Not Found"))

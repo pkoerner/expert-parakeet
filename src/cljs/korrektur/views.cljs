@@ -18,7 +18,7 @@
 
 
 (defn korrektur-form
-  [{frag-punkte :frage/punkte :as m}]
+  [{frag-punkte :question/points :as m}]
   [:div
    [:p "Korrekturtext: "
     [:input
@@ -28,8 +28,8 @@
    [:p "Punkte: "
     [:input
      {:type "number"
-      :value (get m :korrektur/punkte 0)
-      :on-change #(rf/dispatch [:korrektur/punkte (-> % .-target .-value)])}]
+      :value (get m :correction/points 0)
+      :on-change #(rf/dispatch [:correction/points (-> % .-target .-value)])}]
     (str " von " frag-punkte)]
    [:p
     [:input {:type  "button"
@@ -40,11 +40,11 @@
 (defn error-handling
   [error status]
   (case error
-    :keine-passende-antwort "Antwort, die korrigiert werden sollte, nicht vorhanden."
-    :korrektur-text-missing "Korrekturtext angeben."
-    :korrektur-punkte-missing "Punkte angeben."
-    :punkte-invalid "Eingabe keine gültige Punktzahl."
-    :punkte-zu-viel "Angegebene Punktzahl zu groß."
+    :no-fitting-answer "Antwort, die korrigiert werden sollte, nicht vorhanden."
+    :correction-feedback-missing "Korrekturtext angeben."
+    :correction-points-missing "Punkte angeben."
+    :invalid-points "Eingabe keine gültige Punktzahl."
+    :exceeding-number-of-points "Angegebene Punktzahl zu groß."
     :backend-not-responding (str "Servererror (Statuscode " status ").")))
 
 
@@ -64,10 +64,10 @@
   []
   (let [korrektur @(rf/subscribe [:korrektur/erhalten])]
     [:div
-     [:h2 (str (:frage/frage-text korrektur) " - " (:frage/punkte korrektur) " Punkte")]
+     [:h2 (str (:question/question-statement korrektur) " - " (:question/points korrektur) " Punkte")]
      [:p (str "Antwort-Id " (:antwort/id korrektur))]
      [:p (str "Lösungsvorschlag: ")]
-     [:p (:frage/loesungskriterien korrektur)]
+     [:p (:question/evaluation-criteria korrektur)]
      [:p (str "Antwort:")]
      [:p (:antwort/antwort korrektur)]
      [korrektur-form korrektur]

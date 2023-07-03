@@ -28,7 +28,7 @@
   (fn [{:keys [db]}]
     {:db         (assoc-in db [:fach-erstellen :gesendet] true)
      :http-xhrio {:method          :post
-                  :uri             (str vars/base-url "/fach")
+                  :uri             (str vars/base-url "/course")
                   :params          {:fach-name (get-in db [:fach-erstellen :fach-name])}
                   :format          (ajax/transit-request-format)
                   :response-format (ajax/transit-response-format)

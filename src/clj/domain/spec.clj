@@ -3,113 +3,118 @@
     [clojure.spec.alpha :as s]))
 
 
-(s/def :frage/id string?)
-(s/def :frage/typ #{:frage.typ/text :frage.typ/single-choice :frage.typ/multiple-choice})
-(s/def :frage/frage-text string?)
-(s/def :frage/punkte int?)
+(s/def :question/id string?)
+(s/def :question/type #{:question.type/free-text :question.type/single-choice :question.type/multiple-choice})
+(s/def :question/question-statement string?)
+(s/def :question/points int?)
 
 
-(s/def :frage/loesungskriterien string?)
+(s/def :question/evaluation-criteria string?)
 
 
-(s/def :frage/text
+(s/def :question/question
   (s/and
-    (s/keys :req [:frage/id :frage/typ :frage/frage-text :frage/punkte
-                  :frage/loesungskriterien])
-    #(= (:frage/typ %) :frage.typ/text)))
+    (s/keys :req [:question/id :question/type :question/question-statement :question/points
+                  :question/evaluation-criteria])
+    #(= (:question/type %) :question.type/free-text)))
 
 
-(s/def :frage/choices (s/coll-of string?))
+(s/def :question/possible-solutions (s/coll-of string?))
 
-(s/def :frage/single-choice-loesung string?)
+(s/def :question/single-choice-solution string?)
 
 
-(s/def :frage/single-choice
+(s/def :question/single-choice-question
   (s/and
-    (s/keys :req [:frage/id :frage/typ :frage/frage-text :frage/punkte
-                  :frage/choices :frage/single-choice-loesung])
-    #(= (:frage/typ %) :frage.typ/single-choice)))
+    (s/keys :req [:question/id :question/type :question/question-statement :question/points
+                  :question/possible-solutions :question/single-choice-solution])
+    #(= (:question/type %) :question.type/single-choice)))
 
 
-(s/def :frage/multiple-choice-loesung (s/coll-of string?))
+(s/def :question/multiple-choice-solution (s/coll-of string?))
 
 
-(s/def :frage/multiple-choice
+(s/def :question/multiple-choice-question
   (s/and
-    (s/keys :req [:frage/id :frage/typ :frage/frage-text :frage/punkte
-                  :frage/choices :frage/multiple-choice-loesung])
-    #(= (:frage/typ %) :frage.typ/multiple-choice)))
+    (s/keys :req [:question/id :question/type :question/question-statement :question/points
+                  :question/possible-solutions :question/multiple-choice-solution])
+    #(= (:question/type %) :question.type/multiple-choice)))
 
 
-(s/def ::frage
-  (s/or :text :frage/text
-        :single-choice :frage/single-choice
-        :multiple-choice :frage/multiple-choice))
+(s/def ::question
+  (s/or :free-text :question/question ; text -> free-text
+        :single-choice :question/single-choice-question
+        :multiple-choice :question/multiple-choice-question))
+
+
+(s/def :question-set/id string?)
+(s/def :question-set/name string?)
+(s/def :question-set/questions (s/coll-of ::question))
+
+
+(s/def ::question-set
+  (s/keys :req [:question-set/id :question-set/name
+                :question-set/start :question-set/end
+                :question-set/questions :question-set/passing-score]))
+
+
+;; TODO: remove comment once we moved to MA
+;; old entity was called: fach
+(s/def :course/id string?)
+(s/def :course/course-name string?)
+(s/def :course/question-sets (s/coll-of ::question-set))
+
+
+(s/def ::course
+  (s/keys :req [:course/id :course/course-name
+                :course/question-sets]))
+
+
+;; TODO: remove comment once we moved to MA
+;; old entity was called: kurs
+(s/def :course-iteration/id string?)
+(s/def :course-iteration/course ::course)
+(s/def :course-iteration/year pos-int?)
+(s/def :course-iteration/semester string?)
+(s/def :course-iteration/question-sets (s/coll-of ::question-set))
+
+
+(s/def ::course-iteration
+  (s/keys :req [:course-iteration/id :course-iteration/course
+                :course-iteration/year :course-iteration/semester
+                :course-iteration/question-sets]))
 
 
 (s/def :user/id string?)
-(s/def :user/kurse (s/coll-of ::kurs))
+(s/def :user/course-iterations (s/coll-of ::course-iteration))
 
 
 (s/def ::user
-  (s/keys :req [:user/id :user/kurse]))
+  (s/keys :req [:user/id :user/course-iterations]))
 
 
-(s/def :antwort/id string?)
-(s/def :antwort/user ::user)
-(s/def :antwort/frage ::frage)
+(s/def :answer/id string?)
+(s/def :answer/user ::user)
+(s/def :answer/question ::question)
 
 
-(s/def :antwort/antwort
+(s/def :answer/answer
   (s/and (s/coll-of string?)))
 
 
-(s/def :antwort/punkte pos-int?)
+(s/def :answer/points pos-int?)
 
 
-(s/def ::antwort
-  (s/keys :req [:antwort/user :antwort/antwort :antwort/frage]))
+(s/def ::answer
+  (s/keys :req [:answer/user :answer/answer :answer/question]))
 
 
-(s/def :korrektur/korrektor ::user)
-(s/def :korrektur/antwort ::antwort)
-(s/def :korrektur/korrektur-text string?)
+(s/def :correction/corrector ::user) ; No distinction between autograding and human corrector
+(s/def :correction/answer ::answer)
+(s/def :correction/feedback string?)
 
 
-(s/def ::korrektur
-  (s/keys :req [:korrektur/korrektor :korrektur/antwort :korrektur/korrektur-text]))
+(s/def ::correction
+  (s/keys :req [:correction/corrector :correction/answer :correction/feedback]))
 
 
-(s/def :test/id string?)
-(s/def :test/name string?)
-(s/def :test/start inst?)
-(s/def :test/ende inst?)
-(s/def :test/fragen (s/coll-of ::frage))
-(s/def :test/bestehensgrenze int?)
-
-
-(s/def ::test
-  (s/keys :req [:test/id :test/name
-                :test/start :test/ende
-                :test/fragen :test/bestehensgrenze]))
-
-
-(s/def :fach/id string?)
-(s/def :fach/fachtitel string?)
-
-
-(s/def ::fach
-  (s/keys :req [:fach/id :fach/fachtitel]))
-
-
-(s/def :kurs/id string?)
-(s/def :kurs/fach ::fach)
-(s/def :kurs/jahr pos-int?)
-(s/def :kurs/semester string?)
-(s/def :kurs/tests (s/coll-of ::test))
-
-
-(s/def ::kurs
-  (s/keys :req [:kurs/id :kurs/fach
-                :kurs/jahr :kurs/semester
-                :kurs/tests]))

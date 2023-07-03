@@ -19,10 +19,10 @@
 
 
 (defn show-test
-  [{id :test/id
-    name :test/name
-    max-punkte :test/max-punkte
-    erreichte-punkte :test/erreichte-punkte}]
+  [{id :question-set/id
+    name :question-set/name
+    max-punkte :question-set/max-points
+    erreichte-punkte :question-set/achived-points}]
   [:p
    [:input
     {:type "button"
@@ -32,12 +32,12 @@
 
 
 (defn show-kurs
-  [{jahr :kurs/jahr
-    semester :kurs/semester
-    fach :kurs/fach
-    tests :kurs/tests}]
+  [{jahr :course-iteration/year
+    semester :course-iteration/semester
+    fach :course-iteration/course
+    tests :course-iteration/question-sets}]
   [:div
-   [:h2 (str (:fach/fachtitel fach) " - " semester " - " jahr ":")]
+   [:h2 (str (:course/course-name fach) " - " semester " - " jahr ":")]
    (map show-test tests)])
 
 
