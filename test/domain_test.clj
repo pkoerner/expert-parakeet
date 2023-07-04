@@ -265,13 +265,13 @@
   (t/testing "No answer"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "3" :corrector/id "1"}
           answer-input []
-          result (merge correction-input {:error :keine-passende-antwort})]
+          result (merge correction-input {:error :no-fitting-answer})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "Corrupted answer"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "3" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                          :answer/question {}}]
-          result (merge correction-input {:error :keine-passende-antwort})]
+          result (merge correction-input {:error :no-fitting-answer})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No correction 1"
     (let [correction-input {:correction/points "3" :corrector/id "1"}
