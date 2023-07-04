@@ -247,11 +247,12 @@
       (t/is (= result (d/merge-latest-correction-with-answer correction-wrapping-func answer)))))
   (t/testing "Several corrections available"
     (let [answer {:answer/id "0"}
+          result-correction {:correction/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
           correction-wrapping-func (fn [_id]
                                      [{:correction/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-03")}
-                                      {:correction/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
+                                      result-correction
                                       {:correction/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04")}])
-          result (merge answer {:correction/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")})]
+          result (merge answer result-correction)]
       (t/is (= result (d/merge-latest-correction-with-answer correction-wrapping-func answer))))))
 
 
