@@ -230,7 +230,7 @@
                   :answer/question {:question/question-statement "Fragetext", :question/points 6, :question/evaluation-criteria "Loesung"}}]
           output {:answer/id "0", :answer/answer "Antwort", :answer/points 5, :question/question-statement "Fragetext",
                   :question/points 6, :question/evaluation-criteria "Loesung"}]
-      (t/is output (d/answers-for-correction-view input)))))
+      (t/is (= output (d/answers-for-correction-view input))))))
 
 
 (t/deftest test-merging-latest-correction-with-answer
@@ -238,13 +238,13 @@
     (let [answer {:answer/id "0"}
           correction-wrapping-func (fn [_id] [])
           result (merge answer {:correction/id nil})]
-      (t/is result (d/merge-latest-correction-with-answer correction-wrapping-func answer))))
+      (t/is (= result (d/merge-latest-correction-with-answer correction-wrapping-func answer)))))
   (t/testing "Single correction available"
     (let [answer {:answer/id "0"}
           correction {:correction/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
           correction-wrapping-func (fn [_id] (conj [] correction))
           result (merge answer correction)]
-      (t/is result (d/merge-latest-correction-with-answer correction-wrapping-func answer))))
+      (t/is (= result (d/merge-latest-correction-with-answer correction-wrapping-func answer)))))
   (t/testing "Several corrections available"
     (let [answer {:answer/id "0"}
           correction-wrapping-func (fn [_id]
@@ -252,7 +252,7 @@
                                       {:correction/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}
                                       {:correction/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04")}])
           result (merge answer {:correction/id "0" :correction/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")})]
-      (t/is result (d/merge-latest-correction-with-answer correction-wrapping-func answer)))))
+      (t/is (= result (d/merge-latest-correction-with-answer correction-wrapping-func answer))))))
 
 
 (t/deftest test-incoming-correction-validation
@@ -261,57 +261,57 @@
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                          :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result {:correction/feedback "Gut!" :correction/points 3 :corrector/id "1"}]
-      (t/is result (d/validate-incoming-correction correction-input answer-input))))
+      (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No answer"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "3" :corrector/id "1"}
           answer-input []
           result (merge correction-input {:error :keine-passende-antwort})]
-      (t/is result (d/validate-incoming-correction correction-input answer-input))))
+      (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "Corrupted answer"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "3" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                          :answer/question {}}]
           result (merge correction-input {:error :keine-passende-antwort})]
-      (t/is result (d/validate-incoming-correction correction-input answer-input))))
+      (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No correction 1"
     (let [correction-input {:correction/points "3" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                          :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :correction-feedback-missing})]
-      (t/is result (d/validate-incoming-correction correction-input answer-input))))
+      (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No correction 2"
     (let [correction-input {:correction/feedback "" :correction/points "3" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                          :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :correction-feedback-missing})]
-      (t/is result (d/validate-incoming-correction correction-input answer-input))))
+      (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No points 1"
     (let [correction-input {:correction/feedback "Gut!", :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                          :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :correction-points-missing})]
-      (t/is result (d/validate-incoming-correction correction-input answer-input))))
+      (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No points 2"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                          :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :correction-points-missing})]
-      (t/is result (d/validate-incoming-correction correction-input answer-input))))
+      (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No points 1"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "hallo" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                          :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :invalid-points})]
-      (t/is result (d/validate-incoming-correction correction-input answer-input))))
+      (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No points 2"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "-10" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                          :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :invalid-points})]
-      (t/is result (d/validate-incoming-correction correction-input answer-input))))
+      (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "Too many points"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "10" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
                          :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :exceeding-number-of-points})]
-      (t/is result (d/validate-incoming-correction correction-input answer-input)))))
+      (t/is (= result (d/validate-incoming-correction correction-input answer-input))))))
