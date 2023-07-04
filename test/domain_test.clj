@@ -237,7 +237,7 @@
   (t/testing "No correction available"
     (let [answer {:answer/id "0"}
           correction-wrapping-func (fn [_id] [])
-          result (merge answer {:correction/id nil})]
+          result answer]
       (t/is (= result (d/merge-latest-correction-with-answer correction-wrapping-func answer)))))
   (t/testing "Single correction available"
     (let [answer {:answer/id "0"}
