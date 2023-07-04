@@ -143,6 +143,8 @@
 
 
 (defn get-all-question-sets
+  "Return a vector containing the ids of all
+   question-sets in the database."
   []
   (mapv first (d/q '[:find ?id
                      :where [_ :question-set/id ?id]]
