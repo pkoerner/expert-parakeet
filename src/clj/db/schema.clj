@@ -42,8 +42,6 @@
     [[:question-set/id {:db/unique :db.unique/identity
                         :db/index true}]
      :question-set/name
-     :question-set/start
-     :question-set/end
      :question-set/questions
      :question-set/passing-score]))
 

@@ -54,7 +54,6 @@
 
 (s/def ::question-set
   (s/keys :req [:question-set/id :question-set/name
-                :question-set/start :question-set/end
                 :question-set/questions :question-set/passing-score]))
 
 
