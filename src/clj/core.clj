@@ -8,7 +8,8 @@
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
     [ring.middleware.reload :refer [wrap-reload]]
-    [ring.util.response :refer [header response]]))
+    [ring.util.response :refer [header response]]
+    [views.question_set :refer [question-set-form]]))
 
 
 (defn html-response
@@ -18,6 +19,7 @@
 
 ;; all routes that dont need authentication go here
 (defroutes public-routes
+  (GET "/question-set/:id" [id] (html-response (question-set-form id)))
   (GET "/" req (html-response
                  (if (auth/is-logged-in req)
                    [:p (str "Hello, " (str (get-in req [:session :user :id])))]
