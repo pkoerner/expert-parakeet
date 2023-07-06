@@ -51,6 +51,8 @@
 (s/def :question-set/id string?)
 (s/def :question-set/name string?)
 (s/def :question-set/questions (s/coll-of ::question))
+
+
 ;; Added specs :question-set/start, question-set/end, :questions/passing-score
 ;; These specs came into the code as requirements but werent supplied
 ;; with the necessary specifications.
@@ -58,13 +60,14 @@
 (s/def :question-set/end  inst?)
 (s/def :question-set/passing-score nat-int?)
 
+
 (s/def ::question-set
   (s/and
-  (s/keys :req [:question-set/id :question-set/name
-                :question-set/start :question-set/end
-                :question-set/questions :question-set/passing-score])
-  #(time/start-before-end? (:question-set/start %) 
-                           (:question-set/end %))))
+    (s/keys :req [:question-set/id :question-set/name
+                  :question-set/start :question-set/end
+                  :question-set/questions :question-set/passing-score])
+    #(time/start-before-end? (:question-set/start %)
+                             (:question-set/end %))))
 
 
 ;; TODO: remove comment once we moved to MA
