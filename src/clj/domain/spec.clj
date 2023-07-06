@@ -50,6 +50,7 @@
 (s/def :question-set/id string?)
 (s/def :question-set/name string?)
 (s/def :question-set/questions (s/coll-of ::question))
+(s/def :question-set/passing-score pos-int?)
 
 
 (s/def ::question-set
