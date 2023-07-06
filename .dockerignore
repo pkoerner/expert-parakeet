@@ -1,0 +1,9 @@
+.idea
+.clj-kondo
+.cpcache
+.lsp
+/expert-parakeet.iml
+.shadow-cljs/
+node_modules/
+.env
+target/

@@ -9,3 +9,7 @@ format:
 .PHONY: test
 test:
 	clj -M:test-runner
+
+.PHONY: uber
+uber:
+	clj -T:build uber
