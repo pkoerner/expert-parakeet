@@ -4,11 +4,10 @@
 
 
 (def lib 'pkoerner/expert-parakeet)
-(def version (format "git-%s" (b/git-count-revs nil)))
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
-(def jar-file (format "target/%s-%s.jar" (name lib) version))
-(def uber-file (format "target/%s-%s-standalone.jar" (name lib) version))
+(def jar-file (format "target/expert-parakeet.jar"))
+(def uber-file (format "target/expert-parakeet-standalone.jar"))
 
 
 (defn clean
@@ -20,7 +19,6 @@
   [_]
   (b/write-pom {:class-dir class-dir
                 :lib lib
-                :version version
                 :basis basis
                 :src-dirs ["src"]})
   (b/copy-dir {:src-dirs ["src" "resources"]
