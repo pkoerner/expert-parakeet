@@ -52,10 +52,8 @@
 (s/def :question-set/name string?)
 (s/def :question-set/questions (s/coll-of ::question))
 
-
-;; Added specs :question-set/start, question-set/end, :questions/passing-score
-;; These specs came into the code as requirements but werent supplied
-;; with the necessary specifications.
+;; inst? checks for an input to be
+;; of type java.util.Date.
 (s/def :question-set/start inst?)
 (s/def :question-set/end  inst?)
 (s/def :question-set/passing-score nat-int?)
