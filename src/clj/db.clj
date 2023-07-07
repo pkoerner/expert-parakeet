@@ -1,9 +1,10 @@
 (ns db
   (:require
-    [datahike.api :as d]
-    [db.dummy-data :as dummy-data]
-    [db.schema :refer [db-schema]]
-    [nano-id.core :refer [nano-id]]))
+   [datahike.api :as d]
+   [db.dummy-data :as dummy-data]
+   [db.schema :refer [db-schema]]
+   [nano-id.core :refer [nano-id]]
+   [clojure.spec.alpha :as s]))
 
 
 (def id-len 10)
