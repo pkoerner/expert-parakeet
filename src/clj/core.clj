@@ -1,15 +1,17 @@
 (ns core
   (:require
-    [auth :refer [wrap-authentication]]
-    [compojure.core :refer [defroutes GET]]
-    [compojure.route :as route]
-    [domain]
-    [hiccup2.core :as h]
-    [ring.adapter.jetty :refer [run-jetty]]
-    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-    [ring.middleware.reload :refer [wrap-reload]]
-    [ring.util.response :refer [header response]]))
-
+   [auth :refer [wrap-authentication]]
+   [compojure.core :refer [defroutes GET]]
+   [compojure.route :as route]
+   [db]
+   [domain]
+   [hiccup2.core :as h]
+   [ring.adapter.jetty :refer [run-jetty]]
+   [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+   [ring.middleware.reload :refer [wrap-reload]]
+   [ring.util.response :refer [header response]]
+   [views.student-overview]))
+ 
 
 (defn html-response
   [html]
@@ -19,14 +21,19 @@
 ;; all routes that dont need authentication go here
 (defroutes public-routes
   (GET "/" req (html-response
-                 (if (auth/is-logged-in req)
-                   [:p (str "Hello, " (str (get-in req [:session :user :id])))]
-                   [:a {:href "/oauth2/github"} "Login"])))) ; TODO remove route, just an example to show login working
+                (if (auth/is-logged-in req)
+                  (let [user-id "0"] ; TODO: Replace the '0' with (str (get-in req [:session :user :id]))
+                    (views.student-overview/overview
+                     (domain/course-iterations-with-total-points
+                      (db/get-course-iterations-of-student user-id)
+                      (partial db/get-graded-answers-of-question-set user-id))))
+                  [:a {:href "/oauth2/github"} "Login"])))) ; TODO remove route, just an example to show login working
+
 
 
 ;; all routes that require authentication go here
 (defroutes private-routes
-  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
+  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working 
   (route/not-found "Not Found"))
 
 
