@@ -19,7 +19,6 @@
 
 ;; all routes that dont need authentication go here
 (defroutes public-routes
-  (GET "/question-set/:id" [id] (html-response (question-set-form id)))
   (GET "/" req (html-response
                  (if (auth/is-logged-in req)
                    [:p (str "Hello, " (str (get-in req [:session :user :id])))]
@@ -28,6 +27,7 @@
 
 ;; all routes that require authentication go here
 (defroutes private-routes
+  (GET "/question-set/:id" [id] (html-response (question-set-form id)))
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
   (route/not-found "Not Found"))
 
