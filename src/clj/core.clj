@@ -1,14 +1,14 @@
 (ns core
-  (:require
-    [auth :refer [wrap-authentication]]
-    [compojure.core :refer [defroutes GET]]
-    [compojure.route :as route]
-    [domain]
-    [hiccup2.core :as h]
-    [ring.adapter.jetty :refer [run-jetty]]
-    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-    [ring.middleware.reload :refer [wrap-reload]]
-    [ring.util.response :refer [header response]]))
+  (:require [auth :refer [wrap-authentication]]
+            [compojure.core :refer [defroutes GET POST]]
+            [compojure.route :as route]
+            [domain]
+            [hiccup2.core :as h]
+            [ring.adapter.jetty :refer [run-jetty]]
+            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+            [ring.middleware.reload :refer [wrap-reload]]
+            [ring.util.response :refer [header response]]
+            [views.course-iteration.create-course-iteration-view :refer [submit-create-course-iteration! create-course-iteration-get]]))
 
 
 (defn html-response
@@ -27,6 +27,12 @@
 ;; all routes that require authentication go here
 (defroutes private-routes
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
+
+  (GET "/create-course-iteration" _
+    (html-response (create-course-iteration-get "/create-course-iteration")))
+  (POST "/create-course-iteration" req
+    (html-response (submit-create-course-iteration! req)))
+  
   (route/not-found "Not Found"))
 
 
