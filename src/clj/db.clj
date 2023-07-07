@@ -144,8 +144,8 @@
 
 (defn get-all-question-sets
   []
-  (mapv first (d/q '[:find ?id
-                     :where [_ :question-set/id ?id]]
+  (mapv first (d/q '[:find (pull ?e [:question-set/id :question-set/name])
+                     :where [?e :question-set/id]]
                    @conn)))
 
 
