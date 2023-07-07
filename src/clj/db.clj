@@ -148,8 +148,14 @@
                      :where [?e :question-set/id]]
                    @conn)))
 
-
 (defn get-all-courses
+  []
+  (mapv first
+        (d/q '[:find (pull ?e [:course/id :course/course-name {:course/question-sets [:question-set/id :question-set/name]}])
+               :where [?e :course/id]]
+             @db/conn)))
+
+(defn get-all-course-iterations
   []
   (mapv first (d/q '[:find (pull ?e [:course-iteration/id {:course-iteration/course [:course/id :course/course-name]}
                                      :course-iteration/year
