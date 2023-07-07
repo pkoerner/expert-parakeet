@@ -26,4 +26,4 @@
   [start end]
   (and (is-date-object? start)
        (is-date-object? end)
-       (= -1 (compare start end))))
+       (< 0 (compare start end))))
