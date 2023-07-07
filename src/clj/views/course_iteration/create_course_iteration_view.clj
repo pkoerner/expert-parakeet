@@ -7,6 +7,11 @@
 
 (def no-courses [:p "Es muss erst ein Fach erstellt werden bevor ein Kurs erstellt werden kann!"])
 
+(s/fdef course-iteration-form
+  :args (s/cat :courses (s/coll-of (s/keys :req [:course/id :course/course-name]))
+               :question-set (s/coll-of (s/keys :req [:question-set/id :question-set/name]))
+               :post-destination string?))
+
 (defn course-iteration-form
   [courses question-sets post-destination]
   (letfn [(course-to-option
@@ -96,7 +101,7 @@
       " im Jahr " (:course-iteration/year db-result)
       " wurde Erfolgreich für das Fach erstellt!\n"]]))
 
-(defn submit-create-course-iteration-mockable!
+(defn submit-create-course-iteration-mockable
   [request db-add-fun]
   (let [form-data (-> request (:multipart-params) (dissoc :__anti-forgery-token))
         course-id (form-data "course-id")
@@ -114,6 +119,6 @@
 
 (defn submit-create-course-iteration!
   [request]
-  (submit-create-course-iteration-mockable!
+  (submit-create-course-iteration-mockable
    request
    db/add-course-iteration-with-question-sets!))
