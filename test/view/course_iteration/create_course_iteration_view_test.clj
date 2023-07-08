@@ -1,7 +1,9 @@
 (ns view.course-iteration.create-course-iteration-view-test
   (:require [clojure.string :as string]
             [clojure.test :as t :refer [deftest testing]]
-            [views.course-iteration.create-course-iteration-view :use [course-iteration-form]]))
+            [test-extensions :refer [test-with-check]]
+            [views.course-iteration.create-course-iteration-view :use [course-iteration-form]]
+            [domain.spec]))
 
 
 (deftest test-course-iteration-form
