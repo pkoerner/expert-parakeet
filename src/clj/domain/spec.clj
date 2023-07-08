@@ -73,8 +73,8 @@
 
 ;; TODO: remove comment once we moved to MA
 ;; old entity was called: fach
-(s/def :course/id string?)
-(s/def :course/course-name string?)
+(s/def :course/id :general/non-blank-string)
+(s/def :course/course-name :general/non-blank-string)
 (s/def :course/question-sets (s/coll-of ::question-set))
 
 
