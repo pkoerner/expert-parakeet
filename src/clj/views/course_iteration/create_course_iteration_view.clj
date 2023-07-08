@@ -63,7 +63,14 @@
       (hform/submit-button "submit")))))
 
 
-
+(s/fdef submit-error-view
+  :args (s/cat :errors (s/coll-of string? :distinct true :min-count 1))
+  :ret (s/and #(string/includes? % "Fehler")
+              #(instance? hiccup.util.RawString %))
+  :fn (fn [spec-map]
+        (let [{{:keys [errors]} :args
+               ret :ret} spec-map]
+          (every? #(string/includes? ret %) errors))))
 
 (defn submit-error-view
   [errors]
