@@ -1,9 +1,9 @@
 (ns views.course-iteration.create-course-iteration-view
-  (:require [db]
+  (:require [clojure.spec.alpha :as s]
+            [clojure.string :as string]
             [hiccup.form :as hform]
             [hiccup2.core :as h]
-            [ring.util.anti-forgery :refer [anti-forgery-field]]
-            [clojure.spec.alpha :as s]))
+            [ring.util.anti-forgery :refer [anti-forgery-field]]))
 
 (def no-courses [:p "Es muss erst ein Fach erstellt werden bevor ein Kurs erstellt werden kann!"])
 
