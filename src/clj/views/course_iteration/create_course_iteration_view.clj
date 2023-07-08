@@ -99,19 +99,3 @@
      " wurde Erfolgreich für das Fach erstellt!\n"]]))
 
 
-
-
-
-
-
-
-
-
-
-
-
-(defn submit-create-course-iteration!
-  [request]
-  (submit-create-course-iteration-mockable
-   request
-   db/add-course-iteration-with-question-sets!))
