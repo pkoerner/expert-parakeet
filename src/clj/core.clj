@@ -8,7 +8,7 @@
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.util.response :refer [header response]]
-            [views.course-iteration.create-course-iteration-view :refer [submit-create-course-iteration! create-course-iteration-get]]))
+            [controllers.course-iteration.course-iteration-controller :refer [submit-create-course-iteration! create-course-iteration-get]]))
 
 
 (defn html-response
