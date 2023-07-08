@@ -8,9 +8,16 @@
 (def no-courses [:p "Es muss erst ein Fach erstellt werden bevor ein Kurs erstellt werden kann!"])
 
 (s/fdef course-iteration-form
-  :args (s/cat :courses (s/coll-of (s/keys :req [:course/id :course/course-name]))
-               :question-set (s/coll-of (s/keys :req [:question-set/id :question-set/name]))
-               :post-destination string?))
+  :args (s/cat :courses (s/coll-of (s/keys :req [:course/id :course/course-name]) :distinct true)
+               :question-sets (s/coll-of (s/keys :req [:question-set/id :question-set/name]) :distinct true)
+               :post-destination :specs/non-blank-string)
+  :ret #(instance? hiccup.util.RawString %)
+  :fn (fn [spec-map]
+        (let [{{:keys [courses question-sets post-destination]} :args
+               ret :ret} spec-map]
+          (s/and (every? #(string/includes? (str ret) (:course/course-name %)) courses)
+                 (every? #(string/includes? (str ret) (:question-set/name %)) question-sets)
+                 #(string/includes? ret post-destination)))))
 
 (defn course-iteration-form
   [courses question-sets post-destination]
