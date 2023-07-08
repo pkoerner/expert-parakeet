@@ -10,7 +10,7 @@
 (s/fdef course-iteration-form
   :args (s/cat :courses (s/coll-of (s/keys :req [:course/id :course/course-name]) :distinct true)
                :question-sets (s/coll-of (s/keys :req [:question-set/id :question-set/name]) :distinct true)
-               :post-destination :specs/non-blank-string)
+               :post-destination :general/non-blank-string)
   :ret #(instance? hiccup.util.RawString %)
   :fn (fn [spec-map]
         (let [{{:keys [courses question-sets post-destination]} :args
