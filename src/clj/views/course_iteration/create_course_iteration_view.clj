@@ -83,6 +83,13 @@
    [:div
     [:p "Bitte gebe diesmal Korrekte Werete an!"]]))
 
+
+(s/fdef submit-success-view
+  :args (s/cat :semester :course-iteration/semester
+               :year :course-iteration/semester)
+  :ret (s/and #(string/includes? % "Erfolg")
+              #(instance? hiccup.util.RawString %)))
+
 (defn submit-success-view
   [semester year]
   (h/html
