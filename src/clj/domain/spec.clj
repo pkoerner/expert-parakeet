@@ -50,8 +50,8 @@
         :multiple-choice :question/multiple-choice-question))
 
 
-(s/def :question-set/id string?)
-(s/def :question-set/name string?)
+(s/def :question-set/id :general/non-blank-string)
+(s/def :question-set/name :general/non-blank-string)
 (s/def :question-set/questions (s/coll-of ::question))
 
 
