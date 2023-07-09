@@ -1,6 +1,7 @@
 (ns domain.spec
   (:require
-    [clojure.spec.alpha :as s]))
+    [clojure.spec.alpha :as s]
+    [util.time :as time]))
 
 
 (s/def :question/id string?)
@@ -52,10 +53,20 @@
 (s/def :question-set/questions (s/coll-of ::question))
 
 
+;; inst? checks for an input to be
+;; of type java.util.Date.
+(s/def :question-set/start inst?)
+(s/def :question-set/end  inst?)
+(s/def :question-set/passing-score nat-int?)
+
+
 (s/def ::question-set
-  (s/keys :req [:question-set/id :question-set/name
-                :question-set/start :question-set/end
-                :question-set/questions :question-set/passing-score]))
+  (s/and
+    (s/keys :req [:question-set/id :question-set/name
+                  :question-set/start :question-set/end
+                  :question-set/questions :question-set/passing-score])
+    #(time/start-before-end? (:question-set/start %)
+                             (:question-set/end %))))
 
 
 ;; TODO: remove comment once we moved to MA
