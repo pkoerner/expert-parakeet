@@ -258,7 +258,7 @@
 
 
 (defn add-question-set!
-  [question-set-name course-iteration-id passing-score questions]
+  [question-set-name course-iteration-id passing-score questions start end]
   (let [id (generate-id :question-set/id)
         question-ids (doall (map (fn [question]
                                    (if (:question/id question)
@@ -269,6 +269,8 @@
                                            [{:db/id                      -1
                                              :question-set/id            id
                                              :question-set/name          question-set-name
+                                             :question-set/start         start
+                                             :question-set/end           end
                                              :question-set/passing-score passing-score
                                              :question-set/questions (mapv (fn [q-id] [:question/id q-id]) question-ids)}])
         course-iteration (get-course-iteration-by-id course-iteration-id)
