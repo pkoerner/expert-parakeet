@@ -80,6 +80,11 @@
       (add-to-db-and-get-succsess-msg course-id year semester question-set-ids db-add-fun)
       (view/submit-error-view validation-errors))))
 
+(s/fdef submit-create-course-iteration!
+  :args (s/cat :request ::request-data)
+  :ret #(instance? hiccup.util.RawString %))
+
+
 (defn submit-create-course-iteration!
   [request]
   (submit-create-course-iteration-mockable
