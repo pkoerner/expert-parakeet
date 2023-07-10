@@ -16,6 +16,10 @@
 
 
 (defn create-course-iteration-get
+  "Returns a form containing for creating a course-iteration. The current courses and question-sets are queried to display them in the forms selection.  
+   When the courses are `nil`, an error message is displayed that a course must be created before a course-iteration can be created.  
+   
+   The form is posted to the provided `post-destination` parameter."
   [post-destination]
   (let [courses (db/get-all-courses)
         question-sets (db/get-all-question-sets)]
