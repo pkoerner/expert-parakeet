@@ -1,19 +1,14 @@
 (ns core
-  (:require [auth :refer [wrap-authentication]]
-            [compojure.core :refer [defroutes GET POST]]
-            [compojure.route :as route]
-            [domain]
-            [hiccup2.core :as h]
-            [ring.adapter.jetty :refer [run-jetty]]
-            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-            [ring.middleware.reload :refer [wrap-reload]]
-            [ring.util.response :refer [header response]]
-            [controllers.course-iteration.course-iteration-controller :refer [submit-create-course-iteration! create-course-iteration-get]]))
-
-
-(defn html-response
-  [html]
-  (-> html h/html str response (header "Content-Type" "text/html; charset=utf-8")))
+  (:require
+    [auth :refer [wrap-authentication]]
+    [compojure.core :refer [defroutes GET POST]]
+    [compojure.route :as route]
+    [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
+    [domain]
+    [ring.adapter.jetty :refer [run-jetty]]
+    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+    [ring.middleware.reload :refer [wrap-reload]]
+    [util.ring-extensions :refer [html-response]]))
 
 
 ;; all routes that dont need authentication go here
