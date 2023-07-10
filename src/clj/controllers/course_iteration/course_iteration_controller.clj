@@ -30,15 +30,16 @@
                    :course-iteration/semester "Das ausgewählte Semester war inkorrekt!"
                    :question-set/id "Das ausgewählte question-set-war nicht korrekt!"}]
 
-    (reduce (fn [error-col [spec val]]
+    (reduce (fn [error-col [error-key spec val]]
               (if (s/valid? spec val)
                 error-col
-                (conj error-col (error-map spec))))
+                (conj error-col (error-map error-key))))
             []
-            [[:course/id course-id]
-             [:course-iteration/year year]
-             [:course-iteration/semester semester]
-             [(s/coll-of :question-set/id) question-set-ids]])))
+            [[:course/id :course/id course-id]
+             [:course-iteration/year :course-iteration/year year]
+             [:course-iteration/semester :course-iteration/semester semester]
+             [:question-set/id (s/coll-of :question-set/id) question-set-ids]])))
+
 
 (defn- add-to-db-and-get-succsess-msg
   [course-id year semester question-set-ids db-add-fun]
