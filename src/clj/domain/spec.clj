@@ -88,7 +88,7 @@
 (s/def :course-iteration/id string?)
 (s/def :course-iteration/course ::course)
 (s/def :course-iteration/year pos-int?)
-(s/def :course-iteration/semester string?)
+(s/def :course-iteration/semester #{"WiSe" "SoSe"})
 (s/def :course-iteration/question-sets (s/coll-of ::question-set))
 
 
