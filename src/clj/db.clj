@@ -215,6 +215,17 @@
           [:course-iteration/id course-iteration-id]))
 
 
+(s/fdef add-course-iteration-with-question-sets!
+  :args (s/cat :course-id :course/id
+               :year :course-iteration/year
+               :semester :course-iteration/semester
+               :question-set-ids (s/coll-of :question-set/id))
+  :ret (s/keys :req [:course-iteration/id
+                     :course/id
+                     :course-iteration/year
+                     :course-iteration/semester
+                     (s/coll-of :question-set/id)]))
+
 (defn add-course-iteration-with-question-sets!
   [course-id year semester question-set-ids]
   (let [id (generate-id :course-iteration/id)
@@ -235,11 +246,6 @@
                       :course-iteration/question-sets]
             [:course-iteration/id id])))
 
-(s/fdef add-course-iteration-with-question-sets!
-  :args (s/cat :course-id :course/id
-               :year :course-iteration/year
-               :semester :course-iteration/semester
-               :question-set-ids (s/coll-of :question-set/id)))
 
 
 (defn add-course-iteration!
