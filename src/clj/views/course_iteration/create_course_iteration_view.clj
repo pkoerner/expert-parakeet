@@ -82,6 +82,7 @@
 
 
 (defn submit-error-view
+  "Returns a div displaying the errors that are provided in the `errors` collection as elements of an unordered list."
   [errors]
   (h/html
     [:div
