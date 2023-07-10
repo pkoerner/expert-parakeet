@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as string]
             [db]
+            [util.spec-functions :refer [map-spec]]
             [views.course-iteration.create-course-iteration-view :as view]))
 
 
@@ -48,6 +49,20 @@
     (view/submit-success-view
      (:course-iteration/semester db-result)
      (:course-iteration/year db-result))))
+
+
+(s/def ::request-data
+  (map-spec {:__anti-forgery-token any?
+             :multipart-params (map-spec {"course-id" :course/id
+                                          "year" (s/and string? #(s/valid? :course-iteration/year (read-string %)))
+                                          "semester" :course-iteration/semester
+                                          "question-set-ids" (s/coll-of :question-set/id)})}))
+
+
+(s/fdef submit-create-course-iteration-mockable
+  :args (s/cat :request ::request-data
+               :db-add-fun (s/get-spec `db/add-course-iteration-with-question-sets!))
+  :ret #(instance? hiccup.util.RawString %))
 
 (defn submit-create-course-iteration-mockable
   [request db-add-fun]
