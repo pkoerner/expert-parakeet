@@ -1,7 +1,9 @@
 (ns domain.spec
-  (:require [clojure.spec.alpha :as s]
-            [clojure.string :as string]
-            [util.time :as time]))
+  (:require
+    [clojure.spec.alpha :as s]
+    [clojure.string :as string]
+    [util.time :as time]))
+
 
 (s/def :general/non-blank-string (s/and string? (complement string/blank?)))
 

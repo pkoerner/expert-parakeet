@@ -1,10 +1,13 @@
 (ns test-extensions
-  (:require [clojure.spec.test.alpha :as stest]
-            [clojure.test :as t]))
+  (:require
+    [clojure.spec.test.alpha :as stest]
+    [clojure.test :as t]))
+
 
 (defn test-with-check
   [property opts]
-  (letfn [(construct-error-msg [fail]
+  (letfn [(construct-error-msg
+            [fail]
             (-> fail
                 (first)
                 (:clojure.spec.test.check/ret)

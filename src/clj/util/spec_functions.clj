@@ -1,6 +1,7 @@
 (ns util.spec-functions
-  (:require [clojure.spec.alpha :as s]
-            [domain.spec]))
+  (:require
+    [clojure.spec.alpha :as s]
+    [domain.spec]))
 
 
 (defmacro map-spec
@@ -24,11 +25,10 @@
               (let [key-set# (set (keys map-to-validate#))]
                 (every? #(key-set# %) '~input-map-keys)))
             (s/coll-of (s/or
-                        ~@(reduce into
-                                  []
-                                  (for [[key spec] input-map]
-                                    `(~(keyword key) (s/tuple #{~key} ~spec)))))
+                         ~@(reduce into
+                                   []
+                                   (for [[key spec] input-map]
+                                     `(~(keyword key) (s/tuple #{~key} ~spec)))))
                        :kind map?))))
-
 
 

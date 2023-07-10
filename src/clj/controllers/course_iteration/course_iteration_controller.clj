@@ -1,17 +1,18 @@
 (ns controllers.course-iteration.course-iteration-controller
-  (:require [clojure.spec.alpha :as s]
-            [clojure.string :as string]
-            [db]
-            [util.spec-functions :refer [map-spec]]
-            [views.course-iteration.create-course-iteration-view :as view]))
+  (:require
+    [clojure.spec.alpha :as s]
+    [clojure.string :as string]
+    [db]
+    [util.spec-functions :refer [map-spec]]
+    [views.course-iteration.create-course-iteration-view :as view]))
 
 
 (s/fdef create-course-iteration-get
-  :args (s/cat :post-destination :general/non-blank-string)
-  :ret #(instance? hiccup.util.RawString %)
-  :fn #(let [{{:keys [post-destination]} :args
-              ret :ret} %]
-         (string/includes? (str ret) post-destination)))
+        :args (s/cat :post-destination :general/non-blank-string)
+        :ret #(instance? hiccup.util.RawString %)
+        :fn #(let [{{:keys [post-destination]} :args
+                    ret :ret} %]
+               (string/includes? (str ret) post-destination)))
 
 
 (defn create-course-iteration-get
@@ -21,7 +22,6 @@
     (if (nil? courses)
       view/no-courses
       (view/course-iteration-form courses question-sets post-destination))))
-
 
 
 (defn- validate-course-iteration
@@ -45,10 +45,10 @@
 (defn- add-to-db-and-get-succsess-msg
   [course-id year semester question-set-ids db-add-fun]
   (let [db-result (db-add-fun
-                   course-id year semester question-set-ids)]
+                    course-id year semester question-set-ids)]
     (view/submit-success-view
-     (:course-iteration/semester db-result)
-     (:course-iteration/year db-result))))
+      (:course-iteration/semester db-result)
+      (:course-iteration/year db-result))))
 
 
 (s/def ::request-data
@@ -60,9 +60,10 @@
 
 
 (s/fdef submit-create-course-iteration-mockable
-  :args (s/cat :request ::request-data
-               :db-add-fun (s/get-spec `db/add-course-iteration-with-question-sets!))
-  :ret #(instance? hiccup.util.RawString %))
+        :args (s/cat :request ::request-data
+                     :db-add-fun (s/get-spec `db/add-course-iteration-with-question-sets!))
+        :ret #(instance? hiccup.util.RawString %))
+
 
 (defn submit-create-course-iteration-mockable
   [request db-add-fun]
@@ -80,13 +81,14 @@
       (add-to-db-and-get-succsess-msg course-id year semester question-set-ids db-add-fun)
       (view/submit-error-view validation-errors))))
 
+
 (s/fdef submit-create-course-iteration!
-  :args (s/cat :request ::request-data)
-  :ret #(instance? hiccup.util.RawString %))
+        :args (s/cat :request ::request-data)
+        :ret #(instance? hiccup.util.RawString %))
 
 
 (defn submit-create-course-iteration!
   [request]
   (submit-create-course-iteration-mockable
-   request
-   db/add-course-iteration-with-question-sets!))
+    request
+    db/add-course-iteration-with-question-sets!))

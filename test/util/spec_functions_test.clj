@@ -1,9 +1,10 @@
 (ns util.spec-functions-test
-  (:require [clojure.spec.alpha :as s]
-            [clojure.test :refer [deftest testing]]
-            [clojure.test :as t]
-            [util.spec-functions :refer [map-spec]]
-            [domain.spec]))
+  (:require
+    [clojure.spec.alpha :as s]
+    [clojure.test :refer [deftest testing]]
+    [clojure.test :as t]
+    [domain.spec]
+    [util.spec-functions :refer [map-spec]]))
 
 
 (deftest test-map-spec-works-for-a-map
