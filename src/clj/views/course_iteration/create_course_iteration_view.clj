@@ -24,6 +24,10 @@
 
 
 (defn course-iteration-form
+  "Returns a html-form for the creation of a course-iteration.
+   The request is sent to the provided `post-destination`.
+   
+   Fields of the response are: [courses, year, semester, question-sets]."
   [courses question-sets post-destination]
   (letfn [(course-to-option
             [course]
