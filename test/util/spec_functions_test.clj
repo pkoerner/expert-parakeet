@@ -1,8 +1,7 @@
 (ns util.spec-functions-test
   (:require
     [clojure.spec.alpha :as s]
-    [clojure.test :refer [deftest testing]]
-    [clojure.test :as t]
+    [clojure.test :as t :refer [deftest testing]]
     [domain.spec]
     [util.spec-functions :refer [map-spec]]))
 
