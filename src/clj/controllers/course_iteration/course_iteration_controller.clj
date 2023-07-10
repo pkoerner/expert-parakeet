@@ -1,7 +1,16 @@
 (ns controllers.course-iteration.course-iteration-controller
-  (:require [db]
+  (:require [clojure.spec.alpha :as s]
+            [clojure.string :as string]
+            [db]
             [views.course-iteration.create-course-iteration-view :as view]))
 
+
+(s/fdef create-course-iteration-get
+  :args (s/cat :post-destination :general/non-blank-string)
+  :ret #(instance? hiccup.util.RawString %)
+  :fn #(let [{{:keys [post-destination]} :args
+              ret :ret} %]
+         (string/includes? (str ret) post-destination)))
 
 
 (defn create-course-iteration-get
