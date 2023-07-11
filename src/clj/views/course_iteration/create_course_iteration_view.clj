@@ -7,13 +7,32 @@
     [ring.util.anti-forgery :refer [anti-forgery-field]]))
 
 
+(def create-course-iteration-errors
+  {:course-error "Der ausgewählte Kurs war inkorrekt!"
+   :year-error "Das ausgewählte Jahr war inkorrekt!"
+   :semester-error "Das ausgewählte Semester war inkorrekt!"
+   :question-set-error "Das ausgewählte question-set-war nicht korrekt!"})
+
+
 (def no-courses [:p "Es muss erst ein Fach erstellt werden bevor ein Kurs erstellt werden kann!"])
+
+
+(defn- optional-error
+  [key dict]
+  (let [course-error (dict key)]
+    (when course-error [:div [:span {:style "color: red;"} course-error]])))
+
+
+(def ^:private create-course-iteration-errors-spec
+  (into {} (map (fn [[key _]] [key string?]) create-course-iteration-errors)))
 
 
 (s/fdef course-iteration-form
         :args (s/cat :courses (s/coll-of (s/keys :req [:course/id :course/course-name]) :distinct true)
                      :question-sets (s/coll-of (s/keys :req [:question-set/id :question-set/name]) :distinct true)
-                     :post-destination :general/non-blank-string)
+                     :post-destination :general/non-blank-string
+                     :kwargs (s/? (s/map-of (set (keys create-course-iteration-errors-spec))
+                                            string?)))
         :ret #(instance? hiccup.util.RawString %)
         :fn (fn [spec-map]
               (let [{{:keys [courses question-sets post-destination]} :args
@@ -27,8 +46,11 @@
   "Returns a html-form for the creation of a course-iteration.
    The request is sent to the provided `post-destination`.
    
-   Fields of the response are: [courses, year, semester, question-sets]."
-  [courses question-sets post-destination]
+   Fields of the response are: [courses, year, semester, question-sets].
+   
+   It can display error values if they are provided in a map behind the optional `:errors` param
+   (see specs)."
+  [courses question-sets post-destination & {:keys [errors] :or {errors {}}}]
   (letfn [(course-to-option
             [course]
             [(:course/course-name course) (:course/id course)])]
@@ -38,11 +60,13 @@
         [:post post-destination]
 
         [:div
+         (optional-error :course-error errors)
          [:label {:for "courses"} "Fach auswahl:"] [:br]
          [:select#courses {:name "course-id"}
           (hform/select-options (mapv course-to-option courses))]]
 
         [:div
+         (optional-error :year-error errors)
          [:label {:for "year"} "Jahr"] [:br]
          [:input#year {:name "year"
                        :type "number"
@@ -52,12 +76,14 @@
                        :value "2024"}]]
 
         [:div
+         (optional-error :semester-error errors)
          [:label {:for "semester"} "Semester"] [:br]
          [:select#semester {:name "semester"}
           (hform/select-options [["Sommer" "SoSe"]
                                  ["Winter" "WiSe"]])]]
 
         [:div
+         (optional-error :question-set-error errors)
          [:label {:for "question-sets"} "Tests"] [:br]
          [:ul
           (for [question-set question-sets]
