@@ -75,6 +75,15 @@
       (:course-iteration/year db-result))))
 
 
+(defn- construct-url
+  [base-uri param-map]
+  (->> param-map
+       (map (fn [[key msg]] [(form-encode key) (form-encode msg)]))
+       (map (fn [[key msg]] (str key "=" msg)))
+       (string/join "&")
+       (str base-uri "?")))
+
+
 (s/def ::request-data
   (map-spec {:__anti-forgery-token any?
              :multipart-params (map-spec {"course-id" :course/id
