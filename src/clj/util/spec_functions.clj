@@ -4,6 +4,13 @@
     [domain.spec]))
 
 
+(defn- get-val-in-macro
+  [sym]
+  (if (symbol? sym)
+    (var-get (resolve sym))
+    sym))
+
+
 (defmacro map-spec
   "Macro to generate a spec that validates a Map which has non keyword keys.
    (When the keys are keywords, s/keys should be used.)
@@ -21,7 +28,9 @@
 
    Additional keys that are not speced will lead to a failure."
   [input-map & {:keys [opt]}]
-  (let [input-map-keys (keys input-map)
+  (let [input-map (get-val-in-macro input-map)
+        opt (get-val-in-macro opt)
+        input-map-keys (keys input-map)
         input-map-and-opt (if opt (merge input-map opt)
                               input-map)]
 
