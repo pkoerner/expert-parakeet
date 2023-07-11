@@ -50,20 +50,16 @@
 
 (defn- validate-course-iteration
   [course-id year semester question-set-ids]
-  (let [error-map {:course/id "Der ausgewählte Kurs war inkorrekt!"
-                   :course-iteration/year "Das ausgewählte Jahr war inkorrekt!"
-                   :course-iteration/semester "Das ausgewählte Semester war inkorrekt!"
-                   :question-set/id "Das ausgewählte question-set-war nicht korrekt!"}]
-
+  (let [error-map view/create-course-iteration-errors]
     (reduce (fn [error-col [error-key spec val]]
               (if (s/valid? spec val)
-                error-col
-                (conj error-col (error-map error-key))))
-            []
-            [[:course/id :course/id course-id]
-             [:course-iteration/year :course-iteration/year year]
-             [:course-iteration/semester :course-iteration/semester semester]
-             [:question-set/id (s/coll-of :question-set/id) question-set-ids]])))
+                (dissoc error-col error-key)
+                error-col))
+            error-map
+            [[:course-error :course/id course-id]
+             [:year-error :course-iteration/year year]
+             [:semester-error :course-iteration/semester semester]
+             [:question-set-error (s/coll-of :question-set/id) question-set-ids]])))
 
 
 (defn- add-to-db-and-get-succsess-msg
