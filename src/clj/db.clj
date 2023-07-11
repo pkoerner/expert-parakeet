@@ -1,10 +1,10 @@
 (ns db
   (:require
-   [datahike.api :as d]
-   [db.dummy-data :as dummy-data]
-   [db.schema :refer [db-schema]]
-   [nano-id.core :refer [nano-id]]
-   [clojure.spec.alpha :as s]))
+    [clojure.spec.alpha :as s]
+    [datahike.api :as d]
+    [db.dummy-data :as dummy-data]
+    [db.schema :refer [db-schema]]
+    [nano-id.core :refer [nano-id]]))
 
 
 (def id-len 10)
@@ -149,12 +149,14 @@
                      :where [?e :question-set/id]]
                    @conn)))
 
+
 (defn get-all-courses
   []
   (mapv first
         (d/q '[:find (pull ?e [:course/id :course/course-name {:course/question-sets [:question-set/id :question-set/name]}])
                :where [?e :course/id]]
              @db/conn)))
+
 
 (defn get-all-course-iterations
   []
@@ -216,15 +218,16 @@
 
 
 (s/fdef add-course-iteration-with-question-sets!
-  :args (s/cat :course-id :course/id
-               :year :course-iteration/year
-               :semester :course-iteration/semester
-               :question-set-ids (s/coll-of :question-set/id))
-  :ret (s/keys :req [:course-iteration/id
-                     :course/id
-                     :course-iteration/year
-                     :course-iteration/semester
-                     (s/coll-of :question-set/id)]))
+        :args (s/cat :course-id :course/id
+                     :year :course-iteration/year
+                     :semester :course-iteration/semester
+                     :question-set-ids (s/coll-of :question-set/id))
+        :ret (s/keys :req [:course-iteration/id
+                           :course/id
+                           :course-iteration/year
+                           :course-iteration/semester
+                           (s/coll-of :question-set/id)]))
+
 
 (defn add-course-iteration-with-question-sets!
   [course-id year semester question-set-ids]
@@ -247,10 +250,10 @@
             [:course-iteration/id id])))
 
 
-
 (defn add-course-iteration!
   [course-id year semester]
   (add-course-iteration-with-question-sets! course-id year semester []))
+
 
 (defn get-question-by-id
   [id]

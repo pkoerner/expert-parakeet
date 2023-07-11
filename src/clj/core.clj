@@ -23,10 +23,10 @@
 (defroutes private-routes
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
 
-(GET "/create-course-iteration" req
-  (html-response (create-course-iteration-get req "/create-course-iteration")))
-(POST "/create-course-iteration" req
-  (submit-create-course-iteration! req "/create-course-iteration"))
+  (GET "/create-course-iteration" req
+       (html-response (create-course-iteration-get req "/create-course-iteration")))
+  (POST "/create-course-iteration" req
+        (submit-create-course-iteration! req "/create-course-iteration"))
   (route/not-found "Not Found"))
 
 
