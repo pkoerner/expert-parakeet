@@ -89,8 +89,13 @@
         :ret #(instance? hiccup.util.RawString %))
 
 
-(defn submit-create-course-iteration-mockable
-  [request db-add-fun]
+(defn submit-create-course-iteration!
+  "This function takes a `request`, and a uri to be redirected to, when the data of the request was invalid.  
+   It also takes an optional `:db-add-fun` argument which will be called to post the data received in the 
+   `request` to the database after it has been validated.  
+     
+   If the data was invalid the request is redirected to the provided `redirect-uri` with the errors as query params."
+  [request redirect-uri & {:keys [db-add-fun] :or {db-add-fun db/add-course-iteration-with-question-sets!}}]
   (let [form-data (-> request (:multipart-params) (dissoc :__anti-forgery-token))
         course-id (form-data "course-id")
         year (read-string (form-data "year"))
@@ -102,17 +107,5 @@
         validation-errors (validate-course-iteration course-id year semester question-set-ids)]
 
     (if (empty? validation-errors)
-      (add-to-db-and-get-succsess-msg course-id year semester question-set-ids db-add-fun)
-      (view/submit-error-view validation-errors))))
-
-
-(s/fdef submit-create-course-iteration!
-        :args (s/cat :request ::request-data)
-        :ret #(instance? hiccup.util.RawString %))
-
-
-(defn submit-create-course-iteration!
-  [request]
-  (submit-create-course-iteration-mockable
-    request
-    db/add-course-iteration-with-question-sets!))
+      (html-response (add-to-db-and-get-succsess-msg course-id year semester question-set-ids db-add-fun))
+      (response/redirect (construct-url (str "http://localhost:8081" redirect-uri) validation-errors)))))
