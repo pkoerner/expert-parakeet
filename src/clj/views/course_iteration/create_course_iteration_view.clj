@@ -96,7 +96,7 @@
 (s/fdef submit-success-view
         :args (s/cat :semester :course-iteration/semester
                      :year :course-iteration/semester)
-        :ret (s/and #(string/includes? % "Erfolg")
+        :ret (s/and #(string/includes? % "erfolg")
                     #(instance? hiccup.util.RawString %)))
 
 
@@ -107,6 +107,6 @@
     [:div
      [:p "Der Kurs für das " semester
       " im Jahr " year
-      " wurde Erfolgreich für das Fach erstellt!\n"]]))
+      " wurde erfolgreich für das Fach erstellt!\n"]]))
 
 
