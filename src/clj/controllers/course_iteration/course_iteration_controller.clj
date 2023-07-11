@@ -29,14 +29,15 @@
 
 
 (defn create-course-iteration-get
-  "Returns a form for creating a course-iteration.  
-   The courses and question-sets are queried from the database to display them in the forms selection.  
-   When the courses are `nil`, an error message is displayed that a course must be created before a course-iteration can be created.  
+  "Returns an html-form for creating a course-iteration.  
+   The courses and question-sets are fetched from the database to display them in the forms selection.  
+   When there is no course, an error message is displayed that a course must be created before a course-iteration can be created.  
    
    The form is posted to the provided `post-destination` parameter.
    
-   When the request passed to this function inside of `req` contains certain fields, they are displayed as errors within the form.
-   The fields can be seen in `view/course-iteration-form`"
+   When the request passed to this function inside of `req` contains predefined error values in the `:query-params` of the `req` parameter, 
+   they are displayed as errors within the form.
+   The fields can be seen in `view/course-iteration-form`."
   [req post-destination]
   (let [courses (db/get-all-courses)
         question-sets (db/get-all-question-sets)]
@@ -100,12 +101,13 @@
    It also takes an optional `:db-add-fun` argument which will be called to post the data received in the 
    `request` to the database after it has been validated.  
      
-   If the data was invalid the request is redirected to the provided `redirect-uri` with the errors as query params."
+   If the data was invalid the request is redirected to the provided `redirect-uri` with the errors as query parameters."
   [request redirect-uri & {:keys [db-add-fun] :or {db-add-fun db/add-course-iteration-with-question-sets!}}]
   (let [form-data (-> request (:multipart-params) (dissoc :__anti-forgery-token))
         course-id (form-data "course-id")
         year (read-string (form-data "year"))
         semester (form-data "semester")
+        ;; If there is only one id, it is send as a single value. If there are multiple, they are send in a col.
         question-set-ids (let [ids-or-id (form-data "question-set-ids")]
                            (cond (coll? ids-or-id) ids-or-id
                                  (nil? ids-or-id) []
