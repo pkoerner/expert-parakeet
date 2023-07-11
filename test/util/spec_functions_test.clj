@@ -25,4 +25,23 @@
       (t/is (not (s/valid? test-spec (assoc valid-map "course-id" nil)))))
 
     (testing "Testing that the provided spec for a map reports `false` when an additional key is present."
-      (t/is (not (s/valid? test-spec (assoc valid-map "not-speced-key" "test")))))))
+      (t/is (not (s/valid? test-spec (assoc valid-map "not-speced-key" "test")))))
+
+    (let [test-spec-with-opt (map-spec {"req-key" string?} :opt {"opt-key" string?})]
+      (testing "Testing map-spec with optional keys. Keys are accepted."
+        (t/is (s/valid? test-spec-with-opt {"req-key" "valid-val" "opt-key" "valid-val"})))
+
+      (testing "Testing map-spec with optional keys. Optional keys are tested."
+        (t/is (not (s/valid? test-spec-with-opt {"req-key" "valid-val" "opt-key" :invalid-val}))))
+
+      (testing "Testing map-spec with optional keys. Optional keys are not required."
+        (t/is (s/valid? test-spec-with-opt {"req-key" "valid-val"})))
+
+      (testing "Testing map-spec with optional keys. Not speced keys are not accepted."
+        (t/is (not (s/valid? test-spec-with-opt {"req-key" "valid-val"
+                                                 "unexpected-key" "unexpected-val"})))))))
+
+
+(t/run-test test-map-spec-works-for-a-map)
+
+
