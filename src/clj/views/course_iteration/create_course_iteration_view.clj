@@ -97,28 +97,6 @@
         (hform/submit-button "submit")))))
 
 
-(s/fdef submit-error-view
-        :args (s/cat :errors (s/coll-of string? :distinct true :min-count 1))
-        :ret (s/and #(string/includes? % "Fehler")
-                    #(instance? hiccup.util.RawString %))
-        :fn (fn [spec-map]
-              (let [{{:keys [errors]} :args
-                     ret :ret} spec-map]
-                (every? #(string/includes? ret %) errors))))
-
-
-(defn submit-error-view
-  "Returns a div displaying the errors that are provided in the `errors` collection as elements of an unordered list."
-  [errors]
-  (h/html
-    [:div
-     [:p "Es gab folgende Fehler in der Eingabe:"]
-     [:ul (for [error errors]
-            [:li error])]]
-    [:div
-     [:p "Bitte gebe diesmal korrekte Werte an!"]]))
-
-
 (s/fdef submit-success-view
         :args (s/cat :semester :course-iteration/semester
                      :year :course-iteration/semester)
