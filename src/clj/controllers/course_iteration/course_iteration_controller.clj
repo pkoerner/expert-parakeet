@@ -83,8 +83,9 @@
                                           "question-set-ids" (s/coll-of :question-set/id)})}))
 
 
-(s/fdef submit-create-course-iteration-mockable
+(s/fdef submit-create-course-iteration!
         :args (s/cat :request ::request-data
+                     :redirect-uri string?
                      :db-add-fun (s/get-spec `db/add-course-iteration-with-question-sets!))
         :ret #(instance? hiccup.util.RawString %))
 
