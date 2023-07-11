@@ -17,18 +17,20 @@
               \"semester\" :course-iteration/semester
               \"question-set-ids\" (s/coll-of :question-set/id)})
    ```
-   This macro does only support required keys and no optional keys. 
+   Additional optional keys can be added behind the `:opt` parameter in a map similar to the `input-map`.
+
    Additional keys that are not speced will lead to a failure."
-  [input-map]
-  (let [input-map-keys (keys input-map)]
+  [input-map & {:keys [opt]}]
+  (let [input-map-keys (keys input-map)
+        input-map-and-opt (if opt (merge input-map opt)
+                              input-map)]
+
     `(s/and (fn [map-to-validate#]
               (let [key-set# (set (keys map-to-validate#))]
                 (every? #(key-set# %) '~input-map-keys)))
             (s/coll-of (s/or
                          ~@(reduce into
                                    []
-                                   (for [[key spec] input-map]
+                                   (for [[key spec] input-map-and-opt]
                                      `(~(keyword key) (s/tuple #{~key} ~spec)))))
                        :kind map?))))
-
-
