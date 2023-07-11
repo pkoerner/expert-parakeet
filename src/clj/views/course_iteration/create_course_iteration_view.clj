@@ -87,11 +87,10 @@
   (h/html
     [:div
      [:p "Es gab folgende Fehler in der Eingabe:"]
-     [:br]
      [:ul (for [error errors]
             [:li error])]]
     [:div
-     [:p "Bitte gebe diesmal Korrekte Werete an!"]]))
+     [:p "Bitte gebe diesmal korrekte Werte an!"]]))
 
 
 (s/fdef submit-success-view
