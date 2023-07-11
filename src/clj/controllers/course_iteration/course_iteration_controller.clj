@@ -114,4 +114,5 @@
 
     (if (empty? validation-errors)
       (html-response (add-to-db-and-get-succsess-msg course-id year semester question-set-ids db-add-fun))
-      (response/redirect (construct-url (str "http://localhost:8081" redirect-uri) validation-errors)))))
+      (response/redirect (construct-url (str (get-in request [:headers :origin]) redirect-uri) validation-errors)))))
+
