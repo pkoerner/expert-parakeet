@@ -3,12 +3,25 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [db]
+    [ring.util.codec :refer [form-encode]]
+    [ring.util.response :as response]
+    [util.ring-extensions :refer [html-response]]
     [util.spec-functions :refer [map-spec]]
     [views.course-iteration.create-course-iteration-view :as view]))
 
 
+(defn- extract-errors
+  [request]
+  (let [query-params (:query-params request)]
+    (when query-params
+      (->> query-params
+           (map (fn [[key val]] [(read-string key) val]))
+           (into {})))))
+
+
 (s/fdef create-course-iteration-get
-        :args (s/cat :post-destination :general/non-blank-string)
+        :args (s/cat :req map?
+                     :post-destination :general/non-blank-string)
         :ret #(instance? hiccup.util.RawString %)
         :fn #(let [{{:keys [post-destination]} :args
                     ret :ret} %]
@@ -16,16 +29,23 @@
 
 
 (defn create-course-iteration-get
-  "Returns a form containing for creating a course-iteration. The current courses and question-sets are queried to display them in the forms selection.  
+  "Returns a form for creating a course-iteration.  
+   The courses and question-sets are queried from the database to display them in the forms selection.  
    When the courses are `nil`, an error message is displayed that a course must be created before a course-iteration can be created.  
    
-   The form is posted to the provided `post-destination` parameter."
-  [post-destination]
+   The form is posted to the provided `post-destination` parameter.
+   
+   When the request passed to this function inside of `req` contains certain fields, they are displayed as errors within the form.
+   The fields can be seen in `view/course-iteration-form`"
+  [req post-destination]
   (let [courses (db/get-all-courses)
         question-sets (db/get-all-question-sets)]
     (if (nil? courses)
       view/no-courses
-      (view/course-iteration-form courses question-sets post-destination))))
+      (let [errors (extract-errors req)]
+        (if errors
+          (view/course-iteration-form courses question-sets post-destination :errors errors)
+          (view/course-iteration-form courses question-sets post-destination))))))
 
 
 (defn- validate-course-iteration
