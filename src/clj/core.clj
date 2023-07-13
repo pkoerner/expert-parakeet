@@ -1,4 +1,5 @@
 (ns core
+  (:gen-class)
   (:require
     [auth :refer [wrap-authentication]]
     [compojure.core :refer [defroutes GET]]
@@ -35,13 +36,21 @@
   (wrap-authentication private-routes))
 
 
-;; oauth2 middleware callback requires cookie setting same site to be lax, see: https://github.com/weavejester/ring-oauth2
+;; oauth2 middleware callback requires cookie setting :same-site to be lax, see: https://github.com/weavejester/ring-oauth2
 (def app (-> combined-routes (wrap-defaults (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
 
+
+;; in production, the app will be running behind a reverse proxy that does TLS
+(def app-proxied (-> combined-routes (wrap-defaults (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
 
 (def app-dev (wrap-reload #'app))
 
 
-(defn start-server
+(defn start-dev-server
   [& _args]
   (run-jetty app-dev {:port 8081 :join? false}))
+
+
+(defn -main
+  [& _args]
+  (run-jetty app-proxied {:port 8081 :join? false}))
