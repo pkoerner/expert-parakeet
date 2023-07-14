@@ -357,6 +357,17 @@
         ids (:tempids tx-result)]
     (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1))))
 
+(defn get-user-role 
+  "Get the users role for a specific course iteration."
+  [user-id course-iteration-id]
+  (get (first (first
+         (d/q '[:find (pull ?role [:role/name])
+                :in $ ?user-id ?course-iteration-id
+                :where 
+                [?user-id :user/roles ?role]
+                [?role :role/course-iteration ?course-iteration-id]]
+              @conn [:user/id user-id] course-iteration-id))) :role/name ))
+
 
 (comment
   (set! *print-length* 5)

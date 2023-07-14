@@ -96,8 +96,18 @@
                 :course-iteration/question-sets]))
 
 
+(s/def :role/id string?)
+(s/def :role/course-iteration string?)
+(s/def :role/name string?)
+
+
+(s/def ::user-roles
+  (s/keys :req [:role/id :role/course-iteration :role/name]))
+
+
 (s/def :user/id string?)
 (s/def :user/course-iterations (s/coll-of ::course-iteration))
+(s/def :user/roles (s/coll-of ::user-roles))
 
 
 (s/def ::user

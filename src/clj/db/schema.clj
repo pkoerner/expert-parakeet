@@ -48,11 +48,20 @@
      :question-set/passing-score]))
 
 
+(def user-roles-schema
+  (spectomic/datomic-schema
+   [[:role/id {:db/unique :db.unique/identity
+               :db/index true}]
+    :role/course-iteration
+    :role/name]))
+
+
 (def user-schema
   (spectomic/datomic-schema
     [[:user/id {:db/unique :db.unique/identity
                 :db/index true}]
-     :user/course-iterations]))
+     :user/course-iterations
+     :user/roles]))
 
 
 (def course-schema
@@ -74,4 +83,4 @@
 
 
 (def db-schema
-  (concat question-schema answer-schema correction-schema question-set-schema user-schema course-schema course-iteration-schema))
+  (concat question-schema answer-schema correction-schema question-set-schema user-roles-schema user-schema course-schema course-iteration-schema))

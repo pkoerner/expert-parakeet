@@ -66,16 +66,39 @@
     :course-iteration/semester "SoSe"
     :course-iteration/question-sets [[:question-set/id "1"] [:question-set/id "2"]]}])
 
+(def user-roles
+  [{:role/id "0"
+    :role/course-iteration "1"
+    :role/name "student"}
+   {:role/id "1"
+    :role/course-iteration"2"
+    :role/name "student"}
+   {:role/id "2"
+    :role/course-iteration "1"
+    :role/name "corrector"}
+   {:role/id "3"
+    :role/course-iteration "2"
+    :role/name "student"}
+   {:role/id "4"
+    :role/course-iteration "1"
+    :role/name "admin"}
+   {:role/id "5"
+    :role/course-iteration "2"
+    :role/name "student"}])
 
 (def users
   [{:user/id "0"
-    :user/course-iterations [[:course-iteration/id "1"] [:course-iteration/id "2"]]}
+    :user/course-iterations [[:course-iteration/id "1"] [:course-iteration/id "2"]]
+    :user/roles [[:role/id "0"] [:role/id "1"]]}
    {:user/id "1"
-    :user/course-iterations [[:course-iteration/id "1"] [:course-iteration/id "2"]]}
+    :user/course-iterations [[:course-iteration/id "1"] [:course-iteration/id "2"]]
+    :user/roles [[:role/id "2"] [:role/id "3"]]}
    {:user/id "2"
-    :user/course-iterations [[:course-iteration/id "1"]]}
+    :user/course-iterations [[:course-iteration/id "1"]]
+    :user/roles [[:role/id "4"]]}
    {:user/id "3"
-    :user/course-iterations [[:course-iteration/id "2"]]}])
+    :user/course-iterations [[:course-iteration/id "2"]]
+    :user/roles [[:role/id "5"]]}])
 
 
 (def answers
@@ -136,6 +159,7 @@
     question-sets
     courses
     course-iterations
+    user-roles
     users
     answers
     corrections))
