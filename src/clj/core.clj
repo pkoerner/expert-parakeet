@@ -1,15 +1,16 @@
 (ns core
-  (:require [auth :refer [wrap-authentication]]
-            [compojure.core :refer [defroutes GET POST]]
-            [compojure.route :as route]
-            [controllers.course.course-controller :refer [create-course-get
-                                                          submit-create-course!]]
-            [domain]
-            [hiccup2.core :as h]
-            [ring.adapter.jetty :refer [run-jetty]]
-            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-            [ring.middleware.reload :refer [wrap-reload]]
-            [ring.util.response :refer [header response]]))
+  (:require
+    [auth :refer [wrap-authentication]]
+    [compojure.core :refer [defroutes GET POST]]
+    [compojure.route :as route]
+    [controllers.course.course-controller :refer [create-course-get
+                                                  submit-create-course!]]
+    [domain]
+    [hiccup2.core :as h]
+    [ring.adapter.jetty :refer [run-jetty]]
+    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+    [ring.middleware.reload :refer [wrap-reload]]
+    [ring.util.response :refer [header response]]))
 
 
 (defn html-response
@@ -29,9 +30,9 @@
 (defroutes private-routes
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
   (GET "/create-course" req
-    (html-response (create-course-get req "/create-course")))
+       (html-response (create-course-get req "/create-course")))
   (POST "/create-course" req
-    (submit-create-course! req "/create-course"))
+        (submit-create-course! req "/create-course"))
   (route/not-found "Not Found"))
 
 

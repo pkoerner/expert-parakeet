@@ -1,7 +1,7 @@
 (ns util.ring-extensions
   (:require
-   [hiccup2.core :as h]
-   [ring.util.response :refer [header response]]))
+    [hiccup2.core :as h]
+    [ring.util.response :refer [header response]]))
 
 
 (defn html-response
