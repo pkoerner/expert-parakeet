@@ -66,12 +66,13 @@
     :course-iteration/semester "SoSe"
     :course-iteration/question-sets [[:question-set/id "1"] [:question-set/id "2"]]}])
 
+
 (def user-roles
   [{:role/id "0"
     :role/course-iteration "1"
     :role/name "student"}
    {:role/id "1"
-    :role/course-iteration"2"
+    :role/course-iteration "2"
     :role/name "student"}
    {:role/id "2"
     :role/course-iteration "1"
@@ -85,6 +86,7 @@
    {:role/id "5"
     :role/course-iteration "2"
     :role/name "student"}])
+
 
 (def users
   [{:user/id "0"

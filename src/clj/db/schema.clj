@@ -50,10 +50,10 @@
 
 (def user-roles-schema
   (spectomic/datomic-schema
-   [[:role/id {:db/unique :db.unique/identity
-               :db/index true}]
-    :role/course-iteration
-    :role/name]))
+    [[:role/id {:db/unique :db.unique/identity
+                :db/index true}]
+     :role/course-iteration
+     :role/name]))
 
 
 (def user-schema
