@@ -1,15 +1,16 @@
 (ns core
-  (:require
-    [auth :refer [wrap-authentication]]
-    [compojure.core :refer [defroutes GET]]
-    [compojure.route :as route]
-    [domain]
-    [hiccup2.core :as h]
-    [ring.adapter.jetty :refer [run-jetty]]
-    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-    [ring.middleware.reload :refer [wrap-reload]]
-    [ring.util.response :refer [header response]]
-    [views.question_set :refer [question-set-form]]))
+  (:require [auth :refer [wrap-authentication]]
+            [compojure.core :refer [defroutes GET PUT]]
+            [compojure.route :as route]
+            db
+            [domain]
+            [hiccup2.core :as h]
+            [ring.adapter.jetty :refer [run-jetty]]
+            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+            [ring.middleware.reload :refer [wrap-reload]]
+            [ring.util.response :refer [header response]]
+            [views.question :refer [question-form]]
+            [views.question-set :refer [question-set-form]]))
 
 
 (defn html-response
@@ -27,7 +28,17 @@
 
 ;; all routes that require authentication go here
 (defroutes private-routes
-  (GET "/question-set/:id" [id] (html-response (question-set-form id)))
+  (GET "/question-set/:id"
+    [id] 
+    (html-response (question-set-form id)))
+  (GET "/question/:question-id"
+    [question-id]
+    (html-response (question-form question-id)))
+  ;; This route will be included to submit an answer to
+  ;; a question if roles are implemented.
+  ;;(PUT "/answer/:question-id/:answer-id" 
+  ;;  [user-id question-id answer-id]
+  ;;  (db/add-user-answer! user-id question-id answer-id))
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
   (route/not-found "Not Found"))
 

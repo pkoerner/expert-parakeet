@@ -228,7 +228,7 @@
 (defn get-question-by-id
   [id]
   (d/pull @db/conn
-          [:question/id :question/question-statement :question/points :question/type]
+          [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]
           [:question/id id]))
 
 
