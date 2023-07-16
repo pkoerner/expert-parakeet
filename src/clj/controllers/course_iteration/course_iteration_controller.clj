@@ -52,7 +52,7 @@
                                 get-question-sets-fun db/get-all-question-sets}}]
   (let [courses (get-courses-fun)
         question-sets (get-question-sets-fun)]
-    (if (nil? courses)
+    (if (empty? courses)
       view/no-courses
       (let [errors (extract-errors req)]
         (if errors
