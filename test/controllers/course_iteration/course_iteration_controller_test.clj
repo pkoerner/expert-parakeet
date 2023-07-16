@@ -29,6 +29,16 @@
                              (string/includes? res post-destination))))))
 
 
+(deftest test-create-course-iteration-get
+  (testing "When there are no courses, an error message is displayed."
+    (let [empty-request {}
+          get-no-courses-fun (fn [] [])
+          res (create-course-iteration-get empty-request
+                                           "post-destination"
+                                           :get-courses-fun get-no-courses-fun)]
+      (t/is (not (string/includes? res "form"))))))
+
+
 (deftest test-submit-create-course-iteration!
   (testing "Test that the db-add-function get's called with the correct values with different parameters."
     (let [test-request {:__anti-forgery-token ""
