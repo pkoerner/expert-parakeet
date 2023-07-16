@@ -1,6 +1,6 @@
-.PHONY: backend
-backend:
-	clj -X core/start-server
+.PHONY: dev-server
+dev-server:
+	clj -X core/start-dev-server
 
 .PHONY: format
 format:
@@ -9,3 +9,7 @@ format:
 .PHONY: test
 test:
 	clj -M:test-runner
+
+.PHONY: uber
+uber:
+	clj -T:build uber
