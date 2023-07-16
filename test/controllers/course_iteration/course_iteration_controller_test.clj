@@ -11,12 +11,15 @@
     [ring.util.codec :refer [form-encode]]
     [views.course-iteration.create-course-iteration-view :refer [create-course-iteration-errors]]))
 
+
 (def ^:private error-map-gen
   (gen/fmap #(apply merge %) (gen/vector (gen/elements (map (fn [[key val]] {(str key) val}) create-course-iteration-errors))
                                          1 4)))
 
 
 #_{:clj-kondo/ignore [:unresolved-symbol]}
+
+
 (defspec test-create-course-iteration-get 100
   (prop/for-all [error-map error-map-gen]
                 (let [post-destination "destination"

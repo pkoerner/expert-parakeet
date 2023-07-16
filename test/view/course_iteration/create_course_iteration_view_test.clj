@@ -82,6 +82,8 @@
 
 
 #_{:clj-kondo/ignore [:unresolved-symbol]}
+
+
 (defspec test-course-iteration-form-errors-are-displayed 100
   (let [[courses question-sets post-destination] [[] [] "https://some.url"]]
     (prop/for-all [error-map error-map-gen]
