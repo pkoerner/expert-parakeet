@@ -35,8 +35,12 @@
 
 (defn create-course-iteration-get
   "Returns an html-form for creating a course-iteration.  
-   The courses and question-sets are fetched from the database to display them in the forms selection.  
+   The courses and question-sets are fetched from the provided functions `get-courses-fun` `get-question-sets-fun` 
+   to display them in the forms selection.  
    When there is no course, an error message is displayed that a course must be created before a course-iteration can be created.  
+
+   The function accepts optional functions as the arguments `:get-course-fun` and `:get-question-sets-fun` to fetch
+   courses or question-sets.
    
    The form is posted to the provided `post-destination` parameter.
    
