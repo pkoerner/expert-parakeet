@@ -21,11 +21,16 @@
 
 (s/fdef create-course-iteration-get
         :args (s/cat :req map?
-                     :post-destination :general/non-blank-string)
+                     :post-destination :general/non-blank-string
+                     :get-courses-fun (s/? (s/get-spec `db/get-all-courses))
+                     :get-question-sets-fun (s/? (s/get-spec `db/get-all-question-sets)))
         :ret #(instance? hiccup.util.RawString %)
-        :fn #(let [{{:keys [post-destination]} :args
-                    ret :ret} %]
-               (string/includes? (str ret) post-destination)))
+        :fn (s/or :no-courses-existant
+                  #(let [{:keys [ret]} %]
+                     (string/includes? ret "erst ein Fach erstellt"))
+                  :course-iteration-creation
+                  #(let [{{:keys [post-destination]} :args ret :ret} %]
+                     (string/includes? (str ret) post-destination))))
 
 
 (defn create-course-iteration-get
@@ -38,9 +43,11 @@
    When the request passed to this function inside of `req` contains predefined error values in the `:query-params` of the `req` parameter, 
    they are displayed as errors within the form.
    The fields can be seen in `view/course-iteration-form`."
-  [req post-destination]
-  (let [courses (db/get-all-courses)
-        question-sets (db/get-all-question-sets)]
+  [req post-destination & {:keys [get-courses-fun get-question-sets-fun]
+                           :or {get-courses-fun db/get-all-courses
+                                get-question-sets-fun db/get-all-question-sets}}]
+  (let [courses (get-courses-fun)
+        question-sets (get-question-sets-fun)]
     (if (nil? courses)
       view/no-courses
       (let [errors (extract-errors req)]
