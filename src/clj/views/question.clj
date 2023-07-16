@@ -1,7 +1,7 @@
 (ns views.question
   (:require 
    [db]
-   [services.question-service :refer [extract-question-id-from-question
+   [application-services.question-service :refer [extract-question-id-from-question
                                               extract-question-statement-from-question
                                               dispatch-question-type]]
    [hiccup.form :refer [form-to

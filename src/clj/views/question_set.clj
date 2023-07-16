@@ -1,6 +1,6 @@
 (ns views.question-set
   (:require
-    [services.question-set-service :as serv]
+    [application-services.question-set-service :as serv]
     [db]))
 
 
