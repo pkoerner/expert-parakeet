@@ -20,7 +20,7 @@
 #_{:clj-kondo/ignore [:unresolved-symbol]}
 
 
-(defspec test-create-course-iteration-get 100
+(defspec test-generated-create-course-iteration-get 100
   (prop/for-all [error-map error-map-gen]
                 (let [post-destination "destination"
                       res (create-course-iteration-get {:query-params error-map}
