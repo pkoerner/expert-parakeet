@@ -11,10 +11,6 @@
     [ring.util.codec :refer [form-encode]]
     [views.course-iteration.create-course-iteration-view :refer [create-course-iteration-errors]]))
 
-
-(def ^:private opts {:clojure.spec.test.check/opts {:num-tests 200}})
-
-
 (def ^:private error-map-gen
   (gen/fmap #(apply merge %) (gen/vector (gen/elements (map (fn [[key val]] {(str key) val}) create-course-iteration-errors))
                                          1 4)))
