@@ -1,4 +1,4 @@
-(ns application-services.question-service
+(ns controller.question-service
   (:require
    [db]
    [hiccup.form :as form]))

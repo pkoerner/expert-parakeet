@@ -1,4 +1,4 @@
-(ns application-services.question-set-service
+(ns controller.question-set-service
    (:require
     [db]))
 
