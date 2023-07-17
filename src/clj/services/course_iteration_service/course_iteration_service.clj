@@ -1,7 +1,6 @@
 (ns services.course-iteration-service.course-iteration-service
   (:require
     [clojure.spec.alpha :as s]
-    [clojure.spec.test.alpha :as stest]
     [clojure.string :as string]
     [db]
     [services.course-iteration-service.p-course-iteration-service :refer [PCourseIterationService]]
