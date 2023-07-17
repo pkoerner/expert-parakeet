@@ -5,6 +5,7 @@
     [db]
     [ring.util.codec :refer [form-encode]]
     [ring.util.response :as response]
+    [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration validate-course-iteration]]
     [util.ring-extensions :refer [html-response]]
     [util.spec-functions :refer [map-spec]]
     [views.course-iteration.create-course-iteration-view :as view]))
@@ -113,7 +114,7 @@
    `request` to the database after it has been validated.  
      
    If the data was invalid the request is redirected to the provided `redirect-uri` with the errors as query parameters."
-  [request redirect-uri & {:keys [db-add-fun] :or {db-add-fun db/add-course-iteration-with-question-sets!}}]
+  [request redirect-uri course-iteration-service]
   (let [form-data (-> request (:multipart-params) (dissoc :__anti-forgery-token))
         course-id (form-data "course-id")
         year (read-string (form-data "year"))
@@ -123,9 +124,10 @@
                            (cond (coll? ids-or-id) ids-or-id
                                  (nil? ids-or-id) []
                                  :else [ids-or-id]))
-        validation-errors (validate-course-iteration course-id year semester question-set-ids)]
+
+        validation-errors (validate-course-iteration course-iteration-service course-id year semester question-set-ids)]
 
     (if (empty? validation-errors)
-      (html-response (add-to-db-and-get-succsess-msg course-id year semester question-set-ids db-add-fun))
+      (html-response (add-to-db-and-get-succsess-msg course-id year semester question-set-ids (partial create-course-iteration course-iteration-service)))
       (response/redirect (construct-url (str (get-in request [:headers :origin]) redirect-uri) validation-errors)))))
 
