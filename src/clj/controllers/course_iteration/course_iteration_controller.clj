@@ -61,20 +61,6 @@
           (view/course-iteration-form courses question-sets post-destination))))))
 
 
-(defn- validate-course-iteration
-  [course-id year semester question-set-ids]
-  (let [error-map view/create-course-iteration-errors]
-    (reduce (fn [error-col [error-key spec val]]
-              (if (s/valid? spec val)
-                (dissoc error-col error-key)
-                error-col))
-            error-map
-            [[:course-error :course/id course-id]
-             [:year-error :course-iteration/year year]
-             [:semester-error :course-iteration/semester semester]
-             [:question-set-error (s/coll-of :question-set/id) question-set-ids]])))
-
-
 (defn- add-to-db-and-get-succsess-msg
   [course-id year semester question-set-ids db-add-fun]
   (let [db-result (db-add-fun
