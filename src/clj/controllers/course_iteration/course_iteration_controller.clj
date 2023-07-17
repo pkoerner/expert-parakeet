@@ -96,9 +96,9 @@
 
 (defn submit-create-course-iteration!
   "This function takes a `request`, and a uri to be redirected to, when the data of the request was invalid.  
-   It also takes an optional `:db-add-fun` argument which will be called to post the data received in the 
-   `request` to the database after it has been validated.  
-     
+   It also takes an implementation of the `PCourseIterationService` protocol, 
+   which is used for validation and persisting the final course-iteration in the database. 
+        
    If the data was invalid the request is redirected to the provided `redirect-uri` with the errors as query parameters."
   [request redirect-uri course-iteration-service]
   (let [form-data (-> request (:multipart-params) (dissoc :__anti-forgery-token))
