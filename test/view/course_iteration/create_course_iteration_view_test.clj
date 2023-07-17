@@ -7,7 +7,7 @@
     [clojure.test.check.properties :as prop]
     [domain.spec]
     [test-extensions :refer [test-with-check]]
-    [views.course-iteration.create-course-iteration-view :refer [course-iteration-form create-course-iteration-errors submit-success-view]]))
+    [views.course-iteration.create-course-iteration-view :refer [course-iteration-form create-course-iteration-error-keys submit-success-view]]))
 
 
 (def ^:private opts {:clojure.spec.test.check/opts {:num-tests 200}})
@@ -48,27 +48,24 @@
 
 
   (testing "Testing that errors are displayed in the form, when errors are passed to the view."
-    (letfn [(key-with-val-from-map
-              [dict key]
-              (into {} (filter (fn [[mkey _]] (= key mkey)) dict)))]
-      (let [[courses question-sets post-destination] [[] [] "https://some.url"]
-            course-error (key-with-val-from-map create-course-iteration-errors :course-error)
-            year-error (key-with-val-from-map create-course-iteration-errors :year-error)
-            semester-error (key-with-val-from-map create-course-iteration-errors :semester-error)
-            question-set-error (key-with-val-from-map create-course-iteration-errors :question-set-error)]
-        (t/are [errors]
-               (let [test-result (course-iteration-form courses question-sets post-destination :errors errors)]
-                 (every? #(string/includes? test-result %) (vals errors)))
+    (let [[courses question-sets post-destination] [[] [] "https://some.url"]
+          course-error {:course-iteration/course "Some course error"}
+          year-error {:course-iteration/year "Some year error"}
+          semester-error {:course-iteration/semester "Some semester error"}
+          question-set-error {:course-iteration/question-sets "Some question-set error"}]
+      (t/are [errors]
+             (let [test-result (course-iteration-form courses question-sets post-destination :errors errors)]
+               (every? #(string/includes? test-result %) (vals errors)))
 
-          course-error
-          year-error
-          semester-error
-          question-set-error
-          ;; some random merges of the error messages. No particular reason why those are tested.
-          (merge course-error year-error)
-          (merge course-error semester-error)
-          (merge question-set-error semester-error)
-          (merge course-error year-error semester-error question-set-error))))))
+        course-error
+        year-error
+        semester-error
+        question-set-error
+        ;; some random merges of the error messages. No particular reason why those are tested.
+        (merge course-error year-error)
+        (merge course-error semester-error)
+        (merge question-set-error semester-error)
+        (merge course-error year-error semester-error question-set-error)))))
 
 
 (deftest test-submit-success-view
@@ -77,8 +74,11 @@
 
 
 (def ^:private error-map-gen
-  (gen/fmap #(apply merge %) (gen/vector (gen/elements (map (fn [[key val]] {key val}) create-course-iteration-errors))
-                                         1 4)))
+  (let [rand-error-map (->> create-course-iteration-error-keys
+                            (map (fn [key] {key (str "Error for key " key)}))
+                            (gen/elements))]
+    (gen/fmap #(apply merge %)
+              (gen/vector rand-error-map 1 4))))
 
 
 #_{:clj-kondo/ignore [:unresolved-symbol]}
