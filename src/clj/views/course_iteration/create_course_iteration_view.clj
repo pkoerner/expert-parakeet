@@ -23,16 +23,13 @@
     (when course-error [:div [:span {:style "color: red;"} course-error]])))
 
 
-(def ^:private create-course-iteration-errors-spec
-  (into {} (map (fn [key] [key string?]) create-course-iteration-error-keys)))
-
-
 (s/fdef course-iteration-form
         :args (s/cat :courses (s/coll-of (s/keys :req [:course/id :course/course-name]) :distinct true)
                      :question-sets (s/coll-of (s/keys :req [:question-set/id :question-set/name]) :distinct true)
                      :post-destination :general/non-blank-string
-                     :kwargs (s/? (s/map-of (set create-course-iteration-errors-spec)
-                                            string?)))
+                     :kwargs (s/? (s/or :empty empty?
+                                        :map (s/map-of create-course-iteration-error-keys
+                                                       string?))))
         :ret #(instance? hiccup.util.RawString %)
         :fn (fn [spec-map]
               (let [{{:keys [courses question-sets post-destination]} :args
