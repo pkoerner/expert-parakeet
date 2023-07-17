@@ -9,12 +9,17 @@
     [controllers.course-iteration.course-iteration-controller :refer
      [create-course-iteration-get submit-create-course-iteration!]]
     [ring.util.codec :refer [form-encode]]
-    [views.course-iteration.create-course-iteration-view :refer [create-course-iteration-errors]]))
+    [services.course-iteration-service.course-iteration-service :as cis :refer [->CourseIterationService]]
+    [services.course-iteration-service.p-course-iteration-service :refer [PCourseIterationService validate-course-iteration]]
+    [views.course-iteration.create-course-iteration-view :refer [create-course-iteration-error-keys]]))
 
 
 (def ^:private error-map-gen
-  (gen/fmap #(apply merge %) (gen/vector (gen/elements (map (fn [[key val]] {(str key) val}) create-course-iteration-errors))
-                                         1 4)))
+  (let [rand-error-map (->> create-course-iteration-error-keys
+                            (map (fn [key] {(str key) (str "Error for key " key)}))
+                            (gen/elements))]
+    (gen/fmap #(apply merge %)
+              (gen/vector rand-error-map 1 4))))
 
 
 #_{:clj-kondo/ignore [:unresolved-symbol]}
@@ -39,6 +44,20 @@
       (t/is (not (string/includes? res "form"))))))
 
 
+(defn- stub-course-iteration-service
+  [& {:keys [validate-course-iteration create-course-iteration]
+      :or {validate-course-iteration (fn [& _] {})
+           create-course-iteration (fn [& _] {})}}]
+  (reify PCourseIterationService
+    (validate-course-iteration
+      [_self course-id year semester question-set-ids]
+      (validate-course-iteration course-id year semester question-set-ids))
+
+    (create-course-iteration
+      [_self course-id year semester question-set-ids]
+      (create-course-iteration course-id year semester question-set-ids))))
+
+
 (deftest test-submit-create-course-iteration!
   (testing "Test that the db-add-function get's called with the correct values with different parameters."
     (let [test-request {:__anti-forgery-token ""
@@ -51,6 +70,8 @@
                             (t/is (s/valid? :course-iteration/year year))
                             (t/is (s/valid? :course-iteration/semester semester))
                             (t/is (s/valid? (s/coll-of :question-set/id) question-set-ids)))
+          course-iteration-service (stub-course-iteration-service
+                                     :create-course-iteration db-add-fun-stub)
           redirect-uri "S"]
       (doseq [course-id ["1" "50009"]
               year ["2023" "2024"]
@@ -63,7 +84,7 @@
               (assoc-in [:multipart-params "semester"] semester)
               (assoc-in [:multipart-params "question-set-ids"] question-set-ids))
           redirect-uri
-          :db-add-fun db-add-fun-stub))))
+          course-iteration-service))))
 
   (testing "Test that the db-add-function is not called when the parameters are invalid. 
             And that the correct error message is send with the redirect."
@@ -74,6 +95,11 @@
                                            "question-set-ids" ["1"]}}
           db-add-fun-stub (fn [_course-id _year _semester _question-set-ids]
                             (t/is false "The function to create a course-itration was called but shouldn't be!"))
+
+          course-iteration-service (stub-course-iteration-service
+                                     :validate-course-iteration (fn [& args]
+                                                                  (apply (partial validate-course-iteration (->CourseIterationService)) args))
+                                     :create-course-iteration db-add-fun-stub)
           redirect-uri "S"
           wrong-course-id ""
           wrong-year "-2023"
@@ -81,7 +107,7 @@
           wrong-question-set-ids [""]]
 
       (t/are [request expected-error]
-             (let [response (submit-create-course-iteration! request redirect-uri :db-add-fun db-add-fun-stub)
+             (let [response (submit-create-course-iteration! request redirect-uri course-iteration-service)
                    response-status (:status response)
                    response-url (get-in response [:headers "Location"])]
                (and (= 302 response-status)
@@ -96,5 +122,4 @@
         "Das ausgewählte Semester war inkorrekt!"
 
         (assoc-in test-request [:multipart-params "question-set-ids"] wrong-question-set-ids)
-        "Das ausgewählte question-set-war nicht korrekt!"))))
-
+        "Das ausgewählte question-set war nicht korrekt!"))))
