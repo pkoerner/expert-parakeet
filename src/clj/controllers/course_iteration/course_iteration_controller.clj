@@ -21,7 +21,7 @@
 
 
 (s/fdef create-course-iteration-get
-        :args (s/cat :req map?
+        :args (s/cat :req coll?
                      :post-destination :general/non-blank-string
                      :get-courses-fun (s/? (s/get-spec `db/get-all-courses))
                      :get-question-sets-fun (s/? (s/get-spec `db/get-all-question-sets)))
