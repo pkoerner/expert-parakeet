@@ -10,7 +10,7 @@
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.util.response :refer [header response]]
             [views.question :refer [question-form]]
-            [views.question-set :refer [question-set-form]]))
+            [controller.question-set.question-set-controller :refer [question-set-get]]))
 
 
 (defn html-response
@@ -29,11 +29,14 @@
 ;; all routes that require authentication go here
 (defroutes private-routes
   (GET "/question-set/:id"
-    [id] 
-    (html-response (question-set-form id)))
-  (GET "/question/:question-id"
-    [question-id]
-    (html-response (question-form question-id)))
+    req
+    (html-response (question-set-get req)))
+  (GET "/question/:id"
+    req
+    (html-response (question-form
+                     (-> req
+                         :route-params
+                         :id))))
   ;; This route will be included to submit an answer to
   ;; a question if roles are implemented.
   ;;(PUT "/answer/:question-id/:answer-id" 
