@@ -7,12 +7,9 @@
     [ring.util.anti-forgery :refer [anti-forgery-field]]))
 
 
-(def create-course-iteration-errors
-  "Possible errors to display in the `course-iteration-form`."
-  {:course-error "Der ausgewählte Kurs war inkorrekt!"
-   :year-error "Das ausgewählte Jahr war inkorrekt!"
-   :semester-error "Das ausgewählte Semester war inkorrekt!"
-   :question-set-error "Das ausgewählte question-set-war nicht korrekt!"})
+(def create-course-iteration-error-keys
+  "Possible keys for which errors can be displayed in the `course-iteration-form`."
+  #{:course-iteration/course :course-iteration/year :course-iteration/semester :course-iteration/question-sets})
 
 
 (def no-courses
@@ -27,14 +24,14 @@
 
 
 (def ^:private create-course-iteration-errors-spec
-  (into {} (map (fn [[key _]] [key string?]) create-course-iteration-errors)))
+  (into {} (map (fn [key] [key string?]) create-course-iteration-error-keys)))
 
 
 (s/fdef course-iteration-form
         :args (s/cat :courses (s/coll-of (s/keys :req [:course/id :course/course-name]) :distinct true)
                      :question-sets (s/coll-of (s/keys :req [:question-set/id :question-set/name]) :distinct true)
                      :post-destination :general/non-blank-string
-                     :kwargs (s/? (s/map-of (set (keys create-course-iteration-errors-spec))
+                     :kwargs (s/? (s/map-of (set create-course-iteration-errors-spec)
                                             string?)))
         :ret #(instance? hiccup.util.RawString %)
         :fn (fn [spec-map]
@@ -63,13 +60,13 @@
         [:post post-destination]
 
         [:div
-         (optional-error-display :course-error errors)
+         (optional-error-display :course-iteration/course errors)
          [:label {:for "courses"} "Fach auswahl:"] [:br]
          [:select#courses {:name "course-id"}
           (hform/select-options (mapv course-to-option courses))]]
 
         [:div
-         (optional-error-display :year-error errors)
+         (optional-error-display :course-iteration/year errors)
          [:label {:for "year"} "Jahr"] [:br]
          [:input#year {:name "year"
                        :type "number"
@@ -79,14 +76,14 @@
                        :value "2024"}]]
 
         [:div
-         (optional-error-display :semester-error errors)
+         (optional-error-display :course-iteration/semester errors)
          [:label {:for "semester"} "Semester"] [:br]
          [:select#semester {:name "semester"}
           (hform/select-options [["Sommer" "SoSe"]
                                  ["Winter" "WiSe"]])]]
 
         [:div
-         (optional-error-display :question-set-error errors)
+         (optional-error-display :course-iteration/question-sets errors)
          [:label {:for "question-sets"} "Tests"] [:br]
          [:ul
           (for [question-set question-sets]
