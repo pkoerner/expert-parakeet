@@ -1,19 +1,51 @@
 (ns views.question
   (:require 
-   [db]
-   [application-services.question-service :refer [extract-question-id-from-question
-                                              extract-question-statement-from-question
-                                              dispatch-question-type]]
-   [hiccup.form :refer [form-to
-                        submit-button]]))
+   [hiccup.form :as form]))
 
+(def question-errors
+  {:not-assigned-to-question "You are not assigned to this question!"})
+
+
+;; I dont know how this exactly works.
+;; This function and the subsequent usage
+;; in the dispatch-question-type is
+;; sourced from: https://github.com/yokolet/hiccup-samples
+;; TODO: add answer-id to the lablaed radio
+(defn labeled-radio
+  [label]
+  [:label (form/radio-button {:ng-model "question.answer"} "question.answer" false label)
+   (str label "    ")])
+
+(defn dispatch-question-type
+  [question]
+  (cond
+    (= (:question/type question)
+       :question.type/free-text)
+    (form/text-area "answer")
+    (= (:question/type question)
+       :question.type/single-choice)
+    [:div {:class "form-group"} (reduce conj
+                                        [:div {:class "btn-group"}]
+                                        (for [possible-solution (:question/possible-solutions question)]
+                                          [:div
+                                           [:p possible-solution]
+                                           (labeled-radio possible-solution)]))]
+    (= (:question/type question)
+       :question.type/multiple-choice)
+    (for [possible-solution (:question/possible-solutions question)]
+      [:div
+       [:p possible-solution]
+       (form/check-box possible-solution)])))
 
 (defn question-form
-  [question-id]
-  (form-to [:put (str "/answer/" question-id "/" (rand-int 30))]
-                (let [question (db/get-question-by-id question-id)]
-                  [:div [:p
-                         {:id (extract-question-id-from-question question)}
-                         (extract-question-statement-from-question question)]
-                  (dispatch-question-type question)])
-                (submit-button "submit")))
+  [question]
+  (form/form-to [:put (str "/answer/" (:question/id question) "/" (rand-int 30))]
+                [:div [:p
+                         {:id (:question/id question)}
+                         (:question/question-statement question)]
+                  (dispatch-question-type question)]
+                (form/submit-button "submit")))
+
+(defn no-question-assignment 
+  [permission-error]
+  [:p (str "ERROR " (:not-assigned-to-question permission-error))])
