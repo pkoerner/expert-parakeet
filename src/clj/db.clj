@@ -84,7 +84,7 @@
 
 
 (defn get-questions-for-user
-  [corrector-id]
+  [user-id]
   (mapv first
         (d/q '[:find (pull ?course-iteration [:course-iteration/semester
                                               :course-iteration/year
@@ -94,7 +94,7 @@
                :in $ ?corr
                :where
                [?corr :user/course-iterations ?course-iteration]]
-             @conn [:user/id corrector-id])))
+             @conn [:user/id user-id])))
 
 
 (defn get-answers-for-question
