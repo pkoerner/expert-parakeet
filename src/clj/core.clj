@@ -9,7 +9,7 @@
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.util.response :refer [header response]]
-            [views.question :refer [question-form]]
+            [controller.question.question-controller :refer [question-get]]
             [controller.question-set.question-set-controller :refer [question-set-get]]))
 
 
@@ -33,10 +33,7 @@
     (html-response (question-set-get req)))
   (GET "/question/:id"
     req
-    (html-response (question-form
-                     (-> req
-                         :route-params
-                         :id))))
+    (html-response (question-get req)))
   ;; This route will be included to submit an answer to
   ;; a question if roles are implemented.
   ;;(PUT "/answer/:question-id/:answer-id" 
