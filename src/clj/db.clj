@@ -96,6 +96,18 @@
                [?corr :user/course-iterations ?course-iteration]]
              @conn [:user/id user-id])))
 
+(defn get-question-ids-for-user
+  "Fetches all question-ids belonging to
+   a user."
+  [user-id]
+  (mapv first
+        (d/q '[:find (pull ?q [:question/id])
+               :in $ ?u
+               :where
+               [?u :user/course-iterations ?ci]
+               [?ci :course-iteration/question-sets ?qs]
+               [?qs :question-set/questions ?q]]
+             @conn [:user/id user-id])))
 
 (defn get-answers-for-question
   "Fetches all answers of all users for one question."
