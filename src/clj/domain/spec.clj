@@ -3,9 +3,11 @@
     [clojure.spec.alpha :as s]
     [util.time :as time]))
 
+(def question-types
+  #{:question.type/free-text :question.type/single-choice :question.type/multiple-choice})
 
 (s/def :question/id string?)
-(s/def :question/type #{:question.type/free-text :question.type/single-choice :question.type/multiple-choice})
+(s/def :question/type question-types)
 (s/def :question/question-statement string?)
 (s/def :question/points int?)
 
