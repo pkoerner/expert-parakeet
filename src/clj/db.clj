@@ -41,7 +41,7 @@
 (do (d/transact conn dummy-data/dummy-data) nil)
 
 
-(defprotocol Database
+(defprotocol Database-Protocol
 
   (get-course-iterations-of-student
     [this user-id])
@@ -131,10 +131,10 @@
       id)))
 
 
-(deftype database
+(deftype Database
   [conn]
 
-  Database
+  Database-Protocol
 
   (get-course-iterations-of-student
     [this user-id]
@@ -149,7 +149,7 @@
                  :in $ ?u
                  :where
                  [?u :user/course-iterations ?k]]
-               @conn [:user/id user-id])))
+               @(.conn this) [:user/id user-id])))
 
 
   (get-graded-answers-of-question-set
@@ -163,7 +163,7 @@
                  [?a :answer/question ?f]
                  [?t :question-set/questions ?f]
                  [?a :answer/points]]
-               @conn [:user/id user-id] [:question-set/id question-set-id])))
+               @(.conn this) [:user/id user-id] [:question-set/id question-set-id])))
 
 
   (get-questions-for-user
@@ -177,7 +177,7 @@
                  :in $ ?corr
                  :where
                  [?corr :user/course-iterations ?course-iteration]]
-               @conn [:user/id corrector-id])))
+               @(.conn this) [:user/id corrector-id])))
 
 
   (get-answers-for-question
@@ -193,7 +193,7 @@
              [?tx :db/txInstant ?timestamp]
              [?answer :answer/user ?user]
              [?user :user/id ?user-id]]
-           @conn question-id)))
+           @(.conn this) question-id)))
 
 
   (get-all-answers-with-corrections
@@ -203,7 +203,7 @@
                  :in $
                  :where
                  [?correction :correction/answer ?answer]]
-               @conn)))
+               @(.conn this))))
 
 
   (get-all-corrections-of-corrector
@@ -213,12 +213,12 @@
                  :in $ ?korr
                  :where
                  [?k :correction/corrector ?korr]]
-               @conn [:user/id corrector-id])))
+               @(.conn this) [:user/id corrector-id])))
 
 
   (get-question-set-by-id
     [this id]
-    (d/pull @conn
+    (d/pull @(.conn this)
             [:question-set/id {:question-set/questions [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]}]
             [:question-set/id id]))
 
@@ -227,7 +227,7 @@
     [this]
     (mapv first (d/q '[:find ?id
                        :where [_ :question-set/id ?id]]
-                     @conn)))
+                     @(.conn this))))
 
 
   (get-all-courses
@@ -238,7 +238,7 @@
                                        :course-iteration/year
                                        {:course-iteration/question-sets [:question-set/id]}])
                        :where [?e :course-iteration/id]]
-                     @conn)))
+                     @(.conn this))))
 
 
   (get-course-iterations-of-course
@@ -258,20 +258,20 @@
                        [?f :course/id ?course-id]
                        [?e :course-iteration/course ?f]
                        [?e :course-iteration/id]]
-                     @conn course-id)))
+                     @(.conn this) course-id)))
 
 
   (get-all-questions
     [this]
     (mapv first (d/q '[:find (pull ?e [:question/id])
                        :where [?e :question/id]]
-                     @conn)))
+                     @(.conn this))))
 
 
   (add-course!
     [this course-name]
     (let [id (generate-id :course/id)
-          tx-result (d/transact conn
+          tx-result (d/transact @(.conn this)
                                 [{:db/id -1
                                   :course/id id
                                   :course/course-name course-name}])
@@ -282,7 +282,7 @@
 
   (get-course-iteration-by-id
     [this course-iteration-id]
-    (d/pull @conn
+    (d/pull @(.conn this)
             [:course-iteration/id {:course-iteration/course [:course/id :course/course-name]}
              :course-iteration/year :course-iteration/semester
              {:course-iteration/question-sets [:question-set/id :question-set/name]}]
@@ -292,7 +292,7 @@
   (add-course-iteration!
     [this course-id year semester]
     (let [id (generate-id :course-iteration/id)
-          tx-result (d/transact conn
+          tx-result (d/transact @(.conn this)
                                 [{:db/id     -1
                                   :course-iteration/id   id
                                   :course-iteration/course [:course/id course-id]
@@ -306,7 +306,7 @@
 
   (get-question-by-id
     [this id]
-    (d/pull @conn
+    (d/pull @(.conn this)
             [:question/id :question/question-statement :question/points :question/type]
             [:question/id id]))
 
@@ -330,7 +330,7 @@
                                  (= type :question.type/multiple-choice)
                                  [:question/possible-solutions (:question/possible-solutions question)
                                   :question/multiple-choice-solution (:question/multiple-choice-solution question)]))
-          tx-result (d/transact conn [trans-map])
+          tx-result (d/transact @(.conn this) [trans-map])
           db-after (:db-after tx-result)]
       (d/pull db-after  [:question/id :question/question-statement :question/points :question/type :question/possible-solutions
                          :question/evaluation-criteria :question/single-choice-solution
@@ -346,7 +346,7 @@
                                        (:question/id question)
                                        (:question/id (add-question! this question)))) ; frage war noch nicht in db
                                    questions))
-          tx-result-question-set (d/transact conn
+          tx-result-question-set (d/transact @(.conn this)
                                              [{:db/id                      -1
                                                :question-set/id            id
                                                :question-set/name          question-set-name
@@ -367,7 +367,7 @@
   (add-user-answer!
     [this user-id question-id answer]
     (let [id (generate-id :answer/id)
-          tx-result (d/transact conn
+          tx-result (d/transact @(.conn this)
                                 [{:db/id -1
                                   :answer/id id
                                   :answer/question [:question/id question-id]
@@ -389,7 +389,7 @@
     [this]
     (d/q '[:find (pull ?e [:answer/id :answer/user :answer/question :answer/answer])
            :where [?e :answer/id]]
-         @conn))
+         @(.conn this)))
 
 
   (get-answers-for-correction
@@ -404,7 +404,7 @@
                  [?answer :answer/question ?question]
                  [?question :question/type ?type]
                  [(= ?type :question.type/free-text)]]
-               @conn [:answer/id answer-id])))
+               @(.conn this) [:answer/id answer-id])))
 
 
   (get-corrections-of-answer
@@ -418,12 +418,12 @@
              [?correction :correction/answer ?answer ?tx]
              [?tx :db/txInstant ?timestamp]
              [?correction :correction/feedback ?corr-feedback]]
-           @conn answer-id)))
+           @(.conn this) answer-id)))
 
 
   (add-correction!
     [this ant-id {feedback :correction/feedback points :correction/points corr-id :corrector/id}]
-    (let [tx-result (d/transact conn
+    (let [tx-result (d/transact @(.conn this)
                                 [{:db/id -1
                                   :correction/feedback feedback
                                   :correction/corrector [:user/id corr-id]
@@ -435,4 +435,4 @@
       (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1)))))
 
 
-(def db (->database conn))
+(def db (Database. conn))
