@@ -8,6 +8,7 @@
     [hiccup2.core :as h]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+    [ring.middleware.file :refer [wrap-file]]
     [ring.middleware.reload :refer [wrap-reload]]
     [ring.util.response :refer [header response]]))
 
@@ -37,7 +38,10 @@
 
 
 ;; oauth2 middleware callback requires cookie setting :same-site to be lax, see: https://github.com/weavejester/ring-oauth2
-(def app (-> combined-routes (wrap-defaults (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
+(def app
+  (-> combined-routes
+      (wrap-file "resources/public") ; serving of static resources
+      (wrap-defaults (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
 
 
 ;; in production, the app will be running behind a reverse proxy that does TLS
