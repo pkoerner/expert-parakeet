@@ -6,34 +6,40 @@
     :question/type :question.type/free-text
     :question/question-statement "Wie geht es dir heute?"
     :question/evaluation-criteria "Student schreibt Worte (7P)"
-    :question/points 7}
+    :question/points 7
+    :question/categories #{"Cat1" "Cat2"}}
    {:question/id "2"
     :question/type :question.type/free-text
     :question/question-statement "Fühlen sie sich prüfungsbereit?"
     :question/evaluation-criteria "Lösungskriterien"
-    :question/points 1}
+    :question/points 1
+    :question/categories #{"Cat2" "Cat3"}}
    {:question/id "3"
     :question/type :question.type/free-text
     :question/question-statement "Nächste Frage gefällig?"
     :question/evaluation-criteria "Studi muss freudig Ja sagen."
-    :question/points 5}
+    :question/points 5
+    :question/categories #{"Cat1" "Cat2"}}
    {:question/id "4"
     :question/type :question.type/single-choice
     :question/question-statement "Was ist die Hauptstadt von Italien?"
     :question/possible-solutions #{"Wien" "Venedig" "Rom" "Pizza"}
     :question/single-choice-solution "Rom"
-    :question/points 1}
+    :question/points 1
+    :question/categories #{"Cat2"}}
    {:question/id "5"
     :question/type :question.type/multiple-choice
     :question/question-statement "Was ist gut?"
     :question/possible-solutions #{"Lasagne" "Eis" "Schnecken" "Pasta"}
     :question/multiple-choice-solution #{"Lasagne" "Eis" "Pasta"}
-    :question/points 1}
+    :question/points 1
+    :question/categories #{"Cat1"}}
    {:question/id "6"
     :question/question-statement "Nächste Frage gefällig?"
     :question/type :question.type/free-text
     :question/evaluation-criteria "Lösung"
-    :question/points 1}])
+    :question/points 1
+    :question/categories #{"Cat3"}}])
 
 
 (def question-sets
