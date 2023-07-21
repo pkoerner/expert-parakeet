@@ -14,7 +14,8 @@
      :question/evaluation-criteria
      :question/possible-solutions
      :question/single-choice-solution
-     :question/multiple-choice-solution]))
+     :question/multiple-choice-solution
+     :question/categories]))
 
 
 ;; manche Felder bleiben leer (abhaengig vom Fragentyp)
