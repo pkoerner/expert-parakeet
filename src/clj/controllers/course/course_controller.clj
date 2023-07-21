@@ -1,10 +1,12 @@
 (ns controllers.course.course-controller
   (:require
+    [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [db]
     [ring.util.codec :refer [form-encode]]
     [ring.util.response :as response]
     [util.ring-extensions :refer [html-response]]
+    [util.spec-functions :refer [map-spec]]
     [views.course.create-course-view :as view]))
 
 
@@ -15,6 +17,14 @@
       (->> query-params
            (map (fn [[key val]] [(read-string key) val]))
            (into {})))))
+
+
+(s/fdef create-course-get
+        :args (s/cat :req coll?
+                     :post-destination :general/non-blank-string)
+        :ret #(instance? hiccup.util.RawString %)
+        :fn #(let [{{:keys [post-destination]} :args ret :ret} %]
+               (string/includes? (str ret) post-destination)))
 
 
 (defn create-course-get
@@ -31,14 +41,33 @@
       (view/course-form post-destination))))
 
 
+(s/fdef validate-course
+        :args (:course-name :course/course-name)
+        :ret (s/map-of view/create-course-error-keys
+                       string?))
+
+
 (defn- validate-course
   [course-name]
-  (let [error-map (dissoc view/create-course-errors :course-error) ; TODO: should check course-name specs
+  (let [error-map view/create-course-error-keys
         courses (db/get-all-courses)
         courses-with-same-name (filter (fn [course] (= course-name (course :course/course-name))) courses)]
-    (if (empty? courses-with-same-name)
-      (dissoc error-map :course-already-existed)
-      error-map)))
+    (-> error-map
+        (#(if (s/valid? :course/course-name course-name)
+            (dissoc % :course-error)
+            %))
+        (#(if (empty? courses-with-same-name)
+            (dissoc % :course-already-existed)
+            %)))))
+
+
+#_(->> error-map
+     #_(fn [m] (if (s/valid? :course/course-name course-name)
+                 (dissoc m :course-error)
+                 m))
+     (fn [m] (if (empty? courses-with-same-name)
+               (dissoc m :course-already-existed)
+               m)))
 
 
 (defn- add-to-db-and-get-success-msg
@@ -54,6 +83,17 @@
        (map (fn [[key msg]] (str key "=" msg)))
        (string/join "&")
        (str base-uri "?")))
+
+
+(s/def ::req-data
+  (map-spec {:__anti-forgery-token any?
+             :multipart-params (map-spec {"course-name" :course/course-name})}))
+
+
+(s/fdef submit-create-course!
+        :args (s/cat :req ::req-data
+                     :redirect-uri string?)
+        :ret #(instance? hiccup.util.RawString %))
 
 
 (defn submit-create-course!
