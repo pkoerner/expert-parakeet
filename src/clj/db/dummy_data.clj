@@ -1,5 +1,6 @@
 (ns db.dummy-data)
 
+
 ;; in production the ids are nano-ids, therefore an id is stored
 ;; as a string. For readability reasons we leave ids as strings
 ;; in the dummy data
@@ -73,7 +74,7 @@
 
 (def users
   [{:user/id "0"
-    :user/course-iterations [[:course-iteration/id "1"] [:course-iteration/id "2"]]} 
+    :user/course-iterations [[:course-iteration/id "1"] [:course-iteration/id "2"]]}
    {:user/id "2"
     :user/course-iterations [[:course-iteration/id "1"]]}
    {:user/id "3"
@@ -152,10 +153,10 @@
 
 (def dummy-data
   (concat
-   questions
-   question-sets
-   courses
-   course-iterations
-   users
-   answers
-   corrections))
+    questions
+    question-sets
+    courses
+    course-iterations
+    users
+    answers
+    corrections))
