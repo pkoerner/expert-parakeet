@@ -15,9 +15,8 @@
            org.clojure/test.check {:mvn/version "1.1.1"}}
 
  :aliases {;; Test runner in console.
-           :build {
-                   :deps {io.github.clojure/tools.build {:git/tag "v0.9.4" :git/sha "76b78fe"}}
-                   :ns-default build}
+           :build       {:deps {io.github.clojure/tools.build {:git/tag "v0.9.4" :git/sha "76b78fe"}}
+                         :ns-default build}
 
            :test-runner {:extra-paths ["test"]
                          :extra-deps  {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
@@ -27,17 +26,15 @@
            :outdated    {:deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
                          :main-opts ["-m" "antq.core"]}
 
-           :kondo       {:deps {clj-kondo/clj-kondo {:mvn/version "2022.06.22"}}
-                         :main-opts  ["-m" "clj-kondo.main" "--lint" "src" "test"]}
+           :lint        {:deps {clj-kondo/clj-kondo {:mvn/version "2022.06.22"}}
+                         :main-opts  ["-m" "clj-kondo.main" "--lint" "src" "test" "build.clj" "deps.edn"]}
 
            :format      {:deps {mvxcvi/cljstyle {:mvn/version "0.15.0"}}
-                         :main-opts ["-m" "cljstyle.main" "fix" "src" "test"]}
-
-           :clj-kondo   {:deps {clj-kondo/clj-kondo {:mvn/version "2022.06.22"}}
-                         :main-opts  ["-m" "clj-kondo.main"]}
-
-           :clj-format  {:deps {mvxcvi/cljstyle {:mvn/version "0.15.0"}}
-                         :main-opts ["-m" "cljstyle.main"]}
+                         :main-opts ["-m" "cljstyle.main" "fix"]}
+           
+           ;; check-format is used by the ci
+           :check-format {:deps {mvxcvi/cljstyle {:mvn/version "0.15.0"}}
+                          :main-opts ["-m" "cljstyle.main" "check"]}
 
            :nrepl       {:extra-deps {cider/cider-nrepl   {:mvn/version "0.28.5"}}
                          :main-opts  ["-m" "nrepl.cmdline" "--interactive" "--middleware" "[cider.nrepl/cider-middleware]"]}}}
