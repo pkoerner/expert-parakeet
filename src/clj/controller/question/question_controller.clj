@@ -1,7 +1,8 @@
 (ns controller.question.question-controller
   (:require
-   [db]
-   [views.question :as view]))
+    [db]
+    [util.ring-extensions :refer [html-response]]
+    [views.question :as view]))
 
 
 (defn- validate-user-for-question
@@ -16,13 +17,38 @@
       (dissoc view/question-errors :not-assigned-to-question)
       error-map)))
 
+
 (defn question-get
-  [req & {:keys [get-question-fun]
+  [req put-destination-root & {:keys [get-question-fun]
           :or {get-question-fun db/get-question-by-id}}]
-  (let [question
-        (get-question-fun (-> req :route-params :id))
-        permission-error
-        (validate-user-for-question (str (-> req :session :user :id)) (-> req :route-params :id))]
+  (let [question-id (-> req :route-params :id)
+        user-id     (str (-> req :session :user :id))
+        question    (get-question-fun question-id)
+        permission-error (validate-user-for-question user-id question-id)]
     (if (empty? permission-error)
-      (view/question-form question)
+      (view/question-form question (str put-destination-root question-id))
       (view/no-question-assignment permission-error))))
+
+
+(defn- add-to-db-and-get-success-msg
+  [user-id question-id answer]
+  (let [db-result (db/add-user-answer! user-id question-id answer)]
+    (view/submit-success-view (:question/id db-result))))
+
+
+(defn question-put!
+  [req]
+  (println req)
+  (let [form-data (-> req (:params) (dissoc :__anti-forgery-token))
+        user-id (str (-> req :session :user :id))
+        question-id (:id form-data)
+        answer (:answer form-data)
+        multiple-answers (->> form-data
+                               (keys)
+                               (filter #(and (not= % :_method) (not= % :answer) (not= % :id)))
+                               (into [])
+                               (map name)
+                               (into []))]
+    (if (empty? multiple-answers)
+      (html-response (add-to-db-and-get-success-msg user-id question-id answer))
+      (html-response (add-to-db-and-get-success-msg user-id question-id multiple-answers)))))
