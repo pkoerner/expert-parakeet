@@ -160,7 +160,17 @@
     :answer/question [:question/id "8"]
     :answer/user [:user/id "0"]
     :answer/answer ["Alien is the best movie of all time <3"]
-    :answer/points 1}])
+    :answer/points 1}
+   {:answer/id "13"
+    :answer/question [:question/id "6"]
+    :answer/user [:user/id "3"]
+    :answer/answer ["logic"]
+    :answer/points 0}
+   {:answer/id "14"
+    :answer/question [:question/id "2"]
+    :answer/user [:user/id "3"]
+    :answer/answer ["I don't know, pls give me points :D"]
+    :answer/points 0}])
 
 
 (def corrections
@@ -172,7 +182,13 @@
     :correction/feedback "Please elaborate about the aspects of example-based testing"}
    {:correction/answer [:answer/id "4"]
     :correction/corrector [:user/id "0"]
-    :correction/feedback "Superb!"}])
+    :correction/feedback "Superb!"}
+   {:correction/answer [:answer/id "12"]
+    :correction/corrector [:user/id "0"]
+    :correction/feedback "Approved"}
+   {:correction/answer [:answer/id "14"]
+    :correction/corrector [:user/id "3"]
+    :correction/feedback "we do not give away points!"}])
 
 
 (def dummy-data
