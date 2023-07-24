@@ -1,5 +1,6 @@
 .idea
-.clj-kondo
+.clj-kondo/*
+!.clj-kondo/config.edn
 .cpcache
 .lsp
 /expert-parakeet.iml

@@ -2,19 +2,25 @@
   (:gen-class)
   (:require
     [auth :refer [wrap-authentication]]
-    [compojure.core :refer [defroutes GET]]
+    [compojure.core :refer [defroutes GET POST]]
     [compojure.route :as route]
+    [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
     [domain]
-    [hiccup2.core :as h]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
     [ring.middleware.reload :refer [wrap-reload]]
-    [ring.util.response :refer [header response]]))
+    [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
+    [services.course-service.course-service :refer [->CourseService]]
+    [services.course-service.p-course-service :refer [get-all-courses]]
+    [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
+    [services.question-set-service.question-set-service :refer [->QuestionSetService]]
+    [util.ring-extensions :refer [html-response]]))
 
 
-(defn html-response
-  [html]
-  (-> html h/html str response (header "Content-Type" "text/html; charset=utf-8")))
+(def ^:private services
+  {:course-service (->CourseService)
+   :course-iteration-service (->CourseIterationService)
+   :question-set-service (->QuestionSetService)})
 
 
 ;; all routes that dont need authentication go here
@@ -28,6 +34,13 @@
 ;; all routes that require authentication go here
 (defroutes private-routes
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
+
+  (GET "/create-course-iteration" req
+       (html-response (create-course-iteration-get req "/create-course-iteration"
+                                                   :get-courses-fun (partial get-all-courses (:course-service services))
+                                                   :get-question-sets-fun (partial get-all-question-sets (:question-set-service services)))))
+  (POST "/create-course-iteration" req
+        (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
   (route/not-found "Not Found"))
 
 
