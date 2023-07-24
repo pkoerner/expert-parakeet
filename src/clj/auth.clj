@@ -81,7 +81,7 @@
          :oauth-token token
          :as :json})
       :body
-      (select-keys [:email :name :id])))
+      (select-keys [:id])))
 
 
 ;; Github ID zur Session hinzufügen
