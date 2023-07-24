@@ -38,6 +38,17 @@
     :question/type :question.type/single-choice
     :question/possible-solutions #{"object oriented" "functional" "logic"}
     :question/single-choice-solution "object oriented"
+    :question/points 1}
+   {:question/id "7"
+    :question/question-statement "When was the movie Alien by ridley scott released?"
+    :question/type :question.type/single-choice
+    :question/possible-solutions #{"1979" "1976" "2000" "1966"}
+    :question/single-choice-solution "1979"
+    :question/points 1}
+   {:question/id "8"
+    :question/type :question.type/free-text
+    :question/question-statement "Which one is the greates movie of all time? ;D"
+    :question/evaluation-criteria "Alien !!!"
     :question/points 1}])
 
 
@@ -46,14 +57,17 @@
     :question-set/name "Test 01: Generative Testing"
     :question-set/questions [[:question/id "4"] [:question/id "5"] [:question/id "1"] [:question/id "3"]]}
    {:question-set/id "2"
-    :question-set/name "Week 1: "
-    :question-set/questions [[:question/id "6"] [:question/id "2"]]}])
+    :question-set/name "Week 1:"
+    :question-set/questions [[:question/id "6"] [:question/id "2"]]}
+   {:question-set/id "3"
+    :question-set/name "Test 00: Alien"
+    :question-set/questions [[:question/id "7"] [:question/id "8"]]}])
 
 
 (def courses
   [{:course/id "0"
     :course/course-name "Specialization Functional Programming: Clojure"
-    :course/question-sets [[:question-set/id "1"] [:question/id "3"] [:question/id "4"] [:question/id "5"]]}
+    :course/question-sets [[:question-set/id "1"] [:question/id "3"] [:question/id "4"] [:question/id "5"] [:question/id "7"] [:question/id "8"]]}
    {:course/id "1"
     :course/course-name "Programming 1"
     :course/question-sets [[:question-set/id "2"] [:question/id "6"]]}])
@@ -64,7 +78,7 @@
     :course-iteration/course [:course/id "0"]
     :course-iteration/year 2022
     :course-iteration/semester "WiSe"
-    :course-iteration/question-sets [[:question-set/id "1"]]}
+    :course-iteration/question-sets [[:question-set/id "3"] [:question-set/id "1"]]}
    {:course-iteration/id "2"
     :course-iteration/course [:course/id "1"]
     :course-iteration/year 2020
@@ -136,6 +150,16 @@
     :answer/question [:question/id "5"]
     :answer/user [:user/id "2"]
     :answer/answer ["Oracle" "specs"]
+    :answer/points 1}
+   {:answer/id "11"
+    :answer/question [:question/id "7"]
+    :answer/user [:user/id "0"]
+    :answer/answer ["1979"]
+    :answer/points 1}
+   {:answer/id "12"
+    :answer/question [:question/id "8"]
+    :answer/user [:user/id "0"]
+    :answer/answer ["Alien is the best movie of all time <3"]
     :answer/points 1}])
 
 
