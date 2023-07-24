@@ -2,10 +2,12 @@
   (:require
     [db]))
 
+
 (def question-set-errors
   "Possible errors that can occur when trying
    to access a question-set."
   {:not-assigned-to-question-set "Sie haben keinen Zugriff auf diesen Test!"})
+
 
 (defn question-set-form
   [question-set]
@@ -21,5 +23,7 @@
         (:question/question-statement question)]]
       [:td (:question/points question)]])])
 
-(defn no-assignement-form [permission-error]
+
+(defn no-assignement-form
+  [permission-error]
   [:p (str "ERROR:" (:not-assigned-to-question-set permission-error))])
