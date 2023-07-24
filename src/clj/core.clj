@@ -1,16 +1,17 @@
 (ns core
-  (:require [auth :refer [wrap-authentication]]
-            [compojure.core :refer [defroutes GET PUT]]
-            [compojure.route :as route]
-            db
-            [domain]
-            [hiccup2.core :as h]
-            [ring.adapter.jetty :refer [run-jetty]]
-            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-            [ring.middleware.reload :refer [wrap-reload]]
-            [ring.util.response :refer [header response]]
-            [controller.question.question-controller :refer [question-get]]
-            [controller.question-set.question-set-controller :refer [question-set-get]]))
+  (:require
+    [auth :refer [wrap-authentication]]
+    [compojure.core :refer [defroutes GET PUT]]
+    [compojure.route :as route]
+    [controller.question-set.question-set-controller :refer [question-set-get]]
+    [controller.question.question-controller :refer [question-get question-put!]]
+    [db]
+    [domain]
+    [hiccup2.core :as h]
+    [ring.adapter.jetty :refer [run-jetty]]
+    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+    [ring.middleware.reload :refer [wrap-reload]]
+    [ring.util.response :refer [header response]]))
 
 
 (defn html-response
@@ -29,16 +30,14 @@
 ;; all routes that require authentication go here
 (defroutes private-routes
   (GET "/question-set/:id"
-    req
-    (html-response (question-set-get req)))
+       req
+       (html-response (question-set-get req)))
   (GET "/question/:id"
-    req
-    (html-response (question-get req)))
-  ;; This route will be included to submit an answer to
-  ;; a question if roles are implemented.
-  ;;(PUT "/answer/:question-id/:answer-id" 
-  ;;  [user-id question-id answer-id]
-  ;;  (db/add-user-answer! user-id question-id answer-id))
+       req
+       (html-response (question-get req "/question/")))
+  (PUT "/question/:id"
+       req
+       (html-response (question-put! req)))
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
   (route/not-found "Not Found"))
 
