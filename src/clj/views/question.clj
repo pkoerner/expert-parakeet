@@ -65,5 +65,5 @@
   [response]
   (h/html
     [:div
-     [:p "Die Frage wurde erfolgreich eingereicht.!"]
+     [:p "Die Frage wurde erfolgreich eingereicht!"]
      [:p response]]))
