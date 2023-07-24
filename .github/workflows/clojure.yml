@@ -23,3 +23,5 @@ jobs:
         uses: vouch-opensource/tools.deps-build@1.0.1
         with:
           alias: :test-runner
+      - name: Build the whole application
+        run: docker build .
