@@ -96,6 +96,7 @@
                [?corr :user/course-iterations ?course-iteration]]
              @conn [:user/id user-id])))
 
+
 (defn get-question-ids-for-user
   "Fetches all question-ids belonging to
    a user."
@@ -108,6 +109,7 @@
                [?ci :course-iteration/question-sets ?qs]
                [?qs :question-set/questions ?q]]
              @conn [:user/id user-id])))
+
 
 (defn get-answers-for-question
   "Fetches all answers of all users for one question."
