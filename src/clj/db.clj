@@ -97,12 +97,14 @@
                [?corr :user/course-iterations ?course-iteration]]
              @conn [:user/id corrector-id])))
 
+
 (defn get-all-question-categories
   []
   (mapv first
         (d/q '[:find ?c
                :where [_ :question/categories ?c]]
              @conn [])))
+
 
 (defn get-answers-for-question
   "Fetches all answers of all users for one question."

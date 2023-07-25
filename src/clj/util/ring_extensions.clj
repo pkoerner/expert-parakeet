@@ -1,7 +1,8 @@
 (ns util.ring-extensions
   (:require
-   [hiccup2.core :as h]
-   [ring.util.response :refer [header response]]))
+    [hiccup2.core :as h]
+    [ring.util.response :refer [header response]]))
+
 
 (def ^:private bootstrap-include
   [:link {:rel "stylesheet"
