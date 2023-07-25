@@ -24,10 +24,10 @@
 
 
 (s/fdef validate-user-for-question
-  :args (s/cat :self #(satisfies? PQuestionService %)
-               :user-id :user/id
-               :question-id :question/id)
-  :ret (s/coll-of keyword?))
+        :args (s/cat :self #(satisfies? PQuestionService %)
+                     :user-id :user/id
+                     :question-id :question/id)
+        :ret (s/coll-of keyword?))
 
 
 (defn validate-user-for-question

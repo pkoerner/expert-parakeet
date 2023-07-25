@@ -26,5 +26,5 @@
 
 (defn no-assignement-form
   [permission-error]
-    (when (contains? permission-error :not-assigned-to-question-set)
-      [:p (str "ERROR: Sie haben keinen Zugriff auf diesen Test!")]))
+  (when (contains? permission-error :not-assigned-to-question-set)
+    [:p (str "ERROR: Sie haben keinen Zugriff auf diesen Test!")]))

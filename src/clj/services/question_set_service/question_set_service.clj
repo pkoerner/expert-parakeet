@@ -22,8 +22,8 @@
 
 
 (s/fdef get-question-set-by-id
-  :args (s/cat :self #(satisfies? PQuestionSetService %) :question-set-id string?)
-  :ret (s/coll-of (s/keys :req [:question-set/id :question-set/questions])))
+        :args (s/cat :self #(satisfies? PQuestionSetService %) :question-set-id string?)
+        :ret (s/coll-of (s/keys :req [:question-set/id :question-set/questions])))
 
 
 (defn get-question-set-by-id
@@ -44,11 +44,12 @@
                   #(map :question-set/id %)
                   (extract-question-sets-of-user user-id))))
 
+
 (s/fdef validate-user-for-question-set
-  :args (s/cat :self #(satisfies? PQuestionSetService %)
-               :user-id :user/id
-               :question-set-id :question-set/id)
-  :ret (s/coll-of keyword?))
+        :args (s/cat :self #(satisfies? PQuestionSetService %)
+                     :user-id :user/id
+                     :question-set-id :question-set/id)
+        :ret (s/coll-of keyword?))
 
 
 (defn validate-user-for-question-set
