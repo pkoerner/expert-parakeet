@@ -5,6 +5,8 @@
     [db]
     [ring.util.codec :refer [form-encode]]
     [ring.util.response :as response]
+    [services.course-service.p-course-service :refer [create-course
+                                                      validate-course]]
     [util.ring-extensions :refer [html-response]]
     [util.spec-functions :refer [map-spec]]
     [views.course.create-course-view :as view]))
@@ -41,29 +43,9 @@
       (view/course-form post-destination))))
 
 
-(s/fdef validate-course
-        :args (:course-name :course/course-name)
-        :ret (s/map-of view/create-course-error-keys
-                       string?))
-
-
-(defn- validate-course
-  [course-name]
-  (let [error-map view/create-course-error-keys
-        courses (db/get-all-courses)
-        courses-with-same-name (filter (fn [course] (= course-name (course :course/course-name))) courses)]
-    (-> error-map
-        (#(if (s/valid? :course/course-name course-name)
-            (dissoc % :course-error)
-            %))
-        (#(if (empty? courses-with-same-name)
-            (dissoc % :course-already-existed)
-            %)))))
-
-
 (defn- add-to-db-and-get-success-msg
-  [course]
-  (let [db-result (db/add-course! course)]
+  [course db-add-fun]
+  (let [db-result (db-add-fun course)]
     (view/submit-success-view (:course/course-name db-result))))
 
 
@@ -83,17 +65,18 @@
 
 (s/fdef submit-create-course!
         :args (s/cat :req ::req-data
-                     :redirect-uri string?)
+                     :redirect-uri string?
+                     :db-add-fun (s/? (s/get-spec `db/add-course!)))
         :ret #(instance? hiccup.util.RawString %))
 
 
 (defn submit-create-course!
   "This function takes a request and a uri to be redirected to, when the data of the request was invalid.
    If the data was invalid the request is redirected to the `redirect-uri` with the errors as query parameters."
-  [req redirect-uri]
+  [req redirect-uri course-service]
   (let [form-data (-> req (:multipart-params) (dissoc :__anti-forgery-token))
         course-name (form-data "course")
-        validation-errors (validate-course course-name)]
+        validation-errors (validate-course course-service course-name)]
     (if (empty? validation-errors)
-      (html-response (add-to-db-and-get-success-msg course-name))
+      (html-response (add-to-db-and-get-success-msg course-name (partial create-course course-service)))
       (response/redirect (construct-url (str (get-in req [:header :origin]) redirect-uri) validation-errors)))))

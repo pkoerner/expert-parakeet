@@ -8,9 +8,8 @@
 
 
 (def create-course-error-keys
-  "Possible errors to display in the course-form."
-  {:course-error "Der ausgewählte Name war inkorrekt!"
-   :course-already-existed "Der angegebene Fachname wird bereits verwendet!"})
+  "Possible keys for which errors can be displayed in the `course-form`."
+  #{:course/course-error :course/course-already-existed})
 
 
 (s/fdef course-form
@@ -39,10 +38,10 @@
       [:post post-destination]
 
       [:div
-       (when (errors :course-error)
-         [:div [:span {:style "color: red;"} (errors :course-error)]])
-       (when (errors :course-already-existed)
-         [:div [:span {:style "color: red;"} (errors :course-already-existed)]])
+       (when (errors :course/course-error)
+         [:div [:span {:style "color: red;"} (errors :course/course-error)]])
+       (when (errors :course/course-already-existed)
+         [:div [:span {:style "color: red;"} (errors :course/course-already-existed)]])
        [:label {:for "course"} "Fachname:"] [:br]
        [:input#course {:name "course"
                        :type "text"
@@ -62,4 +61,4 @@
   [course]
   (h/html
     [:div
-     [:p "Das Fach " course " wurde erfolgreich erstellt.!\n"]]))
+     [:p "Das Fach " course " wurde erfolgreich erstellt!\n"]]))

@@ -38,7 +38,7 @@
   (GET "/create-course" req
        (html-response (create-course-get req "/create-course")))
   (POST "/create-course" req
-        (submit-create-course! req "/create-course"))
+        (submit-create-course! req "/create-course" (:course-service services)))
   (GET "/create-course-iteration" req
        (html-response (create-course-iteration-get req "/create-course-iteration"
                                                    :get-courses-fun (partial get-all-courses (:course-service services))
