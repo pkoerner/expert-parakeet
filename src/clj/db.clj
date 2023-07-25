@@ -1,5 +1,6 @@
 (ns db
   (:require
+    [clojure.spec.alpha :as s]
     [datahike.api :as d]
     [db.dummy-data :as dummy-data]
     [db.schema :refer [db-schema]]
@@ -160,12 +161,20 @@
   "Return a vector containing the ids of all
    question-sets in the database."
   []
-  (mapv first (d/q '[:find ?id
-                     :where [_ :question-set/id ?id]]
+  (mapv first (d/q '[:find (pull ?e [:question-set/id :question-set/name])
+                     :where [?e :question-set/id]]
                    @conn)))
 
 
 (defn get-all-courses
+  []
+  (mapv first
+        (d/q '[:find (pull ?e [:course/id :course/course-name {:course/question-sets [:question-set/id :question-set/name]}])
+               :where [?e :course/id]]
+             @db/conn)))
+
+
+(defn get-all-course-iterations
   []
   (mapv first (d/q '[:find (pull ?e [:course-iteration/id {:course-iteration/course [:course/id :course/course-name]}
                                      :course-iteration/year
@@ -224,19 +233,42 @@
           [:course-iteration/id course-iteration-id]))
 
 
-(defn add-course-iteration!
-  [course-id year semester]
+(s/fdef add-course-iteration-with-question-sets!
+        :args (s/cat :course-id :course/id
+                     :year :course-iteration/year
+                     :semester :course-iteration/semester
+                     :question-set-ids (s/coll-of :question-set/id))
+        :ret (s/keys :req [:course-iteration/id
+                           :course/id
+                           :course-iteration/year
+                           :course-iteration/semester
+                           (s/coll-of :question-set/id)]))
+
+
+(defn add-course-iteration-with-question-sets!
+  [course-id year semester question-set-ids]
   (let [id (generate-id :course-iteration/id)
+        question-set-ids-keyed (mapv (fn [question-set-id] [:question-set/id (str question-set-id)])
+                                     question-set-ids)
         tx-result (d/transact conn
                               [{:db/id     -1
                                 :course-iteration/id   id
                                 :course-iteration/course [:course/id course-id]
                                 :course-iteration/year year
                                 :course-iteration/semester semester
-                                :course-iteration/question-sets []}])
+                                :course-iteration/question-sets question-set-ids-keyed}])
         db-after (:db-after tx-result)]
-    (d/pull db-after [:course-iteration/id :course-iteration/course :course-iteration/year :course-iteration/semester :course-iteration/question-sets]
+    (d/pull db-after [:course-iteration/id
+                      :course-iteration/course
+                      :course-iteration/year
+                      :course-iteration/semester
+                      :course-iteration/question-sets]
             [:course-iteration/id id])))
+
+
+(defn add-course-iteration!
+  [course-id year semester]
+  (add-course-iteration-with-question-sets! course-id year semester []))
 
 
 (defn get-question-by-id
