@@ -28,7 +28,7 @@
     #(= (:question/type %) :question.type/free-text)))
 
 
-(s/def :question/possible-solutions (s/coll-of :general/non-blank-string))
+(s/def :question/possible-solutions (s/coll-of :general/non-blank-string :min-count 1))
 
 (s/def :question/single-choice-solution :general/non-blank-string)
 
@@ -41,7 +41,7 @@
     #(= (:question/type %) :question.type/single-choice)))
 
 
-(s/def :question/multiple-choice-solution (s/coll-of :general/non-blank-string))
+(s/def :question/multiple-choice-solution (s/coll-of :general/non-blank-string :min-count 1))
 
 
 (s/def :question/multiple-choice-question
