@@ -6,8 +6,8 @@
     [compojure.route :as route]
     [controller.question-set.question-set-controller :refer [question-set-get]]
     [controller.question.question-controller :refer [question-get question-put!]]
-    [db]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
+    [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
@@ -15,7 +15,8 @@
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-service.course-service :refer [->CourseService]]
     [services.course-service.p-course-service :refer [get-all-courses]]
-    [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
+    [services.question-set-service.p-question-set-service :refer [get-all-question-sets
+                                                                  get-question-set-by-id]]
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
     [util.ring-extensions :refer [html-response]]))
 
@@ -38,7 +39,9 @@
 (defroutes private-routes
   (GET "/question-set/:id"
        req
-       (html-response (question-set-get req)))
+       (html-response (question-set-get
+                        req
+                        (:question-set-service services))))
   (GET "/question/:id"
        req
        (html-response (question-get req "/question/")))
