@@ -101,26 +101,33 @@ function registerAddingSolutionBehavior(
 
         liContainer.appendChild(answerInputDisplay);
         liContainer.appendChild(answerInputHidden);
-        
-        removeFromCorrectSolutionsBtn = createButton("✗", () =>
-          liContainer.remove()
+
+        removeFromCorrectSolutionsBtn = createButton(
+          "✗",
+          () => liContainer.remove(),
+          ["btn", "btn-outline-info", "btn-sm"]
         );
 
         liContainer.appendChild(removeFromCorrectSolutionsBtn);
 
         document.getElementById(solutionListId).appendChild(liContainer);
-      }
+      },
+      ["btn", "btn-outline-info", "btn-sm"]
     );
 
     solutionContainer.appendChild(addCorrectSolutionBtn);
 
-    const removeSolutionBtn = createButton("-", function () {
-      newSolutionNode?.remove();
-      lineBreak?.remove();
-      liContainer?.remove();
-      addCorrectSolutionBtn?.remove();
-      removeSolutionBtn?.remove();
-    });
+    const removeSolutionBtn = createButton(
+      "-",
+      function () {
+        newSolutionNode?.remove();
+        lineBreak?.remove();
+        liContainer?.remove();
+        addCorrectSolutionBtn?.remove();
+        removeSolutionBtn?.remove();
+      },
+      ["btn", "btn-outline-info", "btn-sm"]
+    );
     solutionContainer.appendChild(removeSolutionBtn);
   };
 }
