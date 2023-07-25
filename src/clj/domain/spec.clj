@@ -12,9 +12,9 @@
 
 (s/def :question/id string?)
 (s/def :question/type question-types)
-(s/def :question/question-statement string?)
+(s/def :question/question-statement :general/non-blank-string)
 (s/def :question/points int?)
-(s/def :question/categories (s/coll-of string? :type set))
+(s/def :question/categories (s/coll-of :general/non-blank-string :type set))
 
 
 (s/def :question/evaluation-criteria string?)
@@ -22,34 +22,34 @@
 
 (s/def :question/question
   (s/and
-   (s/keys :req [:question/id :question/type :question/question-statement :question/points
-                 :question/evaluation-criteria
-                 :question/categories])
-   #(= (:question/type %) :question.type/free-text)))
+    (s/keys :req [:question/id :question/type :question/question-statement :question/points
+                  :question/evaluation-criteria
+                  :question/categories])
+    #(= (:question/type %) :question.type/free-text)))
 
 
-(s/def :question/possible-solutions (s/coll-of string?))
+(s/def :question/possible-solutions (s/coll-of :general/non-blank-string))
 
-(s/def :question/single-choice-solution string?)
+(s/def :question/single-choice-solution :general/non-blank-string)
 
 
 (s/def :question/single-choice-question
   (s/and
-   (s/keys :req [:question/id :question/type :question/question-statement :question/points
-                 :question/possible-solutions :question/single-choice-solution
-                 :question/categories])
-   #(= (:question/type %) :question.type/single-choice)))
+    (s/keys :req [:question/id :question/type :question/question-statement :question/points
+                  :question/possible-solutions :question/single-choice-solution
+                  :question/categories])
+    #(= (:question/type %) :question.type/single-choice)))
 
 
-(s/def :question/multiple-choice-solution (s/coll-of string?))
+(s/def :question/multiple-choice-solution (s/coll-of :general/non-blank-string))
 
 
 (s/def :question/multiple-choice-question
   (s/and
-   (s/keys :req [:question/id :question/type :question/question-statement :question/points
-                 :question/possible-solutions :question/multiple-choice-solution
-                 :question/categories])
-   #(= (:question/type %) :question.type/multiple-choice)))
+    (s/keys :req [:question/id :question/type :question/question-statement :question/points
+                  :question/possible-solutions :question/multiple-choice-solution
+                  :question/categories])
+    #(= (:question/type %) :question.type/multiple-choice)))
 
 
 (s/def ::question
