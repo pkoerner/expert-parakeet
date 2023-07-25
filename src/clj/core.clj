@@ -15,6 +15,7 @@
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-service.course-service :refer [->CourseService]]
     [services.course-service.p-course-service :refer [get-all-courses]]
+    [services.question-service.question-service :refer [->QuestionService]]
     [services.question-set-service.p-question-set-service :refer [get-all-question-sets
                                                                   get-question-set-by-id]]
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
@@ -24,7 +25,8 @@
 (def ^:private services
   {:course-service (->CourseService)
    :course-iteration-service (->CourseIterationService)
-   :question-set-service (->QuestionSetService)})
+   :question-set-service (->QuestionSetService)
+   :question-service (->QuestionService)})
 
 
 ;; all routes that dont need authentication go here
@@ -44,7 +46,7 @@
                         (:question-set-service services))))
   (GET "/question/:id"
        req
-       (html-response (question-get req "/question/")))
+       (html-response (question-get req "/question/" (:question-service services))))
   (PUT "/question/:id"
        req
        (html-response (question-put! req)))
