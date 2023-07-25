@@ -6,10 +6,18 @@
     [views.question.create-question-view :as view :refer [question-success-view]]))
 
 
-(defn create-question-get
-  [_req post-destination]
+(defn- extract-errors
+  [request]
+  (let [query-params (:query-params request)]
+    (when query-params
+      (->> query-params
+           (map (fn [[key val]] [(read-string key) val]))
+           (into {})))))
 
-  (view/question-form post-destination))
+
+(defn create-question-get
+  [req get-question-categories-fun post-destination]
+  (view/question-form (get-question-categories-fun) post-destination :errors (extract-errors req)))
 
 
 (defn- create-validation-functions-with-error-msg
