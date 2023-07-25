@@ -61,15 +61,6 @@
             %)))))
 
 
-#_(->> error-map
-     #_(fn [m] (if (s/valid? :course/course-name course-name)
-                 (dissoc m :course-error)
-                 m))
-     (fn [m] (if (empty? courses-with-same-name)
-               (dissoc m :course-already-existed)
-               m)))
-
-
 (defn- add-to-db-and-get-success-msg
   [course]
   (let [db-result (db/add-course! course)]
