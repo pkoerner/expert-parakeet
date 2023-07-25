@@ -3,6 +3,9 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [db]
+    [ring.util.codec :refer [form-encode]]
+    [ring.util.response :as response]
+    [util.ring-extensions :refer [html-response]]
     [views.question.create-question-view :as view :refer [question-success-view]]))
 
 
@@ -132,10 +135,13 @@
                  :question/categories])))))
 
 
-(def ^:private to-question-type
-  {"free-text" :question.type/free-text
-   "single-choice" :question.type/single-choice
-   "multiple-choice" :question.type/multiple-choice})
+(defn- construct-url
+  [base-uri param-map]
+  (->> param-map
+       (map (fn [[key msg]] [(form-encode key) (form-encode msg)]))
+       (map (fn [[key msg]] (str key "=" msg)))
+       (string/join "&")
+       (str base-uri "?")))
 
 
 (defn create-question!
@@ -148,29 +154,24 @@
  \"single-choice-solutions\" \"Single choice possible-answer 4\"}
 ```
    "
-  [req add-question-fun]
+  [req redirect-uri add-question-fun]
   (let [form-data (-> req (:multipart-params) (dissoc "__anti-forgery-token"))
         {:strs [question-statement achivable-points type
                 possible-solutions single-choice-solutions multiple-choice-solutions
-                evaluation-criteria]} form-data
-        achivable-points (read-string achivable-points)
-        question-type (to-question-type type)
+                evaluation-criteria
+                categories]} form-data
+        result-map (validate-question-createion-input- question-statement
+                                                       achivable-points
+                                                       type
+                                                       possible-solutions
+                                                       single-choice-solutions
+                                                       multiple-choice-solutions
+                                                       evaluation-criteria
+                                                       categories)
+        validation-errors (result-map :errors)]
 
-        error-map (validate-question-createion-input- question-statement
-                                                      achivable-points
-                                                      question-type
-                                                      possible-solutions
-                                                      single-choice-solutions
-                                                      multiple-choice-solutions
-                                                      evaluation-criteria)]
-    (if (empty? error-map)
-      (let [question {:question/question-statement question-statement
-                      :question/points achivable-points
-                      :question/type question-type
-                      :question/possible-solutions possible-solutions
-                      :question/single-choice-solution single-choice-solutions
-                      :question/multiple-choice-solution multiple-choice-solutions
-                      :question/evaluation-criteria evaluation-criteria}
+    (if (empty? validation-errors)
+      (let [question result-map
             question (add-question-fun question)]
-        (question-success-view question))
-      error-map)))
+        (html-response (question-success-view question)))
+      (response/redirect (construct-url (str (get-in req [:headers :origin]) redirect-uri) validation-errors)))))
