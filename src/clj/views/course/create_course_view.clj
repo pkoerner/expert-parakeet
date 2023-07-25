@@ -24,7 +24,10 @@
                      ret :ret} spec-map]
                 #(string/includes? ret post-destination))))
 
+
 #_{:clj-kondo/ignore [:unresolved-var]}
+
+
 (defn course-form
   "Returns a html-form for course creation.
    Field of the response is: [course].
