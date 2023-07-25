@@ -44,9 +44,40 @@
        [[#(s/valid? :question/multiple-choice-solution multiple-choice-solutions) "Die möglichen Antworten waren keine korrekten möglichen Antworten!"]
         [#(every? (fn [x] ((set possible-solutions) x)) multiple-choice-solutions) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
-    (when (= type :question.type/free-text)
-      {:question/evaluation-criteria
-       [[#(s/valid? :question/evaluation-criteria evaluation-criteria) "Die angegebenen Bewertungskriterien waren keine korrekten Bewertungskriterien!"]]})))
+(def ^:private to-question-type
+  {"free-text" :question.type/free-text
+   "single-choice" :question.type/single-choice
+   "multiple-choice" :question.type/multiple-choice})
+
+
+(defn- parse-question
+  [question-statement achivable-points type
+   possible-solutions single-choice-solutions multiple-choice-solutions
+   evaluation-criteria
+   categories]
+  (letfn [(as-coll
+            [coll-or-single]
+            (if (or (nil? coll-or-single) (coll? coll-or-single))
+              coll-or-single
+              [coll-or-single]))]
+    (reduce merge
+            {}
+            [{:question/question-statement question-statement}
+             (let [question-type (to-question-type type)]
+               (if (nil? question-type)
+                 {:errors {:question/type "Der angegebene question-type war kein valider type!"}}
+                 {:question/type question-type}))
+             (try (let [points (Long/parseLong (.trim achivable-points))]
+                    {:question/points points})
+                  (catch NumberFormatException _
+                    {:errors {:question/points "Die erreichbaren Punkte müssen eine Zahl sein"}}))
+             {:question/possible-solutions (as-coll possible-solutions)}
+             (if (coll? single-choice-solutions)
+               {:errors {:question/single-choice-solution "Es sollte nur eine Antwort bei einer single-choice Frage geben!"}}
+               {:question/single-choice-solution single-choice-solutions})
+             {:question/multiple-choice-solution (as-coll multiple-choice-solutions)}
+             {:question/evaluation-criteria evaluation-criteria}
+             {:question/categories (as-coll categories)}])))
 
 
 (defn- validate-question-createion-input-
