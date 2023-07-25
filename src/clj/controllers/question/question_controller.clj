@@ -21,28 +21,43 @@
 
 
 (defn- create-validation-functions-with-error-msg
-  [question-statement achivable-points type
-   possible-solutions single-choice-solutions multiple-choice-solutions
-   evaluation-criteria]
-  (merge
-    {:question/question-statement [[#(s/valid? :question/question-statement question-statement) "Die Fragestellung war inkorrekt!"]]
-     :question/points [[#(s/valid? :question/points achivable-points) "Die erreichbaren Punkte waren inkorrekt!"]]
-     :question/type [[#(s/valid? :question/type type) "Der ausgewälte question-type war kein korrekter type!"]]}
+  [question]
+  (let [{:question/keys [question-statement
+                         points
+                         type
+                         possible-solutions
+                         single-choice-solution
+                         multiple-choice-solution
+                         evaluation-criteria
+                         categories]} question]
+    (merge
+      {:question/question-statement [[#(s/valid? :question/question-statement question-statement) "Die Fragestellung war inkorrekt!"]]
+       :question/points [[#(s/valid? :question/points points) "Die erreichbaren Punkte waren inkorrekt!"]]
+       :question/type [[#(s/valid? :question/type type) "Der ausgewälte question-type war kein korrekter type!"]]}
 
-    (when (or (= type :question.type/single-choice) (= type :question.type/multiple-choice))
-      {:question/possible-solutions
-       [[#(s/valid? :question/possible-solutions possible-solutions) "Die Antwortmöglichkeiten waren nicht korrekt!"]
-        [#(apply distinct? possible-solutions) "Zwei Antwortmglichkeiten waren identisch!"]]})
+      (when (or (= type :question.type/single-choice) (= type :question.type/multiple-choice))
+        {:question/possible-solutions
+         [[#(s/valid? :question/possible-solutions possible-solutions) "Die Antwortmöglichkeiten waren nicht korrekt!"]
+          [#(if possible-solutions (apply distinct? possible-solutions) true) "Zwei Antwortmglichkeiten waren identisch!"]]})
 
-    (when  (= type :question.type/single-choice)
-      {:question/single-choice-solution
-       [[#(s/valid? :question/single-choice-solution single-choice-solutions) "Die möglichen Antworten waren keine korrekten möglichen Antworten!"]
-        [#((set possible-solutions) single-choice-solutions) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
+      (when  (= type :question.type/single-choice)
+        {:question/single-choice-solution
+         [[#(s/valid? :question/single-choice-solution single-choice-solution) "Die möglichen Antworten waren keine korrekten möglichen Antworten!"]
+          [#((set possible-solutions) single-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
-    (when  (= type :question.type/multiple-choice)
-      {:question/multiple-choice-solution
-       [[#(s/valid? :question/multiple-choice-solution multiple-choice-solutions) "Die möglichen Antworten waren keine korrekten möglichen Antworten!"]
-        [#(every? (fn [x] ((set possible-solutions) x)) multiple-choice-solutions) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
+      (when  (= type :question.type/multiple-choice)
+        {:question/multiple-choice-solution
+         [[#(s/valid? :question/multiple-choice-solution multiple-choice-solution) "Die möglichen Antworten waren keine korrekten möglichen Antworten!"]
+          [#(every? (fn [x] ((set possible-solutions) x)) multiple-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
+
+      (when (= type :question.type/free-text)
+        {:question/evaluation-criteria
+         [[#(s/valid? :question/evaluation-criteria evaluation-criteria) "Die angegebenen Bewertungskriterien waren keine korrekten Bewertungskriterien!"]]})
+
+      (when (seq categories)
+        {:question/categories
+         [[#(s/valid? :question/categories categories) "Die angegebenen Kategorien waren nicht korrekt geformt!"]]}))))
+
 
 (def ^:private to-question-type
   {"free-text" :question.type/free-text
