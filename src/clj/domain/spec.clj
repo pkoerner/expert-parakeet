@@ -1,7 +1,11 @@
 (ns domain.spec
   (:require
     [clojure.spec.alpha :as s]
+    [clojure.string :as string]
     [util.time :as time]))
+
+
+(s/def :general/non-blank-string (s/and string? (complement string/blank?)))
 
 
 (s/def :question/id string?)
@@ -48,8 +52,8 @@
         :multiple-choice :question/multiple-choice-question))
 
 
-(s/def :question-set/id string?)
-(s/def :question-set/name string?)
+(s/def :question-set/id :general/non-blank-string)
+(s/def :question-set/name :general/non-blank-string)
 (s/def :question-set/questions (s/coll-of ::question))
 
 
@@ -71,8 +75,8 @@
 
 ;; TODO: remove comment once we moved to MA
 ;; old entity was called: fach
-(s/def :course/id string?)
-(s/def :course/course-name string?)
+(s/def :course/id :general/non-blank-string)
+(s/def :course/course-name :general/non-blank-string)
 (s/def :course/question-sets (s/coll-of ::question-set))
 
 
@@ -86,7 +90,7 @@
 (s/def :course-iteration/id string?)
 (s/def :course-iteration/course ::course)
 (s/def :course-iteration/year pos-int?)
-(s/def :course-iteration/semester string?)
+(s/def :course-iteration/semester #{"WiSe" "SoSe"})
 (s/def :course-iteration/question-sets (s/coll-of ::question-set))
 
 
