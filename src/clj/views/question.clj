@@ -7,7 +7,7 @@
 
 
 (def question-errors
-  {:not-assigned-to-question "You are not assigned to this question!"})
+  #{:not-assigned-to-question})
 
 
 ;; I dont know how this exactly works.
@@ -58,7 +58,8 @@
 
 (defn no-question-assignment
   [permission-error]
-  [:p (str "ERROR " (:not-assigned-to-question permission-error))])
+  (when (contains? permission-error :not-assigned-to-question)
+    [:p (str "ERROR: Sie sind dieser Frage nicht zugewiesen!")]))
 
 
 (defn submit-success-view

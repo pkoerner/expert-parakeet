@@ -6,7 +6,7 @@
 (def question-set-errors
   "Possible errors that can occur when trying
    to access a question-set."
-  {:not-assigned-to-question-set "Sie haben keinen Zugriff auf diesen Test!"})
+  #{:not-assigned-to-question-set})
 
 
 (defn question-set-form
@@ -26,4 +26,5 @@
 
 (defn no-assignement-form
   [permission-error]
-  [:p (str "ERROR:" (:not-assigned-to-question-set permission-error))])
+    (when (contains? permission-error :not-assigned-to-question-set)
+      [:p (str "ERROR: Sie haben keinen Zugriff auf diesen Test!")]))

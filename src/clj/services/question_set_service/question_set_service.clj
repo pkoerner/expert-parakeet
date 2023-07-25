@@ -21,6 +21,11 @@
   (db/get-all-question-sets))
 
 
+(s/fdef get-question-set-by-id
+  :args (s/cat :self #(satisfies? PQuestionSetService %) :question-set-id string?)
+  :ret (s/coll-of (s/keys :req [:question-set/id :question-set/questions])))
+
+
 (defn get-question-set-by-id
   [_ question-set-id]
   (db/get-question-set-by-id question-set-id))
@@ -39,6 +44,12 @@
                   #(map :question-set/id %)
                   (extract-question-sets-of-user user-id))))
 
+(s/fdef validate-user-for-question-set
+  :args (s/cat :self #(satisfies? PQuestionSetService %)
+               :user-id :user/id
+               :question-set-id :question-set/id)
+  :ret (s/coll-of keyword?))
+
 
 (defn validate-user-for-question-set
   "Checks if a user is assgined to a
@@ -49,7 +60,7 @@
   (let [users-question-sets (extract-question-set-ids-of-user user-id)
         error-map view/question-set-errors]
     (if (.contains users-question-sets question-set-id)
-      (dissoc view/question-set-errors :not-assigned-to-question-set)
+      (disj view/question-set-errors :not-assigned-to-question-set)
       error-map)))
 
 

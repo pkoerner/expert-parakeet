@@ -1,4 +1,4 @@
-(ns controller.question-set.question-set-controller
+(ns controllers.question-set.question-set-controller
   (:require
     [db]
     [services.question-set-service.question-set-service :refer [validate-user-for-question-set

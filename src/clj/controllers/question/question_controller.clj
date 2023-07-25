@@ -1,4 +1,4 @@
-(ns controller.question.question-controller
+(ns controllers.question.question-controller
   (:require
     [db]
     [services.question-service.p-question-service :refer [get-question-by-id
