@@ -9,7 +9,7 @@ RUN clj -T:build clean
 
 COPY Makefile /tmp/
 COPY src /tmp/src
-RUN OAUTH_CLIENT_ID=abc OAUTH_CLIENT_SECRET=xyz make uber
+RUN make uber
 
 FROM amazoncorretto:11.0.19
 COPY --from=builder /tmp/target/expert-parakeet-standalone.jar /app.jar

@@ -37,8 +37,9 @@
 ;; - kann unsicher sein: andere Prozesse könnten diese auslesen
 ;; - besser: secret als Datei
 ;; - Kubernetes z.B. kann secrets direkt als Datei in den Pod mounten
-(def oauth-client-id (System/getenv "OAUTH_CLIENT_ID"))
-(def oauth-client-secret (System/getenv "OAUTH_CLIENT_SECRET"))
+(def oauth-client-id (if *compile-files* "" (System/getenv "OAUTH_CLIENT_ID")))
+(def oauth-client-secret (if *compile-files* "" (System/getenv "OAUTH_CLIENT_SECRET")))
+
 (assert oauth-client-id "OAUTH_CLIENT_ID is not set")
 (assert oauth-client-secret "OAUTH_CLIENT_SECRET is not set")
 
