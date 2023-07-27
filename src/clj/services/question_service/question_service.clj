@@ -15,6 +15,12 @@
   [_ question]
   (db/add-question! question))
 
+
+(s/fdef get-question-categories
+        :args (s/cat :self #(= PQuestionService (type %)))
+        :ret (s/coll-of :question/categories))
+
+
 (defn- get-question-categories
   [_]
   (db/get-all-question-categories))
