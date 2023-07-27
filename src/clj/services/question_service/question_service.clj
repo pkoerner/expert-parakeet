@@ -107,7 +107,7 @@
    Returns a question map. If an error occured while parsing, the map will contain an `:errors` key which indicates an error while parsing.
    Values that are not required may be `nil`."
   [question-statement achivable-points type
-   possible-solutions single-choice-solutions multiple-choice-solutions
+   possible-solutions single-choice-solution multiple-choice-solution
    evaluation-criteria
    categories]
   (letfn [(as-coll
@@ -134,10 +134,10 @@
                    {:question/type question-type})))
              (parse-points achivable-points)
              {:question/possible-solutions (as-coll possible-solutions)}
-             (if (coll? single-choice-solutions)
+             (if (coll? single-choice-solution)
                {:errors {:question/single-choice-solution "Es sollte nur eine Antwort bei einer single-choice Frage geben!"}}
-               {:question/single-choice-solution single-choice-solutions})
-             {:question/multiple-choice-solution (as-coll multiple-choice-solutions)}
+               {:question/single-choice-solution single-choice-solution})
+             {:question/multiple-choice-solution (as-coll multiple-choice-solution)}
              {:question/evaluation-criteria evaluation-criteria}
              {:question/categories (distinct (as-coll categories))}])))
 
@@ -152,8 +152,7 @@
    The so constructed error map is returned."
   [question]
   (let [keys-to-validate question-keys
-        validation-functions-with-error-msg (create-validation-functions-with-error-msg question)
-        not-empty? seq]
+        validation-functions-with-error-msg (create-validation-functions-with-error-msg question)]
 
     (letfn [(construct-error-msg
               [current-key]
@@ -180,8 +179,8 @@
                      :type (s/or :question-type question-types
                                  :question-type-as-string string?)
                      :possible-solutions (s/or :nil nil? :single string? :multiple (s/coll-of string?))
-                     :single-choice-solutions (s/or :nil nil? :solution string?)
-                     :multiple-choice-solutions (s/or :nil nil? :solution string? :multiple-solutions (s/coll-of string?))
+                     :single-choice-solution (s/or :nil nil? :solution string?)
+                     :multiple-choice-solution (s/or :nil nil? :solution string? :multiple-solutions (s/coll-of string?))
                      :evaluation-criteria (s/or :nil nil? :criteria string?)
                      :categories (s/or :nil nil? :single string? :multiple (s/coll-of string?)))
         :ret (s/or :free-text-question :question/question
@@ -196,12 +195,12 @@
    If the returned map has no `:errors` key, the returned map is a valid question of the type under the `:question/type` key."
   [_
    question-statement achivable-points type
-   possible-solutions single-choice-solutions multiple-choice-solutions
+   possible-solutions single-choice-solution multiple-choice-solution
    evaluation-criteria
    categories]
 
   (let [question (parse-question question-statement achivable-points type
-                                 possible-solutions single-choice-solutions multiple-choice-solutions
+                                 possible-solutions single-choice-solution multiple-choice-solution
                                  evaluation-criteria
                                  categories)
         errors (question :errors)]
