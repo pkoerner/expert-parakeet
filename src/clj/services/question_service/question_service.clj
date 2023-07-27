@@ -80,12 +80,12 @@
 
       (when  (= type :question.type/single-choice)
         {:question/single-choice-solution
-         [[#(s/valid? :question/single-choice-solution single-choice-solution) "Die möglichen Antworten waren keine korrekten möglichen Antworten!"]
+         [[#(s/valid? :question/single-choice-solution single-choice-solution) "Die korrekte Antwort war keine korrekte Antwort!"]
           [#((set possible-solutions) single-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
       (when  (= type :question.type/multiple-choice)
         {:question/multiple-choice-solution
-         [[#(s/valid? :question/multiple-choice-solution multiple-choice-solution) "Die möglichen Antworten waren keine korrekten möglichen Antworten!"]
+         [[#(s/valid? :question/multiple-choice-solution multiple-choice-solution) "Die korrekten Antworten waren keine korrekten korrekten Antworten!"]
           [#(every? (fn [x] ((set possible-solutions) x)) multiple-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
       (when (= type :question.type/free-text)
