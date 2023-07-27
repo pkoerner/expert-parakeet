@@ -38,8 +38,8 @@
   (let [container-div-id (str choice-type "input")
         solution-container-div-id (str "additional-" choice-type)
         add-solution-btn-id (str "add-" choice-type "-btn")
-        solution-input-id (str "possible-" choice-type "-solutions")
-        solution-list-id (str choice-type "-solutions")]
+        solution-input-id (str "possible-" choice-type "-solution")
+        solution-list-id (str choice-type "-solution")]
     (h/html
       [:div {:id container-div-id}
        possible-solutions-error

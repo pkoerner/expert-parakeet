@@ -50,15 +50,15 @@
 
         form-data (-> req (:multipart-params) (dissoc "__anti-forgery-token"))
         {:strs [question-statement achivable-points type
-                possible-solutions single-choice-solutions multiple-choice-solutions
+                possible-solutions single-choice-solution multiple-choice-solution
                 evaluation-criteria
                 categories]} form-data
         result-map (validate-question-fun question-statement
                                           achivable-points
                                           type
                                           possible-solutions
-                                          single-choice-solutions
-                                          multiple-choice-solutions
+                                          single-choice-solution
+                                          multiple-choice-solution
                                           evaluation-criteria
                                           categories)
         validation-errors (result-map :errors)]
