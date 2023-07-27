@@ -92,7 +92,7 @@
         {:question/evaluation-criteria
          [[#(s/valid? :question/evaluation-criteria evaluation-criteria) "Die angegebenen Bewertungskriterien waren keine korrekten Bewertungskriterien!"]]})
 
-      (when (seq categories)
+      (when (not-empty categories)
         {:question/categories
          [[#(s/valid? :question/categories categories) "Die angegebenen Kategorien waren nicht korrekt geformt!"]]}))))
 
@@ -158,7 +158,7 @@
               (reduce (fn [current-error-msg [is-valid? error-msg]]
                         (if (is-valid?)
                           current-error-msg
-                          (string/join "\n" (filter not-empty? [current-error-msg error-msg]))))
+                          (string/join "\n" (filter not-empty [current-error-msg error-msg]))))
                       ""
                       (validation-functions-with-error-msg current-key)))]
 
