@@ -156,27 +156,7 @@
         errors (question :errors)]
     (if errors
       question
-      (let [validation-functions-with-error-msg (create-validation-functions-with-error-msg question)]
-        (reduce (fn [error-map error-key]
-                  (let [error-to-display (reduce (fn [error-str [validation-fun error-msg]]
-                                                   (if (validation-fun)
-                                                     error-str
-                                                     (string/join "\n" (filter seq [error-str error-msg]))))
-                                                 ""
-                                                 (validation-functions-with-error-msg error-key))]
-                    (if (seq error-to-display)
-                      (assoc-in error-map [:errors error-key] (string/join [error-to-display ; "\n" "\"" (question error-key) "\""
-                                                                            ]))
-                      error-map)))
-                question
-                [:question/question-statement
-                 :question/points
-                 :question/type
-                 :question/possible-solutions
-                 :question/single-choice-solution
-                 :question/multiple-choice-solution
-                 :question/evaluation-criteria
-                 :question/categories])))))
+      (merge question (validate-parsed-question question)))))
 
 (extend QuestionService
   PQuestionService
