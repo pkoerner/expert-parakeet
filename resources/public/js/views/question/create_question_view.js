@@ -1,7 +1,3 @@
-/// some
-// " (string/join ", "  (map #(str "\"" % "\"") (map name question-types))) "
-// id=type
-
 /**
  * Take an id for an element a `select` dom element and an array of ids for other dom elements as arguments.
  * It registers an onchange handler for the `select` element and hides all dom elements from the Array, except the one currently selected.
