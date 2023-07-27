@@ -121,10 +121,12 @@ function registerAddingSolutionBehavior(
       "-",
       function () {
         newSolutionNode?.remove();
-        lineBreak?.remove();
         liContainer?.remove();
         addCorrectSolutionBtn?.remove();
         removeSolutionBtn?.remove();
+        if (typeof lineBreak !== "undefined") {
+          lineBreak?.remove();
+        }
       },
       ["btn", "btn-outline-info", "btn-sm"]
     );
