@@ -65,6 +65,7 @@ function registerAddingSolutionBehavior(
       newSolutionNode.id = solutionInputId;
       newSolutionNode.name = "possible-solutions";
       newSolutionNode.setAttribute("num", 0);
+      newSolutionNode.classList.add("form-control");
     }
 
     solutionContainer.appendChild(newSolutionNode);

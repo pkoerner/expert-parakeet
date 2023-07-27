@@ -30,7 +30,7 @@
     [:div#free-text
      (optional-error-display :question/evaluation-criteria errors)
      [:label {:for "evaluation-criteria"} "Bewertungskriterien:"] [:br]
-     [:input#evaluation-criteria {:name "evaluation-criteria"}]]))
+     [:input#evaluation-criteria.form-control {:name "evaluation-criteria"}]]))
 
 
 (defn- possible-answers-input
@@ -44,7 +44,7 @@
       [:div {:id container-div-id}
        possible-solutions-error
        [:label {:for "possible-solutions"} "Antwort Möglichkeiten:"] [:br]
-       [:div {:id solution-container-div-id}]
+       [:div.form-group {:id solution-container-div-id}]
        [:button.btn.btn-outline-info.btn-sm {:id add-solution-btn-id :type "button"} "+"]
        ;; When the add button is klicked
        (script "
