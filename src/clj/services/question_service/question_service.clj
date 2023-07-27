@@ -70,7 +70,13 @@
             [coll-or-single]
             (if (or (nil? coll-or-single) (coll? coll-or-single))
               coll-or-single
-              [coll-or-single]))]
+              [coll-or-single]))
+          (parse-points [points] (if (number? points)
+                                   {:question/points points}
+                                   (try (let [points (Long/parseLong (.trim points))]
+                                          {:question/points points})
+                                        (catch NumberFormatException _
+                                          {:errors {:question/points "Die erreichbaren Punkte müssen eine Zahl sein"}}))))]
     (reduce merge
             {}
             [{:question/question-statement question-statement}
@@ -78,10 +84,7 @@
                (if (nil? question-type)
                  {:errors {:question/type "Der angegebene question-type war kein valider type!"}}
                  {:question/type question-type}))
-             (try (let [points (Long/parseLong (.trim achivable-points))]
-                    {:question/points points})
-                  (catch NumberFormatException _
-                    {:errors {:question/points "Die erreichbaren Punkte müssen eine Zahl sein"}}))
+             (parse-points achivable-points)
              {:question/possible-solutions (as-coll possible-solutions)}
              (if (coll? single-choice-solutions)
                {:errors {:question/single-choice-solution "Es sollte nur eine Antwort bei einer single-choice Frage geben!"}}
