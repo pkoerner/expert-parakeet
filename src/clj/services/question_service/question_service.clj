@@ -12,6 +12,9 @@
   [_ question]
   (db/add-question! question))
 
+(defn- get-question-categories
+  [_]
+  (db/get-all-question-categories))
 
 (defn- create-validation-functions-with-error-msg
   [question]
@@ -127,4 +130,5 @@
 (extend QuestionService
   PQuestionService
   {:create-question! create-question-impl!
+   :get-question-categories get-question-categories
    :validate-question validate-question-impl})

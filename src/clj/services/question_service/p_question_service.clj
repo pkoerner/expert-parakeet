@@ -5,6 +5,10 @@
   (create-question!
     [self]
     "Creates a course-iteration entry in the database and returns a course-iteration map.")
+  
+  (get-question-categories
+    [self]
+    "Returns a collection of all `:question/categories`.")
 
   (validate-question
     [self
