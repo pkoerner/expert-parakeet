@@ -62,6 +62,14 @@
 
 
 (defn- parse-question
+  "Takes as arguments all possible fields of a question map and tries to parse them.
+   
+   If a required value (`achivable-points` or `type`) cannot be parsed, a map containing the corresponding key with an error message as string is associated under the
+   `:errors` key.
+   If a not required value fails to parse or is `nil`, `nil` is added under the key to the question map.
+   
+   Returns a question map. If an error occured while parsing, the map will contain an `:errors` key which indicates an error while parsing.
+   Values that are not required may be `nil`."
   [question-statement achivable-points type
    possible-solutions single-choice-solutions multiple-choice-solutions
    evaluation-criteria
