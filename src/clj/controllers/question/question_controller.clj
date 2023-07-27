@@ -34,7 +34,7 @@
        (str base-uri "?")))
 
 
-(defn create-question-post!
+(defn submit-create-question!
   "
 ```clj
 {\"question-statement\" \"Fragestellung\",
