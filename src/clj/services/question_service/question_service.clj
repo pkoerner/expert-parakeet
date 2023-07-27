@@ -1,8 +1,10 @@
 (ns services.question-service.question-service
-  (:require [clojure.spec.alpha :as s]
-            [clojure.string :as string]
-            db
-            [services.question-service.p-question-service :refer [PQuestionService]]))
+  (:require
+    [clojure.spec.alpha :as s]
+    [clojure.string :as string]
+    [db]
+    [domain.spec :refer [question-types]]
+    [services.question-service.p-question-service :refer [PQuestionService]]))
 
 
 ;; todo replace all direct db calls and inject repositories
@@ -150,6 +152,23 @@
                     (assoc-in error-map [:errors current-key] possible-error-msg))))
               {}
               keys-to-validate))))
+
+
+(s/fdef validate-question-impl
+        :args (s/cat :self #(= PQuestionService (type %))
+                     :question-statement string?
+                     :achivable-points (s/or :to-parse string? :valid number?)
+                     :type question-types
+                     :possible-solutions (s/or :nil nil? :single string? :multiple (s/coll-of string?))
+                     :single-choice-solutions (s/or :nil nil? :solution string?)
+                     :multiple-choice-solutions (s/or :nil nil? :solution string? :multiple-solutions (s/coll-of string?))
+                     :evaluation-criteria (s/or :nil nil? :criteria string?)
+                     :categories (s/or :nil nil? :single string? :multiple (s/coll-of string?)))
+        :ret (s/or :free-text-question :question/question
+                   :single-choice-question :question/single-choice-question
+                   :multiple-choice-question :question/multiple-choice-question
+                   :errors #(contains? % :errors)))
+
 
 (defn- validate-question-impl
   "Takes all possible values for a question as arguments and validates them.
