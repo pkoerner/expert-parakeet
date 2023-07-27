@@ -62,7 +62,6 @@
                                           evaluation-criteria
                                           categories)
         validation-errors (result-map :errors)]
-
     (if (empty? validation-errors)
       (let [question result-map
             question (add-question-fun question)]
