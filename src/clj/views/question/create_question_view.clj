@@ -1,11 +1,13 @@
 (ns views.question.create-question-view
   (:require
+    [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [domain.spec :refer [question-types]]
     [hiccup.form :as hform]
     [hiccup.page :as hpage]
     [hiccup2.core :as h]
-    [ring.util.anti-forgery :refer [anti-forgery-field]]))
+    [ring.util.anti-forgery :refer [anti-forgery-field]]
+    [util.hiccup-extensions :refer [script]]))
 
 
 (def create-question-error-keys
@@ -13,6 +15,7 @@
   #{:question/question-statement :question/type :question/points
     :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
     :question/evaluation-criteria})
+
 
 (defn- optional-error-display
   [key dict]
@@ -22,12 +25,6 @@
                        [:div]
                        (map (fn [x] [:p [:span {:style "color: red;"} x]])
                             (string/split error-messages #"\n"))))])))
-
-
-(defn- script
-  [& script-src]
-  [:script {:type "text/javascript"}
-   (h/raw (apply str script-src))])
 
 
 (defn- free-text-inputs
