@@ -117,7 +117,7 @@
               [coll-or-single]))
           (parse-points
             [points]
-            (if (number? points)
+            (if (and (not (nil? points)) (number? points))
               {:question/points points}
               (try (let [points (Long/parseLong (.trim points))]
                      {:question/points points})
