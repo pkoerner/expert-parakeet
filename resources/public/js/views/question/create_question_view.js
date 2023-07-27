@@ -133,3 +133,30 @@ function registerAddingSolutionBehavior(
     solutionContainer.appendChild(removeSolutionBtn);
   };
 }
+
+/**
+ * Creates a new category entry for the list of categories.
+ * The user still needs to select it but it makes it possible to add new categories for questions.
+ *
+ * Notes: The current implementation heavily relies on the current display of categories.
+ * This will need to change when the clj code changes. (Bad but inevitable from my point of view.)
+ * @returns `null`
+ */
+function addNewCategory() {
+  const newCat = document.getElementById("new-category");
+  const newCatName = newCat.value;
+  if (typeof newCatName !== "string" || !newCatName) {
+    window.alert("Die Kategorie sollte nicht leer sein!");
+    return;
+  }
+
+  const newCatDiv = document.createElement("div");
+  newCatDiv.classList.add("form-check");
+  const newCatId = `mult-select-${newCatName}`;
+  newCatDiv.innerHTML = `
+<input class="form-check-input" id="${newCatId}" name="category" type="checkbox" value="${newCatName}">
+<label class="form-check-label" for="${newCatId}">${newCatName}</label>`;
+
+  const categoryDiv = document.getElementById("category-container");
+  categoryDiv.appendChild(newCatDiv);
+}
