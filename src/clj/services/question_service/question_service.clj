@@ -17,6 +17,13 @@
   (db/get-all-question-categories))
 
 
+(def ^:private question-keys
+  [:question/question-statement :question/points :question/type
+   :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
+   :question/evaluation-criteria
+   :question/categories])
+
+
 (def ^:private to-question-type
   {"free-text" :question.type/free-text
    "single-choice" :question.type/single-choice
@@ -119,10 +126,7 @@
    
    The so constructed error map is returned."
   [question]
-  (let [keys-to-validate [:question/question-statement :question/points :question/type
-                          :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
-                          :question/evaluation-criteria
-                          :question/categories]
+  (let [keys-to-validate question-keys
         validation-functions-with-error-msg (create-validation-functions-with-error-msg question)
         not-empty? seq]
 
