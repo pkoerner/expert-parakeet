@@ -6,18 +6,8 @@
     [ring.util.response :as response]
     [services.question-service.p-question-service :refer [create-question!
                                                           validate-question]]
-    [util.ring-extensions :refer [html-response]]
+    [util.ring-extensions :refer [extract-errors html-response]]
     [views.question.create-question-view :as view :refer [question-success-view]]))
-
-
-(defn- extract-errors
-  [request]
-  (let [query-params (:query-params request)]
-    (if query-params
-      (->> query-params
-           (map (fn [[key val]] [(read-string key) val]))
-           (into {}))
-      {})))
 
 
 (defn create-question-get

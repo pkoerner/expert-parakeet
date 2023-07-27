@@ -6,18 +6,9 @@
     [ring.util.codec :refer [form-encode]]
     [ring.util.response :as response]
     [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration validate-course-iteration]]
-    [util.ring-extensions :refer [html-response]]
+    [util.ring-extensions :refer [extract-errors html-response]]
     [util.spec-functions :refer [map-spec]]
     [views.course-iteration.create-course-iteration-view :as view]))
-
-
-(defn- extract-errors
-  [request]
-  (let [query-params (:query-params request)]
-    (when query-params
-      (->> query-params
-           (map (fn [[key val]] [(read-string key) val]))
-           (into {})))))
 
 
 (s/fdef create-course-iteration-get
