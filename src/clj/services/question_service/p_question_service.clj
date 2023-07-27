@@ -1,11 +1,12 @@
 (ns services.question-service.p-question-service)
 
+
 (defprotocol PQuestionService
 
   (create-question!
-    [self]
+    [self question]
     "Creates a course-iteration entry in the database and returns a course-iteration map.")
-  
+
   (get-question-categories
     [self]
     "Returns a collection of all `:question/categories`.")
