@@ -77,7 +77,7 @@
                                           {:question/points points})
                                         (catch NumberFormatException _
                                           {:errors {:question/points "Die erreichbaren Punkte müssen eine Zahl sein"}}))))]
-    (reduce merge
+    (reduce (partial merge-with merge)
             {}
             [{:question/question-statement question-statement}
              (let [question-type (to-question-type type)]
