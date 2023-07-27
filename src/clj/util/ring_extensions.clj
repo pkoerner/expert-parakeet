@@ -1,7 +1,8 @@
 (ns util.ring-extensions
-  (:require
-    [hiccup2.core :as h]
-    [ring.util.response :refer [header response]]))
+  (:require [clojure.string :as string]
+            [hiccup2.core :as h]
+            [ring.util.codec :refer [form-encode]]
+            [ring.util.response :refer [header response]]))
 
 
 (def ^:private bootstrap-include
@@ -24,3 +25,12 @@
            (map (fn [[key val]] [(read-string key) val]))
            (into {}))
       {})))
+
+
+(defn construct-url
+  [base-uri param-map]
+  (->> param-map
+       (map (fn [[key msg]] [(form-encode key) (form-encode msg)]))
+       (map (fn [[key msg]] (str key "=" msg)))
+       (string/join "&")
+       (str base-uri "?")))

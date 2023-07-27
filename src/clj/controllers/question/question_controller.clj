@@ -1,27 +1,17 @@
 (ns controllers.question.question-controller
   (:require
-    [clojure.string :as string]
     [db]
-    [ring.util.codec :refer [form-encode]]
     [ring.util.response :as response]
     [services.question-service.p-question-service :refer [create-question!
                                                           validate-question]]
-    [util.ring-extensions :refer [extract-errors html-response]]
+    [util.ring-extensions :refer [construct-url extract-errors
+                                  html-response]]
     [views.question.create-question-view :as view :refer [question-success-view]]))
 
 
 (defn create-question-get
   [req get-question-categories-fun post-destination]
   (view/question-form (get-question-categories-fun) post-destination :errors (extract-errors req)))
-
-
-(defn- construct-url
-  [base-uri param-map]
-  (->> param-map
-       (map (fn [[key msg]] [(form-encode key) (form-encode msg)]))
-       (map (fn [[key msg]] (str key "=" msg)))
-       (string/join "&")
-       (str base-uri "?")))
 
 
 (defn submit-create-question!
