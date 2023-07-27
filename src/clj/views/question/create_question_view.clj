@@ -126,7 +126,7 @@ registerAddingSolutionBehavior(
            (map (fn [cat]
                   (let [id (str "mult-select-" cat)]
                     [:div.form-check
-                     [:input.form-check-input {:id id :type "checkbox" :name "category" :value cat}]
+                     [:input.form-check-input {:id id :type "checkbox" :name "categories" :value cat}]
                      [:label.form-check-label {:for id} cat]])) (sort categories))]]
 
          (h/raw (anti-forgery-field))

@@ -151,7 +151,7 @@ function addNewCategory() {
   newCatDiv.classList.add("form-check");
   const newCatId = `mult-select-${newCatName}`;
   newCatDiv.innerHTML = `
-<input class="form-check-input" id="${newCatId}" name="category" type="checkbox" value="${newCatName}">
+<input class="form-check-input" id="${newCatId}" name="categories" type="checkbox" value="${newCatName}">
 <label class="form-check-label" for="${newCatId}">${newCatName}</label>`;
 
   const categoryDiv = document.getElementById("category-container");
