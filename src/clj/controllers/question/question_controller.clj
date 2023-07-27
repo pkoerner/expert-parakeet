@@ -1,12 +1,13 @@
 (ns controllers.question.question-controller
-  (:require [clojure.string :as string]
-            [db]
-            [ring.util.codec :refer [form-encode]]
-            [ring.util.response :as response]
-            [services.question-service.p-question-service :refer [create-question!
-                                                                  validate-question]]
-            [util.ring-extensions :refer [html-response]]
-            [views.question.create-question-view :as view :refer [question-success-view]]))
+  (:require
+    [clojure.string :as string]
+    [db]
+    [ring.util.codec :refer [form-encode]]
+    [ring.util.response :as response]
+    [services.question-service.p-question-service :refer [create-question!
+                                                          validate-question]]
+    [util.ring-extensions :refer [html-response]]
+    [views.question.create-question-view :as view :refer [question-success-view]]))
 
 
 (defn- extract-errors
