@@ -143,6 +143,9 @@
               keys-to-validate))))
 
 (defn- validate-question-impl
+  "Takes all possible values for a question as arguments and validates them.
+   If a parsing/validation error occurs the return map will contain an error message for each key that had an error.
+   If the returned map has no `:errors` key, the returned map is a valid question of the type under the `:question/type` key."
   [_
    question-statement achivable-points type
    possible-solutions single-choice-solutions multiple-choice-solutions
