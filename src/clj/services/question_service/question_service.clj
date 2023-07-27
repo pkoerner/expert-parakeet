@@ -23,6 +23,14 @@
    "multiple-choice" :question.type/multiple-choice})
 
 (defn- create-validation-functions-with-error-msg
+  "Takes as input a question map with keys from the `:question` namespace.
+   
+   Constructs a map consisting of all keys from the `:question` namespace mapped to a vector of vectors containing a pair of a function and a string.
+   The function validates the input corresponding to the key and the string is a error message corresponding to the failing of the validation function.
+   
+   The map is constructed at runtime as different validations are needed depending on the type under the `:question/type` key.
+   
+   The returned map will contain all keys for a single-choice, multiple-choice, or free-text question, with corresponding validation functions."
   [question]
   (let [{:question/keys [question-statement
                          points
