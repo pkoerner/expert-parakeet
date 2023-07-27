@@ -110,6 +110,38 @@
              {:question/categories (as-coll categories)}])))
 
 
+(defn- validate-parsed-question
+  "Takes a question map as its input.
+   
+   It constructs the map containing a vector of vectors of validation functions with an error message.
+   For each key an error message is constructed using the functions with their message.
+   If the error message is not empty it is added to a map containing all errors for each question key.
+   
+   The so constructed error map is returned."
+  [question]
+  (let [keys-to-validate [:question/question-statement :question/points :question/type
+                          :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
+                          :question/evaluation-criteria
+                          :question/categories]
+        validation-functions-with-error-msg (create-validation-functions-with-error-msg question)
+        not-empty? seq]
+
+    (letfn [(construct-error-msg [current-key]
+              (reduce (fn [current-error-msg [is-valid? error-msg]]
+                        (if (is-valid?)
+                          current-error-msg
+                          (string/join "\n" (filter not-empty? [current-error-msg error-msg]))))
+                      ""
+                      (validation-functions-with-error-msg current-key)))]
+
+      (reduce (fn [error-map current-key]
+                (let [possible-error-msg (construct-error-msg current-key)]
+                  (if (empty? possible-error-msg)
+                    error-map
+                    (assoc-in error-map [:errors current-key] possible-error-msg))))
+              {}
+              keys-to-validate))))
+
 (defn- validate-question-impl
   [_
    question-statement achivable-points type
