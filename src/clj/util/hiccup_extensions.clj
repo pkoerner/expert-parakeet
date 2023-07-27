@@ -1,13 +1,14 @@
 (ns util.hiccup-extensions
   (:require
-   [clojure.string :as string]
-   [hiccup2.core :as h]
-   [clojure.spec.alpha :as s]))
+    [clojure.spec.alpha :as s]
+    [clojure.string :as string]
+    [hiccup2.core :as h]))
 
 
 (s/fdef script
-  :args (s/cat :script-src (s/* string?))
-  :ret  #(instance? clojure.lang.PersistentVector %))
+        :args (s/cat :script-src (s/* string?))
+        :ret  #(instance? clojure.lang.PersistentVector %))
+
 
 (defn script
   "Takes any number of and joins them into a javascript script tag.
@@ -27,9 +28,10 @@ registerAddingSolutionBehavior(
 
 
 (s/fdef optional-error-display
-  :args (s/cat :key any? :error-map map?)
-  :ret  (s/or :key-absent nil?
-              :key-persent #(instance? clojure.lang.PersistentVector %)))
+        :args (s/cat :key any? :error-map map?)
+        :ret  (s/or :key-absent nil?
+                    :key-persent #(instance? clojure.lang.PersistentVector %)))
+
 
 (defn optional-error-display
   "Takes a key and a map possibly containing an error under this key. If there is no value under the key, nil is returned.
@@ -39,9 +41,10 @@ registerAddingSolutionBehavior(
   (let [error-messages (error-map key)]
     (when (and error-messages (string? error-messages))
       (into [] (concat
-                [:div]
-                (map (fn [x] [:p [:span {:style "color: red;"} x]])
-                     (string/split error-messages #"\n")))))))
+                 [:div]
+                 (map (fn [x] [:p [:span {:style "color: red;"} x]])
+                      (string/split error-messages #"\n")))))))
+
 
 (optional-error-display :key {:key "Hello World!\nHello back!"})
 
