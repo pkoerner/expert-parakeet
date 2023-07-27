@@ -7,7 +7,7 @@
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
-    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+    [ring.middleware.defaults :refer [site-defaults secure-site-defaults wrap-defaults]]
     [ring.middleware.reload :refer [wrap-reload]]
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-service.course-service :refer [->CourseService]]
@@ -54,7 +54,7 @@
 
 
 ;; in production, the app will be running behind a reverse proxy that does TLS
-(def app-proxied (-> combined-routes (wrap-defaults (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
+(def app-proxied (-> combined-routes (wrap-defaults (-> secure-site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax) (assoc :proxy true)))))
 
 (def app-dev (wrap-reload #'app))
 
