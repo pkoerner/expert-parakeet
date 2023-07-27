@@ -13,10 +13,11 @@
 (defn- extract-errors
   [request]
   (let [query-params (:query-params request)]
-    (when query-params
+    (if query-params
       (->> query-params
            (map (fn [[key val]] [(read-string key) val]))
-           (into {})))))
+           (into {}))
+      {})))
 
 
 (defn create-question-get
