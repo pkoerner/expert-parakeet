@@ -16,6 +16,12 @@
   [_]
   (db/get-all-question-categories))
 
+
+(def ^:private to-question-type
+  {"free-text" :question.type/free-text
+   "single-choice" :question.type/single-choice
+   "multiple-choice" :question.type/multiple-choice})
+
 (defn- create-validation-functions-with-error-msg
   [question]
   (let [{:question/keys [question-statement
@@ -53,12 +59,6 @@
      (when (seq categories)
        {:question/categories
         [[#(s/valid? :question/categories categories) "Die angegebenen Kategorien waren nicht korrekt geformt!"]]}))))
-
-
-(def ^:private to-question-type
-  {"free-text" :question.type/free-text
-   "single-choice" :question.type/single-choice
-   "multiple-choice" :question.type/multiple-choice})
 
 
 (defn- parse-question
