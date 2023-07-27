@@ -82,8 +82,9 @@ registerAddingSolutionBehavior(
     (h/html
       (hpage/include-js "js/views/question/util.js"
                         "js/views/question/create_question_view.js")
-      [:div.container-fluid
-       [:h1 "Frage erstellung:"]
+      (script "clearUrlParameters();")
+      [:div.container
+       [:h1 "Fragenerstellung:"]
        (hform/form-to
          {:enctype "multipart/form-data"
           :onsubmit (str "removeHiddenQuestionTypeInputsOnSubmit(" question-types-js-arr ")")}
