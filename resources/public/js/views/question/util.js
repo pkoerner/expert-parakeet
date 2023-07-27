@@ -26,3 +26,14 @@ function createButton(text, onClick, classes=[]) {
   classes.forEach(x => button.classList.add(x));
   return button;
 }
+
+/**
+ * Clears the passed in url parameters from the displayed url.
+ * 
+ * Notes: It's intended to make the url less cluttered for the user.
+ */
+function clearUrlParameters() {
+  const urlWithoutParameters =
+    location.protocol + "//" + location.host + location.pathname;
+  window.history.replaceState({}, document.title, urlWithoutParameters);
+}
