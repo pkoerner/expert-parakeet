@@ -46,6 +46,3 @@ registerAddingSolutionBehavior(
                       (string/split error-messages #"\n")))))))
 
 
-(optional-error-display :key {:key "Hello World!\nHello back!"})
-
-
