@@ -109,7 +109,6 @@
                                  evaluation-criteria
                                  categories)
         errors (question :errors)]
-    (print question)
     (if errors
       question
       (let [validation-functions-with-error-msg (create-validation-functions-with-error-msg question)]
