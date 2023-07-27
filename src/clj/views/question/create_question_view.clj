@@ -8,6 +8,12 @@
     [ring.util.anti-forgery :refer [anti-forgery-field]]))
 
 
+(def create-question-error-keys
+  "Possible keys for which errors can be displayed in the `course-iteration-form`."
+  #{:question/question-statement :question/type :question/points
+    :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
+    :question/evaluation-criteria})
+
 (defn- optional-error-display
   [key dict]
   (let [error-messages (dict key)]
@@ -75,6 +81,13 @@ registerAddingSolutionBehavior(
                              (optional-error-display :question/possible-solutions errors)
                              (optional-error-display :question/multiple-choice-solution errors))]))
 
+(s/fdef question-form
+  :args (s/cat :categories (s/coll-of :question/categories) 
+               :post-destination :general/non-blank-string
+               :kwargs (s/? (s/or :empty empty?
+                                  :map (s/map-of create-question-error-keys
+                                                 string?))))
+  :ret #(instance? hiccup.util.RawString %))
 
 (defn question-form
   [categories post-destination & {:keys [errors] :or {errors {}}}]
@@ -163,6 +176,11 @@ registerQuestionTypeSwitch('type', " question-types-js-arr ");
   [:div
    [:p [:b "Mit dem Bewertungskriterium: "] (question :question/evaluation-criteria)]])
 
+(s/fdef question-success-view
+  :args (s/cat :question (s/or :free-text-question :question/question
+                               :single-choice-question :question/single-choice-question
+                               :multiple-choice-question :question/multiple-choice-question))
+  :ret #(instance? hiccup.util.RawString %))
 
 (defn question-success-view
   [question]
