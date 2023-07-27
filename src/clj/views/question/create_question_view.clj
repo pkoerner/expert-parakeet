@@ -7,7 +7,7 @@
     [hiccup.page :as hpage]
     [hiccup2.core :as h]
     [ring.util.anti-forgery :refer [anti-forgery-field]]
-    [util.hiccup-extensions :refer [script]]))
+    [util.hiccup-extensions :refer [optional-error-display script]]))
 
 
 (def create-question-error-keys
@@ -15,16 +15,6 @@
   #{:question/question-statement :question/type :question/points
     :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
     :question/evaluation-criteria})
-
-
-(defn- optional-error-display
-  [key dict]
-  (let [error-messages (dict key)]
-    (when error-messages
-      [:div (into [] (concat
-                       [:div]
-                       (map (fn [x] [:p [:span {:style "color: red;"} x]])
-                            (string/split error-messages #"\n"))))])))
 
 
 (defn- free-text-inputs
