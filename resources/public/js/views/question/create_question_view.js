@@ -32,11 +32,11 @@ function removeHiddenQuestionTypeInputsOnSubmit(questionTypeFields) {
 }
 
 /**
- * 
- * @param {String} addSolutionButtonId 
- * @param {String} solutionContainerDivId 
- * @param {String} solutionInputId 
- * @param {String} solutionListId 
+ *
+ * @param {String} addSolutionButtonId
+ * @param {String} solutionContainerDivId
+ * @param {String} solutionInputId
+ * @param {String} solutionListId
  */
 function registerAddingSolutionBehavior(
   addSolutionButtonId,
@@ -64,7 +64,7 @@ function registerAddingSolutionBehavior(
       newSolutionNode = document.createElement("input");
       newSolutionNode.id = solutionInputId;
       newSolutionNode.name = "possible-solutions";
-      newSolutionNode.setAttribute('num', 0);
+      newSolutionNode.setAttribute("num", 0);
     }
 
     solutionContainer.appendChild(newSolutionNode);
@@ -86,11 +86,11 @@ function registerAddingSolutionBehavior(
         liContainer = document.createElement("li");
         liContainer.id = liContainerId;
 
-        const answerInputDisplay = document.createElement('span');
+        const answerInputDisplay = document.createElement("span");
         answerInputDisplay.innerText = newSolutionNode.value;
         answerInputDisplay.readOnly = true;
 
-        const answerInputHidden = document.createElement('input');
+        const answerInputHidden = document.createElement("input");
         answerInputHidden.name = solutionListId;
         answerInputHidden.value = newSolutionNode.value;
         answerInputHidden.type = "hidden";

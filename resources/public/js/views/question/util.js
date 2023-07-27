@@ -18,12 +18,12 @@ function createNodeFromText(htmlText) {
  * @param {Array[String]} classes
  * @returns A button Dom element.
  */
-function createButton(text, onClick, classes=[]) {
+function createButton(text, onClick, classes = []) {
   const button = document.createElement("button");
   button.type = "button";
   button.innerText = text;
   button.onclick = onClick;
-  classes.forEach(x => button.classList.add(x));
+  classes.forEach((x) => button.classList.add(x));
   return button;
 }
 
