@@ -4,9 +4,10 @@
             db
             [services.question-service.p-question-service :refer [PQuestionService]]))
 
+
 ;; todo replace all direct db calls and inject repositories
 (deftype QuestionService
-         [])
+  [])
 
 (defn- create-question-impl!
   [_ question]
@@ -29,6 +30,7 @@
    "single-choice" :question.type/single-choice
    "multiple-choice" :question.type/multiple-choice})
 
+
 (defn- create-validation-functions-with-error-msg
   "Takes as input a question map with keys from the `:question` namespace.
    
@@ -48,32 +50,32 @@
                          evaluation-criteria
                          categories]} question]
     (merge
-     {:question/question-statement [[#(s/valid? :question/question-statement question-statement) "Die Fragestellung war inkorrekt!"]]
-      :question/points [[#(s/valid? :question/points points) "Die erreichbaren Punkte waren inkorrekt!"]]
-      :question/type [[#(s/valid? :question/type type) "Der ausgewälte question-type war kein korrekter type!"]]}
+      {:question/question-statement [[#(s/valid? :question/question-statement question-statement) "Die Fragestellung war inkorrekt!"]]
+       :question/points [[#(s/valid? :question/points points) "Die erreichbaren Punkte waren inkorrekt!"]]
+       :question/type [[#(s/valid? :question/type type) "Der ausgewälte question-type war kein korrekter type!"]]}
 
-     (when (or (= type :question.type/single-choice) (= type :question.type/multiple-choice))
-       {:question/possible-solutions
-        [[#(s/valid? :question/possible-solutions possible-solutions) "Die Antwortmöglichkeiten waren nicht korrekt!"]
-         [#(if possible-solutions (apply distinct? possible-solutions) true) "Zwei Antwortmglichkeiten waren identisch!"]]})
+      (when (or (= type :question.type/single-choice) (= type :question.type/multiple-choice))
+        {:question/possible-solutions
+         [[#(s/valid? :question/possible-solutions possible-solutions) "Die Antwortmöglichkeiten waren nicht korrekt!"]
+          [#(if possible-solutions (apply distinct? possible-solutions) true) "Zwei Antwortmglichkeiten waren identisch!"]]})
 
-     (when  (= type :question.type/single-choice)
-       {:question/single-choice-solution
-        [[#(s/valid? :question/single-choice-solution single-choice-solution) "Die möglichen Antworten waren keine korrekten möglichen Antworten!"]
-         [#((set possible-solutions) single-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
+      (when  (= type :question.type/single-choice)
+        {:question/single-choice-solution
+         [[#(s/valid? :question/single-choice-solution single-choice-solution) "Die möglichen Antworten waren keine korrekten möglichen Antworten!"]
+          [#((set possible-solutions) single-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
-     (when  (= type :question.type/multiple-choice)
-       {:question/multiple-choice-solution
-        [[#(s/valid? :question/multiple-choice-solution multiple-choice-solution) "Die möglichen Antworten waren keine korrekten möglichen Antworten!"]
-         [#(every? (fn [x] ((set possible-solutions) x)) multiple-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
+      (when  (= type :question.type/multiple-choice)
+        {:question/multiple-choice-solution
+         [[#(s/valid? :question/multiple-choice-solution multiple-choice-solution) "Die möglichen Antworten waren keine korrekten möglichen Antworten!"]
+          [#(every? (fn [x] ((set possible-solutions) x)) multiple-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
-     (when (= type :question.type/free-text)
-       {:question/evaluation-criteria
-        [[#(s/valid? :question/evaluation-criteria evaluation-criteria) "Die angegebenen Bewertungskriterien waren keine korrekten Bewertungskriterien!"]]})
+      (when (= type :question.type/free-text)
+        {:question/evaluation-criteria
+         [[#(s/valid? :question/evaluation-criteria evaluation-criteria) "Die angegebenen Bewertungskriterien waren keine korrekten Bewertungskriterien!"]]})
 
-     (when (seq categories)
-       {:question/categories
-        [[#(s/valid? :question/categories categories) "Die angegebenen Kategorien waren nicht korrekt geformt!"]]}))))
+      (when (seq categories)
+        {:question/categories
+         [[#(s/valid? :question/categories categories) "Die angegebenen Kategorien waren nicht korrekt geformt!"]]}))))
 
 
 (defn- parse-question
@@ -94,12 +96,14 @@
             (if (or (nil? coll-or-single) (coll? coll-or-single))
               coll-or-single
               [coll-or-single]))
-          (parse-points [points] (if (number? points)
-                                   {:question/points points}
-                                   (try (let [points (Long/parseLong (.trim points))]
-                                          {:question/points points})
-                                        (catch NumberFormatException _
-                                          {:errors {:question/points "Die erreichbaren Punkte müssen eine Zahl sein"}}))))]
+          (parse-points
+            [points]
+            (if (number? points)
+              {:question/points points}
+              (try (let [points (Long/parseLong (.trim points))]
+                     {:question/points points})
+                   (catch NumberFormatException _
+                     {:errors {:question/points "Die erreichbaren Punkte müssen eine Zahl sein"}}))))]
     (reduce (partial merge-with merge)
             {}
             [{:question/question-statement question-statement}
@@ -114,7 +118,7 @@
                {:question/single-choice-solution single-choice-solutions})
              {:question/multiple-choice-solution (as-coll multiple-choice-solutions)}
              {:question/evaluation-criteria evaluation-criteria}
-             {:question/categories (as-coll categories)}])))
+             {:question/categories (distinct (as-coll categories))}])))
 
 
 (defn- validate-parsed-question
@@ -130,7 +134,8 @@
         validation-functions-with-error-msg (create-validation-functions-with-error-msg question)
         not-empty? seq]
 
-    (letfn [(construct-error-msg [current-key]
+    (letfn [(construct-error-msg
+              [current-key]
               (reduce (fn [current-error-msg [is-valid? error-msg]]
                         (if (is-valid?)
                           current-error-msg
@@ -164,6 +169,7 @@
     (if errors
       question
       (merge question (validate-parsed-question question)))))
+
 
 (extend QuestionService
   PQuestionService
