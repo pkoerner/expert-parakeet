@@ -175,4 +175,7 @@ registerQuestionTypeSwitch('type', " question-types-js-arr ");
        :question.type/free-text (free-text-question-view question)
        :question.type/single-choice (single-choice-question-view question)
        :question.type/multiple-choice (multiple-choice-question-view question))
-     [:p [:b "Erreichbare Punkte: "] (question :question/points)]]))
+     [:p [:b "Erreichbare Punkte: "] (question :question/points)]
+     [:p [:b "Kategorien:"]
+      [:ul (for [cat (question :question/categories)]
+             [:li cat])]]]))
