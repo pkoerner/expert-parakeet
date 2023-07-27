@@ -126,10 +126,12 @@
     (reduce (partial merge-with merge)
             {}
             [{:question/question-statement question-statement}
-             (let [question-type (to-question-type type)]
-               (if (nil? question-type)
-                 {:errors {:question/type "Der angegebene question-type war kein valider type!"}}
-                 {:question/type question-type}))
+             (if (s/valid? :question/type type)
+               {:question/type type}
+               (let [question-type (to-question-type type)]
+                 (if (nil? question-type)
+                   {:errors {:question/type "Der angegebene question-type war kein valider type!"}}
+                   {:question/type question-type})))
              (parse-points achivable-points)
              {:question/possible-solutions (as-coll possible-solutions)}
              (if (coll? single-choice-solutions)
@@ -175,7 +177,8 @@
         :args (s/cat :self #(= PQuestionService (type %))
                      :question-statement string?
                      :achivable-points (s/or :to-parse string? :valid number?)
-                     :type question-types
+                     :type (s/or :question-type question-types
+                                 :question-type-as-string string?)
                      :possible-solutions (s/or :nil nil? :single string? :multiple (s/coll-of string?))
                      :single-choice-solutions (s/or :nil nil? :solution string?)
                      :multiple-choice-solutions (s/or :nil nil? :solution string? :multiple-solutions (s/coll-of string?))
