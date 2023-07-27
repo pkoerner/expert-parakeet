@@ -11,6 +11,17 @@
 (deftype QuestionService
   [])
 
+
+(s/fdef create-question-impl!
+        :args (s/cat :self #(= PQuestionService (type %))
+                     :question (s/or :free-text-question :question/question
+                                     :single-choice-question :question/single-choice-question
+                                     :multiple-choice-question :question/multiple-choice-question))
+        :ret (s/or :free-text-question :question/question
+                   :single-choice-question :question/single-choice-question
+                   :multiple-choice-question :question/multiple-choice-question))
+
+
 (defn- create-question-impl!
   [_ question]
   (db/add-question! question))
