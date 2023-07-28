@@ -1,4 +1,4 @@
-(ns controllers.course-iteration.student-overview-controller)
+(ns controllers.student.student-overview-controller)
 
 
 ;; (if (auth/is-logged-in req)

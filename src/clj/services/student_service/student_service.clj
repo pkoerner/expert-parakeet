@@ -3,8 +3,7 @@
    [clojure.spec.alpha :as s]
    [db]
    [services.student-service.p-student-service :refer [PStudentService]]
-   [domain]
-   [domain.spec]))
+   [domain]))
 
 (deftype StudentService
          [])
