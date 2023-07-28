@@ -5,8 +5,7 @@
     [clojure.test :as t :refer [deftest testing]]
     [controllers.question.question-controller :refer [create-question-get
                                                       submit-create-question!]]
-    [services.question-service.p-question-service :refer [create-question!
-                                                          PQuestionService validate-question]]
+    [services.question-service.p-question-service :refer [PQuestionService validate-question]]
     [services.question-service.question-service :refer [->QuestionService]]))
 
 
@@ -30,8 +29,7 @@
 
 
 (deftest test-create-question-get-error-display
-  (let [request-with-params {:query-params {":param" "error"}}
-        get-categories-fun (fn [] [])]
+  (let [get-categories-fun (fn [] [])]
 
 
     (testing "Errors are displayed"
