@@ -31,7 +31,7 @@
   {:course-service (->CourseService db)
    :course-iteration-service (->CourseIterationService db)
    :question-set-service (->QuestionSetService db)
-   :question-service (->QuestionService)})
+   :question-service (->QuestionService db)})
 
 
 ;; all routes that dont need authentication go here

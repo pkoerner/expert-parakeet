@@ -7,9 +7,8 @@
     [services.question-service.p-question-service :refer [PQuestionService]]))
 
 
-;; todo replace all direct db calls and inject repositories
 (deftype QuestionService
-  [])
+  [db])
 
 
 (s/fdef create-question-impl!
@@ -24,7 +23,7 @@
 
 (defn- create-question-impl!
   [_ question]
-  (db/add-question! question))
+  (db/add-question! db question))
 
 
 (s/fdef get-question-categories
@@ -34,7 +33,7 @@
 
 (defn- get-question-categories
   [_]
-  (db/get-all-question-categories))
+  (db/get-all-question-categories db))
 
 
 (def ^:private question-keys
