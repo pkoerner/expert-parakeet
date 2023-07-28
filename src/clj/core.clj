@@ -25,22 +25,11 @@
 
 ;; all routes that dont need authentication go here
 (defroutes public-routes
-  (GET "/" req (html-response
-                (if (auth/is-logged-in req)
-                  (let [user-id "0"] ; TODO: Replace the '0' with (str (get-in req [:session :user :id]))
-                    (views.student-overview/overview
-                     (domain/course-iterations-with-total-points
-                      (db/get-course-iterations-of-student user-id)
-                      (partial db/get-graded-answers-of-question-set user-id))))
-                  [:a {:href "/oauth2/github"} "Login"])))) ; TODO remove route, just an example to show login working
-
+  (GET "/" req (html-response ""))) ; TODO remove route, just an example to show login working
 
 
 ;; all routes that require authentication go here
 (defroutes private-routes
-<<<<<<< HEAD
-  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working 
-=======
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
 
   (GET "/create-course-iteration" req
@@ -49,7 +38,6 @@
                                                    :get-question-sets-fun (partial get-all-question-sets (:question-set-service services)))))
   (POST "/create-course-iteration" req
         (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
->>>>>>> a0b930d8241880272489d01de0af53fefcdd70f8
   (route/not-found "Not Found"))
 
 
