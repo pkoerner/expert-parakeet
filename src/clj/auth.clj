@@ -54,9 +54,8 @@
     :access-token-uri "https://github.com/login/oauth/access_token"
     :client-id        oauth-client-id
     :client-secret    oauth-client-secret
-    ;; Wir wollen die email Adresse des Nutzers erfahren
-    ;; -> wir bekommen noch ein paar Infos mehr (user-id, alles öffentliche, ...)
-    :scopes           ["user:email"]
+    ;; withouth any scopes definition, github provides us with the uid of the current user, which is all we need.
+    ;; :scopes           []
     ;; Start URL (die muss der Nutzer aufrufen)
     ;; -> initiiert alles und leitet den Nutzer an Github weiter
     :launch-uri       "/oauth2/github"
@@ -83,10 +82,10 @@
          :oauth-token token
          :as :json})
       :body
-      (select-keys [:email :name :id])))
+      (select-keys [:id])))
 
 
-;; Github ID, Name, E-Mail zu Session hinzu fügen
+;; Github ID zur Session hinzufügen
 (defn logged-in
   [request]
   (let [github-data (github-user-data-from-token (extract-token request))]
