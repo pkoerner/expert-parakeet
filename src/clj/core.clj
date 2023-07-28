@@ -5,9 +5,11 @@
     [compojure.core :refer [defroutes GET POST]]
     [compojure.route :as route]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
+    [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
-    [ring.middleware.defaults :refer [site-defaults secure-site-defaults wrap-defaults]]
+    [ring.middleware.defaults :refer [secure-site-defaults
+                                      site-defaults wrap-defaults]]
     [ring.middleware.reload :refer [wrap-reload]]
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-service.course-service :refer [->CourseService]]
@@ -17,10 +19,13 @@
     [util.ring-extensions :refer [html-response]]))
 
 
+(def db db/create-database)
+
+
 (def ^:private services
-  {:course-service (->CourseService)
-   :course-iteration-service (->CourseIterationService)
-   :question-set-service (->QuestionSetService)})
+  {:course-service (->CourseService db)
+   :course-iteration-service (->CourseIterationService db)
+   :question-set-service (->QuestionSetService db)})
 
 
 ;; all routes that dont need authentication go here

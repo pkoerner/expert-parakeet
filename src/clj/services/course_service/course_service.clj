@@ -7,7 +7,7 @@
 
 ;; todo replace all direct db calls and inject repositories
 (deftype CourseService
-  [])
+  [db])
 
 
 (s/fdef get-all-courses
@@ -16,8 +16,8 @@
 
 
 (defn get-all-courses
-  [_]
-  (db/get-all-courses db/db))
+  [this]
+  (db/get-all-courses (.db this)))
 
 
 (extend CourseService

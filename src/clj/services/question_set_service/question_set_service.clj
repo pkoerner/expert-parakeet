@@ -7,7 +7,7 @@
 
 ;; todo replace all direct db calls and inject repositories
 (deftype QuestionSetService
-  [])
+  [db])
 
 
 (s/fdef get-all-question-sets
@@ -16,8 +16,8 @@
 
 
 (defn get-all-question-sets
-  [_]
-  (db/get-all-question-sets db/db))
+  [this]
+  (db/get-all-question-sets (.db this)))
 
 
 (extend QuestionSetService

@@ -1,6 +1,5 @@
 (ns db
   (:require
-    [clojure.spec.alpha :as s]
     [datahike.api :as d]
     [db.dummy-data :as dummy-data]
     [db.schema :refer [db-schema]]
@@ -10,39 +9,10 @@
 (def id-len 10)
 
 
-;; use mem db
-
-(def cfg
-  {:store {:backend :mem
-           :id "expert-db"}
-   :initial-tx db-schema})
-
-
-;; use file db
-
-
-#_(def cfg
-    {:store {:backend :file
-             :path "/tmp/expert-db"}
-     :initial-tx schema})
-
-
-(defn create-conn
-  []
-  (if (d/database-exists? cfg)
-    (println "Found existing DB at:" (get-in cfg [:store :path]))
-    (d/create-database cfg))
-
-  (d/connect cfg))
-
-
-(def conn (create-conn))
-
-
-(do (d/transact conn dummy-data/dummy-data) nil)
-
-
 (defprotocol Database-Protocol
+
+  (generate-id
+    [this attr])
 
   (get-course-iterations-of-student
     [this user-id])
@@ -126,22 +96,22 @@
     [this ant-id correction]))
 
 
-;; provide the db attr of the id you want to check for collisions
-(defn generate-id
-  [attr]
-  (loop [id (nano-id id-len)]
-    (if (seq (d/q '[:find ?e
-                    :in $ ?attr ?id
-                    :where [?e ?attr ?id]]
-                  @conn attr id))
-      (recur (nano-id id-len))
-      id)))
-
-
 (deftype Database
   [conn]
 
   Database-Protocol
+
+  ;; provide the db attr of the id you want to check for collisions
+  (generate-id
+    [this attr]
+    (loop [id (nano-id id-len)]
+      (if (seq (d/q '[:find ?e
+                      :in $ ?attr ?id
+                      :where [?e ?attr ?id]]
+                    @(.conn this) attr id))
+        (recur (nano-id id-len))
+        id)))
+
 
   (get-course-iterations-of-student
     [this user-id]
@@ -288,7 +258,7 @@
 
   (add-course!
     [this course-name]
-    (let [id (generate-id :course/id)
+    (let [id (generate-id this :course/id)
           tx-result (d/transact @(.conn this)
                                 [{:db/id -1
                                   :course/id id
@@ -309,7 +279,7 @@
 
   (add-course-iteration-with-question-sets!
     [this course-id year semester question-set-ids]
-    (let [id (generate-id :course-iteration/id)
+    (let [id (generate-id this :course-iteration/id)
           question-set-ids-keyed (mapv (fn [question-set-id] [:question-set/id (str question-set-id)])
                                        question-set-ids)
           tx-result (d/transact @(.conn this)
@@ -342,7 +312,7 @@
 
   (add-question!
     [this question]
-    (let [id (generate-id :question/id)
+    (let [id (generate-id this :question/id)
           type (:question/type question)
           trans-map (apply assoc {:db/id        -1
                                   :question/id     id
@@ -369,7 +339,7 @@
 
   (add-question-set!
     [this question-set-name course-iteration-id passing-score questions start end]
-    (let [id (generate-id :question-set/id)
+    (let [id (generate-id this :question-set/id)
           question-ids (doall (map (fn [question]
                                      (if (:question/id question)
                                        (:question/id question)
@@ -395,7 +365,7 @@
 
   (add-user-answer!
     [this user-id question-id answer]
-    (let [id (generate-id :answer/id)
+    (let [id (generate-id this :answer/id)
           tx-result (d/transact @(.conn this)
                                 [{:db/id -1
                                   :answer/id id
@@ -464,4 +434,33 @@
       (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1)))))
 
 
-(def db (Database. conn))
+;; use mem db
+
+(def cfg
+  {:store {:backend :mem
+           :id "expert-db"}
+   :initial-tx db-schema})
+
+
+;; use file db
+
+
+#_(def cfg
+    {:store {:backend :file
+             :path "/tmp/expert-db"}
+     :initial-tx schema})
+
+
+(defn create-conn
+  []
+  (if (d/database-exists? cfg)
+    (println "Found existing DB at:" (get-in cfg [:store :path]))
+    (d/create-database cfg))
+
+  (d/connect cfg))
+
+
+(def create-database
+  (let [conn (create-conn)]
+    (d/transact conn dummy-data/dummy-data)
+    (Database. conn)))

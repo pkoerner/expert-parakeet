@@ -9,7 +9,7 @@
 
 ;; todo replace all direct db calls and inject repositories
 (deftype CourseIterationService
-  [])
+  [db])
 
 
 (s/fdef create-course-iteration-impl
@@ -26,8 +26,8 @@
 
 
 (defn- create-course-iteration-impl
-  [_ course-id year semester question-set-ids]
-  (db/add-course-iteration-with-question-sets! db/db course-id year semester question-set-ids))
+  [this course-id year semester question-set-ids]
+  (db/add-course-iteration-with-question-sets! (.db this) course-id year semester question-set-ids))
 
 
 (def ^:private validation-functions-with-error-msg
