@@ -31,103 +31,121 @@ function removeHiddenQuestionTypeInputsOnSubmit(questionTypeFields) {
     .forEach((x) => x.remove());
 }
 
+function addToSolutions(solutionListId, newSolutionNode, solutionContainerId) {
+  if (document.getElementById(solutionContainerId) != null) {
+    return;
+  }
+
+  liContainer = document.createElement("li");
+  liContainer.id = solutionContainerId;
+
+  const answerInputDisplay = document.createElement("span");
+  answerInputDisplay.innerText = newSolutionNode.value;
+  answerInputDisplay.readOnly = true;
+
+  const answerInputHidden = document.createElement("input");
+  answerInputHidden.name = solutionListId;
+  answerInputHidden.value = newSolutionNode.value;
+  answerInputHidden.type = "hidden";
+
+  liContainer.appendChild(answerInputDisplay);
+  liContainer.appendChild(answerInputHidden);
+
+  removeFromCorrectSolutionsBtn = createButton(
+    "✗",
+    () => liContainer.remove(),
+    ["btn", "btn-outline-info", "btn-sm"]
+  );
+
+  liContainer.appendChild(removeFromCorrectSolutionsBtn);
+
+  document.getElementById(solutionListId).appendChild(liContainer);
+}
+
+function addPossibleSolution(
+  possibleSolutionContainerDivId,
+  possibleSolutionInputId,
+  possibleSolutionListId,
+  possibleSolutionValue = "",
+  isSolution = null
+) {
+  const possibleSolutionContainer = document.getElementById(possibleSolutionContainerDivId);
+  const lastNode = Array.from(possibleSolutionContainer.children)
+    .filter((x) => x.nodeName === "INPUT")
+    .slice(-1)[0];
+
+  let possibleSolutionNode;
+  const lineBreak = document.createElement("br");
+  if (lastNode != null) {
+    possibleSolutionContainer.appendChild(lineBreak);
+
+    possibleSolutionNode = lastNode.cloneNode();
+    // num is needed to always get a distinct id.
+    const num = parseInt(possibleSolutionNode.getAttribute("num")) + 1;
+    possibleSolutionNode.setAttribute("num", num);
+    possibleSolutionNode.id = possibleSolutionInputId + num;
+  } else {
+    possibleSolutionNode = document.createElement("input");
+    possibleSolutionNode.id = possibleSolutionInputId;
+    possibleSolutionNode.name = "possible-solutions";
+    possibleSolutionNode.setAttribute("num", 0);
+    possibleSolutionNode.classList.add("form-control");
+  }
+  possibleSolutionNode.value = possibleSolutionValue;
+
+  possibleSolutionContainer.appendChild(possibleSolutionNode);
+
+  const solutionLiId = "li-" + possibleSolutionNode.id;
+  const addToSolutionsBtn = createButton(
+    "✓",
+    // Adds the solution to the list of correct solutions.
+    // Creates a button to remove it from this list again.
+    // All references are kept to remove them, if the possible-solution itself is removed.
+    () => addToSolutions(possibleSolutionListId, possibleSolutionNode, solutionLiId),
+    ["btn", "btn-outline-info", "btn-sm"]
+  );
+
+  if (isSolution) {
+    addToSolutions(possibleSolutionListId, possibleSolutionNode, solutionLiId);
+  }
+
+  possibleSolutionContainer.appendChild(addToSolutionsBtn);
+
+  const removePossibleSolutionBtn = createButton(
+    "-",
+    function () {
+      possibleSolutionNode?.remove();
+      addToSolutionsBtn?.remove();
+      removePossibleSolutionBtn?.remove();
+      if (typeof lineBreak !== "undefined") {
+        lineBreak?.remove();
+      }
+      document.getElementById(solutionLiId)?.remove();
+    },
+    ["btn", "btn-outline-info", "btn-sm"]
+  );
+  possibleSolutionContainer.appendChild(removePossibleSolutionBtn);
+}
+
 /**
  *
- * @param {String} addSolutionButtonId
- * @param {String} solutionContainerDivId
- * @param {String} solutionInputId
- * @param {String} solutionListId
+ * @param {String} addPossibleSolutionButtonId
+ * @param {String} possibleSolutionsContainerDivId
+ * @param {String} possibleSolutionInputId
+ * @param {String} possibleSolutionListId
  */
 function registerAddingSolutionBehavior(
-  addSolutionButtonId,
-  solutionContainerDivId,
-  solutionInputId,
-  solutionListId
+  addPossibleSolutionButtonId,
+  possibleSolutionsContainerDivId,
+  possibleSolutionInputId,
+  possibleSolutionListId
 ) {
-  document.getElementById(addSolutionButtonId).onclick = () => {
-    const solutionContainer = document.getElementById(solutionContainerDivId);
-    const lastNode = Array.from(solutionContainer.children)
-      .filter((x) => x.nodeName === "INPUT")
-      .slice(-1)[0];
-
-    let newSolutionNode;
-    if (lastNode != null) {
-      const lineBreak = document.createElement("br");
-      solutionContainer.appendChild(lineBreak);
-
-      newSolutionNode = lastNode.cloneNode();
-      // num is needed to always get a distinct id.
-      const num = parseInt(newSolutionNode.getAttribute("num")) + 1;
-      newSolutionNode.setAttribute("num", num);
-      newSolutionNode.id = solutionInputId + num;
-    } else {
-      newSolutionNode = document.createElement("input");
-      newSolutionNode.id = solutionInputId;
-      newSolutionNode.name = "possible-solutions";
-      newSolutionNode.setAttribute("num", 0);
-      newSolutionNode.classList.add("form-control");
-    }
-
-    solutionContainer.appendChild(newSolutionNode);
-
-    let liContainer = null;
-    let removeFromCorrectSolutionsBtn = null;
-    const addCorrectSolutionBtn = createButton(
-      "✓",
-      // Adds the solution to the list of correct solutions.
-      // Creates a button to remove it from this list again.
-      // All references are kept to remove them, if the possible-solution itself is removed.
-      function () {
-        const liContainerId = "li-" + newSolutionNode.id;
-
-        if (document.getElementById(liContainerId) != null) {
-          return;
-        }
-
-        liContainer = document.createElement("li");
-        liContainer.id = liContainerId;
-
-        const answerInputDisplay = document.createElement("span");
-        answerInputDisplay.innerText = newSolutionNode.value;
-        answerInputDisplay.readOnly = true;
-
-        const answerInputHidden = document.createElement("input");
-        answerInputHidden.name = solutionListId;
-        answerInputHidden.value = newSolutionNode.value;
-        answerInputHidden.type = "hidden";
-
-        liContainer.appendChild(answerInputDisplay);
-        liContainer.appendChild(answerInputHidden);
-
-        removeFromCorrectSolutionsBtn = createButton(
-          "✗",
-          () => liContainer.remove(),
-          ["btn", "btn-outline-info", "btn-sm"]
-        );
-
-        liContainer.appendChild(removeFromCorrectSolutionsBtn);
-
-        document.getElementById(solutionListId).appendChild(liContainer);
-      },
-      ["btn", "btn-outline-info", "btn-sm"]
+  document.getElementById(addPossibleSolutionButtonId).onclick = () => {
+    addPossibleSolution(
+      possibleSolutionsContainerDivId,
+      possibleSolutionInputId,
+      possibleSolutionListId
     );
-
-    solutionContainer.appendChild(addCorrectSolutionBtn);
-
-    const removeSolutionBtn = createButton(
-      "-",
-      function () {
-        newSolutionNode?.remove();
-        liContainer?.remove();
-        addCorrectSolutionBtn?.remove();
-        removeSolutionBtn?.remove();
-        if (typeof lineBreak !== "undefined") {
-          lineBreak?.remove();
-        }
-      },
-      ["btn", "btn-outline-info", "btn-sm"]
-    );
-    solutionContainer.appendChild(removeSolutionBtn);
   };
 }
 
