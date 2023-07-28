@@ -114,7 +114,6 @@ registerAddingSolutionBehavior(
     (h/html
       (hpage/include-js "js/views/question/util.js"
                         "js/views/question/create_question_view.js")
-      (script "clearUrlParameters();")
       [:div.container
        [:h1 "Fragenerstellung:"]
        (hform/form-to
