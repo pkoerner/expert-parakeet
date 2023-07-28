@@ -5,6 +5,9 @@
     [compojure.core :refer [defroutes GET POST]]
     [compojure.route :as route]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
+    [controllers.question.question-controller :refer [create-question-get
+                                                      submit-create-question!]]
+    [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
@@ -13,6 +16,7 @@
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-service.course-service :refer [->CourseService]]
     [services.course-service.p-course-service :refer [get-all-courses]]
+    [services.question-service.p-question-service :refer [get-question-categories]]
     [services.question-service.question-service :refer [->QuestionService]]
     [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
@@ -34,6 +38,7 @@
                    [:a {:href "/oauth2/github"} "Login"])))) ; TODO remove route, just an example to show login working
 
 
+
 ;; all routes that require authentication go here
 (defroutes private-routes
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
@@ -44,6 +49,12 @@
                                                    :get-question-sets-fun (partial get-all-question-sets (:question-set-service services)))))
   (POST "/create-course-iteration" req
         (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
+
+  (GET "/create-question" req
+       (html-response (create-question-get req (partial get-question-categories (:question-service services)) "/create-question")))
+  (POST "/create-question" req
+        (submit-create-question! req "/create-question" (:question-service services)))
+
   (route/not-found "Not Found"))
 
 
