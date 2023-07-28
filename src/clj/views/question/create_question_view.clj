@@ -18,31 +18,48 @@
 
 
 (defn- free-text-inputs
-  [errors]
+  [errors question-data]
   (h/html
     [:div#free-text
      (optional-error-display :question/evaluation-criteria errors)
      [:label {:for "evaluation-criteria"} "Bewertungskriterien:"] [:br]
-     [:input#evaluation-criteria.form-control {:name "evaluation-criteria"}]]))
+     [:input#evaluation-criteria.form-control {:name "evaluation-criteria"
+                                               :value (question-data :question/evaluation-criteria)}]]))
 
 
 (defn- possible-answers-input
-  [choice-type possible-solutions-error solution-error]
-  (let [container-div-id (str choice-type "input")
-        solution-container-div-id (str "additional-" choice-type)
-        add-solution-btn-id (str "add-" choice-type "-btn")
-        solution-input-id (str "possible-" choice-type "-solution")
+  [choice-type
+   possible-solutions-error solution-error
+   was-selected possible-solutions solutions]
+  (let [question-type-container (str choice-type "-container")
+        possible-solution-input-id (str "possible-" choice-type "-solution")
+        solution-container-div-id (str possible-solution-input-id "-container")
+        add-possible-solution-btn-id (str "add-" possible-solution-input-id "-btn")
         solution-list-id (str choice-type "-solution")]
     (h/html
-      [:div {:id container-div-id}
+      [:div {:id question-type-container}
        possible-solutions-error
-       [:label {:for "possible-solutions"} "Antwort Möglichkeiten:"] [:br]
-       [:div.form-group {:id solution-container-div-id}]
-       [:button.btn.btn-outline-info.btn-sm {:id add-solution-btn-id :type "button"} "+"]
+       [:label {:for solution-container-div-id} "Antwort Möglichkeiten:"] [:br]
+       [:div.form-group {:id solution-container-div-id}
+        (when was-selected
+          (apply script
+                 (concat ["window.onload = () => {"]
+                         ["console.log('Hello World!')\n"]
+                         (for [curr-solution possible-solutions]
+                           (str "
+addPossibleSolution(
+  '" solution-container-div-id "',
+  '" possible-solution-input-id "',
+  '" solution-list-id "',
+  '" curr-solution "',
+  '" (some #{curr-solution} solutions) "'
+);\n"))
+                         ["};"])))]
+       [:button.btn.btn-outline-info.btn-sm {:id add-possible-solution-btn-id :type "button"} "+"]
        ;; When the add button is klicked
        (script "
 registerAddingSolutionBehavior(
-    '" add-solution-btn-id "', '" solution-container-div-id "', '" solution-input-id "', '" solution-list-id "'
+    '" add-possible-solution-btn-id "', '" solution-container-div-id "', '" possible-solution-input-id "', '" solution-list-id "'
 )")]
 
       [:div
@@ -52,21 +69,33 @@ registerAddingSolutionBehavior(
 
 
 (defn- single-choice-inputs
-  [errors]
-  (h/html
-    [:div#single-choice
-     (possible-answers-input "single-choice"
-                             (optional-error-display :question/possible-solutions errors)
-                             (optional-error-display :question/single-choice-solution errors))]))
+  [errors question-data]
+  (letfn [(as-coll
+            [coll-or-single]
+            (if (or (nil? coll-or-single)
+                    (coll? coll-or-single))
+              coll-or-single
+              [coll-or-single]))]
+    (h/html
+      [:div#single-choice
+       (possible-answers-input "single-choice"
+                               (optional-error-display :question/possible-solutions errors)
+                               (optional-error-display :question/single-choice-solution errors)
+                               (= :question.type/single-choice (question-data :question/type))
+                               (question-data :question/possible-solutions)
+                               (as-coll (question-data :question/single-choice-solution)))])))
 
 
 (defn- multiple-choice-inputs
-  [errors]
+  [errors question-data]
   (h/html
     [:div#multiple-choice
      (possible-answers-input "multiple-choice"
                              (optional-error-display :question/possible-solutions errors)
-                             (optional-error-display :question/multiple-choice-solution errors))]))
+                             (optional-error-display :question/multiple-choice-solution errors)
+                             (= :question.type/multiple-choice (question-data :question/type))
+                             (question-data :question/possible-solutions)
+                             (question-data :question/multiple-choice-solution))]))
 
 
 (s/fdef question-form
@@ -95,7 +124,7 @@ registerAddingSolutionBehavior(
          [:div.form-group
           (optional-error-display :question/question-statement errors)
           [:label {:for "question-statement"} "Fragestellung:"] [:br]
-          [:input#question-statement.form-control {:name "question-statement"}]]
+          [:input#question-statement.form-control {:name "question-statement" :value (question-data :question/question-statement)}]]
 
          [:div.form-group
           (optional-error-display :question/points errors)
@@ -104,17 +133,25 @@ registerAddingSolutionBehavior(
                                                  :type "number"
                                                  :min "0"
                                                  :step ".1"
-                                                 :value "5"}]]
+                                                 :value (let [points (question-data :question/points)]
+                                                          (if points points "5"))}]]
 
          [:div.form-group
           (optional-error-display :question/type errors)
           [:label {:for "type"} "Fragentyp"] [:br]
           [:select#type.form-control {:name "type"}
-           (hform/select-options (map (fn [type] [type type]) question-types))]]
+           (hform/select-options
+             (let [prev-type (question-types (question-data :question/type))
+                   default-selected (if prev-type prev-type (first question-types))
+                   without-selected (remove #{default-selected} question-types)
+                   to-select-option (fn [type] [type type])]
 
-         (single-choice-inputs errors)
-         (multiple-choice-inputs errors)
-         (free-text-inputs errors)
+               (conj (map to-select-option without-selected)
+                     (to-select-option default-selected))))]]
+
+         (single-choice-inputs errors question-data)
+         (multiple-choice-inputs errors question-data)
+         (free-text-inputs errors question-data)
 
          [:div.form-group
           [:label {:for "new-category"} "Neue Kategorie erstellen:"]
@@ -128,8 +165,10 @@ registerAddingSolutionBehavior(
            (map (fn [cat]
                   (let [id (str "mult-select-" cat)]
                     [:div.form-check
-                     [:input.form-check-input {:id id :type "checkbox" :name "categories" :value cat}]
-                     [:label.form-check-label {:for id} cat]])) (sort categories))]]
+                     [:input.form-check-input {:id id :type "checkbox" :name "categories" :value cat
+                                               :checked (some #{cat} (question-data :question/categories))}]
+                     [:label.form-check-label {:for id} cat]]))
+                (sort categories))]]
 
          (h/raw (anti-forgery-field))
          (hform/submit-button {:class "btn btn-primary"} "submit"))
