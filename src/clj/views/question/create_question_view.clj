@@ -101,9 +101,10 @@ registerAddingSolutionBehavior(
 (s/fdef question-form
         :args (s/cat :categories (s/coll-of :question/categories)
                      :post-destination :general/non-blank-string
-                     :kwargs (s/? (s/or :empty empty?
-                                        :map (s/map-of create-question-error-keys
-                                                       string?))))
+                     :errors (s/cat :errors  (s/? #{:errors})
+                                    :error-map (s/? (s/map-of create-question-error-keys string?))
+                                    :question-data (s/? #{:question-data})
+                                    :question-data-map (s/? map?)))
         :ret #(instance? hiccup.util.RawString %))
 
 
