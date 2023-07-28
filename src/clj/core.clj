@@ -13,6 +13,7 @@
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-service.course-service :refer [->CourseService]]
     [services.course-service.p-course-service :refer [get-all-courses]]
+    [services.question-service.question-service :refer [->QuestionService]]
     [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
     [util.ring-extensions :refer [html-response]]))
@@ -21,7 +22,8 @@
 (def ^:private services
   {:course-service (->CourseService)
    :course-iteration-service (->CourseIterationService)
-   :question-set-service (->QuestionSetService)})
+   :question-set-service (->QuestionSetService)
+   :question-service (->QuestionService)})
 
 
 ;; all routes that dont need authentication go here
