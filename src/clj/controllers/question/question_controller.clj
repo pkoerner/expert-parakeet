@@ -1,12 +1,12 @@
 (ns controllers.question.question-controller
   (:require
-   [db]
-   [services.question-service.p-question-service :refer [create-question!
-                                                         validate-question
-                                                         get-question-categories]]
-   [util.ring-extensions :refer [extract-errors
-                                 html-response]]
-   [views.question.create-question-view :as view :refer [question-success-view]]))
+    [db]
+    [services.question-service.p-question-service :refer [create-question!
+                                                          validate-question
+                                                          get-question-categories]]
+    [util.ring-extensions :refer [extract-errors
+                                  html-response]]
+    [views.question.create-question-view :as view :refer [question-success-view]]))
 
 
 (defn create-question-get
