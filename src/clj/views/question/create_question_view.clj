@@ -11,7 +11,7 @@
 
 
 (def create-question-error-keys
-  "Possible keys for which errors can be displayed in the `course-iteration-form`."
+  "Possible keys for which errors can be displayed in the `question-form`."
   #{:question/question-statement :question/type :question/points
     :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
     :question/evaluation-criteria})
