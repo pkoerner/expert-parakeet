@@ -1,5 +1,6 @@
 (ns db
   (:require
+    [clojure.spec.alpha :as s]
     [datahike.api :as d]
     [db.dummy-data :as dummy-data]
     [db.schema :refer [db-schema]]
@@ -46,6 +47,9 @@
   (get-course-iterations-of-student
     [this user-id])
 
+  (get-all-course-iterations
+    [this])
+
   (get-graded-answers-of-question-set
     [this user-id question-set-id])
 
@@ -83,6 +87,9 @@
 
   (get-course-iteration-by-id
     [this course-iteration-id])
+
+  (add-course-iteration-with-question-sets!
+    [this course-id year semester question-set-ids])
 
   (add-course-iteration!
     [this course-id year semester])
@@ -150,6 +157,17 @@
                  :where
                  [?u :user/course-iterations ?k]]
                @(.conn this) [:user/id user-id])))
+
+
+  (get-all-course-iterations
+    [this]
+    (mapv first (d/q '[:find (pull ?e [:course-iteration/id {:course-iteration/course [:course/id :course/course-name]}
+                                       :course-iteration/year
+                                       :course-iteration/semester
+                                       :course-iteration/year
+                                       {:course-iteration/question-sets [:question-set/id]}])
+                       :where [?e :course-iteration/id]]
+                     @(.conn this))))
 
 
   (get-graded-answers-of-question-set
@@ -289,19 +307,30 @@
             [:course-iteration/id course-iteration-id]))
 
 
-  (add-course-iteration!
-    [this course-id year semester]
+  (add-course-iteration-with-question-sets!
+    [this course-id year semester question-set-ids]
     (let [id (generate-id :course-iteration/id)
+          question-set-ids-keyed (mapv (fn [question-set-id] [:question-set/id (str question-set-id)])
+                                       question-set-ids)
           tx-result (d/transact @(.conn this)
                                 [{:db/id     -1
                                   :course-iteration/id   id
                                   :course-iteration/course [:course/id course-id]
                                   :course-iteration/year year
                                   :course-iteration/semester semester
-                                  :course-iteration/question-sets []}])
+                                  :course-iteration/question-sets question-set-ids-keyed}])
           db-after (:db-after tx-result)]
-      (d/pull db-after [:course-iteration/id :course-iteration/course :course-iteration/year :course-iteration/semester :course-iteration/question-sets]
+      (d/pull db-after [:course-iteration/id
+                        :course-iteration/course
+                        :course-iteration/year
+                        :course-iteration/semester
+                        :course-iteration/question-sets]
               [:course-iteration/id id])))
+
+
+  (add-course-iteration!
+    [this course-id year semester]
+    (add-course-iteration-with-question-sets! this course-id year semester []))
 
 
   (get-question-by-id
