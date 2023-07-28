@@ -46,4 +46,7 @@
       (let [question result-map
             question (add-question-fun question)]
         (html-response (question-success-view question)))
-      (response/redirect (construct-url (str (get-in req [:headers :origin]) redirect-uri) validation-errors)))))
+      (html-response (view/question-form (get-question-categories question-service)
+                                         redirect-uri
+                                         :errors validation-errors
+                                         :question-data (dissoc result-map :errors))))))

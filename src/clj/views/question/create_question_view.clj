@@ -79,7 +79,7 @@ registerAddingSolutionBehavior(
 
 
 (defn question-form
-  [categories post-destination & {:keys [errors] :or {errors {}}}]
+  [categories post-destination & {:keys [errors question-data] :or {errors {} question-data {}}}]
   (let [question-types-js-arr (str "[" (string/join ", "  (map #(str "'" % "'") (map name question-types))) "]")]
     (h/html
       (hpage/include-js "js/views/question/util.js"
