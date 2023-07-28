@@ -8,10 +8,15 @@
     [clojure.test.check.properties :as prop]
     [controllers.course-iteration.course-iteration-controller :refer
      [create-course-iteration-get submit-create-course-iteration!]]
+    [db]
     [ring.util.codec :refer [form-encode]]
     [services.course-iteration-service.course-iteration-service :as cis :refer [->CourseIterationService]]
     [services.course-iteration-service.p-course-iteration-service :refer [PCourseIterationService validate-course-iteration]]
     [views.course-iteration.create-course-iteration-view :refer [create-course-iteration-error-keys]]))
+
+
+;; TODO make dummy db instead
+(def db db/create-database)
 
 
 (def ^:private error-map-gen
@@ -29,7 +34,7 @@
   (prop/for-all [error-map error-map-gen]
                 (let [post-destination "destination"
                       res (create-course-iteration-get {:query-params error-map}
-                                                       post-destination)]
+                                                       post-destination db)]
                   (t/is (and (every? #(string/includes? res %) (vals error-map))
                              (string/includes? res post-destination))))))
 
@@ -37,9 +42,10 @@
 (deftest test-create-course-iteration-get
   (testing "When there are no courses, an error message is displayed."
     (let [empty-request {}
-          get-no-courses-fun (fn [] [])
+          get-no-courses-fun (fn [_] [])
           res (create-course-iteration-get empty-request
                                            "post-destination"
+                                           db
                                            :get-courses-fun get-no-courses-fun)]
       (t/is (not (string/includes? res "form"))))))
 
@@ -98,7 +104,7 @@
 
           course-iteration-service (stub-course-iteration-service
                                      :validate-course-iteration (fn [& args]
-                                                                  (apply (partial validate-course-iteration (->CourseIterationService)) args))
+                                                                  (apply (partial validate-course-iteration (->CourseIterationService db)) args))
                                      :create-course-iteration db-add-fun-stub)
           redirect-uri "S"
           wrong-course-id ""
