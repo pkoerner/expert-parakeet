@@ -109,6 +109,13 @@ registerAddingSolutionBehavior(
 
 
 (defn question-form
+  "Takes as arguments a collection of arguments and a destination to which the form post should be send.
+   Optional keyword arguemnts:  
+   `:errors`: Takes a map with keys from the `:question` namespace mapped to strings. 
+   These are displayed as errors in the form with their corresponding input field.  
+   `:question-data`: Takes a map  with keys from the `:question` namespace mapped to valid values.  
+   When present the values are set put into the input fields corresponding to the name.
+   This way the form can be re/prepopulated.  "
   [categories post-destination & {:keys [errors question-data] :or {errors {} question-data {}}}]
   (let [question-types-js-arr (str "[" (string/join ", "  (map #(str "'" % "'") (map name question-types))) "]")]
     (h/html
@@ -213,6 +220,8 @@ registerQuestionTypeSwitch('type', " question-types-js-arr ");
 
 
 (defn question-success-view
+  "Takes a valid question as argument of one of the question types.
+   The question is displayed with all its values with a success message."
   [question]
   (h/html
     [:h1 "Die Frage vom typ \"" (question :question/type) "\" wurde erfolgreich erstellt."]
