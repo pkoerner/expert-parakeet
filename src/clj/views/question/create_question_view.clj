@@ -184,32 +184,34 @@ registerQuestionTypeSwitch('type', " question-types-js-arr ");
 ")])))
 
 
+(defn- possible-solutions-view
+  [{:question/keys [possible-solutions]}]
+  [:p.lead [:b "Antwortmöglichkeiten: "]
+   [:ul.list-group (for [el possible-solutions]
+                     [:li.list-group-item el])]])
+
+
 (defn- single-choice-question-view
-  [question]
+  [{:question/keys [single-choice-solution] :as question}]
   [:div
-   [:p [:b "Antwortmöglichkeiten: "]
-    [:ul (for [el (question :question/possible-solutions)]
-           [:li el])]]
-   [:p [:b "Mit der korrekten Antwort: "] (question :question/single-choice-solution)]])
+   (possible-solutions-view question)
+   [:p.lead [:b "Mit der korrekten Antwort: "] single-choice-solution]])
 
 
 (defn- multiple-choice-question-view
-  [question]
+  [{:question/keys [multiple-choice-solution] :as question}]
   [:div
+   (possible-solutions-view question)
 
-   [:p [:b "Antwortmöglichkeiten: "]
-    [:ul (for [el (question :question/possible-solutions)]
-           [:li el])]]
-
-   [:p [:b "Mit den korrekten Antworten: "]
-    [:ul (for [el (question :question/multiple-choice-solution)]
-           [:li el])]]])
+   [:p.lead [:b "Mit den korrekten Antworten: "]
+    [:ul.list-group (for [el multiple-choice-solution]
+                      [:li.list-group-item el])]]])
 
 
 (defn- free-text-question-view
-  [question]
+  [{:question/keys [evaluation-criteria]}]
   [:div
-   [:p [:b "Mit dem Bewertungskriterium: "] (question :question/evaluation-criteria)]])
+   [:p.lead [:b "Mit dem Bewertungskriterium: "] evaluation-criteria]])
 
 
 (s/fdef question-success-view
@@ -222,17 +224,19 @@ registerQuestionTypeSwitch('type', " question-types-js-arr ");
 (defn question-success-view
   "Takes a valid question as argument of one of the question types.
    The question is displayed with all its values with a success message."
-  [question]
+  [{:question/keys [type question-statement points categories] :as question}]
   (h/html
-    [:h1 "Die Frage vom typ \"" (question :question/type) "\" wurde erfolgreich erstellt."]
-    [:div
-     [:h2 "Frage: "]
-     [:p [:b "Fragestellung: "] (question :question/question-statement)]
-     (case (question :question/type)
-       :question.type/free-text (free-text-question-view question)
-       :question.type/single-choice (single-choice-question-view question)
-       :question.type/multiple-choice (multiple-choice-question-view question))
-     [:p [:b "Erreichbare Punkte: "] (question :question/points)]
-     [:p [:b "Kategorien:"]
-      [:ul (for [cat (question :question/categories)]
-             [:li cat])]]]))
+    [:div.container
+
+     [:h1 "Die Frage vom typ \"" type "\" wurde erfolgreich erstellt."]
+     [:div.container
+      [:h2 "Frage: "]
+      [:p.lead [:b "Fragestellung: "] question-statement]
+      (case type
+        :question.type/free-text (free-text-question-view question)
+        :question.type/single-choice (single-choice-question-view question)
+        :question.type/multiple-choice (multiple-choice-question-view question))
+      [:p.lead [:b "Erreichbare Punkte: "] points]
+      [:p.lead [:b "Kategorien:"]
+       [:ul.list-group (for [cat categories]
+                         [:li.list-group-item cat])]]]]))
