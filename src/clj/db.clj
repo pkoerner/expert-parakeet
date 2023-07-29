@@ -259,7 +259,7 @@
   (add-course!
     [this course-name]
     (let [id (generate-id this :course/id)
-          tx-result (d/transact @(.conn this)
+          tx-result (d/transact (.conn this)
                                 [{:db/id -1
                                   :course/id id
                                   :course/course-name course-name}])
@@ -282,7 +282,7 @@
     (let [id (generate-id this :course-iteration/id)
           question-set-ids-keyed (mapv (fn [question-set-id] [:question-set/id (str question-set-id)])
                                        question-set-ids)
-          tx-result (d/transact @(.conn this)
+          tx-result (d/transact (.conn this)
                                 [{:db/id     -1
                                   :course-iteration/id   id
                                   :course-iteration/course [:course/id course-id]
@@ -329,7 +329,7 @@
                                  (= type :question.type/multiple-choice)
                                  [:question/possible-solutions (:question/possible-solutions question)
                                   :question/multiple-choice-solution (:question/multiple-choice-solution question)]))
-          tx-result (d/transact @(.conn this) [trans-map])
+          tx-result (d/transact (.conn this) [trans-map])
           db-after (:db-after tx-result)]
       (d/pull db-after  [:question/id :question/question-statement :question/points :question/type :question/possible-solutions
                          :question/evaluation-criteria :question/single-choice-solution
@@ -345,7 +345,7 @@
                                        (:question/id question)
                                        (:question/id (add-question! this question)))) ; frage war noch nicht in db
                                    questions))
-          tx-result-question-set (d/transact @(.conn this)
+          tx-result-question-set (d/transact (.conn this)
                                              [{:db/id                      -1
                                                :question-set/id            id
                                                :question-set/name          question-set-name
@@ -366,7 +366,7 @@
   (add-user-answer!
     [this user-id question-id answer]
     (let [id (generate-id this :answer/id)
-          tx-result (d/transact @(.conn this)
+          tx-result (d/transact (.conn this)
                                 [{:db/id -1
                                   :answer/id id
                                   :answer/question [:question/id question-id]
@@ -422,7 +422,7 @@
 
   (add-correction!
     [this ant-id {feedback :correction/feedback points :correction/points corr-id :corrector/id}]
-    (let [tx-result (d/transact @(.conn this)
+    (let [tx-result (d/transact (.conn this)
                                 [{:db/id -1
                                   :correction/feedback feedback
                                   :correction/corrector [:user/id corr-id]
