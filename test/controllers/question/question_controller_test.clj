@@ -5,7 +5,9 @@
     [clojure.test :as t :refer [deftest testing]]
     [controllers.question.question-controller :refer [create-question-get
                                                       submit-create-question!]]
-    [services.question-service.p-question-service :refer [PQuestionService validate-question]]
+    [db :refer [Database-Protocol]]
+    [services.question-service.p-question-service :refer [PQuestionService
+                                                          validate-question]]
     [services.question-service.question-service :refer [->QuestionService]]))
 
 
@@ -122,76 +124,77 @@
 
 
 (deftest test-submit-create-question!
-  (testing "Test that the db-add-function get's called with the correct values with different parameters."
-    (let [test-request {:__anti-forgery-token ""
-                        :multipart-params {}}
-          question-service (->QuestionService)
-          basic-valid-input {"question-statement" "Valid question statement"
-                             "categories" ["Valid Category"]
-                             "achivable-points" 5}
-          redirect-uri "S"
-          free-text-question (merge basic-valid-input {"type" "free-text"
-                                                       "evaluation-criteria" "Valid evaluation criteria"})
-          single-choice-question (merge basic-valid-input {"type" "single-choice"
-                                                           "single-choice-solution" "Solution1"
-                                                           "possible-solutions" ["Solution1"]})
-          multiple-choice-question (merge basic-valid-input {"type" "multiple-choice"
-                                                             "multiple-choice-solution" ["Solution1" "Solution2"]
-                                                             "possible-solutions" ["Solution1" "Solution2" "Solution3"]})]
-      (t/are [question]
-             (let [was-valid (atom nil)
-                   db-add-fun-stub (fn [question]
-                                     (swap! was-valid (fn [_] (valid-question question)))
-                                     question)
-                   question-service-stub (stub-question-service
-                                           :create-question! db-add-fun-stub
-                                           :validate-question (partial validate-question question-service))]
-               (submit-create-question! (->> question
-                                             (map (fn [[key val]] {(str key) val}))
-                                             (into {})
-                                             (assoc test-request :multipart-params))
-                                        redirect-uri
-                                        question-service-stub)
-               @was-valid)
-        free-text-question
-        single-choice-question
-        multiple-choice-question)))
+  (let [db-stub (reify Database-Protocol)]
+    (testing "Test that the db-add-function get's called with the correct values with different parameters."
+      (let [test-request {:__anti-forgery-token ""
+                          :multipart-params {}}
+            question-service (->QuestionService db-stub)
+            basic-valid-input {"question-statement" "Valid question statement"
+                               "categories" ["Valid Category"]
+                               "achivable-points" 5}
+            redirect-uri "S"
+            free-text-question (merge basic-valid-input {"type" "free-text"
+                                                         "evaluation-criteria" "Valid evaluation criteria"})
+            single-choice-question (merge basic-valid-input {"type" "single-choice"
+                                                             "single-choice-solution" "Solution1"
+                                                             "possible-solutions" ["Solution1"]})
+            multiple-choice-question (merge basic-valid-input {"type" "multiple-choice"
+                                                               "multiple-choice-solution" ["Solution1" "Solution2"]
+                                                               "possible-solutions" ["Solution1" "Solution2" "Solution3"]})]
+        (t/are [question]
+               (let [was-valid (atom false)
+                     db-add-fun-stub (fn [question]
+                                       (swap! was-valid (fn [_] (valid-question question)))
+                                       question)
+                     question-service-stub (stub-question-service
+                                             :create-question! db-add-fun-stub
+                                             :validate-question (partial validate-question question-service))]
+                 (submit-create-question! (->> question
+                                               (map (fn [[key val]] {(str key) val}))
+                                               (into {})
+                                               (assoc test-request :multipart-params))
+                                          redirect-uri
+                                          question-service-stub)
+                 @was-valid)
+          free-text-question
+          single-choice-question
+          multiple-choice-question)))
 
 
-  (testing "Test that the db-add-function is not called with invalid parameters"
-    (let [test-request {:__anti-forgery-token ""
-                        :multipart-params {}}
-          question-service (->QuestionService)
-          basic-valid-input {"question-statement" "Valid question statement"
-                             "categories" ["Valid Category"]
-                             "achivable-points" 5}
-          redirect-uri "S"
-          free-text-question-invalid (merge basic-valid-input {"type" "free-text"
-                                                               "evaluation-criteria" 123})
-          single-choice-question (merge basic-valid-input {"type" "single-choice"
-                                                           "single-choice-solution" "Solution not in possible-solutions"
-                                                           "possible-solutions" ["Solution1"]})
-          multiple-choice-question (merge basic-valid-input {"type" "multiple-choice"
-                                                             "multiple-choice-solution" ["Solution1" "Solution2" "Solution not in possible-solutions"]
-                                                             "possible-solutions" ["Solution1" "Solution2" "Solution3"]})]
-      (t/are [question]
-             (let [was-not-called (atom true)
-                   db-add-fun-stub (fn [question]
-                                     (swap! was-not-called (fn [_] true))
-                                     question)
-                   question-service-stub (stub-question-service
-                                           :create-question! db-add-fun-stub
-                                           :validate-question (partial validate-question question-service))]
-               (submit-create-question! (->> question
-                                             (map (fn [[key val]] {(str key) val}))
-                                             (into {})
-                                             (assoc test-request :multipart-params))
-                                        redirect-uri
-                                        question-service-stub)
-               @was-not-called)
-        free-text-question-invalid
-        single-choice-question
-        multiple-choice-question))))
+    (testing "Test that the db-add-function is not called with invalid parameters"
+      (let [test-request {:__anti-forgery-token ""
+                          :multipart-params {}}
+            question-service (->QuestionService db-stub)
+            basic-valid-input {"question-statement" "Valid question statement"
+                               "categories" ["Valid Category"]
+                               "achivable-points" 5}
+            redirect-uri "S"
+            free-text-question-invalid (merge basic-valid-input {"type" "free-text"
+                                                                 "evaluation-criteria" 123})
+            single-choice-question (merge basic-valid-input {"type" "single-choice"
+                                                             "single-choice-solution" "Solution not in possible-solutions"
+                                                             "possible-solutions" ["Solution1"]})
+            multiple-choice-question (merge basic-valid-input {"type" "multiple-choice"
+                                                               "multiple-choice-solution" ["Solution1" "Solution2" "Solution not in possible-solutions"]
+                                                               "possible-solutions" ["Solution1" "Solution2" "Solution3"]})]
+        (t/are [question]
+               (let [was-not-called (atom true)
+                     db-add-fun-stub (fn [question]
+                                       (swap! was-not-called (fn [_] true))
+                                       question)
+                     question-service-stub (stub-question-service
+                                             :create-question! db-add-fun-stub
+                                             :validate-question (partial validate-question question-service))]
+                 (submit-create-question! (->> question
+                                               (map (fn [[key val]] {(str key) val}))
+                                               (into {})
+                                               (assoc test-request :multipart-params))
+                                          redirect-uri
+                                          question-service-stub)
+                 @was-not-called)
+          free-text-question-invalid
+          single-choice-question
+          multiple-choice-question)))))
 
 
 (t/run-test test-submit-create-question!)
