@@ -31,21 +31,33 @@ function removeHiddenQuestionTypeInputsOnSubmit(questionTypeFields) {
     .forEach((x) => x.remove());
 }
 
+/**
+ * Creates a new list element for the list under the `solutionListId`.
+ * The id of the list element will be the passed in `solutionContainerId`.
+ * Inside of the list element are a span for displaying the answer and a hidden input field for sending the answer
+ * when the form is posted. The values of the span and the input are set to the value of the passed in `newSolutionNode`.
+ * A remove button is added into the list element as well, which will remove the Element from the list if pressed.
+ * @param {String} solutionListId
+ * @param {Node} newSolutionNode
+ * @param {String} solutionContainerId
+ * @returns null.
+ */
 function addToSolutions(solutionListId, newSolutionNode, solutionContainerId) {
   if (document.getElementById(solutionContainerId) != null) {
     return;
   }
+  const newSolutionValue = newSolutionNode.value;
 
   liContainer = document.createElement("li");
   liContainer.id = solutionContainerId;
 
   const answerInputDisplay = document.createElement("span");
-  answerInputDisplay.innerText = newSolutionNode.value;
+  answerInputDisplay.innerText = newSolutionValue;
   answerInputDisplay.readOnly = true;
 
   const answerInputHidden = document.createElement("input");
   answerInputHidden.name = solutionListId;
-  answerInputHidden.value = newSolutionNode.value;
+  answerInputHidden.value = newSolutionValue;
   answerInputHidden.type = "hidden";
 
   liContainer.appendChild(answerInputDisplay);
@@ -62,14 +74,36 @@ function addToSolutions(solutionListId, newSolutionNode, solutionContainerId) {
   document.getElementById(solutionListId).appendChild(liContainer);
 }
 
+/**
+ * Adds a new possible solution to the element under the `possibleSolutionContainerDivId`.
+ * The value found in the element under `possibleSolutionInputId` is expected to be the value to add to the possible solutions.
+ * Additionally two buttons are created.
+ * The first, is a button to add the possible solution to the solutions which can be found under `solutionListId`
+ * (`addToSolutions` is used for this).
+ * The second, is a button to remove the elements created with this function from the document.
+ *
+ * When the optional parameter `possibleSolutionValue` is passed to this function, the value of the created node is set to this.
+ * When the optional parameter `isSolution` is passed as a truthy value to this function as well, 
+ * this value is immediately added as an element of the list under `solutionListId`.
+ * 
+ * Usage: This function can add new input fields for single/multiple-choice questions and if the document is 
+ * constructed from earlier send data this function is called to display all previously added possible solutions again.
+ * @param {String} possibleSolutionContainerDivId
+ * @param {String} possibleSolutionInputId
+ * @param {String} solutionListId
+ * @param {String} possibleSolutionValue (optional)
+ * @param {Boolean} isSolution (optional)
+ */
 function addPossibleSolution(
   possibleSolutionContainerDivId,
   possibleSolutionInputId,
-  possibleSolutionListId,
+  solutionListId,
   possibleSolutionValue = "",
   isSolution = null
 ) {
-  const possibleSolutionContainer = document.getElementById(possibleSolutionContainerDivId);
+  const possibleSolutionContainer = document.getElementById(
+    possibleSolutionContainerDivId
+  );
   const lastNode = Array.from(possibleSolutionContainer.children)
     .filter((x) => x.nodeName === "INPUT")
     .slice(-1)[0];
@@ -101,12 +135,17 @@ function addPossibleSolution(
     // Adds the solution to the list of correct solutions.
     // Creates a button to remove it from this list again.
     // All references are kept to remove them, if the possible-solution itself is removed.
-    () => addToSolutions(possibleSolutionListId, possibleSolutionNode, solutionLiId),
+    () =>
+      addToSolutions(
+        solutionListId,
+        possibleSolutionNode,
+        solutionLiId
+      ),
     ["btn", "btn-outline-info", "btn-sm"]
   );
 
   if (isSolution) {
-    addToSolutions(possibleSolutionListId, possibleSolutionNode, solutionLiId);
+    addToSolutions(solutionListId, possibleSolutionNode, solutionLiId);
   }
 
   possibleSolutionContainer.appendChild(addToSolutionsBtn);
@@ -128,23 +167,27 @@ function addPossibleSolution(
 }
 
 /**
- *
+ * Registers the `addPossibleSolution` function for the onclick action of the button found under `addPossibleSolutionButtonId`.
+ * When the button is clicked a new possible-solution element is added to the `possibleSolutionsContainerDivId` with the
+ * respective buttons.
+ * 
+ * For more detail refer to `addPossibleSolution`.
  * @param {String} addPossibleSolutionButtonId
  * @param {String} possibleSolutionsContainerDivId
  * @param {String} possibleSolutionInputId
- * @param {String} possibleSolutionListId
+ * @param {String} solutionListId
  */
 function registerAddingSolutionBehavior(
   addPossibleSolutionButtonId,
   possibleSolutionsContainerDivId,
   possibleSolutionInputId,
-  possibleSolutionListId
+  solutionListId
 ) {
   document.getElementById(addPossibleSolutionButtonId).onclick = () => {
     addPossibleSolution(
       possibleSolutionsContainerDivId,
       possibleSolutionInputId,
-      possibleSolutionListId
+      solutionListId
     );
   };
 }
