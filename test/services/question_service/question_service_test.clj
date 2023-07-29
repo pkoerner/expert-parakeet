@@ -1,7 +1,8 @@
 (ns services.question-service.question-service-test
   (:require [clojure.test :as t :refer [deftest testing]]
             [db :refer [Database-Protocol]]
-            [services.question-service.p-question-service :refer [validate-question]]
+            [services.question-service.p-question-service :refer [create-question!
+                                                                  get-question-categories validate-question]]
             [services.question-service.question-service :refer [->QuestionService]]))
 
 (deftest test-validate-question
@@ -107,4 +108,24 @@
               (assoc :question/multiple-choice-solution 300))
           :question/multiple-choice-solution)))))
 
+(deftest test-get-question-categories
+  (testing "QuestionService implementation calls database query for all question categories."
+    (let [was-called (atom false)
+          db-stub (reify Database-Protocol
+                    (get-all-question-categories [_this]
+                      (swap! was-called (fn [_] true))
+                      {}))
+          question-service (->QuestionService db-stub)]
+      (get-question-categories question-service)
+      (t/is @was-called))))
 
+(deftest test-create-question!
+  (testing "QuestionService implementation calls database query for to create a question."
+    (let [was-called (atom false)
+          db-stub (reify Database-Protocol
+                    (add-question! [_this _question]
+                      (swap! was-called (fn [_] true))
+                      {}))
+          question-service (->QuestionService db-stub)]
+      (create-question! question-service {})
+      (t/is @was-called))))
