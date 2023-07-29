@@ -22,8 +22,8 @@
 
 
 (defn- create-question-impl!
-  [_ question]
-  (db/add-question! db question))
+  [this question]
+  (db/add-question! (.db this) question))
 
 
 (s/fdef get-question-categories
@@ -32,8 +32,8 @@
 
 
 (defn- get-question-categories
-  [_]
-  (db/get-all-question-categories db))
+  [this]
+  (db/get-all-question-categories (.db this)))
 
 
 (def ^:private question-keys
