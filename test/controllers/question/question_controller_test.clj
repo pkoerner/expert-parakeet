@@ -197,4 +197,3 @@
           multiple-choice-question)))))
 
 
-(t/run-test test-submit-create-question!)
