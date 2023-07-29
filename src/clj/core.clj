@@ -11,7 +11,7 @@
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.defaults :refer [secure-site-defaults
-                                  site-defaults wrap-defaults]]
+                                      site-defaults wrap-defaults]]
     [ring.middleware.file :refer [wrap-file]]
     [ring.middleware.reload :refer [wrap-reload]]
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]

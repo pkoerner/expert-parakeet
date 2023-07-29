@@ -1,9 +1,9 @@
 (ns db
   (:require
-   [datahike.api :as d]
-   [db.dummy-data :as dummy-data]
-   [db.schema :refer [db-schema]]
-   [nano-id.core :refer [nano-id]]))
+    [datahike.api :as d]
+    [db.dummy-data :as dummy-data]
+    [db.schema :refer [db-schema]]
+    [nano-id.core :refer [nano-id]]))
 
 
 (def id-len 10)
@@ -100,7 +100,7 @@
 
 
 (deftype Database
-         [conn]
+  [conn]
 
   Database-Protocol
 
@@ -174,17 +174,17 @@
   (get-answers-for-question
     [this question-id]
     (map
-     #(zipmap [:answer/id :user/id :answer/timestamp] %)
-     (d/q '[:find ?answer-id ?user-id ?timestamp
-            :in $ ?question-id
-            :where
-            [?question :question/id ?question-id]
-            [?answer :answer/question ?question]
-            [?answer :answer/id ?answer-id ?tx]
-            [?tx :db/txInstant ?timestamp]
-            [?answer :answer/user ?user]
-            [?user :user/id ?user-id]]
-          @(.conn this) question-id)))
+      #(zipmap [:answer/id :user/id :answer/timestamp] %)
+      (d/q '[:find ?answer-id ?user-id ?timestamp
+             :in $ ?question-id
+             :where
+             [?question :question/id ?question-id]
+             [?answer :answer/question ?question]
+             [?answer :answer/id ?answer-id ?tx]
+             [?tx :db/txInstant ?timestamp]
+             [?answer :answer/user ?user]
+             [?user :user/id ?user-id]]
+           @(.conn this) question-id)))
 
 
   (get-all-answers-with-corrections
@@ -258,12 +258,14 @@
                        :where [?e :question/id]]
                      @(.conn this))))
 
+
   (get-all-question-categories
     [this]
     (mapv first
           (d/q '[:find ?c
                  :where [_ :question/categories ?c]]
                @(.conn this) [])))
+
 
   (add-course!
     [this course-name]
@@ -390,9 +392,9 @@
   (add-multiple-user-answers!
     [this user-id answers]
     (mapv
-     (fn [[question-id answer]]
-       (add-user-answer! this user-id question-id answer))
-     answers))
+      (fn [[question-id answer]]
+        (add-user-answer! this user-id question-id answer))
+      answers))
 
 
   (get-all-answers
@@ -420,15 +422,15 @@
   (get-corrections-of-answer
     [this answer-id]
     (map
-     #(zipmap [:correction/feedback :correction/timestamp] %)
-     (d/q '[:find ?corr-feedback ?timestamp
-            :in $ ?answer-id
-            :where
-            [?answer :answer/id ?answer-id]
-            [?correction :correction/answer ?answer ?tx]
-            [?tx :db/txInstant ?timestamp]
-            [?correction :correction/feedback ?corr-feedback]]
-          @(.conn this) answer-id)))
+      #(zipmap [:correction/feedback :correction/timestamp] %)
+      (d/q '[:find ?corr-feedback ?timestamp
+             :in $ ?answer-id
+             :where
+             [?answer :answer/id ?answer-id]
+             [?correction :correction/answer ?answer ?tx]
+             [?tx :db/txInstant ?timestamp]
+             [?correction :correction/feedback ?corr-feedback]]
+           @(.conn this) answer-id)))
 
 
   (add-correction!
