@@ -11,15 +11,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: check-format 
+      - name: check formatting
         uses: vouch-opensource/tools.deps-build@1.0.1
         with:
-          alias: :clj-format check
-      - name: kondo-check
+          alias: :check-format
+      - name: run linter
         uses: vouch-opensource/tools.deps-build@1.0.1
         with:
-          alias: :clj-kondo --lint src test
+          alias: :lint
       - name: run tests
         uses: vouch-opensource/tools.deps-build@1.0.1
         with:
           alias: :test-runner
+      - name: Build the whole application
+        run: docker build .

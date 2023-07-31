@@ -8,7 +8,7 @@
 
 ;; todo replace all direct db calls and inject repositories
 (deftype QuestionSetService
-         [])
+  [db])
 
 
 (s/fdef get-all-question-sets
@@ -17,18 +17,18 @@
 
 
 (defn get-all-question-sets
-  [_]
-  (db/get-all-question-sets))
+  [this]
+  (db/get-all-question-sets (.db this)))
 
 (s/fdef get-all-question-sets
   :args (s/cat :self #(satisfies? PQuestionSetService %) :user-id :user/id)
   :ret (s/coll-of (s/keys :req [:question-set/id])))
 
-(defn get-all-question-sets-for-student
-  [_, user-id]
-  (domain/course-iterations-with-total-points
-   (db/get-course-iterations-of-student user-id)
-   (partial db/get-graded-answers-of-question-set user-id)))
+;; (defn get-all-question-sets-for-student
+;;   [_, user-id]
+;;   (domain/course-iterations-with-total-points
+;;    (db/get-course-iterations-of-student user-id)
+;;    (partial db/get-graded-answers-of-question-set user-id)))
 
 
 (extend QuestionSetService
