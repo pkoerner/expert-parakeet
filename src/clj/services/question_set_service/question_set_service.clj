@@ -1,23 +1,34 @@
 (ns services.question-set-service.question-set-service
   (:require
-    [clojure.spec.alpha :as s]
-    [db]
-    [services.question-set-service.p-question-set-service :refer [PQuestionSetService]]))
+   [clojure.spec.alpha :as s]
+   [db]
+   [services.question-set-service.p-question-set-service :refer [PQuestionSetService]]
+   [domain]))
 
 
 ;; todo replace all direct db calls and inject repositories
 (deftype QuestionSetService
-  [])
+         [])
 
 
 (s/fdef get-all-question-sets
-        :args (s/cat :self #(satisfies? PQuestionSetService %))
-        :ret (s/coll-of (s/keys :req [:question-set/id])))
+  :args (s/cat :self #(satisfies? PQuestionSetService %))
+  :ret (s/coll-of (s/keys :req [:question-set/id])))
 
 
 (defn get-all-question-sets
   [_]
   (db/get-all-question-sets))
+
+(s/fdef get-all-question-sets
+  :args (s/cat :self #(satisfies? PQuestionSetService %) :user-id :user/id)
+  :ret (s/coll-of (s/keys :req [:question-set/id])))
+
+(defn get-all-question-sets-for-student
+  [_, user-id]
+  (domain/course-iterations-with-total-points
+   (db/get-course-iterations-of-student user-id)
+   (partial db/get-graded-answers-of-question-set user-id)))
 
 
 (extend QuestionSetService

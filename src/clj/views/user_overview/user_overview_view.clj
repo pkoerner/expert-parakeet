@@ -1,4 +1,4 @@
-(ns views.student-overview.student-overview
+(ns views.user-overview.user-overview-view
   (:require
    [hiccup2.core :as h]
    [clojure.spec.alpha :as s]
@@ -23,7 +23,7 @@
   :args (s/cat :course-iteration :course-iteration)
   :ret #(instance? hiccup.util.RawString %))
 
-(defn display-course-iteration
+(defn display-course-iteration-for-student
   "Creates a list of the course-iterations of the student.
    Each of the course-iterations contains a list of the question-sets
    unlocked for the student"
@@ -48,7 +48,7 @@
                      "failed"
                      "passed")]
               [:td (str "deadline: " (:question-set/end question-set))]
-              [:td [:a {:href "/question-set:id"} [:button "deatils"]]]]]]])]])
+              [:td [:a {:href "/question-set:id"} [:button "details"]]]]]]])]])
 
 
 (s/fdef create-student-overview
@@ -56,16 +56,17 @@
   :ret (s/and #(string/includes? % "Courses")
               #(instance? hiccup.util.RawString %)))
 
-(defn create-student-overview
-  [course-iterations]
+(defn create-user-overview
+  [user course-iterations]
   (h/html
    [:div
-    [:h1 "Overview"]
-    [:h2 "Courses:"]
+    [:h2 "Your Courses:"]
     [:ul
      (for [c course-iterations]
-       [:li (display-course-iteration c)])]]))
+       [:li (display-course-iteration-for-student c)])]]))
 
-
+;; (defn to-corrector-view
+;;   []
+;;   (h/html))
 
 

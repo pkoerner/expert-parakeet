@@ -5,6 +5,7 @@
     [compojure.core :refer [defroutes GET POST]]
     [compojure.route :as route]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
+    [controllers.user.user-overview-controller :refer [create-user-overview-get]]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
@@ -32,12 +33,15 @@
 (defroutes private-routes
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
 
+  (GET "/user-overview" req (let [user-id "0"] ; TODO: Replace the '0' with (str (get-in req [:session :user :id]))
+                              (html-response (create-user-overview-get ))))
+
   (GET "/create-course-iteration" req
-       (html-response (create-course-iteration-get req "/create-course-iteration"
-                                                   :get-courses-fun (partial get-all-courses (:course-service services))
-                                                   :get-question-sets-fun (partial get-all-question-sets (:question-set-service services)))))
+    (html-response (create-course-iteration-get req "/create-course-iteration"
+                                                :get-courses-fun (partial get-all-courses (:course-service services))
+                                                :get-question-sets-fun (partial get-all-question-sets (:question-set-service services)))))
   (POST "/create-course-iteration" req
-        (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
+    (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
   (route/not-found "Not Found"))
 
 
