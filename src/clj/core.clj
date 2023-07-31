@@ -38,7 +38,9 @@
 (defroutes private-routes
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
 
-  (GET "/user-overview" req (let [user-id "0"] ; TODO: Replace the '0' with (str (get-in req [:session :user :id]))
+  ; TODO: Replace the '0' with (str (get-in req [:session :user :id])) which should contain the github id or similar
+  ;       and use the user service to get the right user for the handle.
+  (GET "/user-overview" req (let [user-handle "0"] 
                               (html-response (create-user-overview-get ))))
 
   (GET "/create-course-iteration" req

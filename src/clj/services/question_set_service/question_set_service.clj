@@ -16,7 +16,7 @@
   :ret (s/coll-of (s/keys :req [:question-set/id])))
 
 
-(defn get-all-question-sets
+(defn- get-all-question-sets
   [this]
   (db/get-all-question-sets (.db this)))
 
@@ -24,13 +24,14 @@
   :args (s/cat :self #(satisfies? PQuestionSetService %) :user-id :user/id)
   :ret (s/coll-of (s/keys :req [:question-set/id])))
 
-;; (defn get-all-question-sets-for-student
-;;   [_, user-id]
-;;   (domain/course-iterations-with-total-points
-;;    (db/get-course-iterations-of-student user-id)
-;;    (partial db/get-graded-answers-of-question-set user-id)))
+(defn- get-all-course-iterations-for-student
+  [this, user-id]
+  (domain/course-iterations-with-total-points
+   (db/get-course-iterations-of-student (.db this) user-id)
+   (partial db/get-graded-answers-of-question-set user-id)))
 
 
 (extend QuestionSetService
   PQuestionSetService
-  {:get-all-question-sets get-all-question-sets})
+  {:get-all-question-sets get-all-question-sets
+   :get-all-course-iterations-for-student get-all-course-iterations-for-student})

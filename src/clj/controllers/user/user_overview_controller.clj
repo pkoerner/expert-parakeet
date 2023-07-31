@@ -2,8 +2,7 @@
   (:require
    [clojure.spec.alpha :as s]
    [services.question-set-service.question-set-service :as q-set-ser]
-   [views.user-overview.user-overview-view :as user-view]
-   [util.ring-extensions :refer [extract-errors]]))
+   [views.user-overview.user-overview-view :as user-view]))
 
 
 ;; (if (auth/is-logged-in req)(let [user-id "0"] ; TODO: Replace the '0' with (str (get-in req [:session :user :id]))
@@ -17,7 +16,7 @@
 
 (s/fdef create-user-overview-get
   :args (s/cat :user :user
-               :get-all-question-sets-for-student-fun (s/? (s/get-spec `q-set-ser/get-all-question-sets-for-student))))
+               :get-all-question-sets-for-student-fun (s/? (s/get-spec `q-set-ser/get-all-course-iterations-for-student))))
 
 (defn create-user-overview-get
   " Takes a user and a function to get all question sets for a student as arguments.
