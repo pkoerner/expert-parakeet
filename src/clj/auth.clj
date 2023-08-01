@@ -89,10 +89,12 @@
 ;; Github ID zur Session hinzufügen
 (defn- authenticate-session
   [request]
-  (let [github-data (github-user-data-from-token (extract-token request))]
+  (let [github-data (github-user-data-from-token (extract-token request))
+        oauth-github-id (github-data :id)]
+
     {:status 307
      :headers {"Content-Type" "text/plain", "Location" "/"}
-     :session (assoc (:session request) :user github-data)
+     :session (assoc (:session request) :user {:oauth-github-id oauth-github-id})
      ;; Hier werden für demonstrationszwecke ein paar Daten angezeigt
      ;; Der frontend code könnte hier die Bestätigung bekommen,
      ;; dass der Login funktioniert hat
