@@ -38,7 +38,7 @@
 ;; all routes that dont need authentication go here
 (defroutes public-routes
   (GET "/" req (html-response
-                 (if (auth/is-logged-in req)
+                 (if (auth/is-logged-in? req)
                    [:p (str "Hello, " (str (get-in req [:session :user :id])))]
                    [:a {:href "/oauth2/github"} "Login"])))) ; TODO remove route, just an example to show login working
 

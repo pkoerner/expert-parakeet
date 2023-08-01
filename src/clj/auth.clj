@@ -1,6 +1,7 @@
 (ns auth
   (:require
     [clj-http.client :as client]
+    [clojure.spec.alpha :as s]
     [ring.middleware.oauth2 :refer [wrap-oauth2]]))
 
 
@@ -86,7 +87,7 @@
 
 
 ;; Github ID zur Session hinzufügen
-(defn logged-in
+(defn- authenticate-session
   [request]
   (let [github-data (github-user-data-from-token (extract-token request))]
     {:status 307
@@ -98,20 +99,37 @@
      :body (str github-data)}))
 
 
-(defn is-logged-in
+(s/fdef is-authenticated?
+        :args (s/cat :request coll?)
+        :ret boolean?)
+
+
+(defn is-authenticated?
+  "Checks if the user is authenticated via oauth provided by github."
   [request]
-  (contains? (-> request :session) :user))
+  (contains? (-> request :session :user) :oauth-github-id))
+
+
+(s/fdef is-logged-in?
+        :args (s/cat :request coll?)
+        :ret boolean?)
+
+
+(defn is-logged-in?
+  "Checks if the user is logged in as a user from the application."
+  [request]
+  (contains? (-> request :session :user) :id))
 
 
 (defn wrap-authentication-routes
   [handler]
   (fn [request]
     (case (:uri request)
-      ;; Der logged-in call darf nicht abgefangen werden,
+      ;; Der authenticate-session call darf nicht abgefangen werden,
       ;; daher wird dieser hier gehandhabt
-      "/oauth2/github/callback-success" (logged-in request)
+      "/oauth2/github/callback-success" (authenticate-session request)
       ;; Prüfen ob der Nutzer eingeloggt ist
-      (if (is-logged-in request)
+      (if (is-authenticated? request)
         ;; Nutzer darf alles machen
         (handler request)
         ;; Nutzer muss sich authentifizieren
