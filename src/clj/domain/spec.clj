@@ -101,11 +101,12 @@
 
 
 (s/def :user/id string?)
+(s/def :user/git-id string?)
 (s/def :user/course-iterations (s/coll-of ::course-iteration))
 
 
 (s/def ::user
-  (s/keys :req [:user/id :user/course-iterations]))
+  (s/keys :req [:user/id :user/git-id :user/course-iterations]))
 
 
 (s/def :answer/id string?)

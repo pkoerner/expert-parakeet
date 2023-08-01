@@ -52,6 +52,7 @@
   (spectomic/datomic-schema
     [[:user/id {:db/unique :db.unique/identity
                 :db/index true}]
+     :user/git-id
      :user/course-iterations]))
 
 
