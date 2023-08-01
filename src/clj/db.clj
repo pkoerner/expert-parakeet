@@ -1,9 +1,9 @@
 (ns db
   (:require
-    [datahike.api :as d]
-    [db.dummy-data :as dummy-data]
-    [db.schema :refer [db-schema]]
-    [nano-id.core :refer [nano-id]]))
+   [datahike.api :as d]
+   [db.dummy-data :as dummy-data]
+   [db.schema :refer [db-schema]]
+   [nano-id.core :refer [nano-id]]))
 
 
 (def id-len 10)
@@ -93,11 +93,23 @@
     [this answer-id])
 
   (add-correction!
-    [this ant-id correction]))
+    [this ant-id correction])
+
+  (add-user!
+    [this git-id]
+    "add a new user to the db with a new id, the given git-id and an empty coll of course-iterations.")
+
+  (get-user-by-id
+    [this id]
+    "get the user given the user-id id.")
+
+  (get-user-by-git-id
+    [this git-id]
+    "get the user given the git-id of the user"))
 
 
 (deftype Database
-  [conn]
+         [conn]
 
   Database-Protocol
 
@@ -171,17 +183,17 @@
   (get-answers-for-question
     [this question-id]
     (map
-      #(zipmap [:answer/id :user/id :answer/timestamp] %)
-      (d/q '[:find ?answer-id ?user-id ?timestamp
-             :in $ ?question-id
-             :where
-             [?question :question/id ?question-id]
-             [?answer :answer/question ?question]
-             [?answer :answer/id ?answer-id ?tx]
-             [?tx :db/txInstant ?timestamp]
-             [?answer :answer/user ?user]
-             [?user :user/id ?user-id]]
-           @(.conn this) question-id)))
+     #(zipmap [:answer/id :user/id :answer/timestamp] %)
+     (d/q '[:find ?answer-id ?user-id ?timestamp
+            :in $ ?question-id
+            :where
+            [?question :question/id ?question-id]
+            [?answer :answer/question ?question]
+            [?answer :answer/id ?answer-id ?tx]
+            [?tx :db/txInstant ?timestamp]
+            [?answer :answer/user ?user]
+            [?user :user/id ?user-id]]
+          @(.conn this) question-id)))
 
 
   (get-all-answers-with-corrections
@@ -379,9 +391,9 @@
   (add-multiple-user-answers!
     [this user-id answers]
     (mapv
-      (fn [[question-id answer]]
-        (add-user-answer! this user-id question-id answer))
-      answers))
+     (fn [[question-id answer]]
+       (add-user-answer! this user-id question-id answer))
+     answers))
 
 
   (get-all-answers
@@ -409,15 +421,15 @@
   (get-corrections-of-answer
     [this answer-id]
     (map
-      #(zipmap [:correction/feedback :correction/timestamp] %)
-      (d/q '[:find ?corr-feedback ?timestamp
-             :in $ ?answer-id
-             :where
-             [?answer :answer/id ?answer-id]
-             [?correction :correction/answer ?answer ?tx]
-             [?tx :db/txInstant ?timestamp]
-             [?correction :correction/feedback ?corr-feedback]]
-           @(.conn this) answer-id)))
+     #(zipmap [:correction/feedback :correction/timestamp] %)
+     (d/q '[:find ?corr-feedback ?timestamp
+            :in $ ?answer-id
+            :where
+            [?answer :answer/id ?answer-id]
+            [?correction :correction/answer ?answer ?tx]
+            [?tx :db/txInstant ?timestamp]
+            [?correction :correction/feedback ?corr-feedback]]
+          @(.conn this) answer-id)))
 
 
   (add-correction!
@@ -431,7 +443,32 @@
                                   :answer/points points}])
           db-after (:db-after tx-result)
           ids (:tempids tx-result)]
-      (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1)))))
+      (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1))))
+
+  (add-user!
+    [this git-id]
+    (let [user-id (generate-id this :user/id)
+          tx-result (d/transact (.conn this)
+                                [{:db/id -1
+                                  :user/id user-id
+                                  :user/git-id git-id
+                                  :user/course-iterations []}])
+          db-after (:db-after tx-result)]
+      (d/pull db-after [:user/id :user/git-id :user/course-iterations]
+              [:user/id user-id])))
+
+  (get-user-by-id
+    [this user-id]
+    (d/pull @(.conn this)
+            [:user/id :user/git-id :user/course-iterations]
+            [:user/id user-id]))
+
+  (get-user-by-git-id
+    [this git-id]
+    (d/pull @(.conn this)
+            [:user/id :user/git-id :user/course-iterations]
+            [:user/git-id git-id])))
+
 
 
 ;; use mem db
@@ -464,3 +501,4 @@
   (let [conn (create-conn)]
     (d/transact conn dummy-data/dummy-data)
     (Database. conn)))
+
