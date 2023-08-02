@@ -8,6 +8,7 @@
   [html]
   (-> html h/html str response (header "Content-Type" "text/html; charset=utf-8")))
 
+
 (defn extract-errors
   [request]
   (let [query-params (:query-params request)]

@@ -1,23 +1,24 @@
 (ns core
   (:gen-class)
   (:require
-    [auth :refer [wrap-authentication]]
-    [compojure.core :refer [defroutes GET POST]]
-    [compojure.route :as route]
-    [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
-    [controllers.user.user-overview-controller :refer [create-user-overview-get]]
-    [db]
-    [domain]
-    [ring.adapter.jetty :refer [run-jetty]]
-    [ring.middleware.defaults :refer [secure-site-defaults
-                                      site-defaults wrap-defaults]]
-    [ring.middleware.reload :refer [wrap-reload]]
-    [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
-    [services.course-service.course-service :refer [->CourseService]]
-    [services.course-service.p-course-service :refer [get-all-courses]]
-    [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
-    [services.question-set-service.question-set-service :refer [->QuestionSetService]]
-    [util.ring-extensions :refer [html-response]]))
+   [auth :refer [wrap-authentication]]
+   [compojure.core :refer [defroutes GET POST]]
+   [compojure.route :as route]
+   [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
+   [controllers.user.user-overview-controller :refer [create-user-overview-get]]
+   [db]
+   [domain]
+   [ring.adapter.jetty :refer [run-jetty]]
+   [ring.middleware.defaults :refer [secure-site-defaults
+                                     site-defaults wrap-defaults]]
+   [ring.middleware.reload :refer [wrap-reload]]
+   [services.course-iteration-service.p-course-iteration-service :refer [get-all-course-iterations-for-user]]
+   [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
+   [services.course-service.course-service :refer [->CourseService]]
+   [services.course-service.p-course-service :refer [get-all-courses]]
+   [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
+   [services.question-set-service.question-set-service :refer [->QuestionSetService]]
+   [util.ring-extensions :refer [html-response]]))
 
 
 (def db db/create-database)
@@ -31,17 +32,19 @@
 
 ;; all routes that dont need authentication go here
 (defroutes public-routes
-  (GET "/" req (html-response ""))) ; TODO remove route, just an example to show login working
+  (GET "/" req (html-response
+                (if (auth/is-logged-in req)
+                  [:p (str "Hello, go here to see your courses ")
+                   [:a {:href "/user-overview"} "here"]]
+                  [:a {:href "/oauth2/github"} "Login"])))) ; TODO remove route, just an example to show login working
 
 
 ;; all routes that require authentication go here
 (defroutes private-routes
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
-
-  ; TODO: Replace the '0' with (str (get-in req [:session :user :id])) which should contain the github id or similar
-  ;       and use the user service to get the right user for the handle.
-  (GET "/user-overview" req (let [user-handle "0"] 
-                              (html-response (create-user-overview-get ))))
+  
+  (GET "/user-overview" req (let [user-id (:user/id (db/get-user-by-git-id db "12345"))] ; TODO: (str (get-in req [:session :user :id]))
+                              (html-response (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) user-id)))))
 
   (GET "/create-course-iteration" req
     (html-response (create-course-iteration-get req "/create-course-iteration"

@@ -14,7 +14,7 @@
   (generate-id
     [this attr])
 
-  (get-course-iterations-of-student
+  (get-course-iterations-of-user
     [this user-id])
 
   (get-all-course-iterations
@@ -93,7 +93,10 @@
     [this answer-id])
 
   (add-correction!
-    [this ant-id correction]))
+    [this ant-id correction])
+
+  (get-user-by-git-id
+    [this git-id]))
 
 
 (deftype Database
@@ -113,7 +116,7 @@
         id)))
 
 
-  (get-course-iterations-of-student
+  (get-course-iterations-of-user
     [this user-id]
     (mapv first
           (d/q '[:find (pull ?k [:course-iteration/id
@@ -431,7 +434,11 @@
                                   :answer/points points}])
           db-after (:db-after tx-result)
           ids (:tempids tx-result)]
-      (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1)))))
+      (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1))))
+  
+  (get-user-by-git-id
+   [this git-id]
+   {:user/id "0"}))
 
 
 ;; use mem db

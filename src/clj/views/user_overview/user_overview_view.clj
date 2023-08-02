@@ -1,17 +1,19 @@
 (ns views.user-overview.user-overview-view
   (:require
-   [hiccup2.core :as h]
-   [clojure.spec.alpha :as s]
-   [clojure.string :as string]))
+    [clojure.spec.alpha :as s]
+    [clojure.string :as string]
+    [hiccup2.core :as h]))
 
 
 (def no-course-iterations
   "Simple paragraph to display when the student has no course iterations"
   [:p "du scheinst keinen Kursen zugeordnet zu sein."])
 
+
 (def no-question-sets
   "Simple paragraph to display when the student has no question sets for the course-iteration"
   [:p "noch keine Frageboegen fuer diesen Kurs verfuegbar."])
+
 
 ;; Layout-idea:
 ;; Course-iteration 1: (e.g. fkt-prog-SOM-22)
@@ -20,8 +22,9 @@
 ;; ("" means button)
 
 (s/fdef display-course-iteration
-  :args (s/cat :course-iteration :course-iteration)
-  :ret #(instance? hiccup.util.RawString %))
+        :args (s/cat :course-iteration :course-iteration)
+        :ret #(instance? hiccup.util.RawString %))
+
 
 (defn display-course-iteration-for-student
   "Creates a list of the course-iterations of the student.
@@ -30,7 +33,7 @@
   [course-iteration]
   [:p
    [:h3 (str (:course/course-name
-              (:course-iteration/course course-iteration)) " "
+               (:course-iteration/course course-iteration)) " "
              (:course-iteration/year course-iteration) " "
              (:course-iteration/semester course-iteration))]
    [:ul
@@ -52,21 +55,16 @@
 
 
 (s/fdef create-student-overview
-  :args (s/cat :course-iterations (s/coll-of :course-iteration))
-  :ret (s/and #(string/includes? % "Courses")
-              #(instance? hiccup.util.RawString %)))
+        :args (s/cat :course-iterations (s/coll-of :course-iteration))
+        :ret (s/and #(string/includes? % "Courses")
+                    #(instance? hiccup.util.RawString %)))
+
 
 (defn create-user-overview
-  [user course-iterations]
+  [course-iterations]
   (h/html
-   [:div
-    [:h2 "Your Courses:"]
-    [:ul
-     (for [c course-iterations]
-       [:li (display-course-iteration-for-student c)])]]))
-
-;; (defn to-corrector-view
-;;   []
-;;   (h/html))
-
-
+    [:div
+     [:h2 "Your Courses:"]
+     [:ul
+      (for [c course-iterations]
+        [:li (display-course-iteration-for-student c)])]]))

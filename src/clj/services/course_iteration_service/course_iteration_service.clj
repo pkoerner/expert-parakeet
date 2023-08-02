@@ -3,6 +3,7 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [db]
+    [domain]
     [services.course-iteration-service.p-course-iteration-service :refer [PCourseIterationService]]
     [views.course-iteration.create-course-iteration-view :as view]))
 
@@ -65,8 +66,21 @@
            [question-set-ids :course-iteration/question-sets]]))
 
 
+(s/fdef get-all-question-sets
+        :args (s/cat :self #(satisfies? PCourseIterationService %) :user-id :user/id)
+        :ret (s/coll-of (s/keys :req [:question-set/id])))
+
+
+(defn- get-all-course-iterations-for-user
+  [this user-id]
+  (domain/course-iterations-with-total-points
+    (db/get-course-iterations-of-user (.db this) user-id)
+    (partial db/get-graded-answers-of-question-set (.db this) user-id)))
+
+
 (extend CourseIterationService
   PCourseIterationService
   {:create-course-iteration create-course-iteration-impl
-   :validate-course-iteration validate-course-iteration-impl})
+   :validate-course-iteration validate-course-iteration-impl
+   :get-all-course-iterations-for-user get-all-course-iterations-for-user})
 
