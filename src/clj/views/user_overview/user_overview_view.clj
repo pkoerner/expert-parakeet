@@ -26,10 +26,10 @@
         :ret #(instance? hiccup.util.RawString %))
 
 
-(defn display-course-iteration-for-student
-  "Creates a list of the course-iterations of the student.
+(defn display-course-iteration-for-user
+  "Creates a list of the course-iterations of the user.
    Each of the course-iterations contains a list of the question-sets
-   unlocked for the student"
+   unlocked for the user"
   [course-iteration]
   [:p
    [:h3 (str (:course/course-name
@@ -44,12 +44,13 @@
               [:td (str (:question-set/name question-set))]
               [:td (str (:question-set/achieved-points question-set)
                         "/"
-                        (str (:question-set/max-points question-set))
+                        (:question-set/max-points question-set)
                         " Points")]
-              [:td (if (or (nil? (:question-set/achieved-points question-set))
-                           (>= (:question-set/achieved-points question-set) (:question-set/passing-score question-set)))
-                     "failed"
-                     "passed")]
+              ;; Idea if passing-score is implemented
+              ;; [:td (if (or (nil? (:question-set/achieved-points question-set))
+              ;;              (>= (:question-set/achieved-points question-set) (:question-set/passing-score question-set)))
+              ;;        "failed"
+              ;;        "passed")]
               [:td (str "deadline: " (:question-set/end question-set))]
               [:td [:a {:href "/question-set:id"} [:button "details"]]]]]]])]])
 
@@ -67,4 +68,4 @@
      [:h2 "Your Courses:"]
      [:ul
       (for [c course-iterations]
-        [:li (display-course-iteration-for-student c)])]]))
+        [:li (display-course-iteration-for-user c)])]]))
