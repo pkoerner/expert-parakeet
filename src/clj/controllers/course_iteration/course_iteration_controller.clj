@@ -49,11 +49,9 @@
    When the request passed to this function inside of `req` contains predefined error values in the `:query-params` of the `req` parameter, 
    they are displayed as errors within the form.
    The fields can be seen in `view/course-iteration-form`."
-  [req post-destination db & {:keys [get-courses-fun get-question-sets-fun]
-                              :or {get-courses-fun db/get-all-courses
-                                   get-question-sets-fun db/get-all-question-sets}}]
-  (let [courses (get-courses-fun db)
-        question-sets (get-question-sets-fun db)]
+  [req post-destination get-courses-fun get-question-sets-fun]
+  (let [courses (get-courses-fun)
+        question-sets (get-question-sets-fun)]
     (if (empty? courses)
       view/no-courses
       (let [errors (extract-errors req)]

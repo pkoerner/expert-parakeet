@@ -42,8 +42,8 @@
 
   (GET "/create-course-iteration" req
        (html-response (create-course-iteration-get req "/create-course-iteration"
-                                                   :get-courses-fun (partial get-all-courses (:course-service services))
-                                                   :get-question-sets-fun (partial get-all-question-sets (:question-set-service services)))))
+                                                   (partial get-all-courses (:course-service services))
+                                                   (partial get-all-question-sets (:question-set-service services)))))
   (POST "/create-course-iteration" req
         (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
   (route/not-found "Not Found"))
