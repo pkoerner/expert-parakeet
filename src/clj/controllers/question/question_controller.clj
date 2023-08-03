@@ -1,19 +1,19 @@
 (ns controllers.question.question-controller
   (:require
-   [db]
-   [services.question-service.p-question-service :refer [get-question-by-id
-                                                         validate-user-for-question]]
-   [util.ring-extensions :refer [html-response]]
-   [views.question.question-view :as question-view]
-   [clojure.spec.alpha :as s]
-   [db]
-   [services.question-service.p-question-service :refer [create-question!
-                                                         get-question-categories 
-                                                         PQuestionService 
-                                                         validate-question]]
-   [services.question-service.question-service :as q-ser]
-   [util.ring-extensions :refer [extract-errors html-response]]
-   [views.question.create-question-view :as creation-view :refer [question-success-view]]))
+    [clojure.spec.alpha :as s]
+    [db]
+    [db]
+    [services.question-service.p-question-service :refer [get-question-by-id
+                                                          validate-user-for-question]]
+    [services.question-service.p-question-service :refer [create-question!
+                                                          get-question-categories
+                                                          PQuestionService
+                                                          validate-question]]
+    [services.question-service.question-service :as q-ser]
+    [util.ring-extensions :refer [html-response]]
+    [util.ring-extensions :refer [extract-errors html-response]]
+    [views.question.create-question-view :as creation-view :refer [question-success-view]]
+    [views.question.question-view :as question-view]))
 
 
 (defn question-get
@@ -26,10 +26,11 @@
       (html-response (question-view/question-form question (str put-destination-root question-id)))
       (html-response (question-view/no-question-assignment permission-error)))))
 
+
 (s/fdef create-question-get
-  :args (s/cat :req coll?
-               :get-question-categories-fun (s/get-spec `q-ser/get-question-categories)
-               :post-destination string?))
+        :args (s/cat :req coll?
+                     :get-question-categories-fun (s/get-spec `q-ser/get-question-categories)
+                     :post-destination string?))
 
 
 (defn create-question-get
@@ -40,9 +41,9 @@
 
 
 (s/fdef submit-create-question!
-  :args (s/cat :req coll?
-               :post-destination string?
-               :question-service #(= PQuestionService (type %))))
+        :args (s/cat :req coll?
+                     :post-destination string?
+                     :question-service #(= PQuestionService (type %))))
 
 
 (defn submit-create-question!
@@ -86,6 +87,6 @@
             question (add-question-fun question)]
         (html-response (question-success-view question)))
       (html-response (creation-view/question-form (get-question-categories question-service)
-                                         post-destination
-                                         :errors validation-errors
-                                         :question-data (dissoc result-map :errors))))))
+                                                  post-destination
+                                                  :errors validation-errors
+                                                  :question-data (dissoc result-map :errors))))))

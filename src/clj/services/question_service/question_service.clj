@@ -1,24 +1,25 @@
 (ns services.question-service.question-service
   (:require
-   [clojure.spec.alpha :as s]
-   [db]
-   [services.question-service.p-question-service :refer [PQuestionService]]
-   [views.question.question-view :as view]
-   [clojure.string :as string]
-   [db]
-   [domain.spec :refer [question-types]]
-   [services.question-service.p-question-service :refer [PQuestionService]]))
+    [clojure.spec.alpha :as s]
+    [clojure.string :as string]
+    [db]
+    [db]
+    [domain.spec :refer [question-types]]
+    [services.question-service.p-question-service :refer [PQuestionService]]
+    [services.question-service.p-question-service :refer [PQuestionService]]
+    [views.question.question-view :as view]))
+
 
 (deftype QuestionService
-         [db])
+  [db])
 
 
 (s/fdef get-question-by-id
-  :args (s/cat :self #(satisfies? PQuestionService %) :question-id string?)
-  :ret  (s/keys :req [:question/id
-                      :question/question-statement
-                      :question/points
-                      :question/type]))
+        :args (s/cat :self #(satisfies? PQuestionService %) :question-id string?)
+        :ret  (s/keys :req [:question/id
+                            :question/question-statement
+                            :question/points
+                            :question/type]))
 
 
 (defn get-question-and-possible-solutions-by-id
@@ -27,10 +28,10 @@
 
 
 (s/fdef validate-user-for-question
-  :args (s/cat :self #(satisfies? PQuestionService %)
-               :user-id :user/id
-               :question-id :question/id)
-  :ret (s/coll-of keyword?))
+        :args (s/cat :self #(satisfies? PQuestionService %)
+                     :user-id :user/id
+                     :question-id :question/id)
+        :ret (s/coll-of keyword?))
 
 
 (defn- get-question-ids-for-user
@@ -50,14 +51,15 @@ an error-set with a specified error is returned. "
       (disj view/question-errors :not-assigned-to-question)
       error-set)))
 
+
 (s/fdef create-question-impl!
-  :args (s/cat :self #(= PQuestionService (type %))
-               :question (s/or :free-text-question :question/question
-                               :single-choice-question :question/single-choice-question
-                               :multiple-choice-question :question/multiple-choice-question))
-  :ret (s/or :free-text-question :question/question
-             :single-choice-question :question/single-choice-question
-             :multiple-choice-question :question/multiple-choice-question))
+        :args (s/cat :self #(= PQuestionService (type %))
+                     :question (s/or :free-text-question :question/question
+                                     :single-choice-question :question/single-choice-question
+                                     :multiple-choice-question :question/multiple-choice-question))
+        :ret (s/or :free-text-question :question/question
+                   :single-choice-question :question/single-choice-question
+                   :multiple-choice-question :question/multiple-choice-question))
 
 
 (defn- create-question-impl!
@@ -66,8 +68,8 @@ an error-set with a specified error is returned. "
 
 
 (s/fdef get-question-categories
-  :args (s/cat :self #(= PQuestionService (type %)))
-  :ret (s/coll-of :question/categories))
+        :args (s/cat :self #(= PQuestionService (type %)))
+        :ret (s/coll-of :question/categories))
 
 
 (defn- get-question-categories
@@ -107,32 +109,32 @@ an error-set with a specified error is returned. "
                          evaluation-criteria
                          categories]} question]
     (merge
-     {:question/question-statement [[#(s/valid? :question/question-statement question-statement) "Die Fragestellung war inkorrekt!"]]
-      :question/points [[#(s/valid? :question/points points) "Die erreichbaren Punkte waren inkorrekt!"]]
-      :question/type [[#(s/valid? :question/type type) "Der ausgewälte question-type war kein korrekter type!"]]}
+      {:question/question-statement [[#(s/valid? :question/question-statement question-statement) "Die Fragestellung war inkorrekt!"]]
+       :question/points [[#(s/valid? :question/points points) "Die erreichbaren Punkte waren inkorrekt!"]]
+       :question/type [[#(s/valid? :question/type type) "Der ausgewälte question-type war kein korrekter type!"]]}
 
-     (when (or (= type :question.type/single-choice) (= type :question.type/multiple-choice))
-       {:question/possible-solutions
-        [[#(s/valid? :question/possible-solutions possible-solutions) "Die Antwortmöglichkeiten waren nicht korrekt!"]
-         [#(if possible-solutions (apply distinct? possible-solutions) true) "Zwei Antwortmglichkeiten waren identisch!"]]})
+      (when (or (= type :question.type/single-choice) (= type :question.type/multiple-choice))
+        {:question/possible-solutions
+         [[#(s/valid? :question/possible-solutions possible-solutions) "Die Antwortmöglichkeiten waren nicht korrekt!"]
+          [#(if possible-solutions (apply distinct? possible-solutions) true) "Zwei Antwortmglichkeiten waren identisch!"]]})
 
-     (when  (= type :question.type/single-choice)
-       {:question/single-choice-solution
-        [[#(s/valid? :question/single-choice-solution single-choice-solution) "Die korrekte Antwort war keine korrekte Antwort!"]
-         [#((set possible-solutions) single-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
+      (when  (= type :question.type/single-choice)
+        {:question/single-choice-solution
+         [[#(s/valid? :question/single-choice-solution single-choice-solution) "Die korrekte Antwort war keine korrekte Antwort!"]
+          [#((set possible-solutions) single-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
-     (when  (= type :question.type/multiple-choice)
-       {:question/multiple-choice-solution
-        [[#(s/valid? :question/multiple-choice-solution multiple-choice-solution) "Die korrekten Antworten waren keine korrekten korrekten Antworten!"]
-         [#(every? (fn [x] ((set possible-solutions) x)) multiple-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
+      (when  (= type :question.type/multiple-choice)
+        {:question/multiple-choice-solution
+         [[#(s/valid? :question/multiple-choice-solution multiple-choice-solution) "Die korrekten Antworten waren keine korrekten korrekten Antworten!"]
+          [#(every? (fn [x] ((set possible-solutions) x)) multiple-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
-     (when (= type :question.type/free-text)
-       {:question/evaluation-criteria
-        [[#(s/valid? :question/evaluation-criteria evaluation-criteria) "Die angegebenen Bewertungskriterien waren keine korrekten Bewertungskriterien!"]]})
+      (when (= type :question.type/free-text)
+        {:question/evaluation-criteria
+         [[#(s/valid? :question/evaluation-criteria evaluation-criteria) "Die angegebenen Bewertungskriterien waren keine korrekten Bewertungskriterien!"]]})
 
-     (when (not-empty categories)
-       {:question/categories
-        [[#(s/valid? :question/categories categories) "Die angegebenen Kategorien waren nicht korrekt geformt!"]]}))))
+      (when (not-empty categories)
+        {:question/categories
+         [[#(s/valid? :question/categories categories) "Die angegebenen Kategorien waren nicht korrekt geformt!"]]}))))
 
 
 (defn- parse-question
@@ -211,20 +213,20 @@ an error-set with a specified error is returned. "
 
 
 (s/fdef validate-question-impl
-  :args (s/cat :self #(= PQuestionService (type %))
-               :question-statement string?
-               :achivable-points (s/or :to-parse string? :valid number?)
-               :type (s/or :question-type question-types
-                           :question-type-as-string string?)
-               :possible-solutions (s/or :nil nil? :single string? :multiple (s/coll-of string?))
-               :single-choice-solution (s/or :nil nil? :solution string?)
-               :multiple-choice-solution (s/or :nil nil? :solution string? :multiple-solutions (s/coll-of string?))
-               :evaluation-criteria (s/or :nil nil? :criteria string?)
-               :categories (s/or :nil nil? :single string? :multiple (s/coll-of string?)))
-  :ret (s/or :free-text-question :question/question
-             :single-choice-question :question/single-choice-question
-             :multiple-choice-question :question/multiple-choice-question
-             :errors #(contains? % :errors)))
+        :args (s/cat :self #(= PQuestionService (type %))
+                     :question-statement string?
+                     :achivable-points (s/or :to-parse string? :valid number?)
+                     :type (s/or :question-type question-types
+                                 :question-type-as-string string?)
+                     :possible-solutions (s/or :nil nil? :single string? :multiple (s/coll-of string?))
+                     :single-choice-solution (s/or :nil nil? :solution string?)
+                     :multiple-choice-solution (s/or :nil nil? :solution string? :multiple-solutions (s/coll-of string?))
+                     :evaluation-criteria (s/or :nil nil? :criteria string?)
+                     :categories (s/or :nil nil? :single string? :multiple (s/coll-of string?)))
+        :ret (s/or :free-text-question :question/question
+                   :single-choice-question :question/single-choice-question
+                   :multiple-choice-question :question/multiple-choice-question
+                   :errors #(contains? % :errors)))
 
 
 (defn- validate-question-impl

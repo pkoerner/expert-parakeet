@@ -87,7 +87,9 @@
 
 
 (def users
-  [{:user/id "0"
+  [{:user/id "49522528"
+    :user/course-iterations [[:course-iteration/id "1"] [:course-iteration/id "2"]]}
+   {:user/id "0"
     :user/course-iterations [[:course-iteration/id "1"] [:course-iteration/id "2"]]}
    {:user/id "2"
     :user/course-iterations [[:course-iteration/id "1"]]}
