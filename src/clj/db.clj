@@ -56,6 +56,9 @@
   (get-all-questions
     [this])
 
+  (get-all-question-categories
+    [this])
+
   (add-course!
     [this course-name])
 
@@ -275,6 +278,14 @@
                      @(.conn this))))
 
 
+  (get-all-question-categories
+    [this]
+    (mapv first
+          (d/q '[:find ?c
+                 :where [_ :question/categories ?c]]
+               @(.conn this) [])))
+
+
   (add-course!
     [this course-name]
     (let [id (generate-id this :course/id)
@@ -344,7 +355,8 @@
                                   :question/id     id
                                   :question/type    type
                                   :question/points (:question/points question)
-                                  :question/question-statement (:question/question-statement question)}
+                                  :question/question-statement (:question/question-statement question)
+                                  :question/categories (:question/categories question)}
                            (cond (= type :question.type/free-text)
                                  [:question/evaluation-criteria (:question/evaluation-criteria question)]
 
@@ -359,7 +371,8 @@
           db-after (:db-after tx-result)]
       (d/pull db-after  [:question/id :question/question-statement :question/points :question/type :question/possible-solutions
                          :question/evaluation-criteria :question/single-choice-solution
-                         :question/multiple-choice-solution]
+                         :question/multiple-choice-solution
+                         :question/categories]
               [:question/id id])))
 
 
