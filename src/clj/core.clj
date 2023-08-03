@@ -4,21 +4,21 @@
     [auth :refer [wrap-authentication]]
     [compojure.core :refer [defroutes GET POST PUT]]
     [compojure.route :as route]
+    [controllers.answer.answer-controller :refer [submit-user-answer!]]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
     [controllers.question-set.question-set-controller :refer [question-set-get]]
     [controllers.question.question-controller :refer [question-get]]
-    [controllers.answer.answer-controller :refer [submit-user-answer!]]
     [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.defaults :refer [secure-site-defaults
                                       site-defaults wrap-defaults]]
     [ring.middleware.reload :refer [wrap-reload]]
+    [services.answer-service.answer-service :refer [->AnswerService]]
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-service.course-service :refer [->CourseService]]
     [services.course-service.p-course-service :refer [get-all-courses]]
     [services.question-service.question-service :refer [->QuestionService]]
-    [services.answer-service.answer-service :refer [->AnswerService]]
     [services.question-set-service.p-question-set-service :refer [get-all-question-sets
                                                                   get-question-set-by-id]]
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
@@ -52,7 +52,7 @@
   (GET "/question/:id"
        req
        (question-get req "/question/" (:question-service services)))
-  
+
   (PUT "/question/:id"
        req
        (submit-user-answer! req (:answer-service services)))
@@ -63,7 +63,7 @@
                                                    :get-question-sets-fun (partial get-all-question-sets (:question-set-service services)))))
   (POST "/create-course-iteration" req
         (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
-  
+
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
 
   (route/not-found "Not Found"))

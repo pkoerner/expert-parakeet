@@ -25,7 +25,7 @@
 
   (get-questions-for-user
     [this corrector-id])
- 
+
   (get-question-ids-for-user
     [this user-id]
     "Fetches all question-ids belonging to a user.")
@@ -70,9 +70,9 @@
 
   (get-question-by-id
     [this id])
-  
+
   (get-question-and-possible-solutions-by-id
-   [this id])
+    [this id])
 
   (add-question!
     [this question])
@@ -103,7 +103,8 @@
     [this ant-id correction]))
 
 
-(deftype Database [conn]
+(deftype Database
+  [conn]
 
   Database-Protocol
 
@@ -172,7 +173,8 @@
                  :where
                  [?corr :user/course-iterations ?course-iteration]]
                @(.conn this) [:user/id corrector-id])))
-  
+
+
   (get-question-ids-for-user
     [this user-id]
     (mapv first
@@ -188,17 +190,17 @@
   (get-answers-for-question
     [this question-id]
     (map
-     #(zipmap [:answer/id :user/id :answer/timestamp] %)
-     (d/q '[:find ?answer-id ?user-id ?timestamp
-            :in $ ?question-id
-            :where
-            [?question :question/id ?question-id]
-            [?answer :answer/question ?question]
-            [?answer :answer/id ?answer-id ?tx]
-            [?tx :db/txInstant ?timestamp]
-            [?answer :answer/user ?user]
-            [?user :user/id ?user-id]]
-          @(.conn this) question-id)))
+      #(zipmap [:answer/id :user/id :answer/timestamp] %)
+      (d/q '[:find ?answer-id ?user-id ?timestamp
+             :in $ ?question-id
+             :where
+             [?question :question/id ?question-id]
+             [?answer :answer/question ?question]
+             [?answer :answer/id ?answer-id ?tx]
+             [?tx :db/txInstant ?timestamp]
+             [?answer :answer/user ?user]
+             [?user :user/id ?user-id]]
+           @(.conn this) question-id)))
 
 
   (get-all-answers-with-corrections
@@ -319,17 +321,19 @@
     [this course-id year semester]
     (add-course-iteration-with-question-sets! this course-id year semester []))
 
+
   (get-question-by-id
     [this id]
     (d/pull @(.conn this)
             [:question/id :question/question-statement :question/points :question/type]
             [:question/id id]))
-  
+
+
   (get-question-and-possible-solutions-by-id
-   [this id]
-   (d/pull @(.conn this)
-           [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]
-           [:question/id id]))
+    [this id]
+    (d/pull @(.conn this)
+            [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]
+            [:question/id id]))
 
 
   (add-question!
@@ -401,9 +405,9 @@
   (add-multiple-user-answers!
     [this user-id answers]
     (mapv
-     (fn [[question-id answer]]
-       (add-user-answer! this user-id question-id answer))
-     answers))
+      (fn [[question-id answer]]
+        (add-user-answer! this user-id question-id answer))
+      answers))
 
 
   (get-all-answers
@@ -431,15 +435,15 @@
   (get-corrections-of-answer
     [this answer-id]
     (map
-     #(zipmap [:correction/feedback :correction/timestamp] %)
-     (d/q '[:find ?corr-feedback ?timestamp
-            :in $ ?answer-id
-            :where
-            [?answer :answer/id ?answer-id]
-            [?correction :correction/answer ?answer ?tx]
-            [?tx :db/txInstant ?timestamp]
-            [?correction :correction/feedback ?corr-feedback]]
-          @(.conn this) answer-id)))
+      #(zipmap [:correction/feedback :correction/timestamp] %)
+      (d/q '[:find ?corr-feedback ?timestamp
+             :in $ ?answer-id
+             :where
+             [?answer :answer/id ?answer-id]
+             [?correction :correction/answer ?answer ?tx]
+             [?tx :db/txInstant ?timestamp]
+             [?correction :correction/feedback ?corr-feedback]]
+           @(.conn this) answer-id)))
 
 
   (add-correction!

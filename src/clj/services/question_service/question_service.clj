@@ -29,9 +29,11 @@
                      :question-id :question/id)
         :ret (s/coll-of keyword?))
 
+
 (defn- get-question-ids-for-user
   [db user-id]
   (db/get-question-ids-for-user db user-id))
+
 
 (defn validate-user-for-question
   " Checks if a user is assgined to a

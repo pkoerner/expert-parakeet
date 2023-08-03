@@ -2,7 +2,7 @@
   (:require
     [db]
     [services.question-set-service.p-question-set-service :refer [validate-user-for-question-set
-                                                                get-question-set-by-id]]
+                                                                  get-question-set-by-id]]
     [views.question-set.question-set-view :as view]))
 
 

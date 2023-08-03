@@ -1,8 +1,9 @@
 (ns controllers.answer.answer-controller
   (:require
-   [services.answer-service.p-answer-service :refer [add-user-answer-to-question!]]
-   [views.answer.answer-view :as view]
-   [util.ring-extensions :refer [html-response]]))
+    [services.answer-service.p-answer-service :refer [add-user-answer-to-question!]]
+    [util.ring-extensions :refer [html-response]]
+    [views.answer.answer-view :as view]))
+
 
 (defn- add-to-db-and-get-success-msg
   [user-id question-id answer db-add-fun]
