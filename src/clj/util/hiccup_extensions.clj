@@ -11,7 +11,7 @@
 
 
 (defn script
-  "Takes any number of and joins them into a javascript script tag.
+  "Takes any number of arguments and joins them into a string, which is returned in a javascript script tag.
    
    As it takes a variable number of arguments, arguments to js functions from clj can be written without a string joining.
    
