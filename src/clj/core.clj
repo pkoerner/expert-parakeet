@@ -6,7 +6,8 @@
     [compojure.route :as route]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
     [controllers.question-set.question-set-controller :refer [question-set-get]]
-    [controllers.question.question-controller :refer [question-get question-put!]]
+    [controllers.question.question-controller :refer [question-get]]
+    [controllers.answer.answer-controller :refer [submit-user-answer!]]
     [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
@@ -17,6 +18,7 @@
     [services.course-service.course-service :refer [->CourseService]]
     [services.course-service.p-course-service :refer [get-all-courses]]
     [services.question-service.question-service :refer [->QuestionService]]
+    [services.answer-service.answer-service :refer [->AnswerService]]
     [services.question-set-service.p-question-set-service :refer [get-all-question-sets
                                                                   get-question-set-by-id]]
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
@@ -30,7 +32,8 @@
   {:course-service (->CourseService db)
    :course-iteration-service (->CourseIterationService db)
    :question-set-service (->QuestionSetService db)
-   :question-service (->QuestionService)})
+   :question-service (->QuestionService db)
+   :answer-service (->AnswerService db)})
 
 
 ;; all routes that dont need authentication go here
@@ -45,16 +48,14 @@
 (defroutes private-routes
   (GET "/question-set/:id"
        req
-       (html-response (question-set-get
-                        req
-                        (:question-set-service services))))
+       (html-response (question-set-get req (:question-set-service services))))
   (GET "/question/:id"
        req
-       (html-response (question-get req "/question/" (:question-service services))))
+       (question-get req "/question/" (:question-service services)))
+  
   (PUT "/question/:id"
        req
-       (html-response (question-put! req)))
-  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
+       (submit-user-answer! req (:answer-service services)))
 
   (GET "/create-course-iteration" req
        (html-response (create-course-iteration-get req "/create-course-iteration"
@@ -62,6 +63,9 @@
                                                    :get-question-sets-fun (partial get-all-question-sets (:question-set-service services)))))
   (POST "/create-course-iteration" req
         (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
+  
+  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
+
   (route/not-found "Not Found"))
 
 
