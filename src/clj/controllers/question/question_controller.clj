@@ -4,7 +4,7 @@
     [services.question-service.p-question-service :refer [get-question-by-id
                                                           validate-user-for-question]]
     [util.ring-extensions :refer [html-response]]
-    [views.question :as view]))
+    [views.question.question-view :as view]))
 
 
 (defn question-get
@@ -14,28 +14,5 @@
         question    (get-question-by-id question-service question-id)
         permission-error (validate-user-for-question question-service user-id question-id)]
     (if (empty? permission-error)
-      (view/question-form question (str put-destination-root question-id))
-      (view/no-question-assignment permission-error))))
-
-
-(defn- add-to-db-and-get-success-msg
-  [user-id question-id answer]
-  (let [db-result (db/add-user-answer! user-id question-id answer)]
-    (view/submit-success-view (:question/id db-result))))
-
-
-(defn question-put!
-  [req]
-  (let [form-data (-> req (:params) (dissoc :__anti-forgery-token))
-        user-id (str (-> req :session :user :id))
-        question-id (:id form-data)
-        answer (:answer form-data)
-        multiple-answers (->> form-data
-                              (keys)
-                              (filter #(and (not= % :_method) (not= % :answer) (not= % :id)))
-                              (into [])
-                              (map name)
-                              (into []))]
-    (if (empty? multiple-answers)
-      (html-response (add-to-db-and-get-success-msg user-id question-id answer))
-      (html-response (add-to-db-and-get-success-msg user-id question-id multiple-answers)))))
+      (html-response (view/question-form question (str put-destination-root question-id)))
+      (html-response (view/no-question-assignment permission-error)))))
