@@ -5,7 +5,8 @@
     [db]
     [ring.util.codec :refer [form-encode]]
     [ring.util.response :as response]
-    [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration validate-course-iteration]]
+    [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration PCourseIterationService
+                                                                          validate-course-iteration]]
     [util.ring-extensions :refer [html-response]]
     [util.spec-functions :refer [map-spec]]
     [views.course-iteration.create-course-iteration-view :as view]))
