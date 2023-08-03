@@ -5,7 +5,7 @@
 
   (create-question!
     [self question]
-    "Creates a course-iteration entry in the database and returns a course-iteration map.")
+    "Creates a question entry in the database and returns a question map.")
 
   (get-question-categories
     [self]
