@@ -1,3 +1,5 @@
+// We don't wont to use more JS in our application. In the long run we need a way to use cljs instead and replace this code sooner or later.
+
 /**
  * Creates an Html dom Element from the provided html dom description.
  * @param {String} htmlText Html dom element.

@@ -1,3 +1,5 @@
+// We don't wont to use more JS in our application. In the long run we need a way to use cljs instead and replace this code sooner or later.
+
 /**
  * Take an id for an element a `select` dom element and an array of ids for other dom elements as arguments.
  * It registers an onchange handler for the `select` element and hides all dom elements from the Array, except the one currently selected.
