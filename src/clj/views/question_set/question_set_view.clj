@@ -1,6 +1,7 @@
 (ns views.question-set.question-set-view
   (:require
-    [db]))
+    [db]
+    [hiccup2.core :as h]))
 
 
 (def question-set-errors
@@ -11,6 +12,8 @@
 
 (defn question-set-form
   [question-set]
+  (h/html
+  [:div
   [:h1 (:question-set/name question-set)]
   [:table
    [:tr
@@ -21,10 +24,11 @@
       [:td
        [:a {:href (str "/question/" (:question/id question))}
         (:question/question-statement question)]]
-      [:td (:question/points question)]])])
+      [:td (:question/points question)]])]]))
 
 
 (defn no-assignement-form
   [permission-error]
   (when (contains? permission-error :not-assigned-to-question-set)
-    [:p (str "ERROR: Sie haben keinen Zugriff auf diesen Test!")]))
+    (h/html 
+     [:p (str "ERROR: Sie haben keinen Zugriff auf diesen Test!")])))
