@@ -3,7 +3,7 @@
     [clojure.spec.alpha :as s]
     [db]
     [services.question-set-service.p-question-set-service :refer [PQuestionSetService]]
-    [views.question-set :as view]))
+    [views.question-set.question-set-view :as view]))
 
 
 ;; todo replace all direct db calls and inject repositories
@@ -27,22 +27,22 @@
 
 
 (defn get-question-set-by-id
-  [_ question-set-id]
-  (db/get-question-set-by-id question-set-id))
+  [this question-set-id]
+  (db/get-question-set-by-id (.db this) question-set-id))
 
 
 (defn- extract-question-sets-of-user
-  [user-id]
+  [db user-id]
   (map
     #(-> % :course-iteration/question-sets)
-    (db/get-course-iterations-of-student user-id)))
+    (db/get-course-iterations-of-student db user-id)))
 
 
 (defn- extract-question-set-ids-of-user
-  [user-id]
+  [db user-id]
   (apply concat (map
                   #(map :question-set/id %)
-                  (extract-question-sets-of-user user-id))))
+                  (extract-question-sets-of-user db user-id))))
 
 
 (s/fdef validate-user-for-question-set
@@ -57,8 +57,8 @@
    requested question set. If so an
    empty error map is returned. Otherwise
    an error-map with a specified error is returned."
-  [_ user-id question-set-id]
-  (let [users-question-sets (extract-question-set-ids-of-user user-id)
+  [this user-id question-set-id]
+  (let [users-question-sets (extract-question-set-ids-of-user (.db this) user-id)
         error-map view/question-set-errors]
     (if (.contains users-question-sets question-set-id)
       (disj view/question-set-errors :not-assigned-to-question-set)

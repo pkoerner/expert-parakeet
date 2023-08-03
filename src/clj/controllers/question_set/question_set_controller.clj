@@ -1,9 +1,9 @@
 (ns controllers.question-set.question-set-controller
   (:require
     [db]
-    [services.question-set-service.question-set-service :refer [validate-user-for-question-set
+    [services.question-set-service.p-question-set-service :refer [validate-user-for-question-set
                                                                 get-question-set-by-id]]
-    [views.question-set :as view]))
+    [views.question-set.question-set-view :as view]))
 
 
 (defn question-set-get
