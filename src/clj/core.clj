@@ -28,13 +28,7 @@
     [util.ring-extensions :refer [html-response]]))
 
 
-
-
-
 (def db db/create-database)
-
-
-
 
 
 (def ^:private services

@@ -12,5 +12,5 @@
     "Returns a single question-set corresponding to an id.")
 
   (validate-user-for-question-set
-    [self user-id question-set-id]
+    [delf user-id question-set-id]
     "Checks in databse if user is assigned to a certain question-set."))
