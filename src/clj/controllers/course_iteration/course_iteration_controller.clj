@@ -23,6 +23,7 @@
 (s/fdef create-course-iteration-get
         :args (s/cat :req coll?
                      :post-destination :general/non-blank-string
+                     :db #(satisfies? db/Database-Protocol %)
                      :get-courses-fun (s/? (s/get-spec `db/get-all-courses))
                      :get-question-sets-fun (s/? (s/get-spec `db/get-all-question-sets)))
         :ret #(instance? hiccup.util.RawString %)
@@ -48,11 +49,11 @@
    When the request passed to this function inside of `req` contains predefined error values in the `:query-params` of the `req` parameter, 
    they are displayed as errors within the form.
    The fields can be seen in `view/course-iteration-form`."
-  [req post-destination & {:keys [get-courses-fun get-question-sets-fun]
-                           :or {get-courses-fun db/get-all-courses
-                                get-question-sets-fun db/get-all-question-sets}}]
-  (let [courses (get-courses-fun)
-        question-sets (get-question-sets-fun)]
+  [req post-destination db & {:keys [get-courses-fun get-question-sets-fun]
+                              :or {get-courses-fun db/get-all-courses
+                                   get-question-sets-fun db/get-all-question-sets}}]
+  (let [courses (get-courses-fun db)
+        question-sets (get-question-sets-fun db)]
     (if (empty? courses)
       view/no-courses
       (let [errors (extract-errors req)]
