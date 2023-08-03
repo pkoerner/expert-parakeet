@@ -91,7 +91,7 @@
 (s/fdef submit-create-course-iteration!
         :args (s/cat :request ::request-data
                      :redirect-uri string?
-                     :db-add-fun (s/? (s/get-spec `db/add-course-iteration-with-question-sets!)))
+                     :course-iteration-service #(satisfies? PCourseIterationService %))
         :ret #(instance? hiccup.util.RawString %))
 
 
