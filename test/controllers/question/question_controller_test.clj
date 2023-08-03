@@ -179,7 +179,7 @@
         (t/are [question]
                (let [was-not-called (atom true)
                      db-add-fun-stub (fn [question]
-                                       (swap! was-not-called (fn [_] true))
+                                       (swap! was-not-called (fn [_] false))
                                        question)
                      question-service-stub (stub-question-service
                                              :create-question! db-add-fun-stub
