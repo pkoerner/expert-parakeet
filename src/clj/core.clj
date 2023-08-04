@@ -12,8 +12,8 @@
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.defaults :refer [secure-site-defaults
                                       site-defaults wrap-defaults]]
-    [ring.middleware.file :refer [wrap-file]]
     [ring.middleware.reload :refer [wrap-reload]]
+    [ring.middleware.resource :refer [wrap-resource]]
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-service.course-service :refer [->CourseService]]
     [services.course-service.p-course-service :refer [get-all-courses]]
@@ -70,7 +70,7 @@
 ;; oauth2 middleware callback requires cookie setting :same-site to be lax, see: https://github.com/weavejester/ring-oauth2
 (def app
   (-> combined-routes
-      (wrap-file "resources/public") ; serving of static resources
+      (wrap-resource "public") ; serving of static resources
       (wrap-defaults (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
 
 
