@@ -5,20 +5,10 @@
     [hiccup2.core :as h]))
 
 
-(def no-course-iterations
-  "Simple paragraph to display when the student has no course iterations"
-  [:p "du scheinst keinen Kursen zugeordnet zu sein."])
-
-
-(def no-question-sets
-  "Simple paragraph to display when the student has no question sets for the course-iteration"
-  [:p "noch keine Frageboegen fuer diesen Kurs verfuegbar."])
-
-
 ;; Layout-idea:
 ;; Course-iteration 1: (e.g. fkt-prog-SOM-22)
-;;     question-set-1 | points | passed/failed-check | deadline | "inspect question set"
-;;     question-set-2 | points | passed/failed-check | deadline | "inspect question set"
+;;     question-set-1 | points | deadline | "inspect question set"
+;;     question-set-2 | points | deadline | "inspect question set"
 ;; ("" means button)
 
 (s/fdef display-course-iteration
@@ -36,23 +26,24 @@
                (:course-iteration/course course-iteration)) " "
              (:course-iteration/year course-iteration) " "
              (:course-iteration/semester course-iteration))]
-   [:ul
-    (for [question-set (:course-iteration/question-sets course-iteration)]
-      [:li [:table
-            [:tbody
-             [:tr
-              [:td (str (:question-set/name question-set))]
-              [:td (str (:question-set/achieved-points question-set)
-                        "/"
-                        (:question-set/max-points question-set)
-                        " Points")]
-              ;; Idea if passing-score is implemented
-              ;; [:td (if (or (nil? (:question-set/achieved-points question-set))
-              ;;              (>= (:question-set/achieved-points question-set) (:question-set/passing-score question-set)))
-              ;;        "failed"
-              ;;        "passed")]
-              [:td (str "deadline: " (:question-set/end question-set))]
-              [:td [:a {:href "/question-set:id"} [:button "details"]]]]]]])]])
+   (let [questions-sets (:course-iteration/question-sets course-iteration)]
+     [:ul
+      (for [question-set questions-sets]
+        [:li [:table
+              [:tbody
+               [:tr
+                [:td (str (:question-set/name question-set))]
+                [:td (str (:question-set/achieved-points question-set)
+                          "/"
+                          (:question-set/max-points question-set)
+                          " Points")]
+                ;; Idea if passing-score is implemented
+                ;; [:td (if (or (nil? (:question-set/achieved-points question-set))
+                ;;              (>= (:question-set/achieved-points question-set) (:question-set/passing-score question-set)))
+                ;;        "failed"
+                ;;        "passed")]
+                [:td (str "deadline: " (:question-set/end question-set))]
+                [:td [:a {:href "/question-set:id"} [:button "details"]]]]]]])])])
 
 
 (s/fdef create-student-overview
@@ -62,6 +53,7 @@
 
 
 (defn create-user-overview
+  "Creates the overview page for an user."
   [course-iterations]
   (h/html
     [:div

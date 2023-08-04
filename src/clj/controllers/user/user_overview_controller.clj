@@ -11,8 +11,9 @@
 
 
 (defn create-user-overview-get
-  " Takes a user and a function to get all question sets for a student as arguments.
-   It returns an overview of all question sets the user is assigned to. If the user is also acorrector or a Lecturer this side contains
+  " Takes a list of all course iterations with all questions sets for a user as argument.
+   It returns an overview page of these course iterations the user is assigned to.
+   If the user is also acorrector or a Lecturer this side contains
    links to the corrector overview and the lecturer overview."
   [all-course-iterations-for-user]
   (user-view/create-user-overview all-course-iterations-for-user))

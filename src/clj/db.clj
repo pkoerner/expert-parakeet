@@ -434,12 +434,7 @@
                                   :answer/points points}])
           db-after (:db-after tx-result)
           ids (:tempids tx-result)]
-      (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1))))
-
-  ;; must be replaced with the real implementation
-  (get-user-by-git-id
-    [this git-id]
-    {:user/id "0"}))
+      (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1)))))
 
 
 ;; use mem db
