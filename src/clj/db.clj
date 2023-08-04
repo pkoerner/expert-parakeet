@@ -98,8 +98,17 @@
   (add-correction!
     [this ant-id correction])
 
+  (add-user!
+    [this git-id]
+    "add a new user to the db with a new id, the given git-id and an empty coll of course-iterations.")
+
+  (get-user-by-id
+    [this id]
+    "get the user given the user-id id.")
+
   (get-user-by-git-id
-    [this git-id]))
+    [this git-id]
+    "get the user given the git-id of the user"))
 
 
 (deftype Database
@@ -447,7 +456,34 @@
                                   :answer/points points}])
           db-after (:db-after tx-result)
           ids (:tempids tx-result)]
-      (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1)))))
+      (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1))))
+
+
+  (add-user!
+    [this git-id]
+    (let [user-id (generate-id this :user/id)
+          tx-result (d/transact (.conn this)
+                                [{:db/id -1
+                                  :user/id user-id
+                                  :user/git-id git-id
+                                  :user/course-iterations []}])
+          db-after (:db-after tx-result)]
+      (d/pull db-after [:user/id :user/git-id :user/course-iterations]
+              [:user/id user-id])))
+
+
+  (get-user-by-id
+    [this user-id]
+    (d/pull @(.conn this)
+            [:user/id :user/git-id :user/course-iterations]
+            [:user/id user-id]))
+
+
+  (get-user-by-git-id
+    [this git-id]
+    (d/pull @(.conn this)
+            [:user/id :user/git-id :user/course-iterations]
+            [:user/git-id git-id])))
 
 
 ;; use mem db
@@ -480,3 +516,4 @@
   (let [conn (create-conn)]
     (d/transact conn dummy-data/dummy-data)
     (Database. conn)))
+

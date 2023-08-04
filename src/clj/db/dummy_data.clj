@@ -96,10 +96,13 @@
 
 (def users
   [{:user/id "0"
+    :user/git-id "12345"
     :user/course-iterations [[:course-iteration/id "1"] [:course-iteration/id "2"]]}
    {:user/id "2"
+    :user/git-id "45678"
     :user/course-iterations [[:course-iteration/id "1"]]}
    {:user/id "3"
+    :user/git-id "13579"
     :user/course-iterations [[:course-iteration/id "2"]]}])
 
 
