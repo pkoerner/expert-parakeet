@@ -2,15 +2,13 @@
   (:require
     [clojure.spec.alpha :as s]
     [db]
-    [db]
-    [services.question-service.p-question-service :refer [get-question-by-id
-                                                          validate-user-for-question]]
     [services.question-service.p-question-service :refer [create-question!
                                                           get-question-categories
                                                           PQuestionService
-                                                          validate-question]]
+                                                          validate-question
+                                                          get-question-by-id
+                                                          validate-user-for-question]]
     [services.question-service.question-service :as q-ser]
-    [util.ring-extensions :refer [html-response]]
     [util.ring-extensions :refer [extract-errors html-response]]
     [views.question.create-question-view :as creation-view :refer [question-success-view]]
     [views.question.question-view :as question-view]))

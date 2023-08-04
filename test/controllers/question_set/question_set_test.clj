@@ -21,11 +21,11 @@
     (testing "When the user has access to the question-set, the statement must be in the returned in the html."
       (let [question-set-service (reify PQuestionSetService
                                    (get-question-set-by-id
-                                     [this _id]
+                                     [_ _id]
                                      (get-question-set-by-id))
 
                                    (validate-user-for-question-set
-                                     [this _id _user_id]
+                                     [_ _id _user_id]
                                      (validate-user-for-question-set-success)))
             question-set-response (question-set-get {} question-set-service)]
         (t/is (string/includes? question-set-response "Der text der Frage"))))
@@ -33,14 +33,11 @@
     (testing "When the user has no access to the question-set, an error message has to be displayed."
       (let [question-set-service (reify PQuestionSetService
                                    (get-question-set-by-id
-                                     [this _id]
+                                     [_ _id]
                                      (get-question-set-by-id))
 
                                    (validate-user-for-question-set
-                                     [this _id _user_id]
+                                     [_ _id _user_id]
                                      (validate-user-for-question-set-failure)))
             question-set-response (question-set-get {} question-set-service)]
         (t/is (string/includes? question-set-response "ERROR"))))))
-
-
-(t/run-test test-question-set-get-validation)

@@ -21,11 +21,11 @@
     (testing "When the user has access to a question, the statement must be in the returned in the html."
       (let [question-service (reify PQuestionService
                                (get-question-by-id
-                                 [this _id]
+                                 [_ _id]
                                  (get-question-by-id))
 
                                (validate-user-for-question
-                                 [this _id _user_id]
+                                 [_ _id _user_id]
                                  (validate-user-for-question-success)))
             question-response (question-get {} "put-destination" question-service)]
         (t/is (string/includes? question-response "Why are we still here?"))))
@@ -33,14 +33,11 @@
     (testing "When the user has no access to the question, an error message has to be displayed."
       (let [question-service (reify PQuestionService
                                (get-question-by-id
-                                 [this _id]
+                                 [_ _id]
                                  (get-question-by-id))
 
                                (validate-user-for-question
-                                 [this _id _user_id]
+                                 [_ _id _user_id]
                                  (validate-user-for-question-failure)))
             question-response (question-get {} "put-destination" question-service)]
         (t/is (string/includes? question-response "ERROR"))))))
-
-
-(t/run-test test-question-get-validation)

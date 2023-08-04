@@ -2,8 +2,7 @@
   (:require
     [hiccup.form :as form]
     [hiccup2.core :as h]
-    [ring.util.anti-forgery :refer [anti-forgery-field]]
-    [ring.util.response :as response]))
+    [ring.util.anti-forgery :refer [anti-forgery-field]]))
 
 
 (def question-errors
