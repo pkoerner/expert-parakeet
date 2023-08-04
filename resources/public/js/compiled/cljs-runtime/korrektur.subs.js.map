@@ -1,1 +1,0 @@
-{"version":3,"sources":["korrektur/subs.cljs"],"mappings":";AAKA,2DAAA,3DAACA,2LAEC,WAAKC,GAAGC;AAAR,AAAW,OAAA,4FAAYD","names":["re_frame.core.reg_sub","db","_"],"sourcesContent":["(ns korrektur.subs\n  (:require\n    [re-frame.core :as rf]))\n\n\n(rf/reg-sub\n  :korrektur/erhalten\n  (fn [db _] (:korrektur db)))\n"]}
