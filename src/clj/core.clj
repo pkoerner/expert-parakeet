@@ -50,7 +50,7 @@
 (defroutes private-routes
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
 
-  (GET "/user-overview" req (let [user-id (:user/id (db/get-user-by-git-id db "12345"))] ; TODO: "12345" must be replaced with (str (get-in req [:session :user :id]))
+  (GET "/user-overview" _ (let [user-id (:user/id (db/get-user-by-git-id db "12345"))] ; TODO: "12345" must be replaced with (str (get-in req [:session :user :id]))
                               (html-response (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) user-id)))))
 
   (GET "/create-course-iteration" req
