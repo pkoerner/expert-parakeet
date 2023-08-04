@@ -17,5 +17,5 @@
       (t/is (every? #(string/includes? created-overview %) should-be-included-in-output))))
   (testing "Testing list element is displayed if nothing is handed over the overview"
     (let [created-overview (create-user-overview-get [])]
-        (t/is (not (string/includes? created-overview "<li>")))
-        (t/is (string/includes? created-overview "Your Courses:")))))
+      (t/is (not (string/includes? created-overview "<li>")))
+      (t/is (string/includes? created-overview "Your Courses:")))))
