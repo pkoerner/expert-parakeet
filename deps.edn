@@ -37,4 +37,11 @@
                           :main-opts ["-m" "cljstyle.main" "check"]}
 
            :nrepl       {:extra-deps {cider/cider-nrepl   {:mvn/version "0.28.5"}}
-                         :main-opts  ["-m" "nrepl.cmdline" "--interactive" "--middleware" "[cider.nrepl/cider-middleware]"]}}}
+                         :main-opts  ["-m" "nrepl.cmdline" "--interactive" "--middleware" "[cider.nrepl/cider-middleware]"]}
+
+           :build-cljs {:extra-deps {org.clojure/clojurescript {:mvn/version "1.11.60"}}
+                        :extra-paths ["src/cljs"]
+                        :main-opts ["--main" "cljs.main"
+                                    "-co" "{:output-dir \"resources/public/cljs\" :optimizations :advanced :target :browser :modules {:core {:output-to \"resources/public/cljs/core.js\" :entries #{\"core\"}} :another {:output-to \"resources/public/cljs/another.js\" :entries #{\"another\"}}}}"
+                                    
+                                    ]}}}
