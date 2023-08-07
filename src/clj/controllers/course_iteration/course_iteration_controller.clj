@@ -6,7 +6,7 @@
     [ring.util.response :as response]
     [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration PCourseIterationService
                                                                           validate-course-iteration]]
-    [util.ring-extensions :refer [construct-url extract-errors 
+    [util.ring-extensions :refer [construct-url extract-errors
                                   html-response]]
     [util.spec-functions :refer [map-spec]]
     [views.course-iteration.create-course-iteration-view :as view]))
