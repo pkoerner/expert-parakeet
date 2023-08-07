@@ -8,7 +8,7 @@
     [controllers.course.course-controller :refer [create-course-get submit-create-course!]]
     [controllers.question.question-controller :refer [create-question-get
                                                       submit-create-question!]]
-    [controllers.user.user-controller :refer [login]]
+    [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
     [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
@@ -44,7 +44,9 @@
                  (if (auth/is-logged-in? req)
                    [:p (str "Hello, " (str (get-in req [:session :user :id])))]
                    [:a {:href "/login"} "Login"]))) ; TODO remove route, just an example to show login working
-  (GET "/login" req (login req (services :user-service))))
+  (GET "/login" req (login req (services :user-service)))
+  (GET "/create-user" req (html-response (create-user-get req "/create-user" (services :user-service))))
+  (POST "/create-user" req (submit-create-user req "/login" (services :user-service))))
 
 
 ;; all routes that require authentication go here
