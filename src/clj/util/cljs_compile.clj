@@ -7,6 +7,7 @@
                :asset-path "cljs/out"                    ; Asset path
                :optimizations :none               ; Optimization level
                :target :browser                        ; Target environment
+               :output-to "resources/public/cljs/main.js"
                }))
 
 (compile-cljs)
