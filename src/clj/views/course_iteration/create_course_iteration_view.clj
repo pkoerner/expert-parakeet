@@ -4,7 +4,8 @@
     [clojure.string :as string]
     [hiccup.form :as hform]
     [hiccup2.core :as h]
-    [ring.util.anti-forgery :refer [anti-forgery-field]]))
+    [ring.util.anti-forgery :refer [anti-forgery-field]]
+    [util.hiccup-extensions :refer [optional-error-display]]))
 
 
 (def create-course-iteration-error-keys
@@ -15,12 +16,6 @@
 (def no-courses
   "Simple paragaraph to display when there are no courses in the database."
   [:p "Es muss erst ein Fach erstellt werden bevor ein Kurs erstellt werden kann!"])
-
-
-(defn- optional-error-display
-  [key dict]
-  (let [course-error (dict key)]
-    (when course-error [:div [:span {:style "color: red;"} course-error]])))
 
 
 (s/fdef course-iteration-form
