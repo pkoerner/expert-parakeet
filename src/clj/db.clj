@@ -228,20 +228,17 @@
 
   (get-all-question-sets
     [this]
-    (mapv first (d/q '[:find ?id
-                       :where [_ :question-set/id ?id]]
+    (mapv first (d/q '[:find (pull ?e [:question-set/id :question-set/name])
+                       :where [?e :question-set/id]]
                      @(.conn this))))
 
 
   (get-all-courses
     [this]
-    (mapv first (d/q '[:find (pull ?e [:course-iteration/id {:course-iteration/course [:course/id :course/course-name]}
-                                       :course-iteration/year
-                                       :course-iteration/semester
-                                       :course-iteration/year
-                                       {:course-iteration/question-sets [:question-set/id]}])
-                       :where [?e :course-iteration/id]]
-                     @(.conn this))))
+    (mapv first
+          (d/q '[:find (pull ?e [:course/id :course/course-name {:course/question-sets [:question-set/id :question-set/name]}])
+                 :where [?e :course/id]]
+               @(.conn this))))
 
 
   (get-course-iterations-of-course
