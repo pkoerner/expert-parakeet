@@ -93,7 +93,7 @@
         oauth-github-id (github-data :id)]
 
     {:status 307
-     :headers {"Content-Type" "text/plain", "Location" "/"}
+     :headers {"Content-Type" "text/plain", "Location" "/login"}
      :session (assoc (:session request) :user {:oauth-github-id oauth-github-id})
      ;; Hier werden für demonstrationszwecke ein paar Daten angezeigt
      ;; Der frontend code könnte hier die Bestätigung bekommen,
