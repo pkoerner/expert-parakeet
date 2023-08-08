@@ -40,18 +40,15 @@
 (defroutes public-routes
   (GET "/" req (html-response
                  (if (auth/is-logged-in req)
-                   [:p (str "Hello, go here to see your courses ")
-                    [:a {:href "/user-overview"} "here"]]
+                   (let [user-git-id "12345"] ; TODO: "12345" must be replaced with (str (get-in req [:session :user :id]))
+                     (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) user-git-id)))
                    [:a {:href "/oauth2/github"} "Login"])))) ; TODO remove route, just an example to show login working
 
 
 
 ;; all routes that require authentication go here
 (defroutes private-routes
-  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
-
-  (GET "/user-overview" _ (let [user-id (:user/id (db/get-user-by-git-id db "12345"))] ; TODO: "12345" must be replaced with (str (get-in req [:session :user :id]))
-                            (html-response (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) user-id)))))
+  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working 
 
   (GET "/create-course-iteration" req
        (html-response (create-course-iteration-get req "/create-course-iteration"
