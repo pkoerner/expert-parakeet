@@ -326,7 +326,7 @@
   (get-question-by-id
     [this id]
     (d/pull @(.conn this)
-            [:question/id :question/question-statement :question/points :question/type]
+            ["*"]
             [:question/id id]))
 
 
@@ -485,7 +485,7 @@
 
 ;; use mem db
 
-(def cfg
+(def mem-cfg
   {:store {:backend :mem
            :id "expert-db"}
    :initial-tx db-schema})
@@ -494,14 +494,14 @@
 ;; use file db
 
 
-#_(def cfg
+#_(def file-cfg
     {:store {:backend :file
              :path "/tmp/expert-db"}
      :initial-tx schema})
 
 
 (defn create-conn
-  []
+  [cfg]
   (if (d/database-exists? cfg)
     (println "Found existing DB at:" (get-in cfg [:store :path]))
     (d/create-database cfg))
@@ -510,7 +510,7 @@
 
 
 (def create-database
-  (let [conn (create-conn)]
+  (let [conn (create-conn mem-cfg)]
     (d/transact conn dummy-data/dummy-data)
     (Database. conn)))
 
