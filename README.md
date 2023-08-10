@@ -67,7 +67,11 @@ A Dockerfile is provided that builds the uber-jar within Docker in an ephemeral 
 
 Voila: We have a build system ready to run in docker and a containerized version of our app.
 
-## Secrets
+# Continous Deployment
+Commits to the main branch are automatically deployed to the application running live on https://expert-parakeet.fly.dev/.
+
+Please note that the application is automatically powered down after about 5 minutes of inactivity and -- as we don't have persistency yet -- will loose all application state then. Refer to the fly.io docs on how to change this behaviour, if necessary.
+
 For continous deployment to fly.io, you need to provide your FLY_API_TOKEN to Githubs CI as a repository secret. See the [documentation from fly here](https://fly.io/docs/app-guides/continuous-deployment-with-github-actions/).
 
 As noted in [Setup Authentication](#setup-authentication), you need to provide OAUTH credentials to the application as environment variables. On fly.io, these should be setup as [runtime secrets](https://fly.io/docs/reference/secrets/).

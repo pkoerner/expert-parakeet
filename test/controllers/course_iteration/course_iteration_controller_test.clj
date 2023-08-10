@@ -15,10 +15,6 @@
     [views.course-iteration.create-course-iteration-view :refer [create-course-iteration-error-keys]]))
 
 
-;; TODO make dummy db instead
-(def db db/create-database)
-
-
 (def ^:private error-map-gen
   (let [rand-error-map (->> create-course-iteration-error-keys
                             (map (fn [key] {(str key) (str "Error for key " key)}))
@@ -34,7 +30,9 @@
   (prop/for-all [error-map error-map-gen]
                 (let [post-destination "destination"
                       res (create-course-iteration-get {:query-params error-map}
-                                                       post-destination db)]
+                                                       post-destination
+                                                       (fn [] [{:course/id "Some"}])
+                                                       (fn [] [{:question-set/id "Some"}]))]
                   (t/is (and (every? #(string/includes? res %) (vals error-map))
                              (string/includes? res post-destination))))))
 
@@ -42,11 +40,11 @@
 (deftest test-create-course-iteration-get
   (testing "When there are no courses, an error message is displayed."
     (let [empty-request {}
-          get-no-courses-fun (fn [_] [])
+          get-no-courses-fun (fn [] [])
           res (create-course-iteration-get empty-request
                                            "post-destination"
-                                           db
-                                           :get-courses-fun get-no-courses-fun)]
+                                           get-no-courses-fun
+                                           (fn [] []))]
       (t/is (not (string/includes? res "form"))))))
 
 
@@ -94,7 +92,8 @@
 
   (testing "Test that the db-add-function is not called when the parameters are invalid. 
             And that the correct error message is send with the redirect."
-    (let [test-request {:__anti-forgery-token ""
+    (let [mock-db {}
+          test-request {:__anti-forgery-token ""
                         :multipart-params {"course-id" "123"
                                            "year" "2023"
                                            "semester" "WiSe"
@@ -104,7 +103,7 @@
 
           course-iteration-service (stub-course-iteration-service
                                      :validate-course-iteration (fn [& args]
-                                                                  (apply (partial validate-course-iteration (->CourseIterationService db)) args))
+                                                                  (apply (partial validate-course-iteration (->CourseIterationService mock-db)) args))
                                      :create-course-iteration db-add-fun-stub)
           redirect-uri "S"
           wrong-course-id ""
