@@ -5,6 +5,7 @@
     [compojure.core :refer [defroutes GET POST PUT]]
     [compojure.route :as route]
     [controllers.answer.answer-controller :refer [submit-user-answer!]]
+    [controllers.correction.correction-controller :refer [correction-overview-get]]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
     [controllers.course.course-controller :refer [create-course-get submit-create-course!]]
     [controllers.question-set.question-set-controller :refer [question-set-get]]
@@ -20,6 +21,7 @@
     [ring.middleware.reload :refer [wrap-reload]]
     [ring.middleware.resource :refer [wrap-resource]]
     [services.answer-service.answer-service :refer [->AnswerService]]
+    [services.correction-service.correction-service :refer [->CorrectionService]]
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-service.course-service :refer [->CourseService]]
     [services.course-service.p-course-service :refer [get-all-courses]]
@@ -41,7 +43,8 @@
    :question-set-service (->QuestionSetService db)
    :question-service (->QuestionService db)
    :answer-service (->AnswerService db)
-   :user-service (->UserService db)})
+   :user-service (->UserService db)
+   :correction-service (->CorrectionService db)})
 
 
 ;; all routes that dont need authentication go here
@@ -91,6 +94,9 @@
         (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
 
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
+
+  (GET "/correction-overview" req
+       (html-response (correction-overview-get req (services :correction-service))))
 
   (route/not-found "Not Found"))
 
