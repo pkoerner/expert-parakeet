@@ -2,6 +2,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.test :as t :refer [deftest testing]]
+    [clojure.test.check.generators :as gen]
     [db]))
 
 
@@ -10,8 +11,8 @@
 
 (deftest question-tests
   (let [test-db db/create-database]
-    (testing "get-all-questions of the dummy dataset"
-      (let [res (db/get-all-questions test-db)
+    (testing "get-all-question-ids of the dummy dataset"
+      (let [res (db/get-all-question-ids test-db)
             reference-ids ["1" "2" "3" "4" "5" "6" "7" "8"]
             res-ids (sort (map #(:question/id %) res))]
         (t/is (= reference-ids res-ids))))
@@ -33,7 +34,7 @@
                             :question/points 1
                             :question/categories ["Cat1"]}
             _ (db/add-question! test-db input-question)
-            question-ids (map #(:question/id %) (db/get-all-questions test-db))
+            question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
             question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
                                                                                 :question/question-statement
                                                                                 :question/possible-solutions
@@ -48,9 +49,67 @@
                             :question/single-choice-solution "42"
                             :question/points 1
                             :question/categories ["Cat1"]}]
-        (t/is (thrown? clojure.lang.ArityException (db/add-question! test-db input-question)))))))
+        (t/is (thrown? clojure.lang.ArityException (db/add-question! test-db input-question)))))
+    ;; does not works depending on the input. Example: input categories: "234", "easa", "123", output in question-list: "123", "234", "easa"
+    ;; (testing "add-question! with generated questions"
+    ;;   (let [input-question (first (map #(select-keys % [:question/type
+    ;;                                                     :question/question-statement
+    ;;                                                     :question/evaluation-criteria
+    ;;                                                     :question/points
+    ;;                                                     :question/categories])
+    ;;                                    (gen/sample (gen/not-empty (s/gen :question/question)) 1)))
+    ;;         _ (db/add-question! test-db input-question)
+    ;;         question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+    ;;         question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
+    ;;                                                                             :question/points
+    ;;                                                                             :question/question-statement
+    ;;                                                                             :question/categories
+    ;;                                                                             :question/evaluation-criteria])
+    ;;                            question-ids)]
+    ;;     (t/is (some #(= % input-question) (vec question-list)))))
+    ))
 
 
-((deftest course-iteration-test
-   (let [test-db (db/create-database)]
-     (testing "get-all-course-iterations"))))
+(deftest course-iteration-test
+  (let [test-db db/create-database]
+    (testing "get-all-course-iterations of dummy data"
+      (let [res (db/get-all-course-iterations test-db)
+            reference-ids ["1", "2"]
+            res-ids (sort (map #(:course-iteration/id %) res))]
+        (t/is (= reference-ids res-ids))))
+    (testing "get-course-iterations-of-course programming 1"
+      (let [course-id "1"
+            res (db/get-course-iterations-of-course test-db course-id)
+            reference-ids ["2"]
+            res-ids (sort (map #(:course-iteration/id %) res))]
+        (t/is (= reference-ids res-ids))))
+    (testing "get-course-iterations-of-course specialization functional programming clojure"
+      (let [course-id "0"
+            res (db/get-course-iterations-of-course test-db course-id)
+            reference-ids ["1"]
+            res-ids (sort (map #(:course-iteration/id %) res))]
+        (t/is (= reference-ids res-ids))))
+    (testing "get-course-iteration-by-id with id = 1"
+      (let [course-iteration-id "1"
+            res (db/get-course-iteration-by-id test-db course-iteration-id)]
+        (and (t/is (= (:course-iteration/id res) "1"))
+             (t/is (= (:course-iteration/semester res) "WiSe"))
+             (t/is (= (:course-iteration/year res) 2022)))))
+    (testing "get-course-iteration-by-id with id = 2"
+      (let [course-iteration-id "2"
+            res (db/get-course-iteration-by-id test-db course-iteration-id)]
+        (and (t/is (= (:course-iteration/id res) "2"))
+             (t/is (= (:course-iteration/semester res) "SoSe"))
+             (t/is (= (:course-iteration/year res) 2020)))))
+    (testing "get-course-iteration-by-id with invalid id = 42"
+      (t/is (thrown-with-msg?
+              clojure.lang.ExceptionInfo
+              #"Nothing found for entity id"
+              (db/get-course-iteration-by-id test-db "42"))))
+    (testing "add-course-iteration-with-question-sets! with valid course-iteration as input and check wether it contains in the db"
+      (let [course-id "0"
+            course-iteration-year 1999
+            course-iteration-semester "SoSe"
+            course-iteration-question-sets [[:question-set/id "3"] [:question-set/id "1"]]
+            _ (db/add-course-iteration-with-question-sets! test-db course-id course-iteration-year course-iteration-semester course-iteration-question-sets)
+            course-iterations ()]))))

@@ -49,7 +49,7 @@
   (get-course-iterations-of-course
     [this course-id])
 
-  (get-all-questions
+  (get-all-question-ids
     [this])
 
   (get-all-question-categories
@@ -261,7 +261,7 @@
                      @(.conn this) course-id)))
 
 
-  (get-all-questions
+  (get-all-question-ids
     [this]
     (mapv first (d/q '[:find (pull ?e [:question/id])
                        :where [?e :question/id]]
