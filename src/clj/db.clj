@@ -222,7 +222,7 @@
   (get-question-set-by-id
     [this id]
     (d/pull @(.conn this)
-            [:question-set/id {:question-set/questions [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]}]
+            [:question-set/id :question-set/name {:question-set/questions [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]}]
             [:question-set/id id]))
 
 
