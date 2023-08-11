@@ -113,7 +113,11 @@
 
   (get-course-by-id
     [this course-id]
-    "get the corresponding course given the id"))
+    "get the corresponding course given the id")
+
+  (get-all-user
+    [this]
+    "get all users in database"))
 
 
 (deftype Database
@@ -285,7 +289,7 @@
     [this course-name]
     (let [excisting-course-names (map #(:course/course-name %) (get-all-courses this))]
       (if (some #(= (string/lower-case course-name) (string/lower-case %)) excisting-course-names)
-        (throw (AssertionError. (str "There is already a course named" course-name " in the data base. Please check the existing course and wether you need to create a new one.")))
+        (throw (AssertionError. (str "There is already a course with the same name in the database. Please check the existing course and wether you need to create a new one.")))
         (let [id (generate-id this :course/id)
               tx-result (d/transact (.conn this)
                                     [{:db/id -1
@@ -473,28 +477,31 @@
 
   (add-user!
     [this git-id]
-    (let [user-id (generate-id this :user/id)
-          tx-result (d/transact (.conn this)
-                                [{:db/id -1
-                                  :user/id user-id
-                                  :user/git-id git-id
-                                  :user/course-iterations []}])
-          db-after (:db-after tx-result)]
-      (d/pull db-after [:user/id :user/git-id :user/course-iterations]
-              [:user/id user-id])))
+    (let [existing-git-ids (map #(:user/git-id %) (get-all-user this))]
+      (if (some #(= git-id %) existing-git-ids)
+        (throw (AssertionError. (str "There is already a user with the same git-id in the database. Please check the existing course and wether you need to create a new one.")))
+       (let [user-id (generate-id this :user/id)
+             tx-result (d/transact (.conn this)
+                                   [{:db/id -1
+                                     :user/id user-id
+                                     :user/git-id git-id
+                                     :user/course-iterations []}])
+             db-after (:db-after tx-result)]
+         (d/pull db-after [:user/id :user/git-id :user/course-iterations]
+                 [:user/id user-id])))))
 
 
   (get-user-by-id
     [this user-id]
     (d/pull @(.conn this)
-            [:user/id :user/git-id :user/course-iterations]
+            [:user/id :user/git-id {:user/course-iterations [:course-iteration/id]}]
             [:user/id user-id]))
 
 
   (get-user-by-git-id
     [this git-id]
     (d/pull @(.conn this)
-            [:user/id :user/git-id :user/course-iterations]
+            [:user/id :user/git-id {:user/course-iterations [:course-iteration/id]}]
             [:user/git-id git-id]))
 
 
@@ -502,7 +509,15 @@
     [this course-id]
     (d/pull @(.conn this)
             [:course/id :course/course-name {:course/question-sets [:question-set/id :question-set/name]}]
-            [:course/id course-id])))
+            [:course/id course-id]))
+
+
+  (get-all-user
+    [this]
+    (mapv first
+          (d/q '[:find (pull ?e [:user/id :user/git-id {:user/course-iterations [:course-iteration/id]}])
+                 :where [?e :user/id]]
+               @(.conn this)))))
 
 
 ;; use mem db

@@ -507,13 +507,68 @@
               (db/get-course-by-id test-db "42"))))
     (testing "add-course! with generated course names"
       (let [course-names (distinct (gen/sample (s/gen :course/course-name) generator-sample-size))]
-        (t/is (or (every? (fn [act]
-                            (let [_ (db/add-course! test-db act)
-                                  excisting-course-names (map #(:course/course-name %) (db/get-all-courses test-db))]
-                              (some #(= (string/lower-case act) (string/lower-case %)) excisting-course-names)))
-                          course-names)
-                  (some #(t/is (thrown-with-msg?
-                                 java.lang.AssertionError
-                                 (re-pattern (str "There is already a course named" % " in the data base. Please check the existing course and wether you need to create a new one."))
-                                 (db/add-course! test-db %))) course-names)))))))
+        (t/is (every? (fn [act]
+                        (let [_ (db/add-course! test-db act)
+                              excisting-course-names (map #(:course/course-name %) (db/get-all-courses test-db))]
+                          (some #(= (string/lower-case act) (string/lower-case %)) excisting-course-names)))
+                      course-names))))
+    (testing "add-course! with existing name - should fail"
+      (t/is (thrown-with-msg?
+             java.lang.AssertionError
+             #"There is already a course with the same name in the database. Please check the existing course and wether you need to create a new one."
+             (db/add-course! test-db "Programming 1"))))))
 
+
+(deftest user-test
+  (let [test-db (-create-test-db "user-test-db")]
+    (testing "get-all-user of dummy-data"
+      (let [res (db/get-all-user test-db)
+            reference-user [#:user{:id "0"
+                                   :git-id "12345"
+                                   :course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]}
+                            #:user{:id "2"
+                                   :git-id "45678"
+                                   :course-iterations [#:course-iteration{:id "1"}]}
+                            #:user{:id "3"
+                                   :git-id "13579"
+                                   :course-iterations [#:course-iteration{:id "2"}]}]]
+        (print "\n" "\n" res "\n" "\n")
+        (t/is (every? (fn [act] (some #(= act %) reference-user)) res))))
+    (testing "get-user-by-id with id = 0"
+      (t/is (= (db/get-user-by-id test-db "0") {:user/id "0"
+                                                :user/git-id "12345"
+                                                :user/course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]})))
+    (testing "get-user-by-id with id = 2"
+      (t/is (= (db/get-user-by-id test-db "2") {:user/id "2"
+                                                :user/git-id "45678"
+                                                :user/course-iterations [#:course-iteration{:id "1"}]})))
+    (testing "get-user-by-id with invalid id = 42"
+      (t/is (thrown-with-msg?
+              clojure.lang.ExceptionInfo
+              #"Nothing found for entity id [:user/id \W 42 \W]"
+              (db/get-user-by-id test-db "42"))))
+    (testing "get-user-by-git-id with id = 12345"
+      (t/is (= (db/get-user-by-git-id test-db "12345") {:user/id "0"
+                                                        :user/git-id "12345"
+                                                        :user/course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]})))
+    (testing "get-user-by-id with id = 45678"
+      (t/is (= (db/get-user-by-git-id test-db "45678") {:user/id "2"
+                                                        :user/git-id "45678"
+                                                        :user/course-iterations [#:course-iteration{:id "1"}]})))
+    (testing "get-user-by-id with invalid id = 42"
+      (t/is (thrown-with-msg?
+              clojure.lang.ExceptionInfo
+              #"Nothing found for entity id [:user/git\Wid \W 42 \W]"
+              (db/get-user-by-git-id test-db "42"))))
+    (testing "add-user! with generated git-ids"
+      (let [git-ids (distinct (gen/sample (s/gen :user/git-id) generator-sample-size))]
+        (t/is (every? (fn [act]
+                        (let [_ (db/add-user! test-db act)
+                              excisting-git-ids (map #(:user/git-id %) (db/get-all-user test-db))]
+                          (some #(= act %) excisting-git-ids)))
+                      git-ids))))
+    (testing "add-user! with existing git-id - should fail"
+           (t/is (thrown-with-msg?
+                  java.lang.AssertionError
+                  #"There is already a user with the same git-id in the database. Please check the existing course and wether you need to create a new one."
+                  (db/add-user! test-db "12345"))))))
