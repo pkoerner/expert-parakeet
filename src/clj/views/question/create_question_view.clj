@@ -44,7 +44,6 @@
         (when was-selected
           (apply script
                  (concat ["window.onload = () => {"]
-                         ["console.log('Hello World!')\n"]
                          (for [curr-solution possible-solutions]
                            (str "
 addPossibleSolution(
