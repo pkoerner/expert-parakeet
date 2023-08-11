@@ -51,7 +51,7 @@ expert_parakeet.question.create_question_view.add_to_possible_solution(
   '" possible-solution-input-id "',
   '" solution-list-id "',
   '" curr-solution "',
-  "(contains?  (set solutions) curr-solution)"
+  " (contains?  (set solutions) curr-solution) "
 );\n"))
                          ["};"])))]
        [:button.btn.btn-outline-info.btn-sm {:id add-possible-solution-btn-id :type "button"} "+"]
