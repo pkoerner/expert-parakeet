@@ -37,9 +37,9 @@
 ;; all routes that dont need authentication go here
 (defroutes public-routes
   (GET "/" req (html-response
-                (if (auth/is-logged-in req)
-                  [:p (str "Hello, " (str (get-in req [:session :user :id])))]
-                  [:a {:href "/oauth2/github"} "Login"])))) ; TODO remove route, just an example to show login workin
+                 (if (auth/is-logged-in req)
+                   [:p (str "Hello, " (str (get-in req [:session :user :id])))]
+                   [:a {:href "/oauth2/github"} "Login"])))) ; TODO remove route, just an example to show login workin
 
 
 
@@ -52,12 +52,12 @@
                                                    (partial get-all-courses (:course-service services))
                                                    (partial get-all-question-sets (:question-set-service services)))))
   (POST "/create-course-iteration" req
-    (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
+        (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
 
   (GET "/create-question" req
-    (html-response (create-question-get req (partial get-question-categories (:question-service services)) "/create-question")))
+       (html-response (create-question-get req (partial get-question-categories (:question-service services)) "/create-question")))
   (POST "/create-question" req
-    (submit-create-question! req "/create-question" (:question-service services)))
+        (submit-create-question! req "/create-question" (:question-service services)))
 
   (route/not-found "Not Found"))
 
