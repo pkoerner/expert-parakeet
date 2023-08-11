@@ -46,7 +46,7 @@
               clojure.lang.ExceptionInfo
               #"Nothing found for entity id [:question-set/id \W 42 \W]"
               (db/get-question-by-id test-db "42"))))
-    (testing "add-question! with valid question as input and check wether it contains in the db"
+    (testing "add-question! with valid single-choice question as input and check wether it contains in the db"
       (let [input-question {:question/type :question.type/single-choice
                             :question/question-statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
@@ -63,6 +63,38 @@
                                                                                 :question/categories])
                                question-ids)]
         (t/is (some #(= % input-question) (vec question-list)))))
+    (testing "add-question! with valid multiple-choice question as input and check wether it contains in the db"
+      (let [input-question {:question/type :question.type/multiple-choice
+                            :question/question-statement "What is the answer to everything and what is the best movie ever?"
+                            :question/possible-solutions ["21" "42" "Alien"]
+                            :question/multiple-choice-solution ["42" "Alien"]
+                            :question/points 1
+                            :question/categories ["Cat2"]}
+            _ (db/add-question! test-db input-question)
+            question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+            question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
+                                                                                :question/question-statement
+                                                                                :question/possible-solutions
+                                                                                :question/multiple-choice-solution
+                                                                                :question/points
+                                                                                :question/categories])
+                               question-ids)]
+        (t/is (some #(= % input-question) (vec question-list)))))
+    (testing "add-question! with valid free-text-choice question as input and check wether it contains in the db"
+      (let [input-question {:question/type :question.type/free-text
+                            :question/question-statement "What does rickrolling mean?"
+                            :question/evaluation-criteria "Never gonna give you up"
+                            :question/points 2
+                            :question/categories ["Cat2" "Cat3"]}
+            _ (db/add-question! test-db input-question)
+            question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+            question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
+                                                                                :question/question-statement
+                                                                                :question/evaluation-criteria
+                                                                                :question/points
+                                                                                :question/categories])
+                               question-ids)]
+        (t/is (some #(= % input-question) (vec question-list)))))
     (testing "add-question! with invalid question as input"
       (let [input-question {:question/question-statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
@@ -70,6 +102,21 @@
                             :question/points 1
                             :question/categories ["Cat1"]}]
         (t/is (thrown? clojure.lang.ArityException (db/add-question! test-db input-question)))))
+    (testing "add-question! with already existing free-text-choice question as input and check wether it contains in the db"
+      (let [input-question {:question/type :question.type/free-text
+                            :question/question-statement "What are some advantages and disadvantages of example-based and generative testing?"
+                            :question/evaluation-criteria "The following aspects are explained: Oracle, performance, test-coverage"
+                            :question/points 2
+                            :question/categories ["Cat2" "Cat3"]}
+            _ (db/add-question! test-db input-question)
+            question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+            question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
+                                                                                :question/question-statement
+                                                                                :question/evaluation-criteria
+                                                                                :question/points
+                                                                                :question/categories])
+                               question-ids)]
+        (print question-list)))
     ;; does not work depending on the input. Example: input categories: "234", "easa", "123", output in question-list: "123", "234", "easa"
     ;; (testing "add-question! with generated questions"
     ;;   (let [input-question (first (map #(select-keys % [:question/type
@@ -325,4 +372,46 @@
                   passing-score
                   questions
                   start
-                  end)))))))
+                  end)))))
+    (testing "add-question-set! with valid question-set, but the question is also new"
+      (let [input-question {:question/type :question.type/single-choice
+                            :question/question-statement "What is the answer to everything"
+                            :question/possible-solutions ["21" "42"]
+                            :question/single-choice-solution "42"
+                            :question/points 1
+                            :question/categories ["Cat1"]}
+            question-set-name "The Truth"
+            course-iteration-id "1"
+            passing-score 1
+            questions [input-question]
+            start (instant/read-instant-date "2020-04-25T15:09:16.437Z")
+            end (instant/read-instant-date "2020-04-25T15:17:16.437Z")
+            question-set {:question-set/name question-set-name}
+            _ (db/add-question-set!
+                test-db
+                question-set-name
+                course-iteration-id
+                passing-score
+                questions
+                start
+                end)
+            question-set-list (map #(select-keys % [:question-set/name
+                                                    :question-set/passing-score
+                                                    :question-set/questions
+                                                    :question-set/start
+                                                    :question-set/end])
+                                   (db/get-all-question-sets test-db))
+            course-iteration (db/get-course-iteration-by-id test-db "1")
+            question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+            question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
+                                                                                :question/question-statement
+                                                                                :question/possible-solutions
+                                                                                :question/single-choice-solution
+                                                                                :question/points
+                                                                                :question/categories])
+                               question-ids)]
+        (and (t/is (some #(= % question-set) (vec question-set-list)))
+             (t/is (= (:course-iteration/id course-iteration) "1"))
+             (t/is (= (:course-iteration/semester course-iteration) "WiSe"))
+             (t/is (= (:course-iteration/year course-iteration) 2022))
+             (t/is (some #(= % input-question) (vec question-list))))))))
