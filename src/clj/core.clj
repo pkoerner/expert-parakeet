@@ -1,29 +1,27 @@
 (ns core
   (:gen-class)
   (:require
-   [auth :refer [wrap-authentication]]
-   [compojure.core :refer [defroutes GET POST]]
-   [compojure.route :as route]
-   [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
-   [controllers.question.question-controller :refer [create-question-get
-                                                     submit-create-question!]]
-   [db]
-   [domain]
-   [hiccup.page :as hpage]
-   [ring.adapter.jetty :refer [run-jetty]]
-   [ring.middleware.defaults :refer [secure-site-defaults
-                                     site-defaults wrap-defaults]]
-   [ring.middleware.file :refer [wrap-file]]
-   [ring.middleware.reload :refer [wrap-reload]]
-   [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
-   [services.course-service.course-service :refer [->CourseService]]
-   [services.course-service.p-course-service :refer [get-all-courses]]
-   [services.question-service.p-question-service :refer [get-question-categories]]
-   [services.question-service.question-service :refer [->QuestionService]]
-   [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
-   [services.question-set-service.question-set-service :refer [->QuestionSetService]]
-   [util.ring-extensions :refer [html-response]]
-   [hiccup2.core :as h]))
+    [auth :refer [wrap-authentication]]
+    [compojure.core :refer [defroutes GET POST]]
+    [compojure.route :as route]
+    [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
+    [controllers.question.question-controller :refer [create-question-get
+                                                      submit-create-question!]]
+    [db]
+    [domain]
+    [ring.adapter.jetty :refer [run-jetty]]
+    [ring.middleware.defaults :refer [secure-site-defaults
+                                      site-defaults wrap-defaults]]
+    [ring.middleware.reload :refer [wrap-reload]]
+    [ring.middleware.resource :refer [wrap-resource]]
+    [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
+    [services.course-service.course-service :refer [->CourseService]]
+    [services.course-service.p-course-service :refer [get-all-courses]]
+    [services.question-service.p-question-service :refer [get-question-categories]]
+    [services.question-service.question-service :refer [->QuestionService]]
+    [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
+    [services.question-set-service.question-set-service :refer [->QuestionSetService]]
+    [util.ring-extensions :refer [html-response]]))
 
 
 (def db db/create-database)
@@ -41,23 +39,7 @@
   (GET "/" req (html-response
                 (if (auth/is-logged-in req)
                   [:p (str "Hello, " (str (get-in req [:session :user :id])))]
-                  [:a {:href "/oauth2/github"} "Login"])))
-  (GET "/hello"
-    _req
-    (html-response
-     (h/html
-      [:head
-       [:title "Hello from Clojure!"]
-       (hpage/include-js
-        "cljs/goog/base.js"
-        "cljs/goog/deps.js"
-        "cljs/cljs/core.js"
-        "cljs/expert_parakeet/core.js"
-        "cljs/expert_parakeet/another.js")]
-      [:body
-       [:h1 "Hello from Clojure!"]
-       [:p "This is a paragraph."]
-       [:span.span]])))) ; TODO remove route, just an example to show login working
+                  [:a {:href "/oauth2/github"} "Login"])))) ; TODO remove route, just an example to show login workin
 
 
 
@@ -88,7 +70,7 @@
 ;; oauth2 middleware callback requires cookie setting :same-site to be lax, see: https://github.com/weavejester/ring-oauth2
 (def app
   (-> combined-routes
-      (wrap-file "resources/public") ; serving of static resources
+      (wrap-resource "public") ; serving of static resources
       (wrap-defaults (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
 
 
