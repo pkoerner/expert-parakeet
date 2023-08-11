@@ -228,7 +228,7 @@
 
   (get-all-question-sets
     [this]
-    (mapv first (d/q '[:find (pull ?e [:question-set/id :question-set/name])
+    (mapv first (d/q '[:find (pull ?e [*])
                        :where [?e :question-set/id]]
                      @(.conn this))))
 

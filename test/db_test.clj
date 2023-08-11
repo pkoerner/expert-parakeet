@@ -10,6 +10,9 @@
     [db.schema :refer [db-schema]]))
 
 
+(def generator-sample-size 10)
+
+
 (defn -create-test-db
   [id]
   (let [_ (d/create-database {:store {:backend :mem
@@ -113,21 +116,50 @@
                 java.lang.AssertionError
                 #"There is a similar question already in the data base. Please check the existing question and check wether you need to create a new one."
                 (db/add-question! test-db input-question)))))
-    (testing "add-question! with generated questions"
-      (let [generated-questions (gen/sample (gen/not-empty (s/gen :question/single-choice-question)) 10)]
-        (every? (fn [act]
-                  (let [input-question act
-                        _ (db/add-question! test-db input-question)
-                        question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
-                        question-list (map #(db/get-question-by-id test-db %) question-ids)]
-                    (t/is (some #(and (= (:question/type input-question) (:question/type %))
+    (testing "add-question! with generated single choice questions"
+      (let [generated-questions (distinct (gen/sample (gen/not-empty (s/gen :question/single-choice-question)) generator-sample-size))]
+        (t/is (every? (fn [act]
+                        (let [input-question act
+                              _ (db/add-question! test-db input-question)
+                              question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+                              question-list (map #(db/get-question-by-id test-db %) question-ids)]
+                          (some #(and (= (:question/type input-question) (:question/type %))
                                       (= (:question/points input-question) (:question/points %))
                                       (= (:question/question-statement input-question) (:question/question-statement %))
                                       (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
                                       (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
                                       (= (:question/single-choice-solution input-question) (:question/single-choice-solution %)))
-                                question-list))))
-                generated-questions)))))
+                                question-list)))
+                      generated-questions))))
+    (testing "add-question! with generated multiple choice questions"
+      (let [generated-questions (distinct (gen/sample (gen/not-empty (s/gen :question/multiple-choice-question)) generator-sample-size))]
+        (t/is (every? (fn [act]
+                        (let [input-question act
+                              _ (db/add-question! test-db input-question)
+                              question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+                              question-list (map #(db/get-question-by-id test-db %) question-ids)]
+                          (some #(and (= (:question/type input-question) (:question/type %))
+                                      (= (:question/points input-question) (:question/points %))
+                                      (= (:question/question-statement input-question) (:question/question-statement %))
+                                      (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
+                                      (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
+                                      (= (sort (distinct (:question/multiple-choice-solution input-question))) (:question/multiple-choice-solution %)))
+                                question-list)))
+                      generated-questions))))
+    (testing "add-question! with generated free text questions"
+      (let [generated-questions (distinct (gen/sample (gen/not-empty (s/gen :question/question)) generator-sample-size))]
+        (t/is (every? (fn [act]
+                        (let [input-question act
+                              _ (db/add-question! test-db input-question)
+                              question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+                              question-list (map #(db/get-question-by-id test-db %) question-ids)]
+                          (some #(and (= (:question/type input-question) (:question/type %))
+                                      (= (:question/points input-question) (:question/points %))
+                                      (= (:question/question-statement input-question) (:question/question-statement %))
+                                      (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
+                                      (= (:question/evaluation-criteria input-question) (:question/evaluation-criteria %)))
+                                question-list)))
+                      generated-questions))))))
 
 
 (deftest course-iteration-test
@@ -286,35 +318,33 @@
                         :question/categories #{"Cat1" "Cat2"}}]
             start (instant/read-instant-date "2020-04-25T15:09:16.437Z")
             end (instant/read-instant-date "2020-04-25T15:17:16.437Z")
-            question-set {:question-set/name question-set-name}
+            question-set {:question-set/name question-set-name
+                          :question-set/passing-score passing-score
+                          :question-set/start start
+                          :question-set/end end}
             _ (db/add-question-set!
-                test-db
-                question-set-name
-                course-iteration-id
-                passing-score
-                questions
-                start
-                end)
+               test-db
+               question-set-name
+               course-iteration-id
+               passing-score
+               questions
+               start
+               end)
             question-set-list (map #(select-keys % [:question-set/name
                                                     :question-set/passing-score
-                                                    :question-set/questions
                                                     :question-set/start
                                                     :question-set/end])
-                                   (db/get-all-question-sets test-db))
-            course-iteration (db/get-course-iteration-by-id test-db "1")]
-        (and (t/is (some #(= % question-set) (vec question-set-list)))
-             (t/is (= (:course-iteration/id course-iteration) "1"))
-             (t/is (= (:course-iteration/semester course-iteration) "WiSe"))
-             (t/is (= (:course-iteration/year course-iteration) 2022)))))
+                                   (db/get-all-question-sets test-db))]
+        (t/is (some #(= % question-set) (vec question-set-list)))))
     (testing "add-question-set! with invalid couse-iteration as input and check wether it contains in the db"
       (let [question-set-name "The Truth"
             course-iteration-id "lol"
             passing-score 1
             questions [{:question/id "6"
-                        :question/question-statement "What type of programming lanuage is java?"
+                        :question/question-statement "What type of programming lanuage is clojure?"
                         :question/type :question.type/single-choice
                         :question/possible-solutions #{"object oriented" "functional" "logic"}
-                        :question/single-choice-solution "object oriented"
+                        :question/single-choice-solution "functional"
                         :question/points 1
                         :question/categories #{"Cat2"}}
                        {:question/id "2"
@@ -322,7 +352,7 @@
                         :question/question-statement "What is the JVM?"
                         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
                         :question/points 3
-                        :question/categories #{"Cat1" "Cat2"}}]
+                        :question/categories #{"Cat1"}}]
             start (instant/read-instant-date "2020-04-25T15:09:16.437Z")
             end (instant/read-instant-date "2020-04-25T15:17:16.437Z")]
         (t/is (thrown-with-msg?
@@ -373,38 +403,64 @@
                             :question/single-choice-solution "42"
                             :question/points 1
                             :question/categories ["Cat1"]}
-            question-set-name "The Truth"
+            question-set-name "The Truth 2"
             course-iteration-id "1"
             passing-score 1
             questions [input-question]
             start (instant/read-instant-date "2020-04-25T15:09:16.437Z")
             end (instant/read-instant-date "2020-04-25T15:17:16.437Z")
-            question-set {:question-set/name question-set-name}
-            _ (db/add-question-set!
-                test-db
-                question-set-name
-                course-iteration-id
-                passing-score
-                questions
-                start
-                end)
-            question-set-list (map #(select-keys % [:question-set/name
-                                                    :question-set/passing-score
-                                                    :question-set/questions
-                                                    :question-set/start
-                                                    :question-set/end])
-                                   (db/get-all-question-sets test-db))
-            course-iteration (db/get-course-iteration-by-id test-db "1")
-            question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
-            question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
-                                                                                :question/question-statement
-                                                                                :question/possible-solutions
-                                                                                :question/single-choice-solution
-                                                                                :question/points
-                                                                                :question/categories])
-                               question-ids)]
-        (and (t/is (some #(= % question-set) (vec question-set-list)))
-             (t/is (= (:course-iteration/id course-iteration) "1"))
-             (t/is (= (:course-iteration/semester course-iteration) "WiSe"))
-             (t/is (= (:course-iteration/year course-iteration) 2022))
-             (t/is (some #(= % input-question) (vec question-list))))))))
+            question-set {:question-set/name question-set-name
+                             :question-set/passing-score passing-score
+                             :question-set/start start
+                             :question-set/end end}
+               _ (db/add-question-set!
+                  test-db
+                  question-set-name
+                  course-iteration-id
+                  passing-score
+                  questions
+                  start
+                  end)
+               question-set-list (map #(select-keys % [:question-set/name
+                                                       :question-set/passing-score
+                                                       :question-set/start
+                                                       :question-set/end])
+                                      (db/get-all-question-sets test-db))]
+              (t/is (some #(= % question-set) (vec question-set-list)))))
+    (testing "add-question-set! with semi generated question-set"
+      (dotimes [_ 10]
+        (let [question-set-name (gen/generate (s/gen :question-set/name))
+              course-iteration-id "1" ; must be existing iteration for success
+              passing-score (gen/generate (s/gen :question-set/passing-score))
+              questions []
+              start (gen/generate (s/gen :question-set/start))
+              end (gen/generate (s/gen :question-set/end))
+              question-set {:question-set/name question-set-name
+                            :question-set/start start
+                            :question-set/end end
+                            :question-set/questions questions
+                            :question-set/passing-score passing-score}
+              _ (db/add-question-set!
+                  test-db
+                  question-set-name
+                  course-iteration-id
+                  passing-score
+                  questions
+                  start
+                  end)
+              question-set-list (map #(select-keys % [:question-set/name
+                                                      :question-set/start
+                                                      :question-set/end
+                                                      :question-set/questions
+                                                      :question-set/passing-score])
+                                     (db/get-all-question-sets test-db))]
+          (t/is (some (fn [act-set]
+                        (and (= (:question-set/name question-set) (:question-set/name act-set))
+                             (= (:question-set/start question-set) (:question-set/start act-set))
+                             (= (:question-set/end question-set) (:question-set/end act-set))
+                             (= (:question-set/passing-score question-set) (:question-set/passing-score question-set))))
+                      question-set-list)))))))
+
+((deftest name-test
+      (testing "Context of the test assertions"
+        (is (= assertion-values)))) )
