@@ -4,6 +4,7 @@
     [auth :refer [wrap-authentication]]
     [compojure.core :refer [defroutes GET POST]]
     [compojure.route :as route]
+    [controllers.correction.new-correction-controller :refer [new-correction-get submit-new-correction!]]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
     [controllers.question.question-controller :refer [create-question-get
                                                       submit-create-question!]]
@@ -58,6 +59,9 @@
        (html-response (create-question-get req (partial get-question-categories (:question-service services)) "/create-question")))
   (POST "/create-question" req
         (submit-create-question! req "/create-question" (:question-service services)))
+
+  (GET "/new-correction" req (html-response (new-correction-get req "/new-correction" (partial db/get-answer-by-id db) (partial db/get-question-by-id db))))
+  (POST "/new-correction" req (submit-new-correction! req "/new-correction" (partial db/add-correction! db) (partial db/get-user-by-git-id db)))
 
   (route/not-found "Not Found"))
 
