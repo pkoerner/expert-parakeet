@@ -3,23 +3,14 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [db]
-    [ring.util.codec :refer [form-encode]]
     [ring.util.response :as response]
     [services.course-service.p-course-service :refer [create-course
                                                       PCourseService
                                                       validate-course]]
-    [util.ring-extensions :refer [html-response]]
+    [util.ring-extensions :refer [construct-url extract-errors
+                                  html-response]]
     [util.spec-functions :refer [map-spec]]
     [views.course.create-course-view :as view]))
-
-
-(defn- extract-errors
-  [request]
-  (let [query-params (:query-params request)]
-    (when query-params
-      (->> query-params
-           (map (fn [[key val]] [(read-string key) val]))
-           (into {})))))
 
 
 (s/fdef create-course-get
@@ -48,15 +39,6 @@
   [course db-add-fun]
   (let [db-result (db-add-fun course)]
     (view/submit-success-view (:course/course-name db-result))))
-
-
-(defn- construct-url
-  [base-uri param-map]
-  (->> param-map
-       (map (fn [[key msg]] [(form-encode key) (form-encode msg)]))
-       (map (fn [[key msg]] (str key "=" msg)))
-       (string/join "&")
-       (str base-uri "?")))
 
 
 (s/def ::req-data
