@@ -8,7 +8,7 @@ RUN clj -T:build clean
 # Without that, each change to any file would trigger a redownload of all dependencies.
 
 COPY Makefile /tmp/
-COPY resources/public /tmp/resources/public
+COPY resources /tmp/resources
 COPY src /tmp/src
 RUN make uber
 
