@@ -529,7 +529,3 @@
     (d/transact conn dummy-data/dummy-data)
     (Database. conn)))
 
-
-(def db create-database)
-
-(add-correction! db "1" {:correction/points 1 :correction/feedback "" :corrector/id "0"})
