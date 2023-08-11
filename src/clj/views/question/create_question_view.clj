@@ -58,7 +58,7 @@ addPossibleSolution(
        [:button.btn.btn-outline-info.btn-sm {:id add-possible-solution-btn-id :type "button"} "+"]
        ;; When the add button is klicked
        (script "
-registerAddingSolutionBehavior(
+expert_parakeet.question.create_question_view.register_adding_solution_behavior(
     '" add-possible-solution-btn-id "', '" solution-container-div-id "', '" possible-solution-input-id "', '" solution-list-id "'
 )")]
 
@@ -119,13 +119,14 @@ registerAddingSolutionBehavior(
   [categories post-destination & {:keys [errors question-data] :or {errors {} question-data {}}}]
   (let [question-types-js-arr (str "[" (string/join ", "  (map #(str "'" % "'") (map name question-types))) "]")]
     (h/html
-      (hpage/include-js "js/views/question/util.js"
-                        "js/views/question/create_question_view.js")
+      (hpage/include-js "cljs/goog/base.js"
+                        "cljs/main.js")
+      (script "goog.require('expert_parakeet.question.create_question_view');")
       [:div.container
        [:h1 "Fragenerstellung:"]
        (hform/form-to
          {:enctype "multipart/form-data"
-          :onsubmit (str "removeHiddenQuestionTypeInputsOnSubmit(" question-types-js-arr ")")}
+          :onsubmit (str "expert_parakeet.question.create_question_view.remove_doms_when_hidden(" question-types-js-arr ")")}
          [:post post-destination]
 
          [:div.form-group
@@ -163,7 +164,7 @@ registerAddingSolutionBehavior(
          [:div.form-group
           [:label {:for "new-category"} "Neue Kategorie erstellen:"]
           [:input#new-category.form-control {:type "text"}]
-          [:button.btn.btn-outline-info.btn-sm {:type "button" :onclick "addNewCategory()"} "+"]]
+          [:button.btn.btn-outline-info.btn-sm {:type "button" :onclick "expert_parakeet.question.create_question_view.add_new_category()"} "+"]]
 
          [:div {:clas "form-group"}
           (optional-error-display :question/categories errors)
@@ -180,7 +181,7 @@ registerAddingSolutionBehavior(
          (h/raw (anti-forgery-field))
          (hform/submit-button {:class "btn btn-primary"} "submit"))
        (script "
-registerQuestionTypeSwitch('type', " question-types-js-arr ");
+expert_parakeet.question.create_question_view.register_question_type_switch('type', " question-types-js-arr ");
 ")])))
 
 
