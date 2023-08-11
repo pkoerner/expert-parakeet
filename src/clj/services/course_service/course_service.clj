@@ -8,7 +8,7 @@
 
 ;; todo replace all direct db calls and inject repositories
 (deftype CourseService
-  [])
+  [db])
 
 
 (s/fdef get-all-courses
@@ -17,8 +17,8 @@
 
 
 (defn get-all-courses
-  [_]
-  (db/get-all-courses))
+  [this]
+  (db/get-all-courses (.db this)))
 
 
 (s/fdef create-course-impl

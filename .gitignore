@@ -6,7 +6,6 @@
 /expert-parakeet.iml
 .shadow-cljs/
 node_modules/
-resources/public/js/
 .env
 target/
 .DS_Store

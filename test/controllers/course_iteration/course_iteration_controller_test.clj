@@ -8,6 +8,7 @@
     [clojure.test.check.properties :as prop]
     [controllers.course-iteration.course-iteration-controller :refer
      [create-course-iteration-get submit-create-course-iteration!]]
+    [db]
     [ring.util.codec :refer [form-encode]]
     [services.course-iteration-service.course-iteration-service :as cis :refer [->CourseIterationService]]
     [services.course-iteration-service.p-course-iteration-service :refer [PCourseIterationService validate-course-iteration]]
@@ -29,7 +30,9 @@
   (prop/for-all [error-map error-map-gen]
                 (let [post-destination "destination"
                       res (create-course-iteration-get {:query-params error-map}
-                                                       post-destination)]
+                                                       post-destination
+                                                       (fn [] [{:course/id "Some"}])
+                                                       (fn [] [{:question-set/id "Some"}]))]
                   (t/is (and (every? #(string/includes? res %) (vals error-map))
                              (string/includes? res post-destination))))))
 
@@ -40,7 +43,8 @@
           get-no-courses-fun (fn [] [])
           res (create-course-iteration-get empty-request
                                            "post-destination"
-                                           :get-courses-fun get-no-courses-fun)]
+                                           get-no-courses-fun
+                                           (fn [] []))]
       (t/is (not (string/includes? res "form"))))))
 
 
@@ -88,7 +92,8 @@
 
   (testing "Test that the db-add-function is not called when the parameters are invalid. 
             And that the correct error message is send with the redirect."
-    (let [test-request {:__anti-forgery-token ""
+    (let [mock-db {}
+          test-request {:__anti-forgery-token ""
                         :multipart-params {"course-id" "123"
                                            "year" "2023"
                                            "semester" "WiSe"
@@ -98,7 +103,7 @@
 
           course-iteration-service (stub-course-iteration-service
                                      :validate-course-iteration (fn [& args]
-                                                                  (apply (partial validate-course-iteration (->CourseIterationService)) args))
+                                                                  (apply (partial validate-course-iteration (->CourseIterationService mock-db)) args))
                                      :create-course-iteration db-add-fun-stub)
           redirect-uri "S"
           wrong-course-id ""

@@ -3,21 +3,13 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [db]
-    [ring.util.codec :refer [form-encode]]
     [ring.util.response :as response]
-    [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration validate-course-iteration]]
-    [util.ring-extensions :refer [html-response]]
+    [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration PCourseIterationService
+                                                                          validate-course-iteration]]
+    [util.ring-extensions :refer [construct-url extract-errors
+                                  html-response]]
     [util.spec-functions :refer [map-spec]]
     [views.course-iteration.create-course-iteration-view :as view]))
-
-
-(defn- extract-errors
-  [request]
-  (let [query-params (:query-params request)]
-    (when query-params
-      (->> query-params
-           (map (fn [[key val]] [(read-string key) val]))
-           (into {})))))
 
 
 (s/fdef create-course-iteration-get
@@ -48,9 +40,7 @@
    When the request passed to this function inside of `req` contains predefined error values in the `:query-params` of the `req` parameter, 
    they are displayed as errors within the form.
    The fields can be seen in `view/course-iteration-form`."
-  [req post-destination & {:keys [get-courses-fun get-question-sets-fun]
-                           :or {get-courses-fun db/get-all-courses
-                                get-question-sets-fun db/get-all-question-sets}}]
+  [req post-destination get-courses-fun get-question-sets-fun]
   (let [courses (get-courses-fun)
         question-sets (get-question-sets-fun)]
     (if (empty? courses)
@@ -70,15 +60,6 @@
       (:course-iteration/year db-result))))
 
 
-(defn- construct-url
-  [base-uri param-map]
-  (->> param-map
-       (map (fn [[key msg]] [(form-encode key) (form-encode msg)]))
-       (map (fn [[key msg]] (str key "=" msg)))
-       (string/join "&")
-       (str base-uri "?")))
-
-
 (s/def ::request-data
   (map-spec {:__anti-forgery-token any?
              :multipart-params (map-spec {"course-id" :course/id
@@ -90,7 +71,7 @@
 (s/fdef submit-create-course-iteration!
         :args (s/cat :request ::request-data
                      :redirect-uri string?
-                     :db-add-fun (s/? (s/get-spec `db/add-course-iteration-with-question-sets!)))
+                     :course-iteration-service #(satisfies? PCourseIterationService %))
         :ret #(instance? hiccup.util.RawString %))
 
 
