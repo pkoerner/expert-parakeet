@@ -1,6 +1,7 @@
 (ns compile
   (:require
-   [cljs.build.api :as cljs]))
+    [cljs.build.api :as cljs]))
+
 
 (defn compile-cljs
   "Compiles all of our cljs files into a single js file containing all dependencies.
