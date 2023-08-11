@@ -5,6 +5,7 @@
     [compojure.core :refer [defroutes GET POST]]
     [compojure.route :as route]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
+    [controllers.course.course-controller :refer [create-course-get submit-create-course!]]
     [controllers.question.question-controller :refer [create-question-get
                                                       submit-create-question!]]
     [db]
@@ -46,7 +47,10 @@
 ;; all routes that require authentication go here
 (defroutes private-routes
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
-
+  (GET "/create-course" req
+       (html-response (create-course-get req "/create-course")))
+  (POST "/create-course" req
+        (submit-create-course! req "/create-course" (:course-service services)))
   (GET "/create-course-iteration" req
        (html-response (create-course-iteration-get req "/create-course-iteration"
                                                    (partial get-all-courses (:course-service services))
