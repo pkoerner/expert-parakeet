@@ -46,7 +46,7 @@
                  (concat ["window.onload = () => {"]
                          (for [curr-solution possible-solutions]
                            (str "
-addPossibleSolution(
+expert_parakeet.question.create_question_view.add_to_possible_solution(
   '" solution-container-div-id "',
   '" possible-solution-input-id "',
   '" solution-list-id "',
