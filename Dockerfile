@@ -8,8 +8,9 @@ RUN clj -T:build clean
 # Without that, each change to any file would trigger a redownload of all dependencies.
 
 COPY Makefile /tmp/
+COPY resources/public /tmp/resources/public
 COPY src /tmp/src
-RUN OAUTH_CLIENT_ID=abc OAUTH_CLIENT_SECRET=xyz make uber
+RUN make uber
 
 FROM amazoncorretto:11.0.19
 COPY --from=builder /tmp/target/expert-parakeet-standalone.jar /app.jar

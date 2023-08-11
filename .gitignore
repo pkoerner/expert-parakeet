@@ -1,10 +1,10 @@
 .idea
-.clj-kondo
+.clj-kondo/*
+!.clj-kondo/config.edn
 .cpcache
 .lsp
 /expert-parakeet.iml
 .shadow-cljs/
 node_modules/
-resources/public/js/
 .env
 target/

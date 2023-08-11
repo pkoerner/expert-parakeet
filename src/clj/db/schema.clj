@@ -14,7 +14,8 @@
      :question/evaluation-criteria
      :question/possible-solutions
      :question/single-choice-solution
-     :question/multiple-choice-solution]))
+     :question/multiple-choice-solution
+     :question/categories]))
 
 
 ;; manche Felder bleiben leer (abhaengig vom Fragentyp)
@@ -60,8 +61,8 @@
   (spectomic/datomic-schema
     [[:user/id {:db/unique :db.unique/identity
                 :db/index true}]
-     :user/course-iterations
-     :user/roles]))
+     [:user/git-id {:db/unique :db.unique/identity}]
+     :user/course-iterations]))
 
 
 (def course-schema

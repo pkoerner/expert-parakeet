@@ -1,13 +1,22 @@
 (ns domain.spec
   (:require
     [clojure.spec.alpha :as s]
+    [clojure.string :as string]
     [util.time :as time]))
 
 
+(def question-types
+  #{:question.type/free-text :question.type/single-choice :question.type/multiple-choice})
+
+
+(s/def :general/non-blank-string (s/and string? (complement string/blank?)))
+
+
 (s/def :question/id string?)
-(s/def :question/type #{:question.type/free-text :question.type/single-choice :question.type/multiple-choice})
-(s/def :question/question-statement string?)
+(s/def :question/type question-types)
+(s/def :question/question-statement :general/non-blank-string)
 (s/def :question/points int?)
+(s/def :question/categories (s/coll-of :general/non-blank-string :type set))
 
 
 (s/def :question/evaluation-criteria string?)
@@ -16,29 +25,32 @@
 (s/def :question/question
   (s/and
     (s/keys :req [:question/id :question/type :question/question-statement :question/points
-                  :question/evaluation-criteria])
+                  :question/evaluation-criteria
+                  :question/categories])
     #(= (:question/type %) :question.type/free-text)))
 
 
-(s/def :question/possible-solutions (s/coll-of string?))
+(s/def :question/possible-solutions (s/coll-of :general/non-blank-string :min-count 1))
 
-(s/def :question/single-choice-solution string?)
+(s/def :question/single-choice-solution :general/non-blank-string)
 
 
 (s/def :question/single-choice-question
   (s/and
     (s/keys :req [:question/id :question/type :question/question-statement :question/points
-                  :question/possible-solutions :question/single-choice-solution])
+                  :question/possible-solutions :question/single-choice-solution
+                  :question/categories])
     #(= (:question/type %) :question.type/single-choice)))
 
 
-(s/def :question/multiple-choice-solution (s/coll-of string?))
+(s/def :question/multiple-choice-solution (s/coll-of :general/non-blank-string :min-count 1))
 
 
 (s/def :question/multiple-choice-question
   (s/and
     (s/keys :req [:question/id :question/type :question/question-statement :question/points
-                  :question/possible-solutions :question/multiple-choice-solution])
+                  :question/possible-solutions :question/multiple-choice-solution
+                  :question/categories])
     #(= (:question/type %) :question.type/multiple-choice)))
 
 
@@ -48,8 +60,8 @@
         :multiple-choice :question/multiple-choice-question))
 
 
-(s/def :question-set/id string?)
-(s/def :question-set/name string?)
+(s/def :question-set/id :general/non-blank-string)
+(s/def :question-set/name :general/non-blank-string)
 (s/def :question-set/questions (s/coll-of ::question))
 
 
@@ -71,8 +83,8 @@
 
 ;; TODO: remove comment once we moved to MA
 ;; old entity was called: fach
-(s/def :course/id string?)
-(s/def :course/course-name string?)
+(s/def :course/id :general/non-blank-string)
+(s/def :course/course-name :general/non-blank-string)
 (s/def :course/question-sets (s/coll-of ::question-set))
 
 
@@ -86,7 +98,7 @@
 (s/def :course-iteration/id string?)
 (s/def :course-iteration/course ::course)
 (s/def :course-iteration/year pos-int?)
-(s/def :course-iteration/semester string?)
+(s/def :course-iteration/semester #{"WiSe" "SoSe"})
 (s/def :course-iteration/question-sets (s/coll-of ::question-set))
 
 
@@ -106,12 +118,13 @@
 
 
 (s/def :user/id string?)
+(s/def :user/git-id string?)
 (s/def :user/course-iterations (s/coll-of ::course-iteration))
 (s/def :user/roles (s/coll-of ::user-roles))
 
 
 (s/def ::user
-  (s/keys :req [:user/id :user/course-iterations]))
+  (s/keys :req [:user/id :user/git-id :user/course-iterations]))
 
 
 (s/def :answer/id string?)
