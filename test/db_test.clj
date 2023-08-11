@@ -3,6 +3,7 @@
     [clojure.instant :as instant]
     [clojure.spec.alpha :as s]
     [clojure.test :as t :refer [deftest testing]]
+    [clojure.test.check.generators :as gen]
     [datahike.api :as d]
     [db]
     [db.dummy-data :as dummy-data]
@@ -107,34 +108,26 @@
                             :question/question-statement "What are some advantages and disadvantages of example-based and generative testing?"
                             :question/evaluation-criteria "The following aspects are explained: Oracle, performance, test-coverage"
                             :question/points 2
-                            :question/categories ["Cat2" "Cat3"]}
-            _ (db/add-question! test-db input-question)
-            question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
-            question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
-                                                                                :question/question-statement
-                                                                                :question/evaluation-criteria
-                                                                                :question/points
-                                                                                :question/categories])
-                               question-ids)]
-        (print question-list)))
-    ;; does not work depending on the input. Example: input categories: "234", "easa", "123", output in question-list: "123", "234", "easa"
-    ;; (testing "add-question! with generated questions"
-    ;;   (let [input-question (first (map #(select-keys % [:question/type
-    ;;                                                     :question/question-statement
-    ;;                                                     :question/evaluation-criteria
-    ;;                                                     :question/points
-    ;;                                                     :question/categories])
-    ;;                                    (gen/sample (gen/not-empty (s/gen :question/question)) 1)))
-    ;;         _ (db/add-question! test-db input-question)
-    ;;         question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
-    ;;         question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
-    ;;                                                                             :question/points
-    ;;                                                                             :question/question-statement
-    ;;                                                                             :question/categories
-    ;;                                                                             :question/evaluation-criteria])
-    ;;                            question-ids)]
-    ;;     (t/is (some #(= % input-question) (vec question-list)))))
-    ))
+                            :question/categories #{"Cat1" "Cat3"}}]
+        (t/is (thrown-with-msg?
+                java.lang.AssertionError
+                #"There is a similar question already in the data base. Please check the existing question and check wether you need to create a new one."
+                (db/add-question! test-db input-question)))))
+    (testing "add-question! with generated questions"
+      (let [generated-questions (gen/sample (gen/not-empty (s/gen :question/single-choice-question)) 10)]
+        (every? (fn [act]
+                  (let [input-question act
+                        _ (db/add-question! test-db input-question)
+                        question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+                        question-list (map #(db/get-question-by-id test-db %) question-ids)]
+                    (t/is (some #(and (= (:question/type input-question) (:question/type %))
+                                      (= (:question/points input-question) (:question/points %))
+                                      (= (:question/question-statement input-question) (:question/question-statement %))
+                                      (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
+                                      (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
+                                      (= (:question/single-choice-solution input-question) (:question/single-choice-solution %)))
+                                question-list))))
+                generated-questions)))))
 
 
 (deftest course-iteration-test

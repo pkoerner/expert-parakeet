@@ -332,31 +332,37 @@
 
   (add-question!
     [this question]
-    (let [id (generate-id this :question/id)
-          type (:question/type question)
-          trans-map (apply assoc {:db/id        -1
-                                  :question/id     id
-                                  :question/type    type
-                                  :question/points (:question/points question)
-                                  :question/question-statement (:question/question-statement question)
-                                  :question/categories (:question/categories question)}
-                           (cond (= type :question.type/free-text)
-                                 [:question/evaluation-criteria (:question/evaluation-criteria question)]
+    (let [question-ids (map #(:question/id %) (get-all-question-ids this))
+          question-list (map #(select-keys (db/get-question-by-id this %) [:question/type
+                                                                           :question/question-statement])
+                             question-ids)]
+      (if (some #(= % (select-keys question [:question/type :question/question-statement])) question-list)
+        (throw (AssertionError. "There is a similar question already in the data base. Please check the existing question and check wether you need to create a new one."))
+        (let [id (generate-id this :question/id)
+              type (:question/type question)
+              trans-map (apply assoc {:db/id        -1
+                                      :question/id     id
+                                      :question/type    type
+                                      :question/points (:question/points question)
+                                      :question/question-statement (:question/question-statement question)
+                                      :question/categories (:question/categories question)}
+                               (cond (= type :question.type/free-text)
+                                     [:question/evaluation-criteria (:question/evaluation-criteria question)]
 
-                                 (= type :question.type/single-choice)
-                                 [:question/possible-solutions (:question/possible-solutions question)
-                                  :question/single-choice-solution (:question/single-choice-solution question)]
+                                     (= type :question.type/single-choice)
+                                     [:question/possible-solutions (:question/possible-solutions question)
+                                      :question/single-choice-solution (:question/single-choice-solution question)]
 
-                                 (= type :question.type/multiple-choice)
-                                 [:question/possible-solutions (:question/possible-solutions question)
-                                  :question/multiple-choice-solution (:question/multiple-choice-solution question)]))
-          tx-result (d/transact (.conn this) [trans-map])
-          db-after (:db-after tx-result)]
-      (d/pull db-after  [:question/id :question/question-statement :question/points :question/type :question/possible-solutions
-                         :question/evaluation-criteria :question/single-choice-solution
-                         :question/multiple-choice-solution
-                         :question/categories]
-              [:question/id id])))
+                                     (= type :question.type/multiple-choice)
+                                     [:question/possible-solutions (:question/possible-solutions question)
+                                      :question/multiple-choice-solution (:question/multiple-choice-solution question)]))
+              tx-result (d/transact (.conn this) [trans-map])
+              db-after (:db-after tx-result)]
+          (d/pull db-after  [:question/id :question/question-statement :question/points :question/type :question/possible-solutions
+                             :question/evaluation-criteria :question/single-choice-solution
+                             :question/multiple-choice-solution
+                             :question/categories]
+                  [:question/id id])))))
 
 
   (add-question-set!
