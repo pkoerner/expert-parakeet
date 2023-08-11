@@ -6,6 +6,7 @@
     [ring.util.codec :refer [form-encode]]
     [ring.util.response :as response]
     [services.course-service.p-course-service :refer [create-course
+                                                      PCourseService
                                                       validate-course]]
     [util.ring-extensions :refer [html-response]]
     [util.spec-functions :refer [map-spec]]
@@ -66,7 +67,7 @@
 (s/fdef submit-create-course!
         :args (s/cat :req ::req-data
                      :redirect-uri string?
-                     :db-add-fun (s/? (s/get-spec `db/add-course!)))
+                     :course-service #(satisfies? PCourseService %))
         :ret #(instance? hiccup.util.RawString %))
 
 

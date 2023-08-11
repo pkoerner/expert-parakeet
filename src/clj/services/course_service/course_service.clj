@@ -29,8 +29,8 @@
 
 
 (defn- create-course-impl
-  [_ course-name]
-  (db/add-course! course-name))
+  [this course-name]
+  (db/add-course! (.db this) course-name))
 
 
 (s/fdef validate-course-impl
@@ -41,8 +41,8 @@
 
 
 (defn- validate-course-impl
-  [_ course-name]
-  (let [courses (db/get-all-courses)
+  [this course-name]
+  (let [courses (db/get-all-courses (.db this))
         courses-with-same-name (filter (fn [course] (= course-name (course :course/course-name))) courses)]
     (-> {}
         (#(if (s/valid? :course/course-name course-name)

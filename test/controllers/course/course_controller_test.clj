@@ -8,6 +8,7 @@
     [clojure.test.check.properties :as prop]
     [controllers.course.course-controller :refer [create-course-get
                                                   submit-create-course!]]
+    [db :refer [Database-Protocol]]
     [ring.util.codec :refer [form-encode]]
     [services.course-service.course-service :as cs :refer [->CourseService]]
     [services.course-service.p-course-service :refer [PCourseService
@@ -49,6 +50,15 @@
       (create-course course-name))))
 
 
+(defn- mock-db
+  [& {:keys [get-all-courses]
+      :or {get-all-courses (fn [& _] {})}}]
+  (reify Database-Protocol
+    (get-all-courses
+      [_self]
+      (get-all-courses))))
+
+
 (deftest test-submit-create-course!
   (testing "Test that the db-add-function get's called with the correct values with different parameters."
     (let [test-request {:__anti-forgery-token ""
@@ -65,13 +75,14 @@
 
   (testing "Test that the db-add-function is not called when the parameters are invalid.
             And that the correct error message is send with the redirect."
-    (let [test-request {:__anti-forgery-token ""
+    (let [mock-db (mock-db)
+          test-request {:__anti-forgery-token ""
                         :multipart-params {"course" "nice name"}}
           db-add-fun-stub (fn [_course-name]
                             (t/is false "The function to create a course was called but shouldn't be!"))
           course-service (stub-course-service
                            :validate-course (fn [& args]
-                                              (apply (partial validate-course (->CourseService)) args))
+                                              (apply (partial validate-course (->CourseService mock-db)) args))
                            :create-course db-add-fun-stub)
           redirect-uri "https://some.url"
           wrong-course-name ""]
