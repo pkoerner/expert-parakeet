@@ -1,5 +1,6 @@
 (ns db
   (:require
+    [clojure.string :as string]
     [datahike.api :as d]
     [db.dummy-data :as dummy-data]
     [db.schema :refer [db-schema]]
@@ -108,7 +109,11 @@
 
   (get-user-by-git-id
     [this git-id]
-    "get the user given the git-id of the user"))
+    "get the user given the git-id of the user")
+
+  (get-course-by-id
+    [this course-id]
+    "get the corresponding course given the id"))
 
 
 (deftype Database
@@ -278,14 +283,17 @@
 
   (add-course!
     [this course-name]
-    (let [id (generate-id this :course/id)
-          tx-result (d/transact (.conn this)
-                                [{:db/id -1
-                                  :course/id id
-                                  :course/course-name course-name}])
-          db-after (:db-after tx-result)]
-      (d/pull db-after [:course/id :course/course-name]
-              [:course/id id])))
+    (let [excisting-course-names (map #(:course/course-name %) (get-all-courses this))]
+      (if (some #(= (string/lower-case course-name) (string/lower-case %)) excisting-course-names)
+        (throw (AssertionError. (str "There is already a course named" course-name " in the data base. Please check the existing course and wether you need to create a new one.")))
+        (let [id (generate-id this :course/id)
+              tx-result (d/transact (.conn this)
+                                    [{:db/id -1
+                                      :course/id id
+                                      :course/course-name course-name}])
+              db-after (:db-after tx-result)]
+          (d/pull db-after [:course/id :course/course-name]
+                  [:course/id id])))))
 
 
   (get-course-iteration-by-id
@@ -334,10 +342,11 @@
     [this question]
     (let [question-ids (map #(:question/id %) (get-all-question-ids this))
           question-list (map #(select-keys (db/get-question-by-id this %) [:question/type
-                                                                           :question/question-statement])
+                                                                           :question/question-statement
+                                                                           :question/points])
                              question-ids)]
-      (if (some #(= % (select-keys question [:question/type :question/question-statement])) question-list)
-        (throw (AssertionError. "There is a similar question already in the data base. Please check the existing question and check wether you need to create a new one."))
+      (if (some #(= % (select-keys question [:question/type :question/question-statement :question/points])) question-list)
+        (throw (AssertionError. (str "There is a similar question already in the data base. Please check the existing question and wether you need to create a new one. " (select-keys question [:question/type :question/question-statement]))))
         (let [id (generate-id this :question/id)
               type (:question/type question)
               trans-map (apply assoc {:db/id        -1
@@ -486,7 +495,14 @@
     [this git-id]
     (d/pull @(.conn this)
             [:user/id :user/git-id :user/course-iterations]
-            [:user/git-id git-id])))
+            [:user/git-id git-id]))
+
+
+  (get-course-by-id
+    [this course-id]
+    (d/pull @(.conn this)
+            [:course/id :course/course-name {:course/question-sets [:question-set/id :question-set/name]}]
+            [:course/id course-id])))
 
 
 ;; use mem db

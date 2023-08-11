@@ -75,10 +75,10 @@
 (def courses
   [{:course/id "0"
     :course/course-name "Specialization Functional Programming: Clojure"
-    :course/question-sets [[:question-set/id "1"] [:question/id "3"] [:question/id "4"] [:question/id "5"] [:question/id "7"] [:question/id "8"]]}
+    :course/question-sets [[:question-set/id "1"] [:question-set/id "3"]]}
    {:course/id "1"
     :course/course-name "Programming 1"
-    :course/question-sets [[:question-set/id "2"] [:question/id "6"]]}])
+    :course/question-sets [[:question-set/id "2"]]}])
 
 
 (def course-iterations

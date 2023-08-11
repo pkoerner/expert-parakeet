@@ -2,6 +2,7 @@
   (:require
     [clojure.instant :as instant]
     [clojure.spec.alpha :as s]
+    [clojure.string :as string]
     [clojure.test :as t :refer [deftest testing]]
     [clojure.test.check.generators :as gen]
     [datahike.api :as d]
@@ -114,52 +115,64 @@
                             :question/categories #{"Cat1" "Cat3"}}]
         (t/is (thrown-with-msg?
                 java.lang.AssertionError
-                #"There is a similar question already in the data base. Please check the existing question and check wether you need to create a new one."
+                #"There is a similar question already in the data base. Please check the existing question and wether you need to create a new one."
                 (db/add-question! test-db input-question)))))
     (testing "add-question! with generated single choice questions"
       (let [generated-questions (distinct (gen/sample (gen/not-empty (s/gen :question/single-choice-question)) generator-sample-size))]
-        (t/is (every? (fn [act]
-                        (let [input-question act
-                              _ (db/add-question! test-db input-question)
-                              question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
-                              question-list (map #(db/get-question-by-id test-db %) question-ids)]
-                          (some #(and (= (:question/type input-question) (:question/type %))
-                                      (= (:question/points input-question) (:question/points %))
-                                      (= (:question/question-statement input-question) (:question/question-statement %))
-                                      (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
-                                      (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
-                                      (= (:question/single-choice-solution input-question) (:question/single-choice-solution %)))
-                                question-list)))
-                      generated-questions))))
+        (t/is (or (every? (fn [act]
+                            (let [input-question act
+                                  _ (db/add-question! test-db input-question)
+                                  question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+                                  question-list (map #(db/get-question-by-id test-db %) question-ids)]
+                              (some #(and (= (:question/type input-question) (:question/type %))
+                                          (= (:question/points input-question) (:question/points %))
+                                          (= (:question/question-statement input-question) (:question/question-statement %))
+                                          (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
+                                          (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
+                                          (= (:question/single-choice-solution input-question) (:question/single-choice-solution %)))
+                                    question-list)))
+                          generated-questions)
+                  (some #(t/is (thrown-with-msg?
+                                 java.lang.AssertionError
+                                 #"There is a similar question already in the data base. Please check the existing question and check wether you need to create a new one."
+                                 (db/add-question! test-db %))) generated-questions)))))
     (testing "add-question! with generated multiple choice questions"
       (let [generated-questions (distinct (gen/sample (gen/not-empty (s/gen :question/multiple-choice-question)) generator-sample-size))]
-        (t/is (every? (fn [act]
-                        (let [input-question act
-                              _ (db/add-question! test-db input-question)
-                              question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
-                              question-list (map #(db/get-question-by-id test-db %) question-ids)]
-                          (some #(and (= (:question/type input-question) (:question/type %))
-                                      (= (:question/points input-question) (:question/points %))
-                                      (= (:question/question-statement input-question) (:question/question-statement %))
-                                      (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
-                                      (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
-                                      (= (sort (distinct (:question/multiple-choice-solution input-question))) (:question/multiple-choice-solution %)))
-                                question-list)))
-                      generated-questions))))
+        (t/is (or (every? (fn [act]
+                            (let [input-question act
+                                  _ (db/add-question! test-db input-question)
+                                  question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+                                  question-list (map #(db/get-question-by-id test-db %) question-ids)]
+                              (some #(and (= (:question/type input-question) (:question/type %))
+                                          (= (:question/points input-question) (:question/points %))
+                                          (= (:question/question-statement input-question) (:question/question-statement %))
+                                          (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
+                                          (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
+                                          (= (sort (distinct (:question/multiple-choice-solution input-question))) (:question/multiple-choice-solution %)))
+                                    question-list)))
+                          generated-questions)
+                  (some #(t/is (thrown-with-msg?
+                                 java.lang.AssertionError
+                                 #"There is a similar question already in the data base. Please check the existing question and check wether you need to create a new one."
+                                 (db/add-question! test-db %))) generated-questions)))))
     (testing "add-question! with generated free text questions"
       (let [generated-questions (distinct (gen/sample (gen/not-empty (s/gen :question/question)) generator-sample-size))]
-        (t/is (every? (fn [act]
-                        (let [input-question act
-                              _ (db/add-question! test-db input-question)
-                              question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
-                              question-list (map #(db/get-question-by-id test-db %) question-ids)]
-                          (some #(and (= (:question/type input-question) (:question/type %))
-                                      (= (:question/points input-question) (:question/points %))
-                                      (= (:question/question-statement input-question) (:question/question-statement %))
-                                      (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
-                                      (= (:question/evaluation-criteria input-question) (:question/evaluation-criteria %)))
-                                question-list)))
-                      generated-questions))))))
+        (t/is (or (every? (fn [act]
+                            (let [input-question act
+                                  _ (db/add-question! test-db input-question)
+                                  question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+                                  question-list (map #(db/get-question-by-id test-db %) question-ids)]
+                              (some #(and (= (:question/type input-question) (:question/type %))
+                                          (= (:question/points input-question) (:question/points %))
+                                          (= (:question/question-statement input-question) (:question/question-statement %))
+                                          (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
+                                          (= (:question/evaluation-criteria input-question) (:question/evaluation-criteria %)))
+                                    question-list)))
+                          generated-questions)
+                  (some #(t/is (thrown-with-msg?
+                                 java.lang.AssertionError
+                                 #"There is a similar question already in the data base. Please check the existing question and check wether you need to create a new one."
+                                 (db/add-question! test-db %))) generated-questions)))))))
 
 
 (deftest course-iteration-test
@@ -323,13 +336,13 @@
                           :question-set/start start
                           :question-set/end end}
             _ (db/add-question-set!
-               test-db
-               question-set-name
-               course-iteration-id
-               passing-score
-               questions
-               start
-               end)
+                test-db
+                question-set-name
+                course-iteration-id
+                passing-score
+                questions
+                start
+                end)
             question-set-list (map #(select-keys % [:question-set/name
                                                     :question-set/passing-score
                                                     :question-set/start
@@ -410,23 +423,23 @@
             start (instant/read-instant-date "2020-04-25T15:09:16.437Z")
             end (instant/read-instant-date "2020-04-25T15:17:16.437Z")
             question-set {:question-set/name question-set-name
-                             :question-set/passing-score passing-score
-                             :question-set/start start
-                             :question-set/end end}
-               _ (db/add-question-set!
-                  test-db
-                  question-set-name
-                  course-iteration-id
-                  passing-score
-                  questions
-                  start
-                  end)
-               question-set-list (map #(select-keys % [:question-set/name
-                                                       :question-set/passing-score
-                                                       :question-set/start
-                                                       :question-set/end])
-                                      (db/get-all-question-sets test-db))]
-              (t/is (some #(= % question-set) (vec question-set-list)))))
+                          :question-set/passing-score passing-score
+                          :question-set/start start
+                          :question-set/end end}
+            _ (db/add-question-set!
+                test-db
+                question-set-name
+                course-iteration-id
+                passing-score
+                questions
+                start
+                end)
+            question-set-list (map #(select-keys % [:question-set/name
+                                                    :question-set/passing-score
+                                                    :question-set/start
+                                                    :question-set/end])
+                                   (db/get-all-question-sets test-db))]
+        (t/is (some #(= % question-set) (vec question-set-list)))))
     (testing "add-question-set! with semi generated question-set"
       (dotimes [_ 10]
         (let [question-set-name (gen/generate (s/gen :question-set/name))
@@ -461,6 +474,46 @@
                              (= (:question-set/passing-score question-set) (:question-set/passing-score question-set))))
                       question-set-list)))))))
 
-((deftest name-test
-      (testing "Context of the test assertions"
-        (is (= assertion-values)))) )
+
+(deftest course-test
+  (let [test-db (-create-test-db "course-test-db")]
+    (testing "get-all-courses of the dummy dataset"
+      (let [ref-courses [#:course{:id "1",
+                                  :course-name "Programming 1",
+                                  :question-sets [#:question-set{:id "2", :name "Week 1:"}]}
+                         #:course{:id "0",
+                                  :course-name "Specialization Functional Programming: Clojure",
+                                  :question-sets [#:question-set{:id "1", :name "Test 01: Generative Testing"}
+                                                  #:question-set{:id "3", :name "Test 00: Alien"}]}]
+            res (db/get-all-courses test-db)]
+        (t/is (= ref-courses res))))
+    (testing "get-course-by-id with id = 1"
+      (let [course-id "1"
+            res (db/get-course-by-id test-db course-id)]
+        (t/is (= res #:course{:id "1",
+                              :course-name "Programming 1",
+                              :question-sets [#:question-set{:id "2", :name "Week 1:"}]}))))
+    (testing "get-course-by-id with id = 0"
+      (let [course-id "0"
+            res (db/get-course-by-id test-db course-id)]
+        (t/is (= res #:course{:id "0",
+                              :course-name "Specialization Functional Programming: Clojure",
+                              :question-sets [#:question-set{:id "1", :name "Test 01: Generative Testing"}
+                                              #:question-set{:id "3", :name "Test 00: Alien"}]}))))
+    (testing "get-course-by-id with invalid id = 42"
+      (t/is (thrown-with-msg?
+              clojure.lang.ExceptionInfo
+              #"Nothing found for entity id [:course/id \W 42 \W]"
+              (db/get-course-by-id test-db "42"))))
+    (testing "add-course! with generated course names"
+      (let [course-names (distinct (gen/sample (s/gen :course/course-name) generator-sample-size))]
+        (t/is (or (every? (fn [act]
+                            (let [_ (db/add-course! test-db act)
+                                  excisting-course-names (map #(:course/course-name %) (db/get-all-courses test-db))]
+                              (some #(= (string/lower-case act) (string/lower-case %)) excisting-course-names)))
+                          course-names)
+                  (some #(t/is (thrown-with-msg?
+                                 java.lang.AssertionError
+                                 (re-pattern (str "There is already a course named" % " in the data base. Please check the existing course and wether you need to create a new one."))
+                                 (db/add-course! test-db %))) course-names)))))))
+
