@@ -21,16 +21,20 @@
   (get-all-course-iterations
     [this])
 
+  ;; think unnecessary -> service and domain
   (get-graded-answers-of-question-set
     [this user-id question-set-id])
 
-  (get-questions-for-user
-    [this corrector-id])
+  ;; unnecessary in my opinion because workaround in domain/service
+  ;; (get-questions-for-user
+  ;;   [this corrector-id])
 
+  ;; think unnecessary
   (get-answers-for-question
     [this question-id]
     "Fetches all answers of all users for one question.")
 
+  ;;think unnecessary
   (get-all-answers-with-corrections
     [this]
     "Fetches every answer with a correction from the database")
@@ -65,6 +69,7 @@
   (add-course-iteration-with-question-sets!
     [this course-id year semester question-set-ids])
 
+  ;; no test because it only uses add-course-iteration-with-question-sets!
   (add-course-iteration!
     [this course-id year semester])
 
@@ -79,8 +84,9 @@
 
   (add-user-answer!
     [this user-id question-id answer]
-    "Adds an answer of a user to a question.")
-
+    "Adds an answer of a user to a question.") 
+  
+  ;; no test because it only uses add-user-answer!
   (add-multiple-user-answers!
     [this user-id answers]
     "Adds multiple answers of a user to multiple questions.
@@ -88,8 +94,9 @@
                and an answer.")
 
   (get-all-answers
-    [this])
-
+    [this]) 
+  
+  ;;think unnecessary because it returns an answer based on the answer-id?
   (get-answers-for-correction
     [this answer-id])
 
@@ -178,18 +185,19 @@
                @(.conn this) [:user/id user-id] [:question-set/id question-set-id])))
 
 
-  (get-questions-for-user
-    [this corrector-id]
-    (mapv first
-          (d/q '[:find (pull ?course-iteration [:course-iteration/semester
-                                                :course-iteration/year
-                                                {:course-iteration/course [:course/course-name]}
-                                                {:course-iteration/question-sets [:question-set/id :question-set/name
-                                                                                  {:question-set/questions [:question/id :question/type]}]}])
-                 :in $ ?corr
-                 :where
-                 [?corr :user/course-iterations ?course-iteration]]
-               @(.conn this) [:user/id corrector-id])))
+
+  ;; (get-questions-for-user
+  ;;   [this user-id]
+  ;;   (mapv first
+  ;;         (d/q '[:find (pull ?course-iteration [:course-iteration/semester
+  ;;                                               :course-iteration/year
+  ;;                                               {:course-iteration/course [:course/course-name]}
+  ;;                                               {:course-iteration/question-sets [:question-set/id :question-set/name
+  ;;                                                                                 {:question-set/questions [:question/id :question/type]}]}])
+  ;;                :in $ ?corr
+  ;;                :where
+  ;;                [?corr :user/course-iterations ?course-iteration]]
+  ;;              @(.conn this) [:user/id user-id])))
 
 
   (get-answers-for-question
@@ -427,9 +435,10 @@
 
   (get-all-answers
     [this]
-    (d/q '[:find (pull ?e [:answer/id :answer/user :answer/question :answer/answer])
-           :where [?e :answer/id]]
-         @(.conn this)))
+    (mapv first
+          (d/q '[:find (pull ?e [:answer/id {:answer/question [:question/id]} {:answer/user [:user/id]}  :answer/answer :answer/points])
+                 :where [?e :answer/id]]
+               @(.conn this))))
 
 
   (get-answers-for-correction
@@ -449,16 +458,19 @@
 
   (get-corrections-of-answer
     [this answer-id]
-    (map
-      #(zipmap [:correction/feedback :correction/timestamp] %)
-      (d/q '[:find ?corr-feedback ?timestamp
-             :in $ ?answer-id
-             :where
-             [?answer :answer/id ?answer-id]
-             [?correction :correction/answer ?answer ?tx]
-             [?tx :db/txInstant ?timestamp]
-             [?correction :correction/feedback ?corr-feedback]]
-           @(.conn this) answer-id)))
+    (let [existing-answer-ids (map #(:answer/id %) (get-all-answers this))]
+     (if (some #(= answer-id %) existing-answer-ids)
+       (map
+        #(zipmap [:correction/feedback :correction/timestamp] %)
+        (d/q '[:find ?corr-feedback ?timestamp
+               :in $ ?answer-id
+               :where
+               [?answer :answer/id ?answer-id]
+               [?correction :correction/answer ?answer ?tx]
+               [?tx :db/txInstant ?timestamp]
+               [?correction :correction/feedback ?corr-feedback]]
+             @(.conn this) answer-id))
+       (throw (AssertionError. (re-pattern (str "The answer-id: " answer-id "does not exist in the database!")))))))
 
 
   (add-correction!
@@ -480,15 +492,15 @@
     (let [existing-git-ids (map #(:user/git-id %) (get-all-user this))]
       (if (some #(= git-id %) existing-git-ids)
         (throw (AssertionError. (str "There is already a user with the same git-id in the database. Please check the existing course and wether you need to create a new one.")))
-       (let [user-id (generate-id this :user/id)
-             tx-result (d/transact (.conn this)
-                                   [{:db/id -1
-                                     :user/id user-id
-                                     :user/git-id git-id
-                                     :user/course-iterations []}])
-             db-after (:db-after tx-result)]
-         (d/pull db-after [:user/id :user/git-id :user/course-iterations]
-                 [:user/id user-id])))))
+        (let [user-id (generate-id this :user/id)
+              tx-result (d/transact (.conn this)
+                                    [{:db/id -1
+                                      :user/id user-id
+                                      :user/git-id git-id
+                                      :user/course-iterations []}])
+              db-after (:db-after tx-result)]
+          (d/pull db-after [:user/id :user/git-id :user/course-iterations]
+                  [:user/id user-id])))))
 
 
   (get-user-by-id

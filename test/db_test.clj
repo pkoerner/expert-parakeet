@@ -27,10 +27,6 @@
     test-db))
 
 
-;; (deftest test-db-config
-;;   ())
-
-
 (deftest question-tests
   (let [test-db (-create-test-db "question-test-db")]
     (testing "get-all-question-ids of the dummy dataset"
@@ -506,17 +502,17 @@
               #"Nothing found for entity id [:course/id \W 42 \W]"
               (db/get-course-by-id test-db "42"))))
     (testing "add-course! with generated course names"
-      (let [course-names (distinct (gen/sample (s/gen :course/course-name) generator-sample-size))]
+      (let [course-names (distinct (map #(string/lower-case %) (gen/sample (s/gen :course/course-name) generator-sample-size)))]
         (t/is (every? (fn [act]
                         (let [_ (db/add-course! test-db act)
                               excisting-course-names (map #(:course/course-name %) (db/get-all-courses test-db))]
-                          (some #(= (string/lower-case act) (string/lower-case %)) excisting-course-names)))
+                          (some #(= act %) excisting-course-names)))
                       course-names))))
     (testing "add-course! with existing name - should fail"
       (t/is (thrown-with-msg?
-             java.lang.AssertionError
-             #"There is already a course with the same name in the database. Please check the existing course and wether you need to create a new one."
-             (db/add-course! test-db "Programming 1"))))))
+              java.lang.AssertionError
+              #"There is already a course with the same name in the database. Please check the existing course and wether you need to create a new one."
+              (db/add-course! test-db "Programming 1"))))))
 
 
 (deftest user-test
@@ -532,7 +528,6 @@
                             #:user{:id "3"
                                    :git-id "13579"
                                    :course-iterations [#:course-iteration{:id "2"}]}]]
-        (print "\n" "\n" res "\n" "\n")
         (t/is (every? (fn [act] (some #(= act %) reference-user)) res))))
     (testing "get-user-by-id with id = 0"
       (t/is (= (db/get-user-by-id test-db "0") {:user/id "0"
@@ -568,7 +563,145 @@
                           (some #(= act %) excisting-git-ids)))
                       git-ids))))
     (testing "add-user! with existing git-id - should fail"
-           (t/is (thrown-with-msg?
-                  java.lang.AssertionError
-                  #"There is already a user with the same git-id in the database. Please check the existing course and wether you need to create a new one."
-                  (db/add-user! test-db "12345"))))))
+      (t/is (thrown-with-msg?
+              java.lang.AssertionError
+              #"There is already a user with the same git-id in the database. Please check the existing course and wether you need to create a new one."
+              (db/add-user! test-db "12345"))))))
+
+
+(deftest answer-test
+  (let [test-db (-create-test-db "answer-test-db")]
+    (testing "get-all-answers"
+      (let [ref-answers [#:answer{:id "1"
+                                  :answer ["transients are a non persistent data structures in clojure. They are used to increase performance."]
+                                  :points 1
+                                  :question #:question{:id "1"}
+                                  :user #:user{:id "0"}}
+                         #:answer{:id "2"
+                                  :answer ["generative Tests are only a good choice, if you have an oracle or you can write an inverse function. But they have very high costs compared to example based testing"]
+                                  :points 1
+                                  :question #:question{:id "3"}
+                                  :user #:user{:id "0"}}
+                         #:answer{:id "3"
+                                  :answer ["I like transients"]
+                                  :points 0
+                                  :question #:question{:id "1"}
+                                  :user #:user{:id "2"}}
+                         #:answer{:id "4"
+                                  :answer ["JVM, i.e., Java Virtual Machine. JVM is the engine that drives the Java code. Mostly in other Programming Languages, compiler produce code for a particular system but Java compiler produce Bytecode for a Java Virtual Machine. When we compile a Java program, then bytecode is generated. Bytecode is the source code that can be used to run on any platform. Bytecode is an intermediary language between Java source and the host system. It is the medium which compiles Java code to bytecode which gets interpreted on a different machine and hence it makes it Platform/Operating system independent."]
+                                  :points 3
+                                  :question #:question{:id "2"}
+                                  :user #:user{:id "0"}}
+                         #:answer{:id "5"
+                                  :answer ["immutable"]
+                                  :points 0
+                                  :question #:question{:id "4"}
+                                  :user #:user{:id "2"}}
+                         #:answer{:id "6"
+                                  :answer ["example based testing is good for documentation"]
+                                  :points 0
+                                  :question #:question{:id "3"}
+                                  :user #:user{:id "2"}}
+                         #:answer{:id "7"
+                                  :answer ["Oracle" "inverse function" "specs"]
+                                  :points 1
+                                  :question #:question{:id "5"}
+                                  :user #:user{:id "0"}}
+                         #:answer{:id "8",
+                                  :answer ["mutable"],
+                                  :points 1
+                                  :question #:question{:id "4"},
+                                  :user #:user{:id "0"}}
+                         #:answer{:id "9"
+                                  :answer ["object oriented"]
+                                  :points 1
+                                  :question #:question{:id "6"}
+                                  :user #:user{:id "0"}}
+                         #:answer{:id "10"
+                                  :answer ["Oracle" "specs"]
+                                  :points 1
+                                  :question #:question{:id "5"}
+                                  :user #:user{:id "2"}}
+                         #:answer{:id "11"
+                                  :answer ["1979"]
+                                  :points 1
+                                  :question #:question{:id "7"}
+                                  :user #:user{:id "0"}}
+                         #:answer{:id "12"
+                                  :answer ["Alien is the best movie of all time <3"]
+                                  :points 1
+                                  :question #:question{:id "8"}
+                                  :user #:user{:id "0"}}
+                         #:answer{:id "13"
+                                  :answer ["logic"]
+                                  :points 0
+                                  :question #:question{:id "6"}
+                                  :user #:user{:id "3"}}
+                         #:answer{:id "14"
+                                  :answer ["I don't know, pls give me points :D"]
+                                  :points 0
+                                  :question #:question{:id "2"}
+                                  :user #:user{:id "3"}}]
+            res (db/get-all-answers test-db)]
+        (t/is (every? (fn [act] (some #(= act %) ref-answers)) res))))))
+
+(deftest correction-test
+      (let [test-db (-create-test-db "correction-test-db")]
+        (testing "get-all-corrections-of-corrector with corrector-id = 3"
+        (let [res (db/get-all-corrections-of-corrector test-db "3")
+              ref-corrections [#:correction{:answer #:answer{:id "2"}}
+                               #:correction{:answer #:answer{:id "1"}}
+                               #:correction{:answer #:answer{:id "4"}}
+                               #:correction{:answer #:answer{:id "12"}}]]
+          (t/is (every? (fn [act] (some #(= act %) ref-corrections)) res))))
+        (testing "get-all-corrections-of-corrector with corrector-id = 2"
+          (let [res (db/get-all-corrections-of-corrector test-db "2")
+                ref-corrections [#:correction{:answer #:answer{:id "14"}}]]
+            (t/is (every? (fn [act] (some #(= act %) ref-corrections)) res))))
+        (testing "get-all-corrections-of-corrector with invalid corrector-id = 42"
+          (t/is (thrown-with-msg?
+                 clojure.lang.ExceptionInfo
+                 #"Nothing found for entity id [:user/id \W 42 \W]"
+                 (db/get-all-corrections-of-corrector test-db "42"))))
+        (testing "add-correction! with valid correction"
+               (let [answer-id "1"
+                     correction {:correction/feedback "not good" :correction/points 0 :corrector/id "3"}
+                     _ (db/add-correction! test-db answer-id correction)
+                     corrections-of-corrector (db/get-all-corrections-of-corrector test-db "3")
+                     ref-corrections [#:correction{:answer #:answer{:id "1"}}
+                                      #:correction{:answer #:answer{:id "2"}}                                      
+                                      #:correction{:answer #:answer{:id "1"}}
+                                      #:correction{:answer #:answer{:id "4"}}
+                                      #:correction{:answer #:answer{:id "12"}}]]
+                 (t/is (= corrections-of-corrector ref-corrections))))
+        (testing "add-correction! with invalid answer-id"
+               (let [answer-id "42"
+                     correction {:correction/feedback "not good" :correction/points 0 :corrector/id "3"}]
+                 (t/is (thrown-with-msg?
+                        clojure.lang.ExceptionInfo
+                        #"Nothing found for entity id [:user/id \W 42 \W]"
+                        (db/add-correction! test-db answer-id correction)))))
+        (testing "add-correction! with invalid corrector-id"
+          (let [answer-id "1"
+                correction {:correction/feedback "not good" :correction/points 0 :corrector/id "42"}]
+            (t/is (thrown-with-msg?
+                   clojure.lang.ExceptionInfo
+                   #"Nothing found for entity id [:user/id \W 42 \W]"
+                   (db/add-correction! test-db answer-id correction)))))
+        (testing "get-corrections-of-answer with answer-id = 2"
+               (let [answer-id "2"
+                     res (db/get-corrections-of-answer test-db answer-id)
+                     ref-correction #:correction{:feedback "Please elaborate about the aspects of example-based testing"}]
+                 (t/is (= (:feedback res) (:feedback ref-correction)))))
+        (testing "get-corrections-of-answer with answer-id = 1"
+          (let [answer-id "1"
+                res (db/get-corrections-of-answer test-db answer-id)
+                ref-corrections [#:correction{:feedback "Can you say something about the rules of handling with transients?"}
+                                #:correction{:feedback "not good"}]]
+            (t/is (every? (fn [act] (some #(= (:feedback act) (:feedback %)) ref-corrections)) res))))
+        (testing "get-corrections-of-answer with invalid answer-id"
+          (let [answer-id "42"]
+            (t/is (thrown-with-msg?
+                    java.lang.AssertionError
+                    (re-pattern (str "The answer-id: " answer-id "does not exist in the database!"))
+                    (db/get-corrections-of-answer test-db answer-id)))))))
