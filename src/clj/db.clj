@@ -29,6 +29,10 @@
   (get-answers-for-question
     [this question-id]
     "Fetches all answers of all users for one question.")
+  
+  (get-answers-for-auto-correction
+   [this answer-id]
+   "Fetches an answer of for a question of type single-choice or multiple-choice.")
 
   (get-all-answers-with-corrections
     [this]
@@ -426,6 +430,21 @@
                  [?question :question/type ?type]
                  [(= ?type :question.type/free-text)]]
                @(.conn this) [:answer/id answer-id])))
+  
+  (get-answers-for-auto-correction
+   [this answer-id]
+   (mapv first
+         (d/q '[:find (pull ?answer [:answer/id
+                                     :answer/answer
+                                     {:answer/question [:question/points 
+                                                        :question/single-choice-solution
+                                                        :question/multiple-choice-solution]}])
+                :in $ ?answer
+                :where
+                [?answer :answer/question ?question]
+                [?question :question/type ?type]
+                [(not= ?type :question.type/free-text)]]
+              @(.conn this) [:answer/id answer-id])))
 
 
   (get-corrections-of-answer
