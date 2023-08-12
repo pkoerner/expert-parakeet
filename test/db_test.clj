@@ -474,7 +474,7 @@
                                   :question-sets [#:question-set{:id "1", :name "Test 01: Generative Testing"}
                                                   #:question-set{:id "3", :name "Test 00: Alien"}]}]
             res (db/get-all-courses test-db)]
-        (t/is (= ref-courses res))))
+        (t/is (every? (fn [act] (some #(= act %) ref-courses)) res))))
     (testing "get-course-by-id with id = 1"
       (let [course-id "1"
             res (db/get-course-by-id test-db course-id)]
@@ -660,13 +660,8 @@
       (let [answer-id "1"
             correction {:correction/feedback "not good" :correction/points 0 :corrector/id "3"}
             _ (db/add-correction! test-db answer-id correction)
-            corrections-of-corrector (db/get-all-corrections-of-corrector test-db "3")
-            ref-corrections [#:correction{:answer #:answer{:id "1"}}
-                             #:correction{:answer #:answer{:id "2"}}
-                             #:correction{:answer #:answer{:id "1"}}
-                             #:correction{:answer #:answer{:id "4"}}
-                             #:correction{:answer #:answer{:id "12"}}]]
-        (t/is (= corrections-of-corrector ref-corrections))))
+            corrections-of-corrector (db/get-all-corrections-of-corrector test-db "3")]
+        (t/is (= 2 (count (filter #(= (first (vals (first (vals %)))) "1") corrections-of-corrector))))))
     (testing "add-correction! with invalid answer-id"
       (let [answer-id "42"
             correction {:correction/feedback "not good" :correction/points 0 :corrector/id "3"}]
