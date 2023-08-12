@@ -108,7 +108,11 @@
 
   (get-user-by-git-id
     [this git-id]
-    "get the user given the git-id of the user"))
+    "get the user given the git-id of the user")
+
+  (get-answer-by-id
+    [this answer-id]
+    "get an answer given its id"))
 
 
 (deftype Database
@@ -480,7 +484,18 @@
     [this git-id]
     (d/pull @(.conn this)
             [:user/id :user/git-id :user/course-iterations]
-            [:user/git-id git-id])))
+            [:user/git-id git-id]))
+
+
+  (get-answer-by-id
+    [this answer-id]
+    (d/pull @(.conn this)
+            [:answer/id
+             {:answer/question [:question/id]}
+             :answer/user
+             :answer/answer
+             :answer/points]
+            [:answer/id answer-id])))
 
 
 ;; use mem db
