@@ -34,7 +34,7 @@
     [this question-id]
     "Fetches all answers of all users for one question.")
 
-  ;;think unnecessary
+  ;; think unnecessary
   (get-all-answers-with-corrections
     [this]
     "Fetches every answer with a correction from the database")
@@ -84,8 +84,8 @@
 
   (add-user-answer!
     [this user-id question-id answer]
-    "Adds an answer of a user to a question.") 
-  
+    "Adds an answer of a user to a question.")
+
   ;; no test because it only uses add-user-answer!
   (add-multiple-user-answers!
     [this user-id answers]
@@ -94,9 +94,9 @@
                and an answer.")
 
   (get-all-answers
-    [this]) 
-  
-  ;;think unnecessary because it returns an answer based on the answer-id?
+    [this])
+
+  ;; think unnecessary because it returns an answer based on the answer-id?
   (get-answers-for-correction
     [this answer-id])
 
@@ -459,18 +459,18 @@
   (get-corrections-of-answer
     [this answer-id]
     (let [existing-answer-ids (map #(:answer/id %) (get-all-answers this))]
-     (if (some #(= answer-id %) existing-answer-ids)
-       (map
-        #(zipmap [:correction/feedback :correction/timestamp] %)
-        (d/q '[:find ?corr-feedback ?timestamp
-               :in $ ?answer-id
-               :where
-               [?answer :answer/id ?answer-id]
-               [?correction :correction/answer ?answer ?tx]
-               [?tx :db/txInstant ?timestamp]
-               [?correction :correction/feedback ?corr-feedback]]
-             @(.conn this) answer-id))
-       (throw (AssertionError. (re-pattern (str "The answer-id: " answer-id "does not exist in the database!")))))))
+      (if (some #(= answer-id %) existing-answer-ids)
+        (map
+          #(zipmap [:correction/feedback :correction/timestamp] %)
+          (d/q '[:find ?corr-feedback ?timestamp
+                 :in $ ?answer-id
+                 :where
+                 [?answer :answer/id ?answer-id]
+                 [?correction :correction/answer ?answer ?tx]
+                 [?tx :db/txInstant ?timestamp]
+                 [?correction :correction/feedback ?corr-feedback]]
+               @(.conn this) answer-id))
+        (throw (AssertionError. (re-pattern (str "The answer-id: " answer-id "does not exist in the database!")))))))
 
 
   (add-correction!

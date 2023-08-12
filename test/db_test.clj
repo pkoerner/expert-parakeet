@@ -113,62 +113,54 @@
                 java.lang.AssertionError
                 #"There is a similar question already in the data base. Please check the existing question and wether you need to create a new one."
                 (db/add-question! test-db input-question)))))
-    (testing "add-question! with generated single choice questions"
-      (let [generated-questions (distinct (gen/sample (gen/not-empty (s/gen :question/single-choice-question)) generator-sample-size))]
-        (t/is (or (every? (fn [act]
-                            (let [input-question act
-                                  _ (db/add-question! test-db input-question)
-                                  question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
-                                  question-list (map #(db/get-question-by-id test-db %) question-ids)]
-                              (some #(and (= (:question/type input-question) (:question/type %))
-                                          (= (:question/points input-question) (:question/points %))
-                                          (= (:question/question-statement input-question) (:question/question-statement %))
-                                          (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
-                                          (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
-                                          (= (:question/single-choice-solution input-question) (:question/single-choice-solution %)))
-                                    question-list)))
-                          generated-questions)
-                  (some #(t/is (thrown-with-msg?
-                                 java.lang.AssertionError
-                                 #"There is a similar question already in the data base. Please check the existing question and check wether you need to create a new one."
-                                 (db/add-question! test-db %))) generated-questions)))))
-    (testing "add-question! with generated multiple choice questions"
-      (let [generated-questions (distinct (gen/sample (gen/not-empty (s/gen :question/multiple-choice-question)) generator-sample-size))]
-        (t/is (or (every? (fn [act]
-                            (let [input-question act
-                                  _ (db/add-question! test-db input-question)
-                                  question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
-                                  question-list (map #(db/get-question-by-id test-db %) question-ids)]
-                              (some #(and (= (:question/type input-question) (:question/type %))
-                                          (= (:question/points input-question) (:question/points %))
-                                          (= (:question/question-statement input-question) (:question/question-statement %))
-                                          (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
-                                          (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
-                                          (= (sort (distinct (:question/multiple-choice-solution input-question))) (:question/multiple-choice-solution %)))
-                                    question-list)))
-                          generated-questions)
-                  (some #(t/is (thrown-with-msg?
-                                 java.lang.AssertionError
-                                 #"There is a similar question already in the data base. Please check the existing question and check wether you need to create a new one."
-                                 (db/add-question! test-db %))) generated-questions)))))
-    (testing "add-question! with generated free text questions"
-      (let [generated-questions (distinct (gen/sample (gen/not-empty (s/gen :question/question)) generator-sample-size))]
-        (t/is (or (every? (fn [act]
-                            (let [input-question act
-                                  _ (db/add-question! test-db input-question)
-                                  question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
-                                  question-list (map #(db/get-question-by-id test-db %) question-ids)]
-                              (some #(and (= (:question/type input-question) (:question/type %))
-                                          (= (:question/points input-question) (:question/points %))
-                                          (= (:question/question-statement input-question) (:question/question-statement %))
-                                          (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
-                                          (= (:question/evaluation-criteria input-question) (:question/evaluation-criteria %)))
-                                    question-list)))
-                          generated-questions)
-                  (some #(t/is (thrown-with-msg?
-                                 java.lang.AssertionError
-                                 #"There is a similar question already in the data base. Please check the existing question and check wether you need to create a new one."
-                                 (db/add-question! test-db %))) generated-questions)))))))
+
+    ;; in the following you see an idea of testing add-question! with sampled question - this does not work because the generator implemented like this can create duplicates and the add-question! denies duplicate wuestions. Idea for fixing: create each parameter seperate in a sample and the question then by hand.
+
+    ;; (testing "add-question! with generated single choice questions"
+    ;;   (let [generated-questions (distinct (gen/sample (gen/not-empty (s/gen :question/single-choice-question)) generator-sample-size))]
+    ;;     (t/is (every? (fn [act]
+    ;;                     (let [input-question act
+    ;;                           _ (db/add-question! test-db input-question)
+    ;;                           question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+    ;;                           question-list (map #(db/get-question-by-id test-db %) question-ids)]
+    ;;                       (some #(and (= (:question/type input-question) (:question/type %))
+    ;;                                   (= (:question/points input-question) (:question/points %))
+    ;;                                   (= (:question/question-statement input-question) (:question/question-statement %))
+    ;;                                   (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
+    ;;                                   (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
+    ;;                                   (= (:question/single-choice-solution input-question) (:question/single-choice-solution %)))
+    ;;                             question-list)))
+    ;;                   generated-questions))))
+    ;; (testing "add-question! with generated multiple choice questions"
+    ;;   (let [generated-questions (distinct (gen/sample (gen/not-empty (s/gen :question/multiple-choice-question)) generator-sample-size))]
+    ;;     (t/is (every? (fn [act]
+    ;;                     (let [input-question act
+    ;;                           _ (db/add-question! test-db input-question)
+    ;;                           question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+    ;;                           question-list (map #(db/get-question-by-id test-db %) question-ids)]
+    ;;                       (some #(and (= (:question/type input-question) (:question/type %))
+    ;;                                   (= (:question/points input-question) (:question/points %))
+    ;;                                   (= (:question/question-statement input-question) (:question/question-statement %))
+    ;;                                   (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
+    ;;                                   (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
+    ;;                                   (= (sort (distinct (:question/multiple-choice-solution input-question))) (:question/multiple-choice-solution %)))
+    ;;                             question-list)))
+    ;;                   generated-questions))))
+    ;; (testing "add-question! with generated free text questions"
+    ;;   (let [generated-questions (distinct (gen/sample (gen/not-empty (s/gen :question/question)) generator-sample-size))]
+    ;;     (t/is (every? (fn [act]
+    ;;                     (let [input-question act
+    ;;                           _ (db/add-question! test-db input-question)
+    ;;                           question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+    ;;                           question-list (map #(db/get-question-by-id test-db %) question-ids)]
+    ;;                       (some #(and (= (:question/type input-question) (:question/type %))
+    ;;                                   (= (:question/points input-question) (:question/points %))
+    ;;                                   (= (:question/question-statement input-question) (:question/question-statement %))
+    ;;                                   (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
+    ;;                                   (= (:question/evaluation-criteria input-question) (:question/evaluation-criteria %)))
+    ;;                             question-list)))
+    ;;                   generated-questions))))
+    ))
 
 
 (deftest course-iteration-test
@@ -645,63 +637,64 @@
             res (db/get-all-answers test-db)]
         (t/is (every? (fn [act] (some #(= act %) ref-answers)) res))))))
 
+
 (deftest correction-test
-      (let [test-db (-create-test-db "correction-test-db")]
-        (testing "get-all-corrections-of-corrector with corrector-id = 3"
-        (let [res (db/get-all-corrections-of-corrector test-db "3")
-              ref-corrections [#:correction{:answer #:answer{:id "2"}}
-                               #:correction{:answer #:answer{:id "1"}}
-                               #:correction{:answer #:answer{:id "4"}}
-                               #:correction{:answer #:answer{:id "12"}}]]
-          (t/is (every? (fn [act] (some #(= act %) ref-corrections)) res))))
-        (testing "get-all-corrections-of-corrector with corrector-id = 2"
-          (let [res (db/get-all-corrections-of-corrector test-db "2")
-                ref-corrections [#:correction{:answer #:answer{:id "14"}}]]
-            (t/is (every? (fn [act] (some #(= act %) ref-corrections)) res))))
-        (testing "get-all-corrections-of-corrector with invalid corrector-id = 42"
-          (t/is (thrown-with-msg?
-                 clojure.lang.ExceptionInfo
-                 #"Nothing found for entity id [:user/id \W 42 \W]"
-                 (db/get-all-corrections-of-corrector test-db "42"))))
-        (testing "add-correction! with valid correction"
-               (let [answer-id "1"
-                     correction {:correction/feedback "not good" :correction/points 0 :corrector/id "3"}
-                     _ (db/add-correction! test-db answer-id correction)
-                     corrections-of-corrector (db/get-all-corrections-of-corrector test-db "3")
-                     ref-corrections [#:correction{:answer #:answer{:id "1"}}
-                                      #:correction{:answer #:answer{:id "2"}}                                      
-                                      #:correction{:answer #:answer{:id "1"}}
-                                      #:correction{:answer #:answer{:id "4"}}
-                                      #:correction{:answer #:answer{:id "12"}}]]
-                 (t/is (= corrections-of-corrector ref-corrections))))
-        (testing "add-correction! with invalid answer-id"
-               (let [answer-id "42"
-                     correction {:correction/feedback "not good" :correction/points 0 :corrector/id "3"}]
-                 (t/is (thrown-with-msg?
-                        clojure.lang.ExceptionInfo
-                        #"Nothing found for entity id [:user/id \W 42 \W]"
-                        (db/add-correction! test-db answer-id correction)))))
-        (testing "add-correction! with invalid corrector-id"
-          (let [answer-id "1"
-                correction {:correction/feedback "not good" :correction/points 0 :corrector/id "42"}]
-            (t/is (thrown-with-msg?
-                   clojure.lang.ExceptionInfo
-                   #"Nothing found for entity id [:user/id \W 42 \W]"
-                   (db/add-correction! test-db answer-id correction)))))
-        (testing "get-corrections-of-answer with answer-id = 2"
-               (let [answer-id "2"
-                     res (db/get-corrections-of-answer test-db answer-id)
-                     ref-correction #:correction{:feedback "Please elaborate about the aspects of example-based testing"}]
-                 (t/is (= (:feedback res) (:feedback ref-correction)))))
-        (testing "get-corrections-of-answer with answer-id = 1"
-          (let [answer-id "1"
-                res (db/get-corrections-of-answer test-db answer-id)
-                ref-corrections [#:correction{:feedback "Can you say something about the rules of handling with transients?"}
-                                #:correction{:feedback "not good"}]]
-            (t/is (every? (fn [act] (some #(= (:feedback act) (:feedback %)) ref-corrections)) res))))
-        (testing "get-corrections-of-answer with invalid answer-id"
-          (let [answer-id "42"]
-            (t/is (thrown-with-msg?
-                    java.lang.AssertionError
-                    (re-pattern (str "The answer-id: " answer-id "does not exist in the database!"))
-                    (db/get-corrections-of-answer test-db answer-id)))))))
+  (let [test-db (-create-test-db "correction-test-db")]
+    (testing "get-all-corrections-of-corrector with corrector-id = 3"
+      (let [res (db/get-all-corrections-of-corrector test-db "3")
+            ref-corrections [#:correction{:answer #:answer{:id "2"}}
+                             #:correction{:answer #:answer{:id "1"}}
+                             #:correction{:answer #:answer{:id "4"}}
+                             #:correction{:answer #:answer{:id "12"}}]]
+        (t/is (every? (fn [act] (some #(= act %) ref-corrections)) res))))
+    (testing "get-all-corrections-of-corrector with corrector-id = 2"
+      (let [res (db/get-all-corrections-of-corrector test-db "2")
+            ref-corrections [#:correction{:answer #:answer{:id "14"}}]]
+        (t/is (every? (fn [act] (some #(= act %) ref-corrections)) res))))
+    (testing "get-all-corrections-of-corrector with invalid corrector-id = 42"
+      (t/is (thrown-with-msg?
+              clojure.lang.ExceptionInfo
+              #"Nothing found for entity id [:user/id \W 42 \W]"
+              (db/get-all-corrections-of-corrector test-db "42"))))
+    (testing "add-correction! with valid correction"
+      (let [answer-id "1"
+            correction {:correction/feedback "not good" :correction/points 0 :corrector/id "3"}
+            _ (db/add-correction! test-db answer-id correction)
+            corrections-of-corrector (db/get-all-corrections-of-corrector test-db "3")
+            ref-corrections [#:correction{:answer #:answer{:id "1"}}
+                             #:correction{:answer #:answer{:id "2"}}
+                             #:correction{:answer #:answer{:id "1"}}
+                             #:correction{:answer #:answer{:id "4"}}
+                             #:correction{:answer #:answer{:id "12"}}]]
+        (t/is (= corrections-of-corrector ref-corrections))))
+    (testing "add-correction! with invalid answer-id"
+      (let [answer-id "42"
+            correction {:correction/feedback "not good" :correction/points 0 :corrector/id "3"}]
+        (t/is (thrown-with-msg?
+                clojure.lang.ExceptionInfo
+                #"Nothing found for entity id [:user/id \W 42 \W]"
+                (db/add-correction! test-db answer-id correction)))))
+    (testing "add-correction! with invalid corrector-id"
+      (let [answer-id "1"
+            correction {:correction/feedback "not good" :correction/points 0 :corrector/id "42"}]
+        (t/is (thrown-with-msg?
+                clojure.lang.ExceptionInfo
+                #"Nothing found for entity id [:user/id \W 42 \W]"
+                (db/add-correction! test-db answer-id correction)))))
+    (testing "get-corrections-of-answer with answer-id = 2"
+      (let [answer-id "2"
+            res (db/get-corrections-of-answer test-db answer-id)
+            ref-correction #:correction{:feedback "Please elaborate about the aspects of example-based testing"}]
+        (t/is (= (:feedback res) (:feedback ref-correction)))))
+    (testing "get-corrections-of-answer with answer-id = 1"
+      (let [answer-id "1"
+            res (db/get-corrections-of-answer test-db answer-id)
+            ref-corrections [#:correction{:feedback "Can you say something about the rules of handling with transients?"}
+                             #:correction{:feedback "not good"}]]
+        (t/is (every? (fn [act] (some #(= (:feedback act) (:feedback %)) ref-corrections)) res))))
+    (testing "get-corrections-of-answer with invalid answer-id"
+      (let [answer-id "42"]
+        (t/is (thrown-with-msg?
+                java.lang.AssertionError
+                (re-pattern (str "The answer-id: " answer-id "does not exist in the database!"))
+                (db/get-corrections-of-answer test-db answer-id)))))))
