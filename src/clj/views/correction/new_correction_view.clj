@@ -1,9 +1,23 @@
 (ns views.correction.new-correction-view
   (:require
+    [clojure.spec.alpha :as s]
     [hiccup.form :as hform]
     [hiccup2.core :as h]
     [ring.util.anti-forgery :refer [anti-forgery-field]]
     [util.hiccup-extensions :refer [optional-error-display]]))
+
+
+(def new-correction-error-keys
+  "Possible keys for which errors can be displayed in the new-correction-form."
+  #{:correction/points :correction/feedback})
+
+
+(s/fdef new-correction-form
+        :args (s/cat :answer :correction/answer
+                     :question :answer/question
+                     :post-destination :general/non-blank-string
+                     :errors (s/? (s/map-of new-correction-error-keys string?)))
+        :ret #(instance? hiccup.util.RawString %))
 
 
 (defn new-correction-form

@@ -16,6 +16,14 @@
       nil)))
 
 
+(s/fdef new-correction-get
+        :args (s/cat :req coll?
+                     :post-destination :general/non-blank-string
+                     :get-answer-fn (s/? (s/get-spec `db/get-answer-by-id))
+                     :get-question-fn (s/? (s/get-spec `db/get-question-by-id)))
+        :ret #(instance? hiccup.util.RawString %))
+
+
 (defn new-correction-get
   "Creates the GET form to create a new correction."
   [req post-destination get-answer-fn get-question-fn]
@@ -33,6 +41,14 @@
                 (when-not (s/valid? :answer/points points) [:correction/points "Die angegebenen Punkte sind ungültig."]))
           (when-not (s/valid? :correction/feedback feedback) [:correction/answer "Das angegebene Feedback ist ungültig."]))
     (when-not (s/valid? :answer/id answer-id) [:correction/answer "Die Frage ist ungültig."])))
+
+
+(s/fdef submit-new-correction!
+        :args (s/cat :req coll?
+                     :redirect-uri :general/non-blank-string
+                     :add-correction-fn (s/? (s/get-spec `db/add-correction!))
+                     :get-user-by-git-id-fn (s/? (s/get-spec `db/get-user-by-git-id)))
+        :ret #(instance? hiccup.util.RawString %))
 
 
 (defn submit-new-correction!
