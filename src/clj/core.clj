@@ -5,6 +5,7 @@
     [compojure.core :refer [defroutes GET POST]]
     [compojure.route :as route]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
+    [controllers.course.course-controller :refer [create-course-get submit-create-course!]]
     [controllers.question.question-controller :refer [create-question-get
                                                       submit-create-question!]]
     [db]
@@ -12,8 +13,8 @@
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.defaults :refer [secure-site-defaults
                                       site-defaults wrap-defaults]]
-    [ring.middleware.file :refer [wrap-file]]
     [ring.middleware.reload :refer [wrap-reload]]
+    [ring.middleware.resource :refer [wrap-resource]]
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-service.course-service :refer [->CourseService]]
     [services.course-service.p-course-service :refer [get-all-courses]]
@@ -46,7 +47,10 @@
 ;; all routes that require authentication go here
 (defroutes private-routes
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
-
+  (GET "/create-course" req
+       (html-response (create-course-get req "/create-course")))
+  (POST "/create-course" req
+        (submit-create-course! req "/create-course" (:course-service services)))
   (GET "/create-course-iteration" req
        (html-response (create-course-iteration-get req "/create-course-iteration"
                                                    (partial get-all-courses (:course-service services))
@@ -70,7 +74,7 @@
 ;; oauth2 middleware callback requires cookie setting :same-site to be lax, see: https://github.com/weavejester/ring-oauth2
 (def app
   (-> combined-routes
-      (wrap-file "resources/public") ; serving of static resources
+      (wrap-resource "public") ; serving of static resources
       (wrap-defaults (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
 
 

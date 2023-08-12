@@ -9,3 +9,5 @@ node_modules/
 .env
 target/
 .clava
+resources/public/cljs/
+.DS_Store
