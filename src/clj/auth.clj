@@ -2,7 +2,8 @@
   (:require
     [clj-http.client :as client]
     [clojure.spec.alpha :as s]
-    [ring.middleware.oauth2 :refer [wrap-oauth2]]))
+    [ring.middleware.oauth2 :refer [wrap-oauth2]]
+    [util.ring-extensions :refer [html-response]]))
 
 
 ;; RFC 6749 1.5:
@@ -128,8 +129,7 @@
       "/oauth2/github/callback-success" (authenticate-session request)
       (if (is-authenticated? request)
         (handler request)
-        {:status 401
-         :body "Unauthorized"}))))
+        (html-response [:p "Unauthorized."] )))))
 
 
 (defn wrap-authentication
