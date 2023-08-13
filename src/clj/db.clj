@@ -108,7 +108,11 @@
 
   (get-user-by-git-id
     [this git-id]
-    "get the user given the git-id of the user"))
+    "get the user given the git-id of the user. This function throws an error in case the user does not exist.")
+
+  (get-user-id-by-git-id
+    [this git-id]
+    "get the user id given the git-id of the user. This function returns nil in case the user does not exist."))
 
 
 (deftype Database
@@ -480,7 +484,17 @@
     [this git-id]
     (d/pull @(.conn this)
             [:user/id :user/git-id :user/course-iterations]
-            [:user/git-id git-id])))
+            [:user/git-id git-id]))
+
+
+  (get-user-id-by-git-id
+    [this git-id]
+    (first (d/q '[:find ?id
+                  :in $ ?git-id
+                  :where
+                  [?e :user/git-id ?git-id]
+                  [?e :user/id ?id]]
+                @(.conn this) git-id))))
 
 
 ;; use mem db

@@ -8,6 +8,7 @@
     [controllers.course.course-controller :refer [create-course-get submit-create-course!]]
     [controllers.question.question-controller :refer [create-question-get
                                                       submit-create-question!]]
+    [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
     [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
@@ -22,6 +23,7 @@
     [services.question-service.question-service :refer [->QuestionService]]
     [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
+    [services.user-service.user-service :refer [->UserService]]
     [util.ring-extensions :refer [html-response]]))
 
 
@@ -32,16 +34,19 @@
   {:course-service (->CourseService db)
    :course-iteration-service (->CourseIterationService db)
    :question-set-service (->QuestionSetService db)
-   :question-service (->QuestionService db)})
+   :question-service (->QuestionService db)
+   :user-service (->UserService db)})
 
 
 ;; all routes that dont need authentication go here
 (defroutes public-routes
   (GET "/" req (html-response
-                 (if (auth/is-logged-in req)
+                 (if (auth/is-logged-in? req)
                    [:p (str "Hello, " (str (get-in req [:session :user :id])))]
-                   [:a {:href "/oauth2/github"} "Login"])))) ; TODO remove route, just an example to show login working
-
+                   [:a {:href "/login"} "Login"]))) ; TODO remove route, just an example to show login working
+  (GET "/login" req (login req (services :user-service)))
+  (GET "/create-user" req (html-response (create-user-get req "/create-user" (services :user-service))))
+  (POST "/create-user" req (submit-create-user req "/login" (services :user-service))))
 
 
 ;; all routes that require authentication go here
