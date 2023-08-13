@@ -46,12 +46,16 @@
 ;; all routes that dont need authentication go here
 (defroutes public-routes
   (GET "/" req (html-response
-                 (if (auth/is-logged-in? req)
-                   [:p (str "Hello, " (str (get-in req [:session :user :id])))]
-                   [:a {:href "/login"} "Login"]))) ; TODO remove route, just an example to show login working
-  (GET "/login" req (login req (services :user-service)))
-  (GET "/create-user" req (html-response (create-user-get req "/create-user" (services :user-service))))
-  (POST "/create-user" req (submit-create-user req "/login" (services :user-service))))
+                (if (auth/is-logged-in req)
+                  (concat
+                   [:p [:i (str "coo coo. ")] (str "Github User " (str (get-in req [:session :user :id])) " authenticated.")]
+                   [:img {:src "img/logo.jpeg" :style (str "max-width: 50%; max-height: 50%")}])
+                  (str "Hello stranger. Please " (h/html [:a {:href "/login"} "Login"]) "."))))) ; TODO remove route, just an example to show login working
+
+ (GET "/login" req (login req (services :user-service)))
+ (GET "/create-user" req (html-response (create-user-get req "/create-user" (services :user-service))))
+ (POST "/create-user" req (submit-create-user req "/login" (services :user-service))))
+
 
 
 ;; all routes that require authentication go here
