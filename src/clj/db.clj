@@ -26,6 +26,10 @@
   (get-questions-for-user
     [this corrector-id])
 
+  (get-question-ids-for-user
+    [this user-id]
+    "Fetches all question-ids belonging to a user.")
+
   (get-answers-for-question
     [this question-id]
     "Fetches all answers of all users for one question.")
@@ -68,6 +72,9 @@
     [this course-id year semester])
 
   (get-question-by-id
+    [this id])
+
+  (get-question-and-possible-solutions-by-id
     [this id])
 
   (add-question!
@@ -185,6 +192,18 @@
                  :where
                  [?corr :user/course-iterations ?course-iteration]]
                @(.conn this) [:user/id corrector-id])))
+
+
+  (get-question-ids-for-user
+    [this user-id]
+    (mapv first
+          (d/q '[:find (pull ?q [:question/id])
+                 :in $ ?u
+                 :where
+                 [?u :user/course-iterations ?ci]
+                 [?ci :course-iteration/question-sets ?qs]
+                 [?qs :question-set/questions ?q]]
+               @(.conn this) [:user/id user-id])))
 
 
   (get-answers-for-question
@@ -331,6 +350,13 @@
     [this id]
     (d/pull @(.conn this)
             [:question/id :question/question-statement :question/points :question/type]
+            [:question/id id]))
+
+
+  (get-question-and-possible-solutions-by-id
+    [this id]
+    (d/pull @(.conn this)
+            [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]
             [:question/id id]))
 
 

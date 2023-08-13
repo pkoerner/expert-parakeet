@@ -2,11 +2,14 @@
   (:gen-class)
   (:require
     [auth :refer [wrap-authentication]]
-    [compojure.core :refer [defroutes GET POST]]
+    [compojure.core :refer [defroutes GET POST PUT]]
     [compojure.route :as route]
+    [controllers.answer.answer-controller :refer [submit-user-answer!]]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
     [controllers.course.course-controller :refer [create-course-get submit-create-course!]]
+    [controllers.question-set.question-set-controller :refer [question-set-get]]
     [controllers.question.question-controller :refer [create-question-get
+                                                      question-get
                                                       submit-create-question!]]
     [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
     [db]
@@ -16,6 +19,7 @@
                                       site-defaults wrap-defaults]]
     [ring.middleware.reload :refer [wrap-reload]]
     [ring.middleware.resource :refer [wrap-resource]]
+    [services.answer-service.answer-service :refer [->AnswerService]]
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-service.course-service :refer [->CourseService]]
     [services.course-service.p-course-service :refer [get-all-courses]]
@@ -35,6 +39,7 @@
    :course-iteration-service (->CourseIterationService db)
    :question-set-service (->QuestionSetService db)
    :question-service (->QuestionService db)
+   :answer-service (->AnswerService db)
    :user-service (->UserService db)})
 
 
@@ -51,11 +56,30 @@
 
 ;; all routes that require authentication go here
 (defroutes private-routes
-  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
+  (GET "/question-set/:id"
+       req
+       (html-response (question-set-get req (:question-set-service services))))
+
+  (GET "/question/:id"
+       req
+       (question-get req "/question/" (:question-service services)))
+
+  (PUT "/question/:id"
+       req
+       (submit-user-answer! req (:answer-service services)))
+
+  (GET "/create-question" req
+       (html-response (create-question-get req (partial get-question-categories (:question-service services)) "/create-question")))
+
+  (POST "/create-question" req
+        (submit-create-question! req "/create-question" (:question-service services)))
+
   (GET "/create-course" req
        (html-response (create-course-get req "/create-course")))
+
   (POST "/create-course" req
         (submit-create-course! req "/create-course" (:course-service services)))
+
   (GET "/create-course-iteration" req
        (html-response (create-course-iteration-get req "/create-course-iteration"
                                                    (partial get-all-courses (:course-service services))
@@ -63,10 +87,7 @@
   (POST "/create-course-iteration" req
         (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
 
-  (GET "/create-question" req
-       (html-response (create-question-get req (partial get-question-categories (:question-service services)) "/create-question")))
-  (POST "/create-question" req
-        (submit-create-question! req "/create-question" (:question-service services)))
+  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
 
   (route/not-found "Not Found"))
 
