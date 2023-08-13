@@ -13,11 +13,11 @@
 ;; This function and the subsequent usage
 ;; in the dispatch-question-type is
 ;; sourced from: https://github.com/yokolet/hiccup-samples
-;; TODO: add answer-id to the lablaed radio
+;; Changed after review by deleting unnecessary attributes.
 (defn labeled-radio
   [label]
-  [:label (form/radio-button {:ng-model "question.answer"} "answer" false label)
-   (str label "    ")])
+  [:label (form/radio-button "answer" false label)
+   [:span.mx-1 label]])
 
 
 (defn dispatch-question-type
