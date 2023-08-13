@@ -7,13 +7,6 @@
     [ring.util.response :refer [header response]]))
 
 
-(def ^:private bootstrap-include
-  [:link {:rel "stylesheet"
-          :href "/css/bootstrap.min.css"
-          :integrity "sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-          :crossorigin "anonymous"}])
-
-
 (s/fdef html-response
         :args (s/cat :html #(instance? hiccup.util.RawString %))
         :ret (s/cat :html #(instance? hiccup.util.RawString %)))
@@ -21,7 +14,7 @@
 
 (defn html-response
   [html]
-  (-> (h/html bootstrap-include html) str response (header "Content-Type" "text/html; charset=utf-8")))
+  (-> (h/html html) str response (header "Content-Type" "text/html; charset=utf-8")))
 
 
 (s/fdef extract-errors
