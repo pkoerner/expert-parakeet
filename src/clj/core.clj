@@ -14,6 +14,7 @@
     [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
     [db]
     [domain]
+    [hiccup2.core :as h]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.defaults :refer [secure-site-defaults
                                       site-defaults wrap-defaults]]
@@ -28,7 +29,8 @@
     [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
     [services.user-service.user-service :refer [->UserService]]
-    [util.ring-extensions :refer [html-response]]))
+    [util.ring-extensions :refer [html-response]]
+    [views.template :refer [wrap-navbar-and-footer]]))
 
 
 (def db db/create-database)
@@ -45,17 +47,16 @@
 
 ;; all routes that dont need authentication go here
 (defroutes public-routes
-  (GET "/" req (html-response
-                (if (auth/is-logged-in req)
-                  (concat
-                   [:p [:i (str "coo coo. ")] (str "Github User " (str (get-in req [:session :user :id])) " authenticated.")]
-                   [:img {:src "img/logo.jpeg" :style (str "max-width: 50%; max-height: 50%")}])
-                  (str "Hello stranger. Please " (h/html [:a {:href "/login"} "Login"]) "."))))) ; TODO remove route, just an example to show login working
+  (GET "/" req
+       (if (auth/is-logged-in req)
+         (str (h/html [:div
+                       [:p [:i (str "coo coo. ")] (str "Github User " (str (get-in req [:session :user :id])) " authenticated.")]
+                       [:img {:src "img/logo.jpeg" :style (str "max-width: 50%; max-height: 50%")}]]))
+         (str (h/html [:p "Hello stranger. Please " [:a {:href "/login"} "Login"] "."]))))) ; TODO remove route, just an example to show login working
 
  (GET "/login" req (login req (services :user-service)))
  (GET "/create-user" req (html-response (create-user-get req "/create-user" (services :user-service))))
  (POST "/create-user" req (submit-create-user req "/login" (services :user-service))))
-
 
 
 ;; all routes that require authentication go here
@@ -104,6 +105,7 @@
 ;; oauth2 middleware callback requires cookie setting :same-site to be lax, see: https://github.com/weavejester/ring-oauth2
 (def app
   (-> combined-routes
+      (wrap-navbar-and-footer)
       (wrap-resource "public") ; serving of static resources
       (wrap-defaults (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
 
