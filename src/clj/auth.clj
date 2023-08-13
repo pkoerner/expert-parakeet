@@ -129,7 +129,7 @@
       "/oauth2/github/callback-success" (authenticate-session request)
       (if (is-authenticated? request)
         (handler request)
-        (html-response [:p "Unauthorized."] )))))
+        (html-response [:p "Unauthorized."])))))
 
 
 (defn wrap-authentication

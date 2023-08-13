@@ -14,7 +14,6 @@
     [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
     [db]
     [domain]
-    [hiccup2.core :as h]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.defaults :refer [secure-site-defaults
                                       site-defaults wrap-defaults]]
@@ -48,15 +47,14 @@
 ;; all routes that dont need authentication go here
 (defroutes public-routes
   (GET "/" req
-       (if (auth/is-logged-in req)
-         (str (h/html [:div
-                       [:p [:i (str "coo coo. ")] (str "Github User " (str (get-in req [:session :user :id])) " authenticated.")]
-                       [:img {:src "img/logo.jpeg" :style (str "max-width: 50%; max-height: 50%")}]]))
-         (str (h/html [:p "Hello stranger. Please " [:a {:href "/login"} "Login"] "."]))))) ; TODO remove route, just an example to show login working
-
- (GET "/login" req (login req (services :user-service)))
- (GET "/create-user" req (html-response (create-user-get req "/create-user" (services :user-service))))
- (POST "/create-user" req (submit-create-user req "/login" (services :user-service))))
+       (if (auth/is-logged-in? req)
+         (html-response [:div
+                         [:p [:i (str "coo coo. ")] (str "Github User " (str (get-in req [:session :user :id])) " authenticated.")]
+                         [:img {:src "img/logo.jpeg" :style (str "max-width: 50%; max-height: 50%")}]])
+         (html-response [:p "Hello stranger. Please " [:a {:href "/login"} "Login"] "."])))
+  (GET "/login" req (login req (services :user-service)))
+  (GET "/create-user" req (html-response (create-user-get req "/create-user" (services :user-service))))
+  (POST "/create-user" req (submit-create-user req "/login" (services :user-service))))
 
 
 ;; all routes that require authentication go here

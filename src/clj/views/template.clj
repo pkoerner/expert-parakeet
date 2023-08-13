@@ -1,6 +1,6 @@
 (ns views.template
   (:require
-    [auth :refer [is-logged-in]]
+    [auth :refer [is-logged-in?]]
     [hiccup2.core :as h]))
 
 
@@ -10,14 +10,15 @@
 
 (defn not-logged-in
   [request]
-  (not (is-logged-in request)))
+  (not (is-logged-in? request)))
+
 
 (def menu-items
   (map (fn [item] (apply ->MenuItem item))
        [["Login" "/login" not-logged-in]
-        ["Home" "/" is-logged-in]
-        ["Create Course Iteration" "/create-course-iteration" is-logged-in]  ; FIXME: Check for admin permissions
-        ["Create Question" "/create-question" is-logged-in]]))  ; FIXME: Check for admin permissions
+        ["Home" "/" is-logged-in?]
+        ["Create Course Iteration" "/create-course-iteration" is-logged-in?]  ; FIXME: Check for admin permissions
+        ["Create Question" "/create-question" is-logged-in?]]))  ; FIXME: Check for admin permissions
 
 
 ;; this is the bootstrap 4.0 example "stick-footer-navbar" without the javascript
