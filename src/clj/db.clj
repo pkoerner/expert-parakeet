@@ -103,7 +103,23 @@
     [this answer-id])
 
   (add-correction!
-    [this ant-id correction]))
+    [this ant-id correction])
+
+  (add-user!
+    [this git-id]
+    "add a new user to the db with a new id, the given git-id and an empty coll of course-iterations.")
+
+  (get-user-by-id
+    [this id]
+    "get the user given the user-id id.")
+
+  (get-user-by-git-id
+    [this git-id]
+    "get the user given the git-id of the user. This function throws an error in case the user does not exist.")
+
+  (get-user-id-by-git-id
+    [this git-id]
+    "get the user id given the git-id of the user. This function returns nil in case the user does not exist."))
 
 
 (deftype Database
@@ -235,20 +251,17 @@
 
   (get-all-question-sets
     [this]
-    (mapv first (d/q '[:find ?id
-                       :where [_ :question-set/id ?id]]
+    (mapv first (d/q '[:find (pull ?e [:question-set/id :question-set/name])
+                       :where [?e :question-set/id]]
                      @(.conn this))))
 
 
   (get-all-courses
     [this]
-    (mapv first (d/q '[:find (pull ?e [:course-iteration/id {:course-iteration/course [:course/id :course/course-name]}
-                                       :course-iteration/year
-                                       :course-iteration/semester
-                                       :course-iteration/year
-                                       {:course-iteration/question-sets [:question-set/id]}])
-                       :where [?e :course-iteration/id]]
-                     @(.conn this))))
+    (mapv first
+          (d/q '[:find (pull ?e [:course/id :course/course-name {:course/question-sets [:question-set/id :question-set/name]}])
+                 :where [?e :course/id]]
+               @(.conn this))))
 
 
   (get-course-iterations-of-course
@@ -470,7 +483,44 @@
                                   :answer/points points}])
           db-after (:db-after tx-result)
           ids (:tempids tx-result)]
-      (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1)))))
+      (d/pull db-after [:correction/feedback {:correction/answer [:answer/points]}] (get ids -1))))
+
+
+  (add-user!
+    [this git-id]
+    (let [user-id (generate-id this :user/id)
+          tx-result (d/transact (.conn this)
+                                [{:db/id -1
+                                  :user/id user-id
+                                  :user/git-id git-id
+                                  :user/course-iterations []}])
+          db-after (:db-after tx-result)]
+      (d/pull db-after [:user/id :user/git-id :user/course-iterations]
+              [:user/id user-id])))
+
+
+  (get-user-by-id
+    [this user-id]
+    (d/pull @(.conn this)
+            [:user/id :user/git-id :user/course-iterations]
+            [:user/id user-id]))
+
+
+  (get-user-by-git-id
+    [this git-id]
+    (d/pull @(.conn this)
+            [:user/id :user/git-id :user/course-iterations]
+            [:user/git-id git-id]))
+
+
+  (get-user-id-by-git-id
+    [this git-id]
+    (first (d/q '[:find ?id
+                  :in $ ?git-id
+                  :where
+                  [?e :user/git-id ?git-id]
+                  [?e :user/id ?id]]
+                @(.conn this) git-id))))
 
 
 ;; use mem db
@@ -503,3 +553,4 @@
   (let [conn (create-conn)]
     (d/transact conn dummy-data/dummy-data)
     (Database. conn)))
+

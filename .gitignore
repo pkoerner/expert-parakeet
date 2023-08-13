@@ -10,3 +10,5 @@ node_modules/
 output.calva-repl
 target/
 .nrepl-port
+resources/public/cljs/
+.DS_Store

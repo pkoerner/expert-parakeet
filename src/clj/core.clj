@@ -7,17 +7,19 @@
     [controllers.answer.answer-controller :refer [submit-user-answer!]]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
     [controllers.question-set.question-set-controller :refer [question-set-get]]
-    [controllers.question.question-controller :refer [question-get
-                                                      create-question-get
+    [controllers.course.course-controller :refer [create-course-get submit-create-course!]]
+    [controllers.question.question-controller :refer [create-question-get 
+                                                      question-get
                                                       submit-create-question!]]
+    [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
     [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
     [ring.middleware.defaults :refer [secure-site-defaults
                                       site-defaults wrap-defaults]]
-    [ring.middleware.file :refer [wrap-file]]
     [ring.middleware.reload :refer [wrap-reload]]
     [services.answer-service.answer-service :refer [->AnswerService]]
+    [ring.middleware.resource :refer [wrap-resource]]
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-service.course-service :refer [->CourseService]]
     [services.course-service.p-course-service :refer [get-all-courses]]
@@ -25,6 +27,7 @@
     [services.question-service.question-service :refer [->QuestionService]]
     [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
+    [services.user-service.user-service :refer [->UserService]]
     [util.ring-extensions :refer [html-response]]))
 
 
@@ -36,43 +39,53 @@
    :course-iteration-service (->CourseIterationService db)
    :question-set-service (->QuestionSetService db)
    :question-service (->QuestionService db)
-   :answer-service (->AnswerService db)})
+   :answer-service (->AnswerService db)
+   :user-service (->UserService db)})
 
 
 ;; all routes that dont need authentication go here
 (defroutes public-routes
   (GET "/" req (html-response
-                 (if (auth/is-logged-in req)
+                 (if (auth/is-logged-in? req)
                    [:p (str "Hello, " (str (get-in req [:session :user :id])))]
-                   [:a {:href "/oauth2/github"} "Login"])))) ; TODO remove route, just an example to show login working
-
+                   [:a {:href "/login"} "Login"]))) ; TODO remove route, just an example to show login working
+  (GET "/login" req (login req (services :user-service)))
+  (GET "/create-user" req (html-response (create-user-get req "/create-user" (services :user-service))))
+  (POST "/create-user" req (submit-create-user req "/login" (services :user-service))))
 
 
 ;; all routes that require authentication go here
 (defroutes private-routes
   (GET "/question-set/:id"
-       req
-       (html-response (question-set-get req (:question-set-service services))))
+    req
+    (html-response (question-set-get req (:question-set-service services))))
+  
   (GET "/question/:id"
-       req
-       (question-get req "/question/" (:question-service services)))
+    req
+    (question-get req "/question/" (:question-service services)))
 
   (PUT "/question/:id"
-       req
-       (submit-user-answer! req (:answer-service services)))
+    req
+    (submit-user-answer! req (:answer-service services)))
 
   (GET "/create-question" req
-       (html-response (create-question-get req (partial get-question-categories (:question-service services)) "/create-question")))
+    (html-response (create-question-get req (partial get-question-categories (:question-service services)) "/create-question")))
 
   (POST "/create-question" req
-        (submit-create-question! req "/create-question" (:question-service services)))
+    (submit-create-question! req "/create-question" (:question-service services)))
+
+  (GET "/create-course" req
+    (html-response (create-course-get req "/create-course")))
+
+  (POST "/create-course" req
+    (submit-create-course! req "/create-course" (:course-service services)))
 
   (GET "/create-course-iteration" req
-       (html-response (create-course-iteration-get req "/create-course-iteration"
-                                                   :get-courses-fun (partial get-all-courses (:course-service services))
-                                                   :get-question-sets-fun (partial get-all-question-sets (:question-set-service services)))))
+    (html-response (create-course-iteration-get req "/create-course-iteration"
+                                                (partial get-all-courses (:course-service services))
+                                                (partial get-all-question-sets (:question-set-service services)))))
   (POST "/create-course-iteration" req
-        (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
+    (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
 
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
 
@@ -87,7 +100,7 @@
 ;; oauth2 middleware callback requires cookie setting :same-site to be lax, see: https://github.com/weavejester/ring-oauth2
 (def app
   (-> combined-routes
-      (wrap-file "resources/public") ; serving of static resources
+      (wrap-resource "public") ; serving of static resources
       (wrap-defaults (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
 
 

@@ -86,12 +86,36 @@
     :course-iteration/question-sets [[:question-set/id "2"]]}])
 
 
+(def user-roles
+  [{:role/id "0"
+    :role/course-iteration "1"
+    :role/name "student"}
+   {:role/id "1"
+    :role/course-iteration "2"
+    :role/name "student"}
+   {:role/id "2"
+    :role/course-iteration "1"
+    :role/name "corrector"}
+   {:role/id "3"
+    :role/course-iteration "2"
+    :role/name "student"}
+   {:role/id "4"
+    :role/course-iteration "1"
+    :role/name "admin"}
+   {:role/id "5"
+    :role/course-iteration "2"
+    :role/name "student"}])
+
+
 (def users
   [{:user/id "0"
+    :user/git-id "12345"
     :user/course-iterations [[:course-iteration/id "1"] [:course-iteration/id "2"]]}
    {:user/id "2"
+    :user/git-id "45678"
     :user/course-iterations [[:course-iteration/id "1"]]}
    {:user/id "3"
+    :user/git-id "13579"
     :user/course-iterations [[:course-iteration/id "2"]]}])
 
 
@@ -197,6 +221,7 @@
     question-sets
     courses
     course-iterations
+    user-roles
     users
     answers
     corrections))

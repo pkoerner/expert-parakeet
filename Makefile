@@ -13,3 +13,6 @@ lint:
 
 uber:
 	clj -T:build uber
+
+compile-cljs:
+	clj -X:compile-cljs
