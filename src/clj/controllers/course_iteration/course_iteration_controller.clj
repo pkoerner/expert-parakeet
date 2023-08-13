@@ -81,7 +81,6 @@
   "This function takes a `request`, and a uri to be redirected to, when the data of the request was invalid.  
    It also takes an implementation of the `PCourseIterationService` protocol, 
    which is used for validation and persisting the final course-iteration in the database. 
-get-question-se-by-id
    If the data was invalid the request is redirected to the provided `redirect-uri` with the errors as query parameters."
   [request redirect-uri course-iteration-service]
   (let [form-data (-> request (:multipart-params) (dissoc :__anti-forgery-token))
