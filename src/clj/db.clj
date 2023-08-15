@@ -26,6 +26,10 @@
   (get-questions-for-user
     [this corrector-id])
 
+  (get-question-ids-for-user
+    [this user-id]
+    "Fetches all question-ids belonging to a user.")
+
   (get-answers-for-question
     [this question-id]
     "Fetches all answers of all users for one question.")
@@ -70,6 +74,9 @@
   (get-question-by-id
     [this id])
 
+  (get-question-and-possible-solutions-by-id
+    [this id])
+
   (add-question!
     [this question])
 
@@ -108,7 +115,11 @@
 
   (get-user-by-git-id
     [this git-id]
-    "get the user given the git-id of the user"))
+    "get the user given the git-id of the user. This function throws an error in case the user does not exist.")
+
+  (get-user-id-by-git-id
+    [this git-id]
+    "get the user id given the git-id of the user. This function returns nil in case the user does not exist."))
 
 
 (deftype Database
@@ -183,6 +194,18 @@
                @(.conn this) [:user/id corrector-id])))
 
 
+  (get-question-ids-for-user
+    [this user-id]
+    (mapv first
+          (d/q '[:find (pull ?q [:question/id])
+                 :in $ ?u
+                 :where
+                 [?u :user/course-iterations ?ci]
+                 [?ci :course-iteration/question-sets ?qs]
+                 [?qs :question-set/questions ?q]]
+               @(.conn this) [:user/id user-id])))
+
+
   (get-answers-for-question
     [this question-id]
     (map
@@ -228,20 +251,17 @@
 
   (get-all-question-sets
     [this]
-    (mapv first (d/q '[:find ?id
-                       :where [_ :question-set/id ?id]]
+    (mapv first (d/q '[:find (pull ?e [:question-set/id :question-set/name])
+                       :where [?e :question-set/id]]
                      @(.conn this))))
 
 
   (get-all-courses
     [this]
-    (mapv first (d/q '[:find (pull ?e [:course-iteration/id {:course-iteration/course [:course/id :course/course-name]}
-                                       :course-iteration/year
-                                       :course-iteration/semester
-                                       :course-iteration/year
-                                       {:course-iteration/question-sets [:question-set/id]}])
-                       :where [?e :course-iteration/id]]
-                     @(.conn this))))
+    (mapv first
+          (d/q '[:find (pull ?e [:course/id :course/course-name {:course/question-sets [:question-set/id :question-set/name]}])
+                 :where [?e :course/id]]
+               @(.conn this))))
 
 
   (get-course-iterations-of-course
@@ -330,6 +350,13 @@
     [this id]
     (d/pull @(.conn this)
             [:question/id :question/question-statement :question/points :question/type]
+            [:question/id id]))
+
+
+  (get-question-and-possible-solutions-by-id
+    [this id]
+    (d/pull @(.conn this)
+            [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]
             [:question/id id]))
 
 
@@ -483,7 +510,17 @@
     [this git-id]
     (d/pull @(.conn this)
             [:user/id :user/git-id :user/course-iterations]
-            [:user/git-id git-id])))
+            [:user/git-id git-id]))
+
+
+  (get-user-id-by-git-id
+    [this git-id]
+    (first (d/q '[:find ?id
+                  :in $ ?git-id
+                  :where
+                  [?e :user/git-id ?git-id]
+                  [?e :user/id ?id]]
+                @(.conn this) git-id))))
 
 
 ;; use mem db

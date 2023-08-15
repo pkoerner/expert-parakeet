@@ -4,7 +4,8 @@
     [clojure.string :as string]
     [db]
     [ring.util.response :as response]
-    [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration validate-course-iteration]]
+    [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration PCourseIterationService
+                                                                          validate-course-iteration]]
     [util.ring-extensions :refer [construct-url extract-errors
                                   html-response]]
     [util.spec-functions :refer [map-spec]]
@@ -14,7 +15,6 @@
 (s/fdef create-course-iteration-get
         :args (s/cat :req coll?
                      :post-destination :general/non-blank-string
-                     :db #(satisfies? db/Database-Protocol %)
                      :get-courses-fun (s/? (s/get-spec `db/get-all-courses))
                      :get-question-sets-fun (s/? (s/get-spec `db/get-all-question-sets)))
         :ret #(instance? hiccup.util.RawString %)
@@ -40,11 +40,9 @@
    When the request passed to this function inside of `req` contains predefined error values in the `:query-params` of the `req` parameter, 
    they are displayed as errors within the form.
    The fields can be seen in `view/course-iteration-form`."
-  [req post-destination db & {:keys [get-courses-fun get-question-sets-fun]
-                              :or {get-courses-fun db/get-all-courses
-                                   get-question-sets-fun db/get-all-question-sets}}]
-  (let [courses (get-courses-fun db)
-        question-sets (get-question-sets-fun db)]
+  [req post-destination get-courses-fun get-question-sets-fun]
+  (let [courses (get-courses-fun)
+        question-sets (get-question-sets-fun)]
     (if (empty? courses)
       view/no-courses
       (let [errors (extract-errors req)]
@@ -73,7 +71,7 @@
 (s/fdef submit-create-course-iteration!
         :args (s/cat :request ::request-data
                      :redirect-uri string?
-                     :db-add-fun (s/? (s/get-spec `db/add-course-iteration-with-question-sets!)))
+                     :course-iteration-service #(satisfies? PCourseIterationService %))
         :ret #(instance? hiccup.util.RawString %))
 
 
@@ -81,7 +79,6 @@
   "This function takes a `request`, and a uri to be redirected to, when the data of the request was invalid.  
    It also takes an implementation of the `PCourseIterationService` protocol, 
    which is used for validation and persisting the final course-iteration in the database. 
-        
    If the data was invalid the request is redirected to the provided `redirect-uri` with the errors as query parameters."
   [request redirect-uri course-iteration-service]
   (let [form-data (-> request (:multipart-params) (dissoc :__anti-forgery-token))
