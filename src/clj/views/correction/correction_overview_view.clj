@@ -1,5 +1,6 @@
 (ns views.correction.correction-overview-view
   (:require
+    [clojure.spec.alpha :as s]
     [hiccup2.core :as h]))
 
 
@@ -53,6 +54,22 @@
             (card-entry "Feedback:" (correction :correction/feedback))
             (card-entry "Punkte:" (str (correction :answer/points) " von " (correction :question/points)))]]])
        corrections))
+
+
+(s/def ::correction (s/keys :req [:correction/feedback :answer/points :question/points :question/question-statement :answer/answer]))
+
+
+(s/fdef correction-overview
+        :args (s/and (s/cat :corrections (s/coll-of ::correction)
+                            :tabs (s/map-of :general/non-blank-string :general/non-blank-string)
+                            :active-tab :general/non-blank-string
+                            :number-of-pages pos-int?
+                            :active-page pos-int?)
+                     #(> (:active-page %) 0)
+                     #(> (:number-of-pages %) 0)
+                     #(>= (:number-of-pages %) (:active-page %))
+                     #(contains? (:tabs %) (:active-tab %)))
+        :ret  #(instance? hiccup.util.RawString %))
 
 
 (defn correction-overview
