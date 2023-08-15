@@ -31,6 +31,6 @@
                          (sort-by #(% :correction/timestamp))
                          (drop (* page-size (dec active-page)))
                          (take page-size))
-        number-of-pages (int (Math/ceil (/ (count corrections) page-size)))]
+        number-of-pages (max 1 (int (Math/ceil (/ (count corrections) page-size))))]
 
     (view/correction-overview page-result tabs active-tab number-of-pages active-page)))
