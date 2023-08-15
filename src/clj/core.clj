@@ -11,8 +11,8 @@
     [controllers.question.question-controller :refer [create-question-get
                                                       question-get
                                                       submit-create-question!]]
-    [controllers.user.user-overview-controller :refer [create-user-overview-get]]
     [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
+    [controllers.user.user-overview-controller :refer [create-user-overview-get]]
     [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
