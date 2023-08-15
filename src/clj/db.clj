@@ -29,7 +29,10 @@
   ;; (get-questions-for-user
   ;;   [this corrector-id])
 
-  ;; think unnecessary
+  (get-question-ids-for-user
+    [this user-id]
+    "Fetches all question-ids belonging to a user.")
+
   (get-answers-for-question
     [this question-id]
     "Fetches all answers of all users for one question.")
@@ -74,6 +77,9 @@
     [this course-id year semester])
 
   (get-question-by-id
+    [this id])
+
+  (get-question-and-possible-solutions-by-id
     [this id])
 
   (add-question!
@@ -125,6 +131,11 @@
   (get-all-user
     [this]
     "get all users in database"))
+    "get the user given the git-id of the user. This function throws an error in case the user does not exist.")
+
+  (get-user-id-by-git-id
+    [this git-id]
+    "get the user id given the git-id of the user. This function returns nil in case the user does not exist."))
 
 
 (deftype Database
@@ -198,6 +209,18 @@
   ;;                :where
   ;;                [?corr :user/course-iterations ?course-iteration]]
   ;;              @(.conn this) [:user/id user-id])))
+
+
+  (get-question-ids-for-user
+    [this user-id]
+    (mapv first
+          (d/q '[:find (pull ?q [:question/id])
+                 :in $ ?u
+                 :where
+                 [?u :user/course-iterations ?ci]
+                 [?ci :course-iteration/question-sets ?qs]
+                 [?qs :question-set/questions ?q]]
+               @(.conn this) [:user/id user-id])))
 
 
   (get-answers-for-question
@@ -347,6 +370,13 @@
     [this id]
     (d/pull @(.conn this)
             ["*"]
+            [:question/id id]))
+
+
+  (get-question-and-possible-solutions-by-id
+    [this id]
+    (d/pull @(.conn this)
+            [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]
             [:question/id id]))
 
 
@@ -529,7 +559,17 @@
     (mapv first
           (d/q '[:find (pull ?e [:user/id :user/git-id {:user/course-iterations [:course-iteration/id]}])
                  :where [?e :user/id]]
-               @(.conn this)))))
+               @(.conn this))))
+
+
+  (get-user-id-by-git-id
+    [this git-id]
+    (first (d/q '[:find ?id
+                  :in $ ?git-id
+                  :where
+                  [?e :user/git-id ?git-id]
+                  [?e :user/id ?id]]
+                @(.conn this) git-id))))
 
 
 ;; use mem db

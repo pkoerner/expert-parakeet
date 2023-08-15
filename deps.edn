@@ -1,4 +1,4 @@
-{:paths   ["src/clj"]
+{:paths   ["src/clj" "resources"]
  :deps    {org.clojure/clojure {:mvn/version "1.11.1"}
            io.replikativ/datahike {:mvn/version "0.5.1507"}
            provisdom/spectomic {:mvn/version "1.0.78"}
@@ -37,4 +37,8 @@
                           :main-opts ["-m" "cljstyle.main" "check"]}
 
            :nrepl       {:extra-deps {cider/cider-nrepl   {:mvn/version "0.28.5"}}
-                         :main-opts  ["-m" "nrepl.cmdline" "--interactive" "--middleware" "[cider.nrepl/cider-middleware]"]}}}
+                         :main-opts  ["-m" "nrepl.cmdline" "--interactive" "--middleware" "[cider.nrepl/cider-middleware]"]}
+
+           :compile-cljs  {:extra-deps {org.clojure/clojurescript {:mvn/version "1.11.60"}}
+                           :extra-paths ["src/cljs"]
+                           :exec-fn    compile/compile-cljs}}}

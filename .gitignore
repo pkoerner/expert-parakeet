@@ -7,4 +7,8 @@
 .shadow-cljs/
 node_modules/
 .env
+output.calva-repl
 target/
+.nrepl-port
+resources/public/cljs/
+.DS_Store

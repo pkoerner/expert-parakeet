@@ -10,54 +10,46 @@
     :question/type :question.type/free-text
     :question/question-statement "Describe a use case for transient data structures"
     :question/evaluation-criteria "The following aspects are explained: performance improvement, mutable variant of persistent data structures, must be made persistent before function return"
-    :question/points 3
-    :question/categories #{"Cat1" "Cat2" "Cat3"}}
+    :question/points 3}
    {:question/id "2"
     :question/type :question.type/free-text
     :question/question-statement "What is the JVM?"
     :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
-    :question/points 3
-    :question/categories #{"Cat1" "Cat2"}}
+    :question/points 3}
    {:question/id "3"
     :question/type :question.type/free-text
     :question/question-statement "What are some advantages and disadvantages of example-based and generative testing?"
     :question/evaluation-criteria "The following aspects are explained: Oracle, performance, test-coverage"
-    :question/points 2
-    :question/categories #{"Cat1" "Cat3"}}
+    :question/points 2}
    {:question/id "4"
     :question/type :question.type/single-choice
     :question/question-statement "Transient data structures are:"
     :question/possible-solutions #{"mutable" "immutable"}
     :question/single-choice-solution "mutable"
-    :question/points 1
-    :question/categories #{"Cat2" "Cat3"}}
+    :question/points 1}
    {:question/id "5"
     :question/type :question.type/multiple-choice
     :question/question-statement "Which keywords are suitable for generative testing?"
     :question/possible-solutions #{"Oracle" "inverse function" "specs" "fast and low memory usage"}
     :question/multiple-choice-solution #{"Oracle" "inverse function" "specs"}
-    :question/points 1
-    :question/categories #{"Cat1"}}
+    :question/points 1}
    {:question/id "6"
     :question/question-statement "What type of programming lanuage is java?"
     :question/type :question.type/single-choice
     :question/possible-solutions #{"object oriented" "functional" "logic"}
     :question/single-choice-solution "object oriented"
-    :question/points 1
-    :question/categories #{"Cat2"}}
+    :question/points 1}
    {:question/id "7"
     :question/question-statement "When was the movie Alien by ridley scott released?"
     :question/type :question.type/single-choice
     :question/possible-solutions #{"1979" "1976" "2000" "1966"}
     :question/single-choice-solution "1979"
-    :question/points 1
-    :question/categories #{"Cat3"}}
+    :question/points 1}
    {:question/id "8"
     :question/type :question.type/free-text
     :question/question-statement "Which one is the greates movie of all time? ;D"
     :question/evaluation-criteria "Alien !!!"
-    :question/points 1
-    :question/categories #{"Cat2" "Cat1" "Cat3"}}])
+    :question/points 1}])
 
 
 (def question-sets
@@ -92,6 +84,27 @@
     :course-iteration/year 2020
     :course-iteration/semester "SoSe"
     :course-iteration/question-sets [[:question-set/id "2"]]}])
+
+
+(def user-roles
+  [{:role/id "0"
+    :role/course-iteration "1"
+    :role/name "student"}
+   {:role/id "1"
+    :role/course-iteration "2"
+    :role/name "student"}
+   {:role/id "2"
+    :role/course-iteration "1"
+    :role/name "corrector"}
+   {:role/id "3"
+    :role/course-iteration "2"
+    :role/name "student"}
+   {:role/id "4"
+    :role/course-iteration "1"
+    :role/name "admin"}
+   {:role/id "5"
+    :role/course-iteration "2"
+    :role/name "student"}])
 
 
 (def users
@@ -203,6 +216,7 @@
     question-sets
     courses
     course-iterations
+    user-roles
     users
     answers
     corrections))
