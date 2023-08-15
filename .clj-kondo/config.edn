@@ -1,3 +1,6 @@
 {:linters {:unresolved-var {:exclude [hiccup.form/form-to
                                       hiccup.form/select-options
-                                      hiccup.form/submit-button]}}}
+                                      hiccup.form/submit-button
+                                      hiccup.form/radio-button
+                                      hiccup.form/text-area
+                                      hiccup.form/check-box]}}}
