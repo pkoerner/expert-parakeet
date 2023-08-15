@@ -538,16 +538,16 @@
       (d/q '[:find ?feedback ?points-reached ?reachable-points ?question-statement ?timestamp ?answers
              :in $ ?user-id
              :where
-             [?correction :correction/answer ?answer]
-             [?correction :correction/feedback ?feedback ?tx]
+             [?user :user/id ?user-id]
              [?answer :answer/user ?user]
              [?answer :answer/points ?points-reached]
              [?answer :answer/answer ?answers]
              [?answer :answer/question ?question]
+             [?correction :correction/answer ?answer]
+             [?correction :correction/feedback ?feedback ?tx]
              [?question :question/question-statement ?question-statement]
              [?question :question/points ?reachable-points]
-             [?tx :db/txInstant ?timestamp]
-             [?user :user/id ?user-id]]
+             [?tx :db/txInstant ?timestamp]]
            @(.conn this) user-id)))
 
 
@@ -558,16 +558,16 @@
       (d/q '[:find ?feedback ?points-reached ?reachable-points ?question-statement ?timestamp ?answers
              :in $ ?user-id
              :where
-             [?correction :correction/answer ?answer]
-             [?correction :correction/feedback ?feedback ?tx]
+             [?user :user/id ?user-id]
              [?correction :correction/corrector ?user]
+             [?correction :correction/feedback ?feedback ?tx]
+             [?correction :correction/answer ?answer]
              [?answer :answer/points ?points-reached]
              [?answer :answer/answer ?answers]
              [?answer :answer/question ?question]
              [?question :question/question-statement ?question-statement]
              [?question :question/points ?reachable-points]
-             [?tx :db/txInstant ?timestamp]
-             [?user :user/id ?user-id]]
+             [?tx :db/txInstant ?timestamp]]
            @(.conn this) corrector-id))))
 
 
