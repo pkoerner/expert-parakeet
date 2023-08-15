@@ -130,8 +130,7 @@
 
   (get-all-user
     [this]
-    "get all users in database"))
-    "get the user given the git-id of the user. This function throws an error in case the user does not exist.")
+    "get all users in database")
 
   (get-user-id-by-git-id
     [this git-id]
