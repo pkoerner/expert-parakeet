@@ -110,14 +110,14 @@
 (def app
   (-> combined-routes
       (wrap-navbar-and-footer)
-      (wrap-resource "public") ; serving of static resources
-      (wrap-defaults (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
+      (wrap-resource "public"))) ; serving of static resources
+
+
+(def app-dev (wrap-reload (wrap-defaults app (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
 
 
 ;; in production, the app will be running behind a reverse proxy that does TLS
-(def app-proxied (-> combined-routes (wrap-defaults (-> secure-site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax) (assoc :proxy true)))))
-
-(def app-dev (wrap-reload #'app))
+(def app-prod (wrap-defaults app (-> secure-site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax) (assoc :proxy true))))
 
 
 (defn start-dev-server
@@ -127,4 +127,4 @@
 
 (defn -main
   [& _args]
-  (run-jetty app-proxied {:port 8081 :join? false}))
+  (run-jetty app-prod {:port 8081 :join? false}))
