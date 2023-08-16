@@ -18,7 +18,8 @@
        [["Login" "/login" not-logged-in]
         ["Home" "/" is-logged-in?]
         ["Create Course Iteration" "/create-course-iteration" is-logged-in?]  ; FIXME: Check for admin permissions
-        ["Create Question" "/create-question" is-logged-in?]]))  ; FIXME: Check for admin permissions
+        ["Create Question" "/create-question" is-logged-in?] ; FIXME: Check for admin permissions
+        ["Correction Overview" "/correction-overview" is-logged-in?]]))  ; FIXME: Check for admin permissions
 
 
 ;; this is the bootstrap 4.0 example "stick-footer-navbar" without the javascript
