@@ -32,7 +32,8 @@
     :question/question-statement "Which keywords are suitable for generative testing?"
     :question/possible-solutions #{"Oracle" "inverse function" "specs" "fast and low memory usage"}
     :question/multiple-choice-solution #{"Oracle" "inverse function" "specs"}
-    :question/points 1}
+    :question/points 1
+    :question/categories ["Cat2" "Cat1" "Cat3"]}
    {:question/id "6"
     :question/question-statement "What type of programming lanuage is java?"
     :question/type :question.type/single-choice

@@ -41,7 +41,13 @@
     (testing "get-question-by-id with id = 5"
       (let [res (db/get-question-by-id test-db "5")]
         (and (t/is (= (:question/id res) "5"))
-             (t/is (s/valid? :question/multiple-choice-question res)))))
+             (t/is (s/valid? :question/multiple-choice-question (select-keys res [:question/id
+                                                                                  :question/type
+                                                                                  :question/question-statement
+                                                                                  :question/points
+                                                                                  :question/possible-solutions
+                                                                                  :question/multiple-choice-solution
+                                                                                  :question/categories]))))))
     (testing "get-question-by-id with invalid id = 42"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
