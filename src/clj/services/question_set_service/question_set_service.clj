@@ -2,6 +2,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [db]
+    [domain]
     [services.question-set-service.p-question-set-service :refer [PQuestionSetService]]
     [views.question-set.question-set-view :as view]))
 
@@ -16,7 +17,7 @@
         :ret (s/coll-of (s/keys :req [:question-set/id])))
 
 
-(defn get-all-question-sets
+(defn- get-all-question-sets
   [this]
   (db/get-all-question-sets (.db this)))
 

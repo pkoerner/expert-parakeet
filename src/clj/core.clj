@@ -13,6 +13,7 @@
                                                       question-get
                                                       submit-create-question!]]
     [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
+    [controllers.user.user-overview-controller :refer [create-user-overview-get]]
     [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
@@ -23,6 +24,7 @@
     [services.answer-service.answer-service :refer [->AnswerService]]
     [services.correction-service.correction-service :refer [->CorrectionService]]
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
+    [services.course-iteration-service.p-course-iteration-service :refer [get-all-course-iterations-for-user]]
     [services.course-service.course-service :refer [->CourseService]]
     [services.course-service.p-course-service :refer [get-all-courses]]
     [services.question-service.p-question-service :refer [get-question-categories]]
@@ -62,6 +64,8 @@
 
 ;; all routes that require authentication go here
 (defroutes private-routes
+  (GET "/user-overview" req (let [user-git-id (str (get-in req [:session :user :oauth-github-id]))]
+                              (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) user-git-id))))
   (GET "/question-set/:id"
        req
        (html-response (question-set-get req (:question-set-service services))))
@@ -85,6 +89,7 @@
 
   (POST "/create-course" req
         (submit-create-course! req "/create-course" (:course-service services)))
+  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working 
 
   (GET "/create-course-iteration" req
        (html-response (create-course-iteration-get req "/create-course-iteration"
