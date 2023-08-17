@@ -15,7 +15,7 @@
 (s/def :question/id string?)
 (s/def :question/type question-types)
 (s/def :question/question-statement :general/non-blank-string)
-(s/def :question/points int?)
+(s/def :question/points pos-int?)
 (s/def :question/categories (s/coll-of :general/non-blank-string :type set))
 
 
