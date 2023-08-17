@@ -134,7 +134,15 @@
 
   (get-user-id-by-git-id
     [this git-id]
-    "get the user id given the git-id of the user. This function returns nil in case the user does not exist."))
+    "get the user id given the git-id of the user. This function returns nil in case the user does not exist.")
+
+  (get-all-corrections-from-user
+    [this user-id]
+    "get all corrections by user-id")
+
+  (get-all-corrections-from-corrector
+    [this corrector-id]
+    "get all corrections by the user-id of the corrector"))
 
 
 (deftype Database
@@ -568,7 +576,47 @@
                   :where
                   [?e :user/git-id ?git-id]
                   [?e :user/id ?id]]
-                @(.conn this) git-id))))
+                @(.conn this) git-id)))
+
+
+  (get-all-corrections-from-user
+    [this user-id]
+    (mapv
+      #(zipmap [:correction/feedback :answer/points :question/points :question/question-statement :correction/timestamp :answer/answer] %)
+      (d/q '[:find ?feedback ?points-reached ?reachable-points ?question-statement ?timestamp ?answers
+             :in $ ?user-id
+             :where
+             [?user :user/id ?user-id]
+             [?answer :answer/user ?user]
+             [?answer :answer/points ?points-reached]
+             [?answer :answer/answer ?answers]
+             [?answer :answer/question ?question]
+             [?correction :correction/answer ?answer]
+             [?correction :correction/feedback ?feedback ?tx]
+             [?question :question/question-statement ?question-statement]
+             [?question :question/points ?reachable-points]
+             [?tx :db/txInstant ?timestamp]]
+           @(.conn this) user-id)))
+
+
+  (get-all-corrections-from-corrector
+    [this corrector-id]
+    (mapv
+      #(zipmap [:correction/feedback :answer/points :question/points :question/question-statement :correction/timestamp :answer/answer] %)
+      (d/q '[:find ?feedback ?points-reached ?reachable-points ?question-statement ?timestamp ?answers
+             :in $ ?user-id
+             :where
+             [?user :user/id ?user-id]
+             [?correction :correction/corrector ?user]
+             [?correction :correction/feedback ?feedback ?tx]
+             [?correction :correction/answer ?answer]
+             [?answer :answer/points ?points-reached]
+             [?answer :answer/answer ?answers]
+             [?answer :answer/question ?question]
+             [?question :question/question-statement ?question-statement]
+             [?question :question/points ?reachable-points]
+             [?tx :db/txInstant ?timestamp]]
+           @(.conn this) corrector-id))))
 
 
 ;; use mem db
