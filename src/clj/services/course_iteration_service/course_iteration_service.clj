@@ -75,7 +75,7 @@
   [this user-git-id]
   (let [user-id (:user/id (db/get-user-by-git-id (.db this) user-git-id))]
     (domain/course-iterations-with-total-points
-      (db/get-course-iterations-of-user (.db this) user-id)
+      (db/get-course-iterations-of-student (.db this) user-id)
       (partial db/get-graded-answers-of-question-set (.db this) user-id))))
 
 
