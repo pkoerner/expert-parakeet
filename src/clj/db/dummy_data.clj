@@ -32,7 +32,8 @@
     :question/question-statement "Which keywords are suitable for generative testing?"
     :question/possible-solutions #{"Oracle" "inverse function" "specs" "fast and low memory usage"}
     :question/multiple-choice-solution #{"Oracle" "inverse function" "specs"}
-    :question/points 1}
+    :question/points 1
+    :question/categories ["Cat2" "Cat1" "Cat3"]}
    {:question/id "6"
     :question/question-statement "What type of programming lanuage is java?"
     :question/type :question.type/single-choice
@@ -67,7 +68,7 @@
 (def courses
   [{:course/id "0"
     :course/course-name "Specialization Functional Programming: Clojure"
-    :course/question-sets [[:question-set/id "1"] [:question-set/id "2"]]}
+    :course/question-sets [[:question-set/id "1"] [:question-set/id "3"]]}
    {:course/id "1"
     :course/course-name "Programming 1"
     :course/question-sets [[:question-set/id "2"]]}])
@@ -138,12 +139,7 @@
    {:answer/id "4"
     :answer/question [:question/id "2"]
     :answer/user [:user/id "0"]
-    :answer/answer [" JVM, i.e., Java Virtual Machine.
-    JVM is the engine that drives the Java code.
-    Mostly in other Programming Languages, compiler produce code for a particular system but Java compiler produce Bytecode for a Java Virtual Machine.
-    When we compile a Java program, then bytecode is generated. Bytecode is the source code that can be used to run on any platform.
-    Bytecode is an intermediary language between Java source and the host system.
-    It is the medium which compiles Java code to bytecode which gets interpreted on a different machine and hence it makes it Platform/Operating system independent."]
+    :answer/answer ["JVM, i.e., Java Virtual Machine. JVM is the engine that drives the Java code. Mostly in other Programming Languages, compiler produce code for a particular system but Java compiler produce Bytecode for a Java Virtual Machine. When we compile a Java program, then bytecode is generated. Bytecode is the source code that can be used to run on any platform. Bytecode is an intermediary language between Java source and the host system. It is the medium which compiles Java code to bytecode which gets interpreted on a different machine and hence it makes it Platform/Operating system independent."]
     :answer/points 3}
    {:answer/id "5"
     :answer/question [:question/id "4"]
@@ -199,19 +195,19 @@
 
 (def corrections
   [{:correction/answer [:answer/id "1"]
-    :correction/corrector [:user/id "0"]
+    :correction/corrector [:user/id "3"]
     :correction/feedback "Can you say something about the rules of handling with transients?"}
    {:correction/answer [:answer/id "2"]
-    :correction/corrector [:user/id "0"]
+    :correction/corrector [:user/id "3"]
     :correction/feedback "Please elaborate about the aspects of example-based testing"}
    {:correction/answer [:answer/id "4"]
-    :correction/corrector [:user/id "0"]
+    :correction/corrector [:user/id "3"]
     :correction/feedback "Superb!"}
    {:correction/answer [:answer/id "12"]
-    :correction/corrector [:user/id "0"]
+    :correction/corrector [:user/id "3"]
     :correction/feedback "Approved"}
    {:correction/answer [:answer/id "14"]
-    :correction/corrector [:user/id "3"]
+    :correction/corrector [:user/id "2"]
     :correction/feedback "we do not give away points!"}])
 
 
