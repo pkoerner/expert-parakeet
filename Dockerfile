@@ -9,7 +9,6 @@ RUN clj -T:build clean
 
 COPY Makefile /tmp/
 COPY src /tmp/src
-RUN make compile-cljs
 COPY resources /tmp/resources
 RUN make uber
 
