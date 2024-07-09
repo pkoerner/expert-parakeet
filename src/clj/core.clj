@@ -64,8 +64,11 @@
 
 ;; all routes that require authentication go here
 (defroutes private-routes
+  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working 
+
   (GET "/user-overview" req (let [user-git-id (str (get-in req [:session :user :oauth-github-id]))]
-                              (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) user-git-id))))
+                              (html-response (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) user-git-id)))))
+
   (GET "/question-set/:id"
        req
        (html-response (question-set-get req (:question-set-service services))))
@@ -89,7 +92,6 @@
 
   (POST "/create-course" req
         (submit-create-course! req "/create-course" (:course-service services)))
-  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working 
 
   (GET "/create-course-iteration" req
        (html-response (create-course-iteration-get req "/create-course-iteration"
@@ -97,8 +99,6 @@
                                                    (partial get-all-question-sets (:question-set-service services)))))
   (POST "/create-course-iteration" req
         (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
-
-  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
 
   (GET "/correction-overview" req
        (html-response (correction-overview-get req (services :correction-service))))

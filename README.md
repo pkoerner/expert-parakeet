@@ -36,6 +36,8 @@ export OAUTH_CLIENT_ID OAUTH_CLIENT_SECRET
 ## Run Development Server
 
 ```shell
+make
+# or
 make dev-server
 ```
 

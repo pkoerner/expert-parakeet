@@ -3,6 +3,7 @@
 !.clj-kondo/config.edn
 .cpcache
 .lsp
+.portal/
 /expert-parakeet.iml
 .shadow-cljs/
 node_modules/
