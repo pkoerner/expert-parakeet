@@ -55,7 +55,7 @@
        (if (auth/is-logged-in? req)
          (html-response [:div
                          [:p [:i (str "coo coo. ")] (str "Github User " (str (get-in req [:session :user :id])) " authenticated.")]
-                         [:img {:src "img/logo.jpeg" :style (str "max-width: 50%; max-height: 50%")}]])
+                         [:img {:src "/img/logo.jpeg" :style (str "max-width: 50%; max-height: 50%")}]])
          (html-response [:p "Hello stranger. Please " [:a {:href "/login"} "Login"] "."])))
   (GET "/login" req (login req (services :user-service)))
   (GET "/create-user" req (html-response (create-user-get req "/create-user" (services :user-service))))
