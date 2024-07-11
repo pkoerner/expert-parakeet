@@ -1,9 +1,12 @@
 .idea
+.calva
 .clj-kondo
 .cpcache
 .lsp
+.portal
 /expert-parakeet.iml
 .shadow-cljs/
 node_modules/
 .env
 target/
+doc
