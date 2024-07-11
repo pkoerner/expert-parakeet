@@ -12,20 +12,24 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: install clojure
+        run: |
+          curl -L -O https://github.com/clojure/brew-install/releases/latest/download/posix-install.sh
+          chmod +x posix-install.sh
+          sudo ./posix-install.sh
       - name: check formatting
-        uses: vouch-opensource/tools.deps-build@1.0.1
-        with:
-          alias: :check-format
+        run: make check-format
       - name: run linter
-        uses: vouch-opensource/tools.deps-build@1.0.1
-        with:
-          alias: :lint
+        run: make lint
       - name: run tests
+        run: make test
         env:
           OAUTH_CLIENT_ID: ''
           OAUTH_CLIENT_SECRET: ''
-        uses: vouch-opensource/tools.deps-build@1.0.1
-        with:
-          alias: :test-runner
-      - name: Build the whole application
-        run: docker build .
+      - name: build uber jar
+        run: make uber

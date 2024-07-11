@@ -3,11 +3,14 @@
 dev-server: compile-cljs
 	clj -X core/start-dev-server
 
+check-format:
+	clj -M:check-format
+
 format:
 	clj -M:format
 
 test: compile-cljs
-	clj -M:test-runner
+	clj -X:test
 
 lint:
 	clj -M:lint
