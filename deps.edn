@@ -3,7 +3,8 @@
            io.replikativ/datahike {:mvn/version "0.5.1510" #_"0.6.1568"} ;; cannot upgrade further because of a startup error
            provisdom/spectomic {:mvn/version "1.0.78"}
            compojure/compojure {:mvn/version "1.7.1"}
-           ring/ring {:mvn/version "1.12.2"}
+           ring/ring {:mvn/version "1.12.2"} 
+           org.slf4j/slf4j-simple {:mvn/version "2.0.13"}
            nano-id/nano-id {:mvn/version "1.1.0"}
            ring/ring-defaults {:mvn/version "0.5.0"}
            ring-oauth2/ring-oauth2 {:mvn/version "0.3.0"}
