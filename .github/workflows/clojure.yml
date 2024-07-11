@@ -22,13 +22,15 @@ jobs:
           chmod +x posix-install.sh
           sudo ./posix-install.sh
       - name: check formatting
-        run: make check-format
+        run: clojure -M:check-format
       - name: run linter
-        run: make lint
+        run: clojure -M:lint
+      - name: compile cljs
+        run: clojure -X:compile-cljs
       - name: run tests
-        run: make test
+        run: clojure -X:test
         env:
           OAUTH_CLIENT_ID: ''
           OAUTH_CLIENT_SECRET: ''
       - name: build uber jar
-        run: make uber
+        run: clojure -T:build uber

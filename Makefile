@@ -3,9 +3,6 @@
 dev-server: compile-cljs
 	clj -X core/start-dev-server
 
-check-format:
-	clj -M:check-format
-
 format:
 	clj -M:format
 
