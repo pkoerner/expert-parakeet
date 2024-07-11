@@ -118,8 +118,8 @@ expert_parakeet.question.create_question_view.register_adding_solution_behavior(
   [categories post-destination & {:keys [errors question-data] :or {errors {} question-data {}}}]
   (let [question-types-js-arr (str "[" (string/join ", "  (map #(str "'" % "'") (map name question-types))) "]")]
     (h/html
-      (hpage/include-js "cljs/goog/base.js"
-                        "cljs/main.js")
+      (hpage/include-js "/cljs/goog/base.js"
+                        "/cljs/main.js")
       (script "goog.require('expert_parakeet.question.create_question_view');")
       [:div.container
        [:h1 "Fragenerstellung:"]
