@@ -194,5 +194,3 @@
           free-text-question-invalid
           single-choice-question
           multiple-choice-question)))))
-
-

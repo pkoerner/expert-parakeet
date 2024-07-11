@@ -102,4 +102,3 @@
     (prop/for-all [error-map error-map-gen]
                   (let [test-result (question-form categories post-destination :errors error-map)]
                     (every? #(string/includes? test-result %) (vals error-map))))))
-

@@ -104,5 +104,3 @@
      [:p "Der Kurs für das " semester
       " im Jahr " year
       " wurde erfolgreich für das Fach erstellt!\n"]]))
-
-

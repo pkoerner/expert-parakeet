@@ -664,4 +664,3 @@
   (let [conn (create-conn mem-cfg)]
     (d/transact conn dummy-data/dummy-data)
     (Database. conn)))
-

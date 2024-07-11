@@ -96,4 +96,3 @@
     (if (empty? validation-errors)
       (html-response (add-to-db-and-get-succsess-msg course-id year semester question-set-ids (partial create-course-iteration course-iteration-service)))
       (response/redirect (construct-url (str (get-in request [:headers :origin]) redirect-uri) validation-errors)))))
-
