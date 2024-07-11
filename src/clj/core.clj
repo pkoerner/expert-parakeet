@@ -105,7 +105,7 @@
        (html-response (correction-overview-get req (services :correction-service))))
 
   (GET "/new-correction" req (html-response (new-correction-get req "/new-correction" (partial db/get-answer-by-id db) (partial db/get-question-by-id db))))
-  (POST "/new-correction" req (submit-new-correction! req "/new-correction" (partial db/add-correction! db) (partial db/get-user-by-git-id db)))
+  (POST "/new-correction" req (submit-new-correction! req "/new-correction" (partial db/add-correction! db) (partial db/get-user-by-id db)))
 
   (route/not-found "Not Found"))
 
