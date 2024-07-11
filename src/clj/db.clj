@@ -142,7 +142,11 @@
 
   (get-all-corrections-from-corrector
     [this corrector-id]
-    "get all corrections by the user-id of the corrector"))
+    "get all corrections by the user-id of the corrector")
+
+  (get-answer-by-id
+    [this answer-id]
+    "get an answer given its id"))
 
 
 (deftype Database
@@ -616,7 +620,18 @@
              [?question :question/question-statement ?question-statement]
              [?question :question/points ?reachable-points]
              [?tx :db/txInstant ?timestamp]]
-           @(.conn this) corrector-id))))
+           @(.conn this) corrector-id)))
+
+
+  (get-answer-by-id
+    [this answer-id]
+    (d/pull @(.conn this)
+            [:answer/id
+             {:answer/question [:question/id]}
+             :answer/user
+             :answer/answer
+             :answer/points]
+            [:answer/id answer-id])))
 
 
 ;; use mem db

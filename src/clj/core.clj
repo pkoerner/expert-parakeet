@@ -6,6 +6,7 @@
     [compojure.route :as route]
     [controllers.answer.answer-controller :refer [submit-user-answer!]]
     [controllers.correction.correction-controller :refer [correction-overview-get]]
+    [controllers.correction.new-correction-controller :refer [new-correction-get submit-new-correction!]]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
     [controllers.course.course-controller :refer [create-course-get submit-create-course!]]
     [controllers.question-set.question-set-controller :refer [question-set-get]]
@@ -64,7 +65,7 @@
 
 ;; all routes that require authentication go here
 (defroutes private-routes
-  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working 
+  (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
 
   (GET "/user-overview" req (let [user-git-id (str (get-in req [:session :user :oauth-github-id]))]
                               (html-response (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) user-git-id)))))
@@ -102,6 +103,9 @@
 
   (GET "/correction-overview" req
        (html-response (correction-overview-get req (services :correction-service))))
+
+  (GET "/new-correction" req (html-response (new-correction-get req "/new-correction" (partial db/get-answer-by-id db) (partial db/get-question-by-id db))))
+  (POST "/new-correction" req (submit-new-correction! req "/new-correction" (partial db/add-correction! db) (partial db/get-user-by-git-id db)))
 
   (route/not-found "Not Found"))
 
