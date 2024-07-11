@@ -53,13 +53,13 @@
 
 (defn submit-new-correction!
   "Parses a request to submit a new correction. Redirects to redirect-uri on errors."
-  [req redirect-uri add-correction-fn get-user-by-git-id-fn]
+  [req redirect-uri add-correction-fn get-user-by-id-fn]
   (let [form-data (-> req (:multipart-params) (dissoc :__anti-forgery-token))
         answer-id (form-data "answer-id")
         points (try (Long/parseLong (form-data "points")) (catch NumberFormatException _ nil))
         feedback (form-data "feedback")
         validation-errors (validate-correction answer-id points feedback)]
     (if (empty? validation-errors)
-      (do (add-correction-fn answer-id {:correction/feedback feedback :correction/points points :corrector/id (get-user-by-git-id-fn (str (get-in req [:session :user :id])))})
+      (do (add-correction-fn answer-id {:correction/feedback feedback :correction/points points :corrector/id (get-user-by-id-fn (str (get-in req [:session :user :id])))})
           (html-response "Die Korrektur wurde erfolgreich hinzugefügt."))
       (response/redirect (construct-url (str (get-in req [:headers :origin]) redirect-uri) (assoc validation-errors "answer-id" answer-id))))))
