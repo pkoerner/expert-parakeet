@@ -10,54 +10,47 @@
     :question/type :question.type/free-text
     :question/question-statement "Describe a use case for transient data structures"
     :question/evaluation-criteria "The following aspects are explained: performance improvement, mutable variant of persistent data structures, must be made persistent before function return"
-    :question/points 3
-    :question/categories #{"Cat1" "Cat2" "Cat3"}}
+    :question/points 3}
    {:question/id "2"
     :question/type :question.type/free-text
     :question/question-statement "What is the JVM?"
     :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
-    :question/points 3
-    :question/categories #{"Cat1" "Cat2"}}
+    :question/points 3}
    {:question/id "3"
     :question/type :question.type/free-text
     :question/question-statement "What are some advantages and disadvantages of example-based and generative testing?"
     :question/evaluation-criteria "The following aspects are explained: Oracle, performance, test-coverage"
-    :question/points 2
-    :question/categories #{"Cat1" "Cat3"}}
+    :question/points 2}
    {:question/id "4"
     :question/type :question.type/single-choice
     :question/question-statement "Transient data structures are:"
     :question/possible-solutions #{"mutable" "immutable"}
     :question/single-choice-solution "mutable"
-    :question/points 1
-    :question/categories #{"Cat2" "Cat3"}}
+    :question/points 1}
    {:question/id "5"
     :question/type :question.type/multiple-choice
     :question/question-statement "Which keywords are suitable for generative testing?"
     :question/possible-solutions #{"Oracle" "inverse function" "specs" "fast and low memory usage"}
     :question/multiple-choice-solution #{"Oracle" "inverse function" "specs"}
     :question/points 1
-    :question/categories #{"Cat1"}}
+    :question/categories ["Cat2" "Cat1" "Cat3"]}
    {:question/id "6"
     :question/question-statement "What type of programming lanuage is java?"
     :question/type :question.type/single-choice
     :question/possible-solutions #{"object oriented" "functional" "logic"}
     :question/single-choice-solution "object oriented"
-    :question/points 1
-    :question/categories #{"Cat2"}}
+    :question/points 1}
    {:question/id "7"
     :question/question-statement "When was the movie Alien by ridley scott released?"
     :question/type :question.type/single-choice
     :question/possible-solutions #{"1979" "1976" "2000" "1966"}
     :question/single-choice-solution "1979"
-    :question/points 1
-    :question/categories #{"Cat3"}}
+    :question/points 1}
    {:question/id "8"
     :question/type :question.type/free-text
     :question/question-statement "Which one is the greates movie of all time? ;D"
     :question/evaluation-criteria "Alien !!!"
-    :question/points 1
-    :question/categories #{"Cat2" "Cat1" "Cat3"}}])
+    :question/points 1}])
 
 
 (def question-sets
@@ -75,10 +68,10 @@
 (def courses
   [{:course/id "0"
     :course/course-name "Specialization Functional Programming: Clojure"
-    :course/question-sets [[:question-set/id "1"] [:question/id "3"] [:question/id "4"] [:question/id "5"] [:question/id "7"] [:question/id "8"]]}
+    :course/question-sets [[:question-set/id "1"] [:question-set/id "3"]]}
    {:course/id "1"
     :course/course-name "Programming 1"
-    :course/question-sets [[:question-set/id "2"] [:question/id "6"]]}])
+    :course/question-sets [[:question-set/id "2"]]}])
 
 
 (def course-iterations
@@ -92,6 +85,27 @@
     :course-iteration/year 2020
     :course-iteration/semester "SoSe"
     :course-iteration/question-sets [[:question-set/id "2"]]}])
+
+
+(def user-roles
+  [{:role/id "0"
+    :role/course-iteration "1"
+    :role/name "student"}
+   {:role/id "1"
+    :role/course-iteration "2"
+    :role/name "student"}
+   {:role/id "2"
+    :role/course-iteration "1"
+    :role/name "corrector"}
+   {:role/id "3"
+    :role/course-iteration "2"
+    :role/name "student"}
+   {:role/id "4"
+    :role/course-iteration "1"
+    :role/name "admin"}
+   {:role/id "5"
+    :role/course-iteration "2"
+    :role/name "student"}])
 
 
 (def users
@@ -125,12 +139,7 @@
    {:answer/id "4"
     :answer/question [:question/id "2"]
     :answer/user [:user/id "0"]
-    :answer/answer [" JVM, i.e., Java Virtual Machine.
-    JVM is the engine that drives the Java code.
-    Mostly in other Programming Languages, compiler produce code for a particular system but Java compiler produce Bytecode for a Java Virtual Machine.
-    When we compile a Java program, then bytecode is generated. Bytecode is the source code that can be used to run on any platform.
-    Bytecode is an intermediary language between Java source and the host system.
-    It is the medium which compiles Java code to bytecode which gets interpreted on a different machine and hence it makes it Platform/Operating system independent."]
+    :answer/answer ["JVM, i.e., Java Virtual Machine. JVM is the engine that drives the Java code. Mostly in other Programming Languages, compiler produce code for a particular system but Java compiler produce Bytecode for a Java Virtual Machine. When we compile a Java program, then bytecode is generated. Bytecode is the source code that can be used to run on any platform. Bytecode is an intermediary language between Java source and the host system. It is the medium which compiles Java code to bytecode which gets interpreted on a different machine and hence it makes it Platform/Operating system independent."]
     :answer/points 3}
    {:answer/id "5"
     :answer/question [:question/id "4"]
@@ -186,19 +195,19 @@
 
 (def corrections
   [{:correction/answer [:answer/id "1"]
-    :correction/corrector [:user/id "0"]
+    :correction/corrector [:user/id "3"]
     :correction/feedback "Can you say something about the rules of handling with transients?"}
    {:correction/answer [:answer/id "2"]
-    :correction/corrector [:user/id "0"]
+    :correction/corrector [:user/id "3"]
     :correction/feedback "Please elaborate about the aspects of example-based testing"}
    {:correction/answer [:answer/id "4"]
-    :correction/corrector [:user/id "0"]
+    :correction/corrector [:user/id "3"]
     :correction/feedback "Superb!"}
    {:correction/answer [:answer/id "12"]
-    :correction/corrector [:user/id "0"]
+    :correction/corrector [:user/id "3"]
     :correction/feedback "Approved"}
    {:correction/answer [:answer/id "14"]
-    :correction/corrector [:user/id "3"]
+    :correction/corrector [:user/id "2"]
     :correction/feedback "we do not give away points!"}])
 
 
@@ -208,6 +217,7 @@
     question-sets
     courses
     course-iterations
+    user-roles
     users
     answers
     corrections))

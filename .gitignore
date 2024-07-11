@@ -3,8 +3,13 @@
 !.clj-kondo/config.edn
 .cpcache
 .lsp
+.portal/
 /expert-parakeet.iml
 .shadow-cljs/
 node_modules/
 .env
+output.calva-repl
 target/
+.nrepl-port
+resources/public/cljs/
+.DS_Store

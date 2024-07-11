@@ -1,5 +1,6 @@
 (ns db
   (:require
+    [clojure.string :as string]
     [datahike.api :as d]
     [db.dummy-data :as dummy-data]
     [db.schema :refer [db-schema]]
@@ -20,16 +21,23 @@
   (get-all-course-iterations
     [this])
 
+  ;; think unnecessary -> service and domain
   (get-graded-answers-of-question-set
     [this user-id question-set-id])
 
-  (get-questions-for-user
-    [this corrector-id])
+  ;; unnecessary in my opinion because workaround in domain/service
+  ;; (get-questions-for-user
+  ;;   [this corrector-id])
+
+  (get-question-ids-for-user
+    [this user-id]
+    "Fetches all question-ids belonging to a user.")
 
   (get-answers-for-question
     [this question-id]
     "Fetches all answers of all users for one question.")
 
+  ;; think unnecessary
   (get-all-answers-with-corrections
     [this]
     "Fetches every answer with a correction from the database")
@@ -49,7 +57,7 @@
   (get-course-iterations-of-course
     [this course-id])
 
-  (get-all-questions
+  (get-all-question-ids
     [this])
 
   (get-all-question-categories
@@ -64,10 +72,14 @@
   (add-course-iteration-with-question-sets!
     [this course-id year semester question-set-ids])
 
+  ;; no test because it only uses add-course-iteration-with-question-sets!
   (add-course-iteration!
     [this course-id year semester])
 
   (get-question-by-id
+    [this id])
+
+  (get-question-and-possible-solutions-by-id
     [this id])
 
   (add-question!
@@ -80,6 +92,7 @@
     [this user-id question-id answer]
     "Adds an answer of a user to a question.")
 
+  ;; no test because it only uses add-user-answer!
   (add-multiple-user-answers!
     [this user-id answers]
     "Adds multiple answers of a user to multiple questions.
@@ -89,6 +102,7 @@
   (get-all-answers
     [this])
 
+  ;; think unnecessary because it returns an answer based on the answer-id?
   (get-answers-for-correction
     [this answer-id])
 
@@ -109,6 +123,26 @@
   (get-user-by-git-id
     [this git-id]
     "get the user given the git-id of the user")
+
+  (get-course-by-id
+    [this course-id]
+    "get the corresponding course given the id")
+
+  (get-all-user
+    [this]
+    "get all users in database")
+
+  (get-user-id-by-git-id
+    [this git-id]
+    "get the user id given the git-id of the user. This function returns nil in case the user does not exist.")
+
+  (get-all-corrections-from-user
+    [this user-id]
+    "get all corrections by user-id")
+
+  (get-all-corrections-from-corrector
+    [this corrector-id]
+    "get all corrections by the user-id of the corrector")
 
   (get-answer-by-id
     [this answer-id]
@@ -173,18 +207,31 @@
                @(.conn this) [:user/id user-id] [:question-set/id question-set-id])))
 
 
-  (get-questions-for-user
-    [this corrector-id]
+
+  ;; (get-questions-for-user
+  ;;   [this user-id]
+  ;;   (mapv first
+  ;;         (d/q '[:find (pull ?course-iteration [:course-iteration/semester
+  ;;                                               :course-iteration/year
+  ;;                                               {:course-iteration/course [:course/course-name]}
+  ;;                                               {:course-iteration/question-sets [:question-set/id :question-set/name
+  ;;                                                                                 {:question-set/questions [:question/id :question/type]}]}])
+  ;;                :in $ ?corr
+  ;;                :where
+  ;;                [?corr :user/course-iterations ?course-iteration]]
+  ;;              @(.conn this) [:user/id user-id])))
+
+
+  (get-question-ids-for-user
+    [this user-id]
     (mapv first
-          (d/q '[:find (pull ?course-iteration [:course-iteration/semester
-                                                :course-iteration/year
-                                                {:course-iteration/course [:course/course-name]}
-                                                {:course-iteration/question-sets [:question-set/id :question-set/name
-                                                                                  {:question-set/questions [:question/id :question/type]}]}])
-                 :in $ ?corr
+          (d/q '[:find (pull ?q [:question/id])
+                 :in $ ?u
                  :where
-                 [?corr :user/course-iterations ?course-iteration]]
-               @(.conn this) [:user/id corrector-id])))
+                 [?u :user/course-iterations ?ci]
+                 [?ci :course-iteration/question-sets ?qs]
+                 [?qs :question-set/questions ?q]]
+               @(.conn this) [:user/id user-id])))
 
 
   (get-answers-for-question
@@ -226,13 +273,13 @@
   (get-question-set-by-id
     [this id]
     (d/pull @(.conn this)
-            [:question-set/id {:question-set/questions [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]}]
+            [:question-set/id :question-set/name {:question-set/questions [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]}]
             [:question-set/id id]))
 
 
   (get-all-question-sets
     [this]
-    (mapv first (d/q '[:find (pull ?e [:question-set/id :question-set/name])
+    (mapv first (d/q '[:find (pull ?e [*])
                        :where [?e :question-set/id]]
                      @(.conn this))))
 
@@ -265,7 +312,7 @@
                      @(.conn this) course-id)))
 
 
-  (get-all-questions
+  (get-all-question-ids
     [this]
     (mapv first (d/q '[:find (pull ?e [:question/id])
                        :where [?e :question/id]]
@@ -282,14 +329,17 @@
 
   (add-course!
     [this course-name]
-    (let [id (generate-id this :course/id)
-          tx-result (d/transact (.conn this)
-                                [{:db/id -1
-                                  :course/id id
-                                  :course/course-name course-name}])
-          db-after (:db-after tx-result)]
-      (d/pull db-after [:course/id :course/course-name]
-              [:course/id id])))
+    (let [excisting-course-names (map #(:course/course-name %) (get-all-courses this))]
+      (if (some #(= (string/lower-case course-name) (string/lower-case %)) excisting-course-names)
+        (throw (AssertionError. (str "There is already a course with the same name in the database. Please check the existing course and wether you need to create a new one.")))
+        (let [id (generate-id this :course/id)
+              tx-result (d/transact (.conn this)
+                                    [{:db/id -1
+                                      :course/id id
+                                      :course/course-name course-name}])
+              db-after (:db-after tx-result)]
+          (d/pull db-after [:course/id :course/course-name]
+                  [:course/id id])))))
 
 
   (get-course-iteration-by-id
@@ -330,37 +380,51 @@
   (get-question-by-id
     [this id]
     (d/pull @(.conn this)
-            [:question/id :question/question-statement :question/points :question/type]
+            ["*"]
+            [:question/id id]))
+
+
+  (get-question-and-possible-solutions-by-id
+    [this id]
+    (d/pull @(.conn this)
+            [:question/id :question/question-statement :question/points :question/type :question/possible-solutions]
             [:question/id id]))
 
 
   (add-question!
     [this question]
-    (let [id (generate-id this :question/id)
-          type (:question/type question)
-          trans-map (apply assoc {:db/id        -1
-                                  :question/id     id
-                                  :question/type    type
-                                  :question/points (:question/points question)
-                                  :question/question-statement (:question/question-statement question)
-                                  :question/categories (:question/categories question)}
-                           (cond (= type :question.type/free-text)
-                                 [:question/evaluation-criteria (:question/evaluation-criteria question)]
+    (let [question-ids (map #(:question/id %) (get-all-question-ids this))
+          question-list (map #(select-keys (db/get-question-by-id this %) [:question/type
+                                                                           :question/question-statement
+                                                                           :question/points])
+                             question-ids)]
+      (if (some #(= % (select-keys question [:question/type :question/question-statement :question/points])) question-list)
+        (throw (AssertionError. (str "There is a similar question already in the data base. Please check the existing question and wether you need to create a new one. " (select-keys question [:question/type :question/question-statement]))))
+        (let [id (generate-id this :question/id)
+              type (:question/type question)
+              trans-map (apply assoc {:db/id        -1
+                                      :question/id     id
+                                      :question/type    type
+                                      :question/points (:question/points question)
+                                      :question/question-statement (:question/question-statement question)
+                                      :question/categories (:question/categories question)}
+                               (cond (= type :question.type/free-text)
+                                     [:question/evaluation-criteria (:question/evaluation-criteria question)]
 
-                                 (= type :question.type/single-choice)
-                                 [:question/possible-solutions (:question/possible-solutions question)
-                                  :question/single-choice-solution (:question/single-choice-solution question)]
+                                     (= type :question.type/single-choice)
+                                     [:question/possible-solutions (:question/possible-solutions question)
+                                      :question/single-choice-solution (:question/single-choice-solution question)]
 
-                                 (= type :question.type/multiple-choice)
-                                 [:question/possible-solutions (:question/possible-solutions question)
-                                  :question/multiple-choice-solution (:question/multiple-choice-solution question)]))
-          tx-result (d/transact (.conn this) [trans-map])
-          db-after (:db-after tx-result)]
-      (d/pull db-after  [:question/id :question/question-statement :question/points :question/type :question/possible-solutions
-                         :question/evaluation-criteria :question/single-choice-solution
-                         :question/multiple-choice-solution
-                         :question/categories]
-              [:question/id id])))
+                                     (= type :question.type/multiple-choice)
+                                     [:question/possible-solutions (:question/possible-solutions question)
+                                      :question/multiple-choice-solution (:question/multiple-choice-solution question)]))
+              tx-result (d/transact (.conn this) [trans-map])
+              db-after (:db-after tx-result)]
+          (d/pull db-after  [:question/id :question/question-statement :question/points :question/type :question/possible-solutions
+                             :question/evaluation-criteria :question/single-choice-solution
+                             :question/multiple-choice-solution
+                             :question/categories]
+                  [:question/id id])))))
 
 
   (add-question-set!
@@ -412,9 +476,10 @@
 
   (get-all-answers
     [this]
-    (d/q '[:find (pull ?e [:answer/id :answer/user :answer/question :answer/answer])
-           :where [?e :answer/id]]
-         @(.conn this)))
+    (mapv first
+          (d/q '[:find (pull ?e [:answer/id {:answer/question [:question/id]} {:answer/user [:user/id]}  :answer/answer :answer/points])
+                 :where [?e :answer/id]]
+               @(.conn this))))
 
 
   (get-answers-for-correction
@@ -434,16 +499,19 @@
 
   (get-corrections-of-answer
     [this answer-id]
-    (map
-      #(zipmap [:correction/feedback :correction/timestamp] %)
-      (d/q '[:find ?corr-feedback ?timestamp
-             :in $ ?answer-id
-             :where
-             [?answer :answer/id ?answer-id]
-             [?correction :correction/answer ?answer ?tx]
-             [?tx :db/txInstant ?timestamp]
-             [?correction :correction/feedback ?corr-feedback]]
-           @(.conn this) answer-id)))
+    (let [existing-answer-ids (map #(:answer/id %) (get-all-answers this))]
+      (if (some #(= answer-id %) existing-answer-ids)
+        (map
+          #(zipmap [:correction/feedback :correction/timestamp] %)
+          (d/q '[:find ?corr-feedback ?timestamp
+                 :in $ ?answer-id
+                 :where
+                 [?answer :answer/id ?answer-id]
+                 [?correction :correction/answer ?answer ?tx]
+                 [?tx :db/txInstant ?timestamp]
+                 [?correction :correction/feedback ?corr-feedback]]
+               @(.conn this) answer-id))
+        (throw (AssertionError. (re-pattern (str "The answer-id: " answer-id "does not exist in the database!")))))))
 
 
   (add-correction!
@@ -462,29 +530,97 @@
 
   (add-user!
     [this git-id]
-    (let [user-id (generate-id this :user/id)
-          tx-result (d/transact (.conn this)
-                                [{:db/id -1
-                                  :user/id user-id
-                                  :user/git-id git-id
-                                  :user/course-iterations []}])
-          db-after (:db-after tx-result)]
-      (d/pull db-after [:user/id :user/git-id :user/course-iterations]
-              [:user/id user-id])))
+    (let [existing-git-ids (map #(:user/git-id %) (get-all-user this))]
+      (if (some #(= git-id %) existing-git-ids)
+        (throw (AssertionError. (str "There is already a user with the same git-id in the database. Please check the existing course and wether you need to create a new one.")))
+        (let [user-id (generate-id this :user/id)
+              tx-result (d/transact (.conn this)
+                                    [{:db/id -1
+                                      :user/id user-id
+                                      :user/git-id git-id
+                                      :user/course-iterations []}])
+              db-after (:db-after tx-result)]
+          (d/pull db-after [:user/id :user/git-id :user/course-iterations]
+                  [:user/id user-id])))))
 
 
   (get-user-by-id
     [this user-id]
     (d/pull @(.conn this)
-            [:user/id :user/git-id :user/course-iterations]
+            [:user/id :user/git-id {:user/course-iterations [:course-iteration/id]}]
             [:user/id user-id]))
 
 
   (get-user-by-git-id
     [this git-id]
     (d/pull @(.conn this)
-            [:user/id :user/git-id :user/course-iterations]
+            [:user/id :user/git-id {:user/course-iterations [:course-iteration/id]}]
             [:user/git-id git-id]))
+
+
+  (get-course-by-id
+    [this course-id]
+    (d/pull @(.conn this)
+            [:course/id :course/course-name {:course/question-sets [:question-set/id :question-set/name]}]
+            [:course/id course-id]))
+
+
+  (get-all-user
+    [this]
+    (mapv first
+          (d/q '[:find (pull ?e [:user/id :user/git-id {:user/course-iterations [:course-iteration/id]}])
+                 :where [?e :user/id]]
+               @(.conn this))))
+
+
+  (get-user-id-by-git-id
+    [this git-id]
+    (first (d/q '[:find ?id
+                  :in $ ?git-id
+                  :where
+                  [?e :user/git-id ?git-id]
+                  [?e :user/id ?id]]
+                @(.conn this) git-id)))
+
+
+  (get-all-corrections-from-user
+    [this user-id]
+    (mapv
+      #(zipmap [:correction/feedback :answer/points :question/points :question/question-statement :correction/timestamp :answer/answer] %)
+      (d/q '[:find ?feedback ?points-reached ?reachable-points ?question-statement ?timestamp ?answers
+             :in $ ?user-id
+             :where
+             [?user :user/id ?user-id]
+             [?answer :answer/user ?user]
+             [?answer :answer/points ?points-reached]
+             [?answer :answer/answer ?answers]
+             [?answer :answer/question ?question]
+             [?correction :correction/answer ?answer]
+             [?correction :correction/feedback ?feedback ?tx]
+             [?question :question/question-statement ?question-statement]
+             [?question :question/points ?reachable-points]
+             [?tx :db/txInstant ?timestamp]]
+           @(.conn this) user-id)))
+
+
+  (get-all-corrections-from-corrector
+    [this corrector-id]
+    (mapv
+      #(zipmap [:correction/feedback :answer/points :question/points :question/question-statement :correction/timestamp :answer/answer] %)
+      (d/q '[:find ?feedback ?points-reached ?reachable-points ?question-statement ?timestamp ?answers
+             :in $ ?user-id
+             :where
+             [?user :user/id ?user-id]
+             [?correction :correction/corrector ?user]
+             [?correction :correction/feedback ?feedback ?tx]
+             [?correction :correction/answer ?answer]
+             [?answer :answer/points ?points-reached]
+             [?answer :answer/answer ?answers]
+             [?answer :answer/question ?question]
+             [?question :question/question-statement ?question-statement]
+             [?question :question/points ?reachable-points]
+             [?tx :db/txInstant ?timestamp]]
+           @(.conn this) corrector-id)))
 
 
   (get-answer-by-id
@@ -500,7 +636,7 @@
 
 ;; use mem db
 
-(def cfg
+(def mem-cfg
   {:store {:backend :mem
            :id "expert-db"}
    :initial-tx db-schema})
@@ -509,14 +645,14 @@
 ;; use file db
 
 
-#_(def cfg
+#_(def file-cfg
     {:store {:backend :file
              :path "/tmp/expert-db"}
      :initial-tx schema})
 
 
 (defn create-conn
-  []
+  [cfg]
   (if (d/database-exists? cfg)
     (println "Found existing DB at:" (get-in cfg [:store :path]))
     (d/create-database cfg))
@@ -525,7 +661,7 @@
 
 
 (def create-database
-  (let [conn (create-conn)]
+  (let [conn (create-conn mem-cfg)]
     (d/transact conn dummy-data/dummy-data)
     (Database. conn)))
 

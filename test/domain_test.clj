@@ -51,7 +51,7 @@
     (let [question-set {:question-set/id "1", :question-set/name "Test 1", :question-set/questions [{:question/id "2", :question/points 10},{:question/id "3", :question/points 2}]}
           answer-selection (fn [& _args] [{:answer/points 10, :answer/question {:question/id "2", :question/type :question.type/bool}}])]
       (t/is (= (d/calc-question-set-points answer-selection question-set)
-               {:question-set/id "1" :question-set/name "Test 1" :question-set/max-points 12 :question-set/achived-points 10})))))
+               {:question-set/id "1" :question-set/name "Test 1" :question-set/max-points 12 :question-set/achieved-points 10})))))
 
 
 (t/deftest test-unpack-map-in-map

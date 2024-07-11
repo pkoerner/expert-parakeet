@@ -33,9 +33,9 @@
   [question-set->answer question-set]
   (-> question-set
       (assoc :question-set/max-points (calc-max-points-of-question-set question-set))
-      (assoc :question-set/achived-points (calc-achieved-points
-                                            (question-set->answer (:question-set/id question-set))))
-      (select-keys [:question-set/id :question-set/name :question-set/max-points :question-set/achived-points])))
+      (assoc :question-set/achieved-points (calc-achieved-points
+                                             (question-set->answer (:question-set/id question-set))))
+      (select-keys [:question-set/id :question-set/name :question-set/max-points :question-set/achieved-points :question-set/passing-score])))
 
 
 (defn course-iterations-with-total-points
