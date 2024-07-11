@@ -16,7 +16,6 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: 'maven'
       - name: install clojure
         run: |
           curl -L -O https://github.com/clojure/brew-install/releases/latest/download/posix-install.sh
