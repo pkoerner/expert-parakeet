@@ -1,44 +1,44 @@
 {:paths   ["src/clj" "resources"]
- :deps    {org.clojure/clojure {:mvn/version "1.11.1"}
-           io.replikativ/datahike {:mvn/version "0.5.1507"}
+ :deps    {org.clojure/clojure {:mvn/version "1.11.3"}
+           io.replikativ/datahike {:mvn/version "0.5.1510" #_"0.6.1568"} ; cannot upgrade further because of a startup error
            provisdom/spectomic {:mvn/version "1.0.78"}
-           metosin/muuntaja {:mvn/version "0.6.8"}
-           compojure/compojure {:mvn/version "1.7.0"}
-           ring/ring {:mvn/version "1.9.5"}
-           ring-cors/ring-cors {:mvn/version "0.1.13"}
-           nano-id/nano-id {:mvn/version "1.0.0"}
-           ring/ring-defaults {:mvn/version "0.3.3"}
-           ring-oauth2/ring-oauth2 {:mvn/version "0.2.0"}
-           clj-http/clj-http {:mvn/version "3.12.3"}
-           hiccup/hiccup {:mvn/version "2.0.0-RC1"}
+           compojure/compojure {:mvn/version "1.7.1"}
+           ring/ring {:mvn/version "1.12.2"}
+           nano-id/nano-id {:mvn/version "1.1.0"}
+           ring/ring-defaults {:mvn/version "0.5.0"}
+           ring-oauth2/ring-oauth2 {:mvn/version "0.3.0"}
+           clj-http/clj-http {:mvn/version "3.13.0"}
+           hiccup/hiccup {:mvn/version "2.0.0-RC3"}
            ;; -> besides on running the tests, test/check is required at least on build time by spectomic, so I'll leave it here
            org.clojure/test.check {:mvn/version "1.1.1"}}
 
  :aliases {;; Test runner in console.
-           :build       {:deps {io.github.clojure/tools.build {:git/tag "v0.9.4" :git/sha "76b78fe"}}
+           :build       {:deps {io.github.clojure/tools.build {:mvn/version "0.10.4"}}
                          :ns-default build}
 
            :test-runner {:extra-paths ["test"]
                          :extra-deps  {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
-                                                                  :sha     "a85b3b02765fb68684ab9ee4a8598eacf7e471d2"}}
+                                                                  :sha     "7284cda41fb9edc0f3bc6b6185cfb7138fc8a023"}}
                          :main-opts   ["-m" "cognitect.test-runner"]}
 
-           :outdated    {:deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
+           :outdated    {:deps {com.github.liquidz/antq {:mvn/version "2.8.1201"}}
                          :main-opts ["-m" "antq.core"]}
 
-           :lint        {:deps {clj-kondo/clj-kondo {:mvn/version "2022.06.22"}}
+           :lint        {:deps {clj-kondo/clj-kondo {:mvn/version "2024.05.24"}}
                          :main-opts  ["-m" "clj-kondo.main" "--lint" "src" "test" "build.clj" "deps.edn"]}
 
-           :format      {:deps {mvxcvi/cljstyle {:mvn/version "0.15.0"}}
+           :format      {:deps {mvxcvi/cljstyle {:mvn/version "0.16.630"}}
+                         :extra-paths ["test"]
                          :main-opts ["-m" "cljstyle.main" "fix"]}
-           
+
            ;; check-format is used by the ci
-           :check-format {:deps {mvxcvi/cljstyle {:mvn/version "0.15.0"}}
+           :check-format {:deps {mvxcvi/cljstyle {:mvn/version "0.16.630"}}
+                          :extra-paths ["test"]
                           :main-opts ["-m" "cljstyle.main" "check"]}
 
-           :nrepl       {:extra-deps {cider/cider-nrepl   {:mvn/version "0.28.5"}}
+           :nrepl       {:extra-deps {cider/cider-nrepl   {:mvn/version "0.49.1"}}
                          :main-opts  ["-m" "nrepl.cmdline" "--interactive" "--middleware" "[cider.nrepl/cider-middleware]"]}
 
-           :compile-cljs  {:extra-deps {org.clojure/clojurescript {:mvn/version "1.11.60"}}
+           :compile-cljs  {:extra-deps {org.clojure/clojurescript {:mvn/version "1.11.132"}}
                            :extra-paths ["src/cljs"]
                            :exec-fn    compile/compile-cljs}}}
