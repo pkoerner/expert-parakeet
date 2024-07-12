@@ -1,6 +1,6 @@
 {:paths   ["src/clj" "resources"]
  :deps    {org.clojure/clojure {:mvn/version "1.11.3"}
-           io.replikativ/datahike {:mvn/version "0.5.1510" #_"0.6.1568"} ;; cannot upgrade further because of a startup error
+           io.replikativ/datahike {:mvn/version "0.6.1568"}
            provisdom/spectomic {:mvn/version "1.0.78"}
            compojure/compojure {:mvn/version "1.7.1"}
            ring/ring {:mvn/version "1.12.2"} 

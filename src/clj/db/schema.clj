@@ -1,7 +1,8 @@
 (ns db.schema
   (:require
     [domain.spec]
-    [provisdom.spectomic.core :as spectomic]))
+    [provisdom.spectomic.core :as spectomic]
+    [clojure.spec.alpha :as s]))
 
 
 (def question-schema
@@ -85,3 +86,7 @@
 
 (def db-schema
   (concat question-schema answer-schema correction-schema question-set-schema user-roles-schema user-schema course-schema course-iteration-schema))
+
+;; override global :db/id schema that was set by spectomic because its predicate tries to lookup datomic
+;; datomic is not on the classpath and so it crashes
+(s/def :db/id any?)
