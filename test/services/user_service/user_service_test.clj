@@ -58,4 +58,3 @@
           user-service (->UserService db-stub)]
       (get-user-id-by-git-id user-service "some-git-id")
       (t/is @was-called))))
-

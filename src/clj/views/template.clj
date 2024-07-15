@@ -39,25 +39,27 @@
              :content "width=device-width, initial-scale=1, shrink-to-fit=no"}]
            [:title "Expert Parakeet"]
            (comment "Bootstrap core CSS")
-           [:link {:href "/css/bootstrap.min.css", :rel "stylesheet"
-                   :integrity "sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-                   :crossorigin "anonymous"}]
+           [:link {:href "/css/bootstrap.min.css", :rel "stylesheet"}]
            (comment "Custom styles for this template")
            [:link {:href "/css/sticky-footer-navbar.css", :rel "stylesheet"}]]
           [:body
            [:header
             (comment "Fixed navbar")
             [:nav
-             {:class "navbar navbar-expand-md navbar-dark fixed-top bg-dark"}
-             [:a {:class "navbar-brand", :href "#"} "Expert Parakeet"]
-             [:ul
-              {:class "navbar-nav mr-auto"}
-              (->> menu-items
-                   (filter (fn [item] ((:visible? item) request)))
-                   (map (fn [item]
-                          (if (= (:uri request) (:href item))
-                            [:li {:class "nav-item active"} [:a {:class "nav-link", :href (:href item)} (:displayname item) [:span {:class "sr-only"} "current"]]]
-                            [:li {:class "nav-item"} [:a {:class "nav-link", :href (:href item)} (:displayname item)]]))))]]]
+             {:class "navbar navbar-expand-md fixed-top bg-dark", :data-bs-theme "dark"}
+             [:div {:class "container-fluid"}
+              [:a {:class "navbar-brand", :href "#"} "Expert Parakeet"]
+              [:ul
+               {:class "navbar-nav me-auto"}
+               (->> menu-items
+                    (filter (fn [item] ((:visible? item) request)))
+                    (map (fn [item]
+                           [:li {:class "nav-item"}
+                            [:a
+                             (if (= (:uri request) (:href item))
+                               {:class "nav-link active", :href (:href item), :aria-current "page"}
+                               {:class "nav-link", :href (:href item)})
+                             (:displayname item)]])))]]]]
 
            [:main
             {:role "main", :class "container"}

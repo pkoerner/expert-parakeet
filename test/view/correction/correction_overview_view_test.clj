@@ -36,4 +36,3 @@
                                        (t/is (every? #(string/includes? correction-overview (str (:answer/points %))) corrections))
                                        (t/is (every? #(string/includes? correction-overview (str (:question/points %))) corrections))
                                        (t/is (every? #(string/includes? correction-overview (:question/question-statement %)) corrections)))))))
-

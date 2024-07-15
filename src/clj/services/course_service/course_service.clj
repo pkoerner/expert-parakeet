@@ -58,4 +58,3 @@
   {:get-all-courses get-all-courses
    :create-course create-course-impl
    :validate-course validate-course-impl})
-

@@ -150,5 +150,3 @@
 
 (s/def ::correction
   (s/keys :req [:correction/corrector :correction/answer :correction/feedback]))
-
-

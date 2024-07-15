@@ -44,5 +44,3 @@ registerAddingSolutionBehavior(
                  [:div]
                  (map (fn [x] [:p [:span {:style "color: red;"} x]])
                       (string/split error-messages #"\n")))))))
-
-

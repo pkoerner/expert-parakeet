@@ -81,4 +81,3 @@
      (nav-tabs tabs active-tab)
      (display-corrections corrections)
      (pagination number-of-pages active-page active-tab)]))
-

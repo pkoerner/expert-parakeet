@@ -1,7 +1,8 @@
 name: Clojure CI
 
 on:
-  push: {}
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -10,21 +11,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: install clojure
+        run: |
+          curl -L -O https://github.com/clojure/brew-install/releases/latest/download/posix-install.sh
+          chmod +x posix-install.sh
+          sudo ./posix-install.sh
       - name: check formatting
-        uses: vouch-opensource/tools.deps-build@1.0.1
-        with:
-          alias: :check-format
+        run: clojure -M:check-format
       - name: run linter
-        uses: vouch-opensource/tools.deps-build@1.0.1
-        with:
-          alias: :lint
+        run: clojure -M:lint
+      - name: compile cljs
+        run: clojure -X:compile-cljs
       - name: run tests
+        run: clojure -X:test
         env:
           OAUTH_CLIENT_ID: ''
           OAUTH_CLIENT_SECRET: ''
-        uses: vouch-opensource/tools.deps-build@1.0.1
-        with:
-          alias: :test-runner
-      - name: Build the whole application
-        run: docker build .
+      - name: build uber jar
+        run: clojure -T:build uber

@@ -12,7 +12,7 @@ COPY src /tmp/src
 COPY resources /tmp/resources
 RUN make uber
 
-FROM amazoncorretto:11.0.19
+FROM amazoncorretto:21
 COPY --from=builder /tmp/target/expert-parakeet-standalone.jar /app.jar
 EXPOSE 8081/tcp
 CMD java -jar /app.jar

@@ -7,7 +7,7 @@ format:
 	clj -M:format
 
 test: compile-cljs
-	clj -M:test-runner
+	clj -X:test
 
 lint:
 	clj -M:lint

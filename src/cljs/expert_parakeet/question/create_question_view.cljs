@@ -155,4 +155,3 @@
                                                            :for new-cat-id}
                                                       new-cat-name))]
         (-> "category-container" (dom/getElement) (dom/appendChild new-cat-div))))))
-

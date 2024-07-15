@@ -12,4 +12,3 @@
   (let [elements (dom/getElementsByTagName "body")
         element (first elements)]
     (set! (.-textContent element) (str (.-textContent element) "Hello from ClojureScript!"))))
-

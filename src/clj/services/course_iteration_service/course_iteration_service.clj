@@ -84,4 +84,3 @@
   {:create-course-iteration create-course-iteration-impl
    :validate-course-iteration validate-course-iteration-impl
    :get-all-course-iterations-for-user get-all-course-iterations-for-user})
-

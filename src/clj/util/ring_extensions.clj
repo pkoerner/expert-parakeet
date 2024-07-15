@@ -55,4 +55,3 @@
        (map (fn [[key msg]] (str key "=" msg)))
        (string/join "&")
        (str base-uri "?")))
-
