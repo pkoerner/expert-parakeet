@@ -8,6 +8,7 @@
 (def question-types
   #{:question.type/free-text :question.type/single-choice :question.type/multiple-choice})
 
+
 (def semesters
   #{:semester/winter :semester/summer})
 
@@ -84,12 +85,13 @@
                              (:question-set/end %))))
 
 
-;; TODO: remove comment once we moved to MA
-;; old entity was called: fach
 (s/def :course/id :general/non-blank-string)
-(s/def :course/course-name :general/non-blank-string)
+(s/def :course/name :general/non-blank-string)
 (s/def :course/questions (s/coll-of ::question))
 (s/def :course/question-sets (s/coll-of ::question-set))
+
+
+(s/def :semester/semester semesters)
 
 
 (s/def ::course
@@ -97,12 +99,10 @@
                 :course/question-sets]))
 
 
-;; TODO: remove comment once we moved to MA
-;; old entity was called: kurs
 (s/def :course-iteration/id string?)
 (s/def :course-iteration/course ::course)
 (s/def :course-iteration/year pos-int?)
-(s/def :course-iteration/semester semesters)
+(s/def :course-iteration/semester :semester/semester)
 (s/def :course-iteration/question-sets (s/coll-of ::question-set))
 
 

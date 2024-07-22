@@ -5,6 +5,11 @@
     [provisdom.spectomic.core :as spectomic]))
 
 
+(defn- to-ident
+  [enum-value]
+  {:db/ident enum-value})
+
+
 (def question-schema
   (spectomic/datomic-schema
     [[:question/id {:db/unique :db.unique/identity
@@ -67,28 +72,57 @@
 
 
 (def course-schema
-  (spectomic/datomic-schema
-    [[:course/id {:db/doc "External course id"
-                  :db/unique :db.unique/identity
-                  :db/index true}]
-     [:course/course-name {:db/doc "Name of this course"}]
-     [:course/questions {:db/doc "All questions owned by this course"}]
-     [:course/question-sets {:db/doc "All question sets owned by this course, consisting out of questions owned by this course"}]]))
+  [#:db{:ident :course/id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true
+        :doc "External course id"}
+   #:db{:ident :course/name
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :doc "Name of this course"}
+   #:db{:ident :course/questions
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/many
+        :doc "All questions owned by this course"}
+   #:db{:ident :course/question-sets
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/many
+        :doc "All question sets owned by this course, consisting out of questions owned by this course"}])
+
+
+(def semester-schema
+  (mapv to-ident domain.spec/semesters))
 
 
 (def course-iteration-schema
-  (spectomic/datomic-schema
-    [[:course-iteration/id {:db/doc "External course iteration id"
-                            :db/unique :db.unique/identity
-                            :db/index true}]
-     [:course-iteration/course {:db/doc "The course this course iteration belongs to"}]
-     [:course-iteration/year {:db/doc "The year in which this course iteration is being held"}]
-     [:course-iteration/semester {:db/doc "The semester in which this course iteration is being held"}]
-     [:course-iteration/question-sets {:db/doc "The question sets available in this course iteration for students to answer"}]]))
+  [#:db{:ident :course-iteration/id,
+        :valueType :db.type/string,
+        :cardinality :db.cardinality/one,
+        :doc "External course iteration id",
+        :unique :db.unique/identity,
+        :index true}
+   #:db{:ident :course-iteration/course,
+        :valueType :db.type/ref,
+        :cardinality :db.cardinality/one,
+        :doc "The course this course iteration belongs to"}
+   #:db{:ident :course-iteration/year,
+        :valueType :db.type/long,
+        :cardinality :db.cardinality/one,
+        :doc "The year in which this course iteration is being held"}
+   #:db{:ident :course-iteration/semester,
+        :valueType :db.type/ref,
+        :cardinality :db.cardinality/one,
+        :doc "The semester in which this course iteration is being held"}
+   #:db{:ident :course-iteration/question-sets,
+        :cardinality :db.cardinality/many,
+        :valueType :db.type/ref,
+        :doc "The question sets available in this course iteration for students to answer"}])
 
 
 (def db-schema
-  (concat question-schema answer-schema correction-schema question-set-schema user-roles-schema user-schema course-schema course-iteration-schema))
+  (concat question-schema answer-schema correction-schema question-set-schema user-roles-schema user-schema course-schema semester-schema course-iteration-schema))
 
 
 ;; override global :db/id schema that was set by spectomic (for internal use) because its predicate tries to lookup datomic
