@@ -1,8 +1,7 @@
 (ns domain.spec
   (:require
     [clojure.spec.alpha :as s]
-    [clojure.string :as string]
-    [util.time :as time]))
+    [clojure.string :as string]))
 
 
 (def question-types
@@ -26,7 +25,7 @@
 (s/def :question/possible-solutions (s/coll-of ::solution :min-count 1))
 (s/def :question/correct-solutions (s/coll-of ::solution :min-count 1))
 (s/def :question/evaluation-criteria string?)
-(s/def :question/max-points (s/and number? #(>= % 0)))
+(s/def :question/max-points nat-int?)
 (s/def :question/categories (s/coll-of :general/non-blank-string :distinct true :into #{}))
 
 
@@ -85,9 +84,7 @@
 (s/def :question-set/id :general/non-blank-string)
 (s/def :question-set/name :general/non-blank-string)
 (s/def :question-set/questions (s/coll-of ::question))
-(s/def :question-set/start inst?) ; inst? means java.util.Date
-(s/def :question-set/end inst?)
-(s/def :question-set/required-points (s/and number? #(>= % 0)))
+(s/def :question-set/required-points nat-int?)
 
 
 (s/def ::question-set
@@ -97,9 +94,7 @@
                   :question-set/questions
                   :question-set/start
                   :question-set/end
-                  :question-set/required-points])
-    #(time/start-before-end? (:question-set/start %)
-                             (:question-set/end %))))
+                  :question-set/required-points])))
 
 
 (s/def :course/id :general/non-blank-string)
@@ -141,12 +136,14 @@
                 :user/github-id]))
 
 
+(s/def :membership/id string?)
 (s/def :membership/user ::user)
 (s/def :membership/role user-roles)
 
 
 (s/def ::membership
-  (s/keys :req [:membership/user
+  (s/keys :req [:membership/id
+                :membership/user
                 :membership/role]))
 
 
@@ -168,7 +165,7 @@
 (s/def :correction/corrector ::user) ; No distinction between autograding and human corrector
 (s/def :correction/answer ::answer)
 (s/def :correction/feedback string?)
-(s/def :correction/points (s/and number? #(>= % 0)))
+(s/def :correction/points nat-int?)
 
 
 (s/def ::correction

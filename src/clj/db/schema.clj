@@ -28,7 +28,7 @@
         :cardinality :db.cardinality/one
         :doc "Question statement"}
    #:db{:ident :question/max-points
-        :valueType :db.type/double
+        :valueType :db.type/long
         :cardinality :db.cardinality/one
         :doc "Maximum points that can be achieved"}
    #:db{:ident :question/evaluation-criteria
@@ -107,7 +107,7 @@
         :cardinality :db.cardinality/one
         :doc "The feedback text for the student (optional for automatic corrections)"}
    #:db{:ident :correction/points
-        :valueType :db.type/double
+        :valueType :db.type/long
         :cardinality :db.cardinality/one
         :doc "The points given by the correction"}])
 
@@ -127,16 +127,8 @@
         :cardinality :db.cardinality/many
         :valueType :db.type/ref
         :doc "The questions contained in this question set"}
-   #:db{:ident :question-set/start
-        :valueType :db.type/instant
-        :cardinality :db.cardinality/one
-        :doc "Start date"}
-   #:db{:ident :question-set/end
-        :valueType :db.type/instant
-        :cardinality :db.cardinality/one
-        :doc "End date"}
    #:db{:ident :question-set/required-points
-        :valueType :db.type/double
+        :valueType :db.type/long
         :cardinality :db.cardinality/one
         :doc "The points required for the student to pass"}])
 
@@ -146,7 +138,13 @@
 
 
 (def membership-schema
-  [#:db{:ident :membership/user
+  [#:db{:ident :membership/id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true
+        :doc "External membership id"}
+   #:db{:ident :membership/user
         :valueType :db.type/ref
         :cardinality :db.cardinality/one
         :doc "The user of this membership relation"}
