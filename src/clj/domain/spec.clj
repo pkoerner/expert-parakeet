@@ -23,68 +23,81 @@
 (s/def :question/id string?)
 (s/def :question/type question-types)
 (s/def :question/question-statement :general/non-blank-string)
-(s/def :question/points pos-int?)
-(s/def :question/categories (s/coll-of :general/non-blank-string :type set))
-
-
+(s/def :question/possible-solutions (s/coll-of ::solution :min-count 1))
+(s/def :question/correct-solutions (s/coll-of ::solution :min-count 1))
 (s/def :question/evaluation-criteria string?)
+(s/def :question/points pos-int?)
+(s/def :question/categories (s/coll-of :general/non-blank-string :distinct true :into #{}))
 
 
 (s/def :question/question
   (s/and
-    (s/keys :req [:question/id :question/type :question/question-statement :question/points
+    (s/keys :req [:question/id
+                  :question/type
+                  :question/question-statement
+                  :question/points
                   :question/evaluation-criteria
                   :question/categories])
     #(= (:question/type %) :question.type/free-text)))
 
 
-(s/def :question/possible-solutions (s/coll-of :general/non-blank-string :min-count 1))
-
-(s/def :question/single-choice-solution :general/non-blank-string)
-
-
 (s/def :question/single-choice-question
   (s/and
-    (s/keys :req [:question/id :question/type :question/question-statement :question/points
-                  :question/possible-solutions :question/single-choice-solution
+    (s/keys :req [:question/id
+                  :question/type
+                  :question/question-statement
+                  :question/points
+                  :question/possible-solutions
+                  :question/correct-solutions
                   :question/categories])
-    #(= (:question/type %) :question.type/single-choice)))
-
-
-(s/def :question/multiple-choice-solution (s/coll-of :general/non-blank-string :min-count 1))
+    #(= (:question/type %) :question.type/single-choice)
+    #(= (count (:question/correct-solutions %)) 1)
+    (fn [q]
+      (every? #(some (partial = %) (:question/possible-solutions q))
+              (:question/correct-solutions q)))))
 
 
 (s/def :question/multiple-choice-question
   (s/and
-    (s/keys :req [:question/id :question/type :question/question-statement :question/points
-                  :question/possible-solutions :question/multiple-choice-solution
+    (s/keys :req [:question/id
+                  :question/type
+                  :question/question-statement
+                  :question/points
+                  :question/possible-solutions
+                  :question/correct-solutions
                   :question/categories])
-    #(= (:question/type %) :question.type/multiple-choice)))
+    #(= (:question/type %) :question.type/multiple-choice)
+    (fn [q]
+      (every? #(some (partial = %) (:question/possible-solutions q))
+              (:question/correct-solutions q)))))
 
 
 (s/def ::question
-  (s/or :free-text :question/question ; text -> free-text
+  (s/or :free-text :question/question
         :single-choice :question/single-choice-question
         :multiple-choice :question/multiple-choice-question))
 
 
+(s/def :solution/id string?)
+(s/def :solution/statement string?)
+(s/def ::solution (s/keys :req [:solution/id :solution/statement]))
+
 (s/def :question-set/id :general/non-blank-string)
 (s/def :question-set/name :general/non-blank-string)
 (s/def :question-set/questions (s/coll-of ::question))
-
-
-;; inst? checks for an input to be
-;; of type java.util.Date.
-(s/def :question-set/start inst?)
-(s/def :question-set/end  inst?)
+(s/def :question-set/start inst?) ; inst? means java.util.Date
+(s/def :question-set/end inst?)
 (s/def :question-set/passing-score nat-int?)
 
 
 (s/def ::question-set
   (s/and
-    (s/keys :req [:question-set/id :question-set/name
-                  :question-set/start :question-set/end
-                  :question-set/questions :question-set/passing-score])
+    (s/keys :req [:question-set/id
+                  :question-set/name
+                  :question-set/questions
+                  :question-set/start
+                  :question-set/end
+                  :question-set/passing-score])
     #(time/start-before-end? (:question-set/start %)
                              (:question-set/end %))))
 
@@ -96,8 +109,10 @@
 
 
 (s/def ::course
-  (s/keys :req [:course/id :course/course-name
-                :course/questions :course/question-sets]))
+  (s/keys :req [:course/id
+                :course/name
+                :course/questions
+                :course/question-sets]))
 
 
 (s/def :course-iteration/id string?)
@@ -136,8 +151,8 @@
 
 
 (s/def :answer/id string?)
-(s/def :answer/user ::user)
 (s/def :answer/question ::question)
+(s/def :answer/creator ::user)
 
 
 (s/def :answer/answer

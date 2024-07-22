@@ -10,31 +10,72 @@
   {:db/ident enum-value})
 
 
+(def question-type-schema
+  (mapv to-ident domain.spec/question-types))
+
+
 (def question-schema
-  (spectomic/datomic-schema
-    [[:question/id {:db/unique :db.unique/identity
-                    :db/index true}]
-     :question/type ; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/reference/best.html#idents-for-enumerated-types)
-     :question/question-statement
-     :question/points
-     :question/evaluation-criteria
-     :question/possible-solutions
-     :question/single-choice-solution
-     :question/multiple-choice-solution
-     :question/categories]))
+  [#:db{:ident :question/id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true}
+   #:db{:ident :question/type
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/one}
+   #:db{:ident :question/question-statement
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one}
+   #:db{:ident :question/points
+        :valueType :db.type/long
+        :cardinality :db.cardinality/one}
+   #:db{:ident :question/evaluation-criteria
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one}
+   #:db{:ident :question/possible-solutions
+        :valueType :db.type/string
+        :cardinality :db.cardinality/many}
+   #:db{:ident :question/single-choice-solution
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one}
+   #:db{:ident :question/multiple-choice-solution
+        :valueType :db.type/string
+        :cardinality :db.cardinality/many}
+   #:db{:ident :question/categories
+        :valueType :db.type/string
+        :cardinality :db.cardinality/many}])
 
 
 ;; manche Felder bleiben leer (abhaengig vom Fragentyp)
 
 
+
+(def solution-schema
+  [#:db{:ident :solution/id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true}
+   #:db{:ident :solution/statement
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one}])
+
+
 (def answer-schema
-  (spectomic/datomic-schema
-    [[:answer/id {:db/unique :db.unique/identity
-                  :db/index true}]
-     :answer/user
-     :answer/question
-     :answer/answer
-     :answer/points]))
+  [#:db{:ident :answer/id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true}
+   #:db{:ident :answer/question
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/one}
+   #:db{:ident :answer/creator
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/one}
+   #:db{:ident :answer/answer
+        :cardinality :db.cardinality/many
+        :valueType :db.type/string}])
 
 
 (def correction-schema
@@ -45,14 +86,26 @@
 
 
 (def question-set-schema
-  (spectomic/datomic-schema
-    [[:question-set/id {:db/unique :db.unique/identity
-                        :db/index true}]
-     :question-set/name
-     :question-set/start
-     :question-set/end
-     :question-set/questions
-     :question-set/passing-score]))
+  [#:db{:ident :question-set/id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true}
+   #:db{:ident :question-set/name
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one}
+   #:db{:ident :question-set/questions
+        :cardinality :db.cardinality/many
+        :valueType :db.type/ref}
+   #:db{:ident :question-set/start
+        :valueType :db.type/instant
+        :cardinality :db.cardinality/one}
+   #:db{:ident :question-set/end
+        :valueType :db.type/instant
+        :cardinality :db.cardinality/one}
+   #:db{:ident :question-set/passing-score
+        :valueType :db.type/long
+        :cardinality :db.cardinality/one}])
 
 
 (def user-roles-schema
@@ -136,7 +189,9 @@
 
 
 (def db-schema
-  (concat question-schema
+  (concat question-type-schema
+          question-schema
+          solution-schema
           answer-schema
           correction-schema
           question-set-schema
