@@ -56,19 +56,29 @@
 
 
 (def user-roles-schema
-  (spectomic/datomic-schema
-    [[:role/id {:db/unique :db.unique/identity
-                :db/index true}]
-     :role/course-iteration
-     :role/name]))
+  (mapv to-ident domain.spec/user-roles))
+
+
+(def membership-schema
+  [#:db{:ident :membership/user
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/one}
+   #:db{:ident :membership/role
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/one}])
 
 
 (def user-schema
-  (spectomic/datomic-schema
-    [[:user/id {:db/unique :db.unique/identity
-                :db/index true}]
-     [:user/git-id {:db/unique :db.unique/identity}]
-     :user/course-iterations]))
+  [#:db{:ident :user/id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true}
+   #:db{:ident :user/git-id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true}])
 
 
 (def course-schema
@@ -97,32 +107,45 @@
 
 
 (def course-iteration-schema
-  [#:db{:ident :course-iteration/id,
-        :valueType :db.type/string,
-        :cardinality :db.cardinality/one,
-        :doc "External course iteration id",
-        :unique :db.unique/identity,
+  [#:db{:ident :course-iteration/id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :doc "External course iteration id"
+        :unique :db.unique/identity
         :index true}
-   #:db{:ident :course-iteration/course,
-        :valueType :db.type/ref,
-        :cardinality :db.cardinality/one,
+   #:db{:ident :course-iteration/course
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/one
         :doc "The course this course iteration belongs to"}
-   #:db{:ident :course-iteration/year,
-        :valueType :db.type/long,
-        :cardinality :db.cardinality/one,
+   #:db{:ident :course-iteration/year
+        :valueType :db.type/long
+        :cardinality :db.cardinality/one
         :doc "The year in which this course iteration is being held"}
-   #:db{:ident :course-iteration/semester,
-        :valueType :db.type/ref,
-        :cardinality :db.cardinality/one,
+   #:db{:ident :course-iteration/semester
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/one
         :doc "The semester in which this course iteration is being held"}
-   #:db{:ident :course-iteration/question-sets,
-        :cardinality :db.cardinality/many,
-        :valueType :db.type/ref,
+   #:db{:ident :course-iteration/members
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/many
+        :doc "The members (as membership references) of this course iteration"}
+   #:db{:ident :course-iteration/question-sets
+        :cardinality :db.cardinality/many
+        :valueType :db.type/ref
         :doc "The question sets available in this course iteration for students to answer"}])
 
 
 (def db-schema
-  (concat question-schema answer-schema correction-schema question-set-schema user-roles-schema user-schema course-schema semester-schema course-iteration-schema))
+  (concat question-schema
+          answer-schema
+          correction-schema
+          question-set-schema
+          user-roles-schema
+          membership-schema
+          user-schema
+          course-schema
+          semester-schema
+          course-iteration-schema))
 
 
 ;; override global :db/id schema that was set by spectomic (for internal use) because its predicate tries to lookup datomic

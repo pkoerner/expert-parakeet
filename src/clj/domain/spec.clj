@@ -13,6 +13,10 @@
   #{:semester/winter :semester/summer})
 
 
+(def user-roles
+  #{:role/student :role/corrector :role/lecturer})
+
+
 (s/def :general/non-blank-string (s/and string? (complement string/blank?)))
 
 
@@ -91,44 +95,44 @@
 (s/def :course/question-sets (s/coll-of ::question-set))
 
 
-(s/def :semester/semester semesters)
-
-
 (s/def ::course
   (s/keys :req [:course/id :course/course-name
-                :course/question-sets]))
+                :course/questions :course/question-sets]))
 
 
 (s/def :course-iteration/id string?)
 (s/def :course-iteration/course ::course)
 (s/def :course-iteration/year pos-int?)
-(s/def :course-iteration/semester :semester/semester)
+(s/def :course-iteration/semester semesters)
+(s/def :course-iteration/members (s/coll-of ::membership))
 (s/def :course-iteration/question-sets (s/coll-of ::question-set))
 
 
 (s/def ::course-iteration
-  (s/keys :req [:course-iteration/id :course-iteration/course
-                :course-iteration/year :course-iteration/semester
+  (s/keys :req [:course-iteration/id
+                :course-iteration/course
+                :course-iteration/year
+                :course-iteration/semester
+                :course-iteration/members
                 :course-iteration/question-sets]))
 
 
-(s/def :role/id string?)
-(s/def :role/course-iteration string?)
-(s/def :role/name string?)
+(s/def :membership/user ::user)
+(s/def :membership/role user-roles)
 
 
-(s/def ::user-roles
-  (s/keys :req [:role/id :role/course-iteration :role/name]))
+(s/def ::membership
+  (s/keys :req [:membership/user
+                :membership/role]))
 
 
 (s/def :user/id string?)
 (s/def :user/git-id string?)
-(s/def :user/course-iterations (s/coll-of ::course-iteration))
-(s/def :user/roles (s/coll-of ::user-roles))
 
 
 (s/def ::user
-  (s/keys :req [:user/id :user/git-id :user/course-iterations]))
+  (s/keys :req [:user/id
+                :user/git-id]))
 
 
 (s/def :answer/id string?)
