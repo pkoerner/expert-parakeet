@@ -132,15 +132,6 @@
                 :course-iteration/question-sets]))
 
 
-(s/def :membership/user ::user)
-(s/def :membership/role user-roles)
-
-
-(s/def ::membership
-  (s/keys :req [:membership/user
-                :membership/role]))
-
-
 (s/def :user/id string?)
 (s/def :user/github-id string?)
 
@@ -148,6 +139,15 @@
 (s/def ::user
   (s/keys :req [:user/id
                 :user/github-id]))
+
+
+(s/def :membership/user ::user)
+(s/def :membership/role user-roles)
+
+
+(s/def ::membership
+  (s/keys :req [:membership/user
+                :membership/role]))
 
 
 (s/def :answer/id string?)
