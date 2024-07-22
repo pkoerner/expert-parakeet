@@ -27,7 +27,7 @@
         :valueType :db.type/string
         :cardinality :db.cardinality/one}
    #:db{:ident :question/points
-        :valueType :db.type/long
+        :valueType :db.type/double
         :cardinality :db.cardinality/one}
    #:db{:ident :question/evaluation-criteria
         :valueType :db.type/string
@@ -73,16 +73,32 @@
    #:db{:ident :answer/creator
         :valueType :db.type/ref
         :cardinality :db.cardinality/one}
+   #:db{:ident :answer/selected-solutions
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/many}
    #:db{:ident :answer/answer
-        :cardinality :db.cardinality/many
-        :valueType :db.type/string}])
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one}])
 
 
 (def correction-schema
-  (spectomic/datomic-schema
-    [:correction/corrector
-     :correction/answer
-     :correction/feedback]))
+  [#:db{:ident :correction/id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true}
+   #:db{:ident :correction/corrector
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/one}
+   #:db{:ident :correction/answer
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/one}
+   #:db{:ident :correction/feedback
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one}
+   #:db{:ident :correction/points
+        :valueType :db.type/double
+        :cardinality :db.cardinality/one}])
 
 
 (def question-set-schema
@@ -104,7 +120,7 @@
         :valueType :db.type/instant
         :cardinality :db.cardinality/one}
    #:db{:ident :question-set/passing-score
-        :valueType :db.type/long
+        :valueType :db.type/double
         :cardinality :db.cardinality/one}])
 
 
@@ -126,12 +142,14 @@
         :valueType :db.type/string
         :cardinality :db.cardinality/one
         :unique :db.unique/identity
-        :index true}
+        :index true
+        :doc "External user id"}
    #:db{:ident :user/git-id
         :valueType :db.type/string
         :cardinality :db.cardinality/one
         :unique :db.unique/identity
-        :index true}])
+        :index true
+        :doc "GitHub user id, used for authentication"}])
 
 
 (def course-schema

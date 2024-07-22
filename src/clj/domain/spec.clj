@@ -26,7 +26,7 @@
 (s/def :question/possible-solutions (s/coll-of ::solution :min-count 1))
 (s/def :question/correct-solutions (s/coll-of ::solution :min-count 1))
 (s/def :question/evaluation-criteria string?)
-(s/def :question/points pos-int?)
+(s/def :question/max-points (s/and number? #(>= % 0)))
 (s/def :question/categories (s/coll-of :general/non-blank-string :distinct true :into #{}))
 
 
@@ -35,7 +35,7 @@
     (s/keys :req [:question/id
                   :question/type
                   :question/question-statement
-                  :question/points
+                  :question/max-points
                   :question/evaluation-criteria
                   :question/categories])
     #(= (:question/type %) :question.type/free-text)))
@@ -46,7 +46,7 @@
     (s/keys :req [:question/id
                   :question/type
                   :question/question-statement
-                  :question/points
+                  :question/max-points
                   :question/possible-solutions
                   :question/correct-solutions
                   :question/categories])
@@ -62,7 +62,7 @@
     (s/keys :req [:question/id
                   :question/type
                   :question/question-statement
-                  :question/points
+                  :question/max-points
                   :question/possible-solutions
                   :question/correct-solutions
                   :question/categories])
@@ -87,7 +87,7 @@
 (s/def :question-set/questions (s/coll-of ::question))
 (s/def :question-set/start inst?) ; inst? means java.util.Date
 (s/def :question-set/end inst?)
-(s/def :question-set/passing-score nat-int?)
+(s/def :question-set/required-points (s/and number? #(>= % 0)))
 
 
 (s/def ::question-set
@@ -97,7 +97,7 @@
                   :question-set/questions
                   :question-set/start
                   :question-set/end
-                  :question-set/passing-score])
+                  :question-set/required-points])
     #(time/start-before-end? (:question-set/start %)
                              (:question-set/end %))))
 
@@ -153,23 +153,27 @@
 (s/def :answer/id string?)
 (s/def :answer/question ::question)
 (s/def :answer/creator ::user)
-
-
-(s/def :answer/answer
-  (s/and (s/coll-of string?)))
-
-
-(s/def :answer/points pos-int?)
+(s/def :answer/selected-solutions (s/coll-of ::solution :min-count 1))
+(s/def :answer/answer string?)
 
 
 (s/def ::answer
-  (s/keys :req [:answer/user :answer/answer :answer/question]))
+  (s/keys :req [:answer/id
+                :answer/question
+                :answer/creator
+                (or :answer/selected-solutions :answer/answer)]))
 
 
+(s/def :correction/id string?)
 (s/def :correction/corrector ::user) ; No distinction between autograding and human corrector
 (s/def :correction/answer ::answer)
 (s/def :correction/feedback string?)
+(s/def :correction/points (s/and number? #(>= % 0)))
 
 
 (s/def ::correction
-  (s/keys :req [:correction/corrector :correction/answer :correction/feedback]))
+  (s/keys :req [:correction/id
+                :correction/answer
+                :correction/points]
+          :opt [:correction/corrector
+                :correction/feedback]))
