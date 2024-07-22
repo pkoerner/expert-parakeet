@@ -31,4 +31,4 @@
   [permission-error]
   (when (contains? permission-error :not-assigned-to-question-set)
     (h/html
-      [:p (str "ERROR: Sie haben keinen Zugriff auf diesen Test!")])))
+      [:p (str "ERROR: You do not have access to this test!")])))

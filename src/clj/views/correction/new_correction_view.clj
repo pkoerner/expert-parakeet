@@ -31,17 +31,17 @@
       [:div
        [:input#answer-id {:name "answer-id" :type "hidden" :value (:answer/id answer)}]]
       [:div
-       [:label {:for "question"} "Frage:"] [:br]
+       [:label {:for "question"} "Question:"] [:br]
        [:p#question {:name "question"} (:question/question-statement question)]]
       [:div
-       [:label {:for "evaluation-criteria"} "Evaluationskriterien:"] [:br]
+       [:label {:for "evaluation-criteria"} "Evaluation criteria:"] [:br]
        [:p#evaluation-criteria {:name "evaluation-criteria"} (:question/evaluation-criteria question)]]
       [:div
-       [:label {:for "answer"} "Antwort:"] [:br]
+       [:label {:for "answer"} "Answer:"] [:br]
        [:p#answer {:name "answer"} (map str (:answer/answer answer))]]
       [:div
        (optional-error-display :correction/points errors)
-       [:label {:for "points"} "Punkte:"] [:br]
+       [:label {:for "points"} "Points:"] [:br]
        [:input#points {:name "points" :type "number" :value 0}]]
       [:div
        (optional-error-display :correction/feedback errors)

@@ -19,7 +19,7 @@
   (hform/form-to
     [:post post-destination]
     ;; TODO: maybe ask about name, mail, unikennung?
-    [:div "Für diesen GitHub Account ist noch kein User hinterlegt."]
+    [:div "For this Github account, there is no user assigned"]
 
     (h/raw (anti-forgery-field))
-    (hform/submit-button "User für diesen GitHub Account erstellen")))
+    (hform/submit-button "Create user for this Github account")))
