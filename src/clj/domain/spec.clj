@@ -142,12 +142,12 @@
 
 
 (s/def :user/id string?)
-(s/def :user/git-id string?)
+(s/def :user/github-id string?)
 
 
 (s/def ::user
   (s/keys :req [:user/id
-                :user/git-id]))
+                :user/github-id]))
 
 
 (s/def :answer/id string?)

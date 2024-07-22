@@ -19,35 +19,36 @@
         :valueType :db.type/string
         :cardinality :db.cardinality/one
         :unique :db.unique/identity
-        :index true}
+        :index true
+        :doc "External question id"}
    #:db{:ident :question/type
         :valueType :db.type/ref
-        :cardinality :db.cardinality/one}
+        :cardinality :db.cardinality/one
+        :doc "Question type (enum value)"}
    #:db{:ident :question/question-statement
         :valueType :db.type/string
-        :cardinality :db.cardinality/one}
-   #:db{:ident :question/points
+        :cardinality :db.cardinality/one
+        :doc "Question statement"}
+   #:db{:ident :question/max-points
         :valueType :db.type/double
-        :cardinality :db.cardinality/one}
+        :cardinality :db.cardinality/one
+        :doc "Maximum points that can be achieved"}
    #:db{:ident :question/evaluation-criteria
         :valueType :db.type/string
-        :cardinality :db.cardinality/one}
+        :cardinality :db.cardinality/one
+        :doc "Optional evaluation criteria for manual correction"}
    #:db{:ident :question/possible-solutions
-        :valueType :db.type/string
-        :cardinality :db.cardinality/many}
-   #:db{:ident :question/single-choice-solution
-        :valueType :db.type/string
-        :cardinality :db.cardinality/one}
-   #:db{:ident :question/multiple-choice-solution
-        :valueType :db.type/string
-        :cardinality :db.cardinality/many}
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/many
+        :doc "References all possible solutions for single/multiple-choice questions"}
+   #:db{:ident :question/correct-solutions
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/many
+        :doc "References the correct solution(s) for single/multiple-choice questions"}
    #:db{:ident :question/categories
         :valueType :db.type/string
-        :cardinality :db.cardinality/many}])
-
-
-;; manche Felder bleiben leer (abhaengig vom Fragentyp)
-
+        :cardinality :db.cardinality/many
+        :doc "Categories/Tags for this question"}])
 
 
 (def solution-schema
@@ -55,10 +56,12 @@
         :valueType :db.type/string
         :cardinality :db.cardinality/one
         :unique :db.unique/identity
-        :index true}
+        :index true
+        :doc "External solution id"}
    #:db{:ident :solution/statement
         :valueType :db.type/string
-        :cardinality :db.cardinality/one}])
+        :cardinality :db.cardinality/one
+        :doc "Solution statement"}])
 
 
 (def answer-schema
@@ -66,19 +69,24 @@
         :valueType :db.type/string
         :cardinality :db.cardinality/one
         :unique :db.unique/identity
-        :index true}
+        :index true
+        :doc "External answer id"}
    #:db{:ident :answer/question
         :valueType :db.type/ref
-        :cardinality :db.cardinality/one}
+        :cardinality :db.cardinality/one
+        :doc "The answered question"}
    #:db{:ident :answer/creator
         :valueType :db.type/ref
-        :cardinality :db.cardinality/one}
+        :cardinality :db.cardinality/one
+        :doc "The creator of this answer"}
    #:db{:ident :answer/selected-solutions
         :valueType :db.type/ref
-        :cardinality :db.cardinality/many}
+        :cardinality :db.cardinality/many
+        :doc "The selected solution(s), mutually exclusive with :answer/answer"}
    #:db{:ident :answer/answer
         :valueType :db.type/string
-        :cardinality :db.cardinality/one}])
+        :cardinality :db.cardinality/one
+        :doc "The free text answer, mutually exclusve with :answer/selected-solutions"}])
 
 
 (def correction-schema
@@ -86,19 +94,24 @@
         :valueType :db.type/string
         :cardinality :db.cardinality/one
         :unique :db.unique/identity
-        :index true}
+        :index true
+        :doc "External correction id"}
    #:db{:ident :correction/corrector
         :valueType :db.type/ref
-        :cardinality :db.cardinality/one}
+        :cardinality :db.cardinality/one
+        :doc "The corrector (optional of automatic corrections)"}
    #:db{:ident :correction/answer
         :valueType :db.type/ref
-        :cardinality :db.cardinality/one}
+        :cardinality :db.cardinality/one
+        :doc "The referenced answer"}
    #:db{:ident :correction/feedback
         :valueType :db.type/string
-        :cardinality :db.cardinality/one}
+        :cardinality :db.cardinality/one
+        :doc "The feedback text for the student (optional for automatic corrections)"}
    #:db{:ident :correction/points
         :valueType :db.type/double
-        :cardinality :db.cardinality/one}])
+        :cardinality :db.cardinality/one
+        :doc "The points given by the correction"}])
 
 
 (def question-set-schema
@@ -106,22 +119,28 @@
         :valueType :db.type/string
         :cardinality :db.cardinality/one
         :unique :db.unique/identity
-        :index true}
+        :index true
+        :doc "External question set id"}
    #:db{:ident :question-set/name
         :valueType :db.type/string
-        :cardinality :db.cardinality/one}
+        :cardinality :db.cardinality/one
+        :doc "The name of this question set"}
    #:db{:ident :question-set/questions
         :cardinality :db.cardinality/many
-        :valueType :db.type/ref}
+        :valueType :db.type/ref
+        :doc "The questions contained in this question set"}
    #:db{:ident :question-set/start
         :valueType :db.type/instant
-        :cardinality :db.cardinality/one}
+        :cardinality :db.cardinality/one
+        :doc "Start date"}
    #:db{:ident :question-set/end
         :valueType :db.type/instant
-        :cardinality :db.cardinality/one}
-   #:db{:ident :question-set/passing-score
+        :cardinality :db.cardinality/one
+        :doc "End date"}
+   #:db{:ident :question-set/required-points
         :valueType :db.type/double
-        :cardinality :db.cardinality/one}])
+        :cardinality :db.cardinality/one
+        :doc "The points required for the student to pass"}])
 
 
 (def user-roles-schema
@@ -131,10 +150,12 @@
 (def membership-schema
   [#:db{:ident :membership/user
         :valueType :db.type/ref
-        :cardinality :db.cardinality/one}
+        :cardinality :db.cardinality/one
+        :doc "The user of this membership relation"}
    #:db{:ident :membership/role
         :valueType :db.type/ref
-        :cardinality :db.cardinality/one}])
+        :cardinality :db.cardinality/one
+        :doc "The role the given user has in a course iteration"}])
 
 
 (def user-schema
@@ -144,7 +165,7 @@
         :unique :db.unique/identity
         :index true
         :doc "External user id"}
-   #:db{:ident :user/git-id
+   #:db{:ident :user/github-id
         :valueType :db.type/string
         :cardinality :db.cardinality/one
         :unique :db.unique/identity
@@ -195,7 +216,7 @@
    #:db{:ident :course-iteration/semester
         :valueType :db.type/ref
         :cardinality :db.cardinality/one
-        :doc "The semester in which this course iteration is being held"}
+        :doc "The semester in which this course iteration is being held (enum value)"}
    #:db{:ident :course-iteration/members
         :valueType :db.type/ref
         :cardinality :db.cardinality/many
