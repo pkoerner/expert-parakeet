@@ -9,7 +9,7 @@
   (spectomic/datomic-schema
     [[:question/id {:db/unique :db.unique/identity
                     :db/index true}]
-     :question/type ; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/on-prem/best-practices.html#idents-for-enumerated-types)
+     :question/type ; optimize using :db.type/ref to enum type with :db/ident (https://docs.datomic.com/reference/best.html#idents-for-enumerated-types)
      :question/question-statement
      :question/points
      :question/evaluation-criteria
@@ -68,20 +68,23 @@
 
 (def course-schema
   (spectomic/datomic-schema
-    [[:course/id {:db/unique :db.unique/identity
+    [[:course/id {:db/doc "External course id"
+                  :db/unique :db.unique/identity
                   :db/index true}]
-     :course/course-name
-     :course/question-sets]))
+     [:course/course-name {:db/doc "Name of this course"}]
+     [:course/questions {:db/doc "All questions owned by this course"}]
+     [:course/question-sets {:db/doc "All question sets owned by this course, consisting out of questions owned by this course"}]]))
 
 
 (def course-iteration-schema
   (spectomic/datomic-schema
-    [[:course-iteration/id {:db/unique :db.unique/identity
+    [[:course-iteration/id {:db/doc "External course iteration id"
+                            :db/unique :db.unique/identity
                             :db/index true}]
-     :course-iteration/course
-     :course-iteration/year
-     :course-iteration/semester
-     :course-iteration/question-sets]))
+     [:course-iteration/course {:db/doc "The course this course iteration belongs to"}]
+     [:course-iteration/year {:db/doc "The year in which this course iteration is being held"}]
+     [:course-iteration/semester {:db/doc "The semester in which this course iteration is being held"}]
+     [:course-iteration/question-sets {:db/doc "The question sets available in this course iteration for students to answer"}]]))
 
 
 (def db-schema
