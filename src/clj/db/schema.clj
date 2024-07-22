@@ -1,8 +1,7 @@
 (ns db.schema
   (:require
     [clojure.spec.alpha :as s]
-    [domain.spec]
-    [provisdom.spectomic.core :as spectomic]))
+    [domain.spec]))
 
 
 (defn- to-ident
@@ -240,9 +239,3 @@
           course-schema
           semester-schema
           course-iteration-schema))
-
-
-;; override global :db/id schema that was set by spectomic (for internal use) because its predicate tries to lookup datomic
-;; datomic is not on the classpath
-;; because the spec is global datahike accidentally uses it when verifying the database schema
-(s/def :db/id any?)
