@@ -1,6 +1,5 @@
 (ns db.schema
   (:require
-    [clojure.spec.alpha :as s]
     [domain.spec]))
 
 
