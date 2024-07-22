@@ -50,9 +50,9 @@
           [:div.card-body
            [:h5.card-title (correction :question/question-statement)]
            [:div.card-text
-            (card-entry "Gegebene Antwort:" (or (not-empty (correction :answer/answer)) "Keine Antwort gegeben"))
+            (card-entry "Given answer: " (or (not-empty (correction :answer/answer)) "No answer given"))
             (card-entry "Feedback:" (correction :correction/feedback))
-            (card-entry "Punkte:" (str (correction :answer/points) " von " (correction :question/points)))]]])
+            (card-entry "Points: " (str (correction :answer/points) " of " (correction :question/points)))]]])
        corrections))
 
 
@@ -76,7 +76,7 @@
   [corrections tabs active-tab number-of-pages active-page]
   (h/html
     [:div
-     [:h2 "Korrektur Übersicht"]
+     [:h2 "Correction overview"]
 
      (nav-tabs tabs active-tab)
      (display-corrections corrections)

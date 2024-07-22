@@ -59,4 +59,4 @@
 (defn no-question-assignment
   [permission-error]
   (when (contains? permission-error :not-assigned-to-question)
-    [:p (str "ERROR: Sie sind dieser Frage nicht zugewiesen!")]))
+    [:p (str "ERROR: You are not assigned to this question!")]))
