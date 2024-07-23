@@ -8,8 +8,88 @@
   {:db/ident enum-value})
 
 
+(def user-pull
+  [:user/id
+   :user/github-id])
+
+
+(def user-schema
+  [#:db{:ident :user/id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true
+        :doc "External user id"}
+   #:db{:ident :user/github-id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true
+        :doc "GitHub user id, used for authentication"}])
+
+
+(def user-roles-schema
+  (mapv to-ident domain.spec/user-roles))
+
+
+(def membership-pull
+  [:membership/id
+   {:membership/user user-pull}
+   :membership/role])
+
+
+(def membership-schema
+  [#:db{:ident :membership/id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true
+        :doc "External membership id"}
+   #:db{:ident :membership/user
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/one
+        :doc "The user of this membership relation"}
+   #:db{:ident :membership/role
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/one
+        :doc "The role the given user has in a course iteration"}])
+
+
+(def solution-pull
+  [:solution/id
+   :solution/statement])
+
+
+(def solution-schema
+  [#:db{:ident :solution/id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true
+        :doc "External solution id"}
+   #:db{:ident :solution/statement
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :doc "Solution statement"}])
+
+
 (def question-type-schema
   (mapv to-ident domain.spec/question-types))
+
+
+(def question-slim-pull
+  [:question/id
+   :question/type
+   :question/statement
+   :question/max-points])
+
+
+(def question-pull
+  (conj question-slim-pull
+        :question/evaluation-criteria
+        {:question/possible-solutions solution-pull}
+        {:question/correct-solutions solution-pull}
+        :question/categories))
 
 
 (def question-schema
@@ -23,7 +103,7 @@
         :valueType :db.type/ref
         :cardinality :db.cardinality/one
         :doc "Question type (enum value)"}
-   #:db{:ident :question/question-statement
+   #:db{:ident :question/statement
         :valueType :db.type/string
         :cardinality :db.cardinality/one
         :doc "Question statement"}
@@ -49,17 +129,20 @@
         :doc "Categories/Tags for this question"}])
 
 
-(def solution-schema
-  [#:db{:ident :solution/id
-        :valueType :db.type/string
-        :cardinality :db.cardinality/one
-        :unique :db.unique/identity
-        :index true
-        :doc "External solution id"}
-   #:db{:ident :solution/statement
-        :valueType :db.type/string
-        :cardinality :db.cardinality/one
-        :doc "Solution statement"}])
+(def answer-slim-pull
+  [:answer/id
+   {:answer/question question-slim-pull}
+   {:answer/creator user-pull}
+   {:answer/selected-solutions solution-pull}
+   :answer/answer])
+
+
+(def answer-pull
+  [:answer/id
+   {:answer/question question-pull}
+   {:answer/creator user-pull}
+   {:answer/selected-solutions solution-pull}
+   :answer/answer])
 
 
 (def answer-schema
@@ -87,6 +170,22 @@
         :doc "The free text answer, mutually exclusve with :answer/selected-solutions"}])
 
 
+(def correction-slim-pull
+  [:correction/id
+   {:correction/corrector user-pull}
+   {:correction/answer answer-slim-pull}
+   :correction/feedback
+   :correction/points])
+
+
+(def correction-pull
+  [:correction/id
+   {:correction/corrector user-pull}
+   {:correction/answer answer-pull}
+   :correction/feedback
+   :correction/points])
+
+
 (def correction-schema
   [#:db{:ident :correction/id
         :valueType :db.type/string
@@ -112,6 +211,27 @@
         :doc "The points given by the correction"}])
 
 
+(def question-set-no-questions-pull
+  [:question-set/id
+   :question-set/name
+   ;; no questions
+   :question-set/required-points])
+
+
+(def question-set-slim-pull
+  [:question-set/id
+   :question-set/name
+   {:question-set/questions question-slim-pull}
+   :question-set/required-points])
+
+
+(def question-set-pull
+  [:question-set/id
+   :question-set/name
+   {:question-set/questions question-pull}
+   :question-set/required-points])
+
+
 (def question-set-schema
   [#:db{:ident :question-set/id
         :valueType :db.type/string
@@ -133,40 +253,19 @@
         :doc "The points required for the student to pass"}])
 
 
-(def user-roles-schema
-  (mapv to-ident domain.spec/user-roles))
+(def course-slim-pull
+  [:course/id
+   :course/name
+   {:course/question-sets question-set-no-questions-pull}
+   ;; no questions for slim pull
+   ])
 
 
-(def membership-schema
-  [#:db{:ident :membership/id
-        :valueType :db.type/string
-        :cardinality :db.cardinality/one
-        :unique :db.unique/identity
-        :index true
-        :doc "External membership id"}
-   #:db{:ident :membership/user
-        :valueType :db.type/ref
-        :cardinality :db.cardinality/one
-        :doc "The user of this membership relation"}
-   #:db{:ident :membership/role
-        :valueType :db.type/ref
-        :cardinality :db.cardinality/one
-        :doc "The role the given user has in a course iteration"}])
-
-
-(def user-schema
-  [#:db{:ident :user/id
-        :valueType :db.type/string
-        :cardinality :db.cardinality/one
-        :unique :db.unique/identity
-        :index true
-        :doc "External user id"}
-   #:db{:ident :user/github-id
-        :valueType :db.type/string
-        :cardinality :db.cardinality/one
-        :unique :db.unique/identity
-        :index true
-        :doc "GitHub user id, used for authentication"}])
+(def course-pull
+  [:course/id
+   :course/name
+   {:course/questions question-pull}
+   {:course/question-sets question-set-pull}])
 
 
 (def course-schema
@@ -192,6 +291,33 @@
 
 (def semester-schema
   (mapv to-ident domain.spec/semesters))
+
+
+(def course-iteration-very-slim-pull
+  [:course-iteration/id
+   {:course-iteration/course course-slim-pull}
+   :course-iteration/year
+   :course-iteration/semester
+   ;; no members and no question sets
+   ])
+
+
+(def course-iteration-slim-pull
+  [:course-iteration/id
+   {:course-iteration/course course-slim-pull}
+   :course-iteration/year
+   :course-iteration/semester
+   ;; no members
+   {:course-iteration/question-sets question-set-no-questions-pull}])
+
+
+(def course-iteration-pull
+  [:course-iteration/id
+   {:course-iteration/course course-slim-pull}
+   :course-iteration/year
+   :course-iteration/semester
+   :course-iteration/members membership-pull
+   {:course-iteration/question-sets question-set-slim-pull}])
 
 
 (def course-iteration-schema

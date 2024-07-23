@@ -47,7 +47,7 @@
         :args (s/cat :req coll?
                      :redirect-uri :general/non-blank-string
                      :add-correction-fn (s/? (s/get-spec `db/add-correction!))
-                     :get-user-by-git-id-fn (s/? (s/get-spec `db/get-user-by-git-id)))
+                     :get-user-by-github-id-fn (s/? (s/get-spec `db/get-user-by-github-id)))
         :ret #(instance? hiccup.util.RawString %))
 
 

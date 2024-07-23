@@ -518,52 +518,52 @@
     (testing "get-all-user of dummy-data"
       (let [res (db/get-all-user test-db)
             reference-user [#:user{:id "0"
-                                   :git-id "12345"
+                                   :github-id "12345"
                                    :course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]}
                             #:user{:id "2"
-                                   :git-id "45678"
+                                   :github-id "45678"
                                    :course-iterations [#:course-iteration{:id "1"}]}
                             #:user{:id "3"
-                                   :git-id "13579"
+                                   :github-id "13579"
                                    :course-iterations [#:course-iteration{:id "2"}]}]]
         (t/is (every? (fn [act] (some #(= act %) reference-user)) res))))
     (testing "get-user-by-id with id = 0"
       (t/is (= (db/get-user-by-id test-db "0") {:user/id "0"
-                                                :user/git-id "12345"
+                                                :user/github-id "12345"
                                                 :user/course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]})))
     (testing "get-user-by-id with id = 2"
       (t/is (= (db/get-user-by-id test-db "2") {:user/id "2"
-                                                :user/git-id "45678"
+                                                :user/github-id "45678"
                                                 :user/course-iterations [#:course-iteration{:id "1"}]})))
     (testing "get-user-by-id with invalid id = 42"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
               #"Nothing found for entity id [:user/id \W 42 \W]"
               (db/get-user-by-id test-db "42"))))
-    (testing "get-user-by-git-id with id = 12345"
-      (t/is (= (db/get-user-by-git-id test-db "12345") {:user/id "0"
-                                                        :user/git-id "12345"
-                                                        :user/course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]})))
+    (testing "get-user-by-github-id with id = 12345"
+      (t/is (= (db/get-user-by-github-id test-db "12345") {:user/id "0"
+                                                           :user/github-id "12345"
+                                                           :user/course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]})))
     (testing "get-user-by-id with id = 45678"
-      (t/is (= (db/get-user-by-git-id test-db "45678") {:user/id "2"
-                                                        :user/git-id "45678"
-                                                        :user/course-iterations [#:course-iteration{:id "1"}]})))
+      (t/is (= (db/get-user-by-github-id test-db "45678") {:user/id "2"
+                                                           :user/github-id "45678"
+                                                           :user/course-iterations [#:course-iteration{:id "1"}]})))
     (testing "get-user-by-id with invalid id = 42"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
               #"Nothing found for entity id [:user/git\Wid \W 42 \W]"
-              (db/get-user-by-git-id test-db "42"))))
+              (db/get-user-by-github-id test-db "42"))))
     (testing "add-user! with generated git-ids"
-      (let [git-ids (distinct (gen/sample (s/gen :user/git-id) generator-sample-size))]
+      (let [git-ids (distinct (gen/sample (s/gen :user/github-id) generator-sample-size))]
         (t/is (every? (fn [act]
                         (let [_ (db/add-user! test-db act)
-                              excisting-git-ids (map #(:user/git-id %) (db/get-all-user test-db))]
+                              excisting-git-ids (map #(:user/github-id %) (db/get-all-user test-db))]
                           (some #(= act %) excisting-git-ids)))
                       git-ids))))
-    (testing "add-user! with existing git-id - should fail"
+    (testing "add-user! with existing github-id - should fail"
       (t/is (thrown-with-msg?
               java.lang.AssertionError
-              #"There is already a user with the same git-id in the database. Please check the existing course and wether you need to create a new one."
+              #"There is already a user with the same github-id in the database. Please check the existing course and wether you need to create a new one."
               (db/add-user! test-db "12345"))))))
 
 

@@ -21,7 +21,7 @@
 
 (s/def :question/id string?)
 (s/def :question/type question-types)
-(s/def :question/question-statement :general/non-blank-string)
+(s/def :question/statement :general/non-blank-string)
 (s/def :question/possible-solutions (s/coll-of ::solution :min-count 1))
 (s/def :question/correct-solutions (s/coll-of ::solution :min-count 1))
 (s/def :question/evaluation-criteria string?)
@@ -33,7 +33,7 @@
   (s/and
     (s/keys :req [:question/id
                   :question/type
-                  :question/question-statement
+                  :question/statement
                   :question/max-points
                   :question/evaluation-criteria
                   :question/categories])
@@ -44,7 +44,7 @@
   (s/and
     (s/keys :req [:question/id
                   :question/type
-                  :question/question-statement
+                  :question/statement
                   :question/max-points
                   :question/possible-solutions
                   :question/correct-solutions
@@ -60,7 +60,7 @@
   (s/and
     (s/keys :req [:question/id
                   :question/type
-                  :question/question-statement
+                  :question/statement
                   :question/max-points
                   :question/possible-solutions
                   :question/correct-solutions

@@ -67,8 +67,8 @@
 (defroutes private-routes
   (GET "/private" _ "Only for logged in users.") ; TODO remove route, just example to show authenticated routes working
 
-  (GET "/user-overview" req (let [user-git-id (str (get-in req [:session :user :oauth-github-id]))]
-                              (html-response (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) user-git-id)))))
+  (GET "/user-overview" req (let [user-github-id (str (get-in req [:session :user :oauth-github-id]))]
+                              (html-response (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) user-github-id)))))
 
   (GET "/question-set/:id"
        req

@@ -39,7 +39,7 @@
   [question-statement max-points categories evaluation-criteria]
   {:question/id (gen-id! :question)
    :question/type :question.type/free-text
-   :question/question-statement question-statement
+   :question/statement question-statement
    :question/evaluation-criteria evaluation-criteria
    :question/max-points max-points
    :question/categories (vec categories)})
@@ -54,7 +54,7 @@
 (defn- choice-question
   [question-statement max-points categories correct-solutions & other-solutions]
   (let [base {:question/id (gen-id! :question)
-              :question/question-statement question-statement
+              :question/statement question-statement
               :question/max-points max-points
               :question/categories (vec categories)}]
     (if (string? correct-solutions)

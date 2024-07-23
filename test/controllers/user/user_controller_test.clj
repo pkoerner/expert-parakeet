@@ -5,7 +5,7 @@
     [services.user-service.p-user-service :refer [PUserService]]))
 
 
-(def authenticated-session {:user {:oauth-github-id "git-id"}})
+(def authenticated-session {:user {:oauth-github-id "github-id"}})
 
 
 (deftest test-login
@@ -19,7 +19,7 @@
   (testing "authenticated login is logged in, when user exists"
     (let [request {:session authenticated-session}
           user-service (reify PUserService
-                         (get-user-id-by-git-id
+                         (get-user-id-by-github-id
                            [_self _git-id]
                            "some-user-id"))
           response (login request user-service)]
@@ -27,7 +27,7 @@
   (testing "authenticated login is redirected to create user page, when user doesn't exist"
     (let [request {:session authenticated-session}
           user-service (reify PUserService
-                         (get-user-id-by-git-id
+                         (get-user-id-by-github-id
                            [_self _git-id]
                            nil))
           response (login request user-service)]
@@ -37,10 +37,10 @@
 
 
 (deftest test-submit-create-user
-  (testing "submit is unauthorized when git id is already in use"
+  (testing "submit is unauthorized when github id is already in use"
     (let [request {:session authenticated-session}
           user-service (reify PUserService
-                         (git-id-in-use?
+                         (github-id-in-use?
                            [_self _git-id]
                            true))
           response (submit-create-user request "/" user-service)]
@@ -49,13 +49,13 @@
     (let [request {:session authenticated-session}
           redirect-url "/redirect-url"
           user-service (reify PUserService
-                         (git-id-in-use?
+                         (github-id-in-use?
                            [_self _git-id]
                            false)
 
                          (create-user!
-                           [_self git-id]
-                           (t/is (= git-id (-> request :session :user :oauth-github-id)))))
+                           [_self github-id]
+                           (t/is (= github-id (-> request :session :user :oauth-github-id)))))
           response (submit-create-user request redirect-url user-service)]
       (t/is (= 302 (response :status)))
       (t/is (= redirect-url (get-in response [:headers "Location"]))))))

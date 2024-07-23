@@ -20,9 +20,9 @@
                             :question/type]))
 
 
-(defn get-question-and-possible-solutions-by-id
+(defn get-question-by-id
   [this question-id]
-  (db/get-question-and-possible-solutions-by-id (.db this) question-id))
+  (db/get-question-by-id (.db this) question-id))
 
 
 (s/fdef validate-user-for-question
@@ -250,7 +250,7 @@ an error-set with a specified error is returned. "
 (extend QuestionService
   PQuestionService
   {:validate-user-for-question validate-user-for-question
-   :get-question-by-id get-question-and-possible-solutions-by-id
+   :get-question-by-id get-question-by-id
    :create-question! create-question-impl!
    :get-question-categories get-question-categories
    :validate-question validate-question-impl})
