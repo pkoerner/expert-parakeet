@@ -32,10 +32,10 @@
 
 
 (def ^:private validation-functions-with-error-msg
-  {:course-iteration/course [[#(s/valid? :course/id %) "Der ausgewählte Kurs war inkorrekt!"]]
-   :course-iteration/year [[#(s/valid? :course-iteration/year %) "Das ausgewählte Jahr war inkorrekt!"]]
-   :course-iteration/semester [[#(s/valid? :course-iteration/semester %) "Das ausgewählte Semester war inkorrekt!"]]
-   :course-iteration/question-sets [[#(s/valid? (s/coll-of :question-set/id) %) "Das ausgewählte question-set war nicht korrekt!"]]})
+  {:course-iteration/course [[#(s/valid? :course/id %) "The chosen course was incorrect!"]]
+   :course-iteration/year [[#(s/valid? :course-iteration/year %) "The chosen year was incorrect!"]]
+   :course-iteration/semester [[#(s/valid? :course-iteration/semester %) "The chosen semester was incorrect!"]]
+   :course-iteration/question-sets [[#(s/valid? (s/coll-of :question-set/id) %) "The chosen question-set was incorrect!"]]})
 
 
 (s/fdef validate-course-iteration-impl

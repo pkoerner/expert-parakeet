@@ -8,7 +8,7 @@
 
 (def page-size 3)
 
-(def tabs {"corrections" "Korrekturen", "corrected" "Von mir korrigierte Abgaben"})
+(def tabs {"corrections" "Corrections", "corrected" "Submissions corrected by me"})
 
 
 (s/fdef correction-overview-get

@@ -59,7 +59,7 @@
 
         [:div
          (optional-error-display :course-iteration/year errors)
-         [:label {:for "year"} "Jahr"] [:br]
+         [:label {:for "year"} "Year"] [:br]
          [:input#year {:name "year"
                        :type "number"
                        :min "1900"

@@ -122,7 +122,7 @@ expert_parakeet.question.create_question_view.register_adding_solution_behavior(
                         "/cljs/main.js")
       (script "goog.require('expert_parakeet.question.create_question_view');")
       [:div.container
-       [:h1 "Fragenerstellung:"]
+       [:h2 "Create question"]
        (hform/form-to
          {:enctype "multipart/form-data"
           :onsubmit (str "expert_parakeet.question.create_question_view.remove_doms_when_hidden(" question-types-js-arr ")")}
