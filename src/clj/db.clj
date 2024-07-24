@@ -173,7 +173,7 @@
 
 
   (get-graded-answers-of-question-set
-    [this user-id question-set-id]
+    [_this _user-id _question-set-id]
     [] ; we are not saving points in the answer anymore
     #_(mapv first
             (d/q '[:find (pull ?a [:answer/points
@@ -457,6 +457,7 @@
 
   (get-user-by-github-id
     [this github-id]
+    ;; TODO: use d/q to mitigate logs and exceptions when there is no user for the given id
     (d/pull @(.conn this)
             db.schema/user-pull
             [:user/github-id github-id]))

@@ -323,24 +323,16 @@
                         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
                         :question/points 3
                         :question/categories #{"Cat1" "Cat2"}}]
-            start (instant/read-instant-date "2020-04-25T15:09:16.437Z")
-            end (instant/read-instant-date "2020-04-25T15:17:16.437Z")
             question-set {:question-set/name question-set-name
-                          :question-set/passing-score passing-score
-                          :question-set/start start
-                          :question-set/end end}
+                          :question-set/passing-score passing-score}
             _ (db/add-question-set!
                 test-db
                 question-set-name
                 course-iteration-id
                 passing-score
-                questions
-                start
-                end)
+                questions)
             question-set-list (map #(select-keys % [:question-set/name
-                                                    :question-set/passing-score
-                                                    :question-set/start
-                                                    :question-set/end])
+                                                    :question-set/passing-score])
                                    (db/get-all-question-sets test-db))]
         (t/is (some #(= % question-set) (vec question-set-list)))))
     (testing "add-question-set! with invalid couse-iteration as input and check wether it contains in the db"
@@ -359,9 +351,7 @@
                         :question/question-statement "What is the JVM?"
                         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
                         :question/points 3
-                        :question/categories #{"Cat1"}}]
-            start (instant/read-instant-date "2020-04-25T15:09:16.437Z")
-            end (instant/read-instant-date "2020-04-25T15:17:16.437Z")]
+                        :question/categories #{"Cat1"}}]]
         (t/is (thrown-with-msg?
                 clojure.lang.ExceptionInfo
                 #"Nothing found for entity id [:course-iteration/id \W lol \W]"
@@ -370,9 +360,7 @@
                   question-set-name
                   course-iteration-id
                   passing-score
-                  questions
-                  start
-                  end)))))
+                  questions)))))
     (testing "add-question-set! with invalid question-set-name as input and check wether it contains in the db"
       (let [question-set-name 3
             course-iteration-id "1"
@@ -389,9 +377,7 @@
                         :question/question-statement "What is the JVM?"
                         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
                         :question/points 3
-                        :question/categories #{"Cat1" "Cat2"}}]
-            start (instant/read-instant-date "2020-04-25T15:09:16.437Z")
-            end (instant/read-instant-date "2020-04-25T15:17:16.437Z")]
+                        :question/categories #{"Cat1" "Cat2"}}]]
         (t/is (thrown-with-msg?
                 clojure.lang.ExceptionInfo
                 #"Bad entity value 3"
@@ -400,9 +386,7 @@
                   question-set-name
                   course-iteration-id
                   passing-score
-                  questions
-                  start
-                  end)))))
+                  questions)))))
     (testing "add-question-set! with valid question-set, but the question is also new"
       (let [input-question {:question/type :question.type/single-choice
                             :question/question-statement "What is the answer to everything"
@@ -414,24 +398,16 @@
             course-iteration-id "1"
             passing-score 1
             questions [input-question]
-            start (instant/read-instant-date "2020-04-25T15:09:16.437Z")
-            end (instant/read-instant-date "2020-04-25T15:17:16.437Z")
             question-set {:question-set/name question-set-name
-                          :question-set/passing-score passing-score
-                          :question-set/start start
-                          :question-set/end end}
+                          :question-set/passing-score passing-score}
             _ (db/add-question-set!
                 test-db
                 question-set-name
                 course-iteration-id
                 passing-score
-                questions
-                start
-                end)
+                questions)
             question-set-list (map #(select-keys % [:question-set/name
-                                                    :question-set/passing-score
-                                                    :question-set/start
-                                                    :question-set/end])
+                                                    :question-set/passing-score])
                                    (db/get-all-question-sets test-db))]
         (t/is (some #(= % question-set) (vec question-set-list)))))
     (testing "add-question-set! with semi generated question-set"
@@ -440,11 +416,7 @@
               course-iteration-id "1" ; must be existing iteration for success
               passing-score (gen/generate (s/gen :question-set/passing-score))
               questions []
-              start (gen/generate (s/gen :question-set/start))
-              end (gen/generate (s/gen :question-set/end))
               question-set {:question-set/name question-set-name
-                            :question-set/start start
-                            :question-set/end end
                             :question-set/questions questions
                             :question-set/passing-score passing-score}
               _ (db/add-question-set!
@@ -452,19 +424,13 @@
                   question-set-name
                   course-iteration-id
                   passing-score
-                  questions
-                  start
-                  end)
+                  questions)
               question-set-list (map #(select-keys % [:question-set/name
-                                                      :question-set/start
-                                                      :question-set/end
                                                       :question-set/questions
                                                       :question-set/passing-score])
                                      (db/get-all-question-sets test-db))]
           (t/is (some (fn [act-set]
                         (and (= (:question-set/name question-set) (:question-set/name act-set))
-                             (= (:question-set/start question-set) (:question-set/start act-set))
-                             (= (:question-set/end question-set) (:question-set/end act-set))
                              (= (:question-set/passing-score question-set) (:question-set/passing-score question-set))))
                       question-set-list)))))))
 
