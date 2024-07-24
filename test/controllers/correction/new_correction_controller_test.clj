@@ -12,7 +12,7 @@
         question "This is the question."
         evaluation  "This the evaluation criteria."
         get-answer-fn (fn [_] {:answer/id "0" :answer/question "0" :answer/answer answer})
-        get-question-fn (fn [_] {:question/question-statement question :question/evaluation-criteria evaluation})]
+        get-question-fn (fn [_] {:question/statement question :question/evaluation-criteria evaluation})]
     (testing "Returns a form object on normal invocation."
       (let [post-destination "post-destination"
             res (new-correction-get empty-request

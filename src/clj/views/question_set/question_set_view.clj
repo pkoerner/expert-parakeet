@@ -23,7 +23,7 @@
         [:tr
          [:td
           [:a {:href (str "/question/" (:question/id question))}
-           (:question/question-statement question)]]
+           (:question/statement question)]]
          [:td (:question/points question)]])]]))
 
 

@@ -15,7 +15,7 @@
 (s/fdef get-question-by-id
         :args (s/cat :self #(satisfies? PQuestionService %) :question-id string?)
         :ret  (s/keys :req [:question/id
-                            :question/question-statement
+                            :question/statement
                             :question/points
                             :question/type]))
 
@@ -76,7 +76,7 @@ an error-set with a specified error is returned. "
 
 
 (def ^:private question-keys
-  [:question/question-statement :question/points :question/type
+  [:question/statement :question/points :question/type
    :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
    :question/evaluation-criteria
    :question/categories])
@@ -107,7 +107,7 @@ an error-set with a specified error is returned. "
                          evaluation-criteria
                          categories]} question]
     (merge
-      {:question/question-statement [[#(s/valid? :question/question-statement question-statement) "Die Fragestellung war inkorrekt!"]]
+      {:question/statement [[#(s/valid? :question/statement question-statement) "Die Fragestellung war inkorrekt!"]]
        :question/points [[#(s/valid? :question/points points) "Die erreichbaren Punkte waren inkorrekt!"]]
        :question/type [[#(s/valid? :question/type type) "Der ausgewälte question-type war kein korrekter type!"]]}
 
@@ -163,7 +163,7 @@ an error-set with a specified error is returned. "
                      {:errors {:question/points "Die erreichbaren Punkte müssen eine Zahl sein"}}))))]
     (reduce (partial merge-with merge)
             {}
-            [{:question/question-statement question-statement}
+            [{:question/statement question-statement}
              (if (s/valid? :question/type type)
                {:question/type type}
                (let [question-type (to-question-type type)]

@@ -12,7 +12,7 @@
 
 (def create-question-error-keys
   "Possible keys for which errors can be displayed in the `question-form`."
-  #{:question/question-statement :question/type :question/points
+  #{:question/statement :question/type :question/points
     :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
     :question/evaluation-criteria})
 
@@ -129,9 +129,9 @@ expert_parakeet.question.create_question_view.register_adding_solution_behavior(
          [:post post-destination]
 
          [:div.form-group
-          (optional-error-display :question/question-statement errors)
+          (optional-error-display :question/statement errors)
           [:label {:for "question-statement"} "Fragestellung:"] [:br]
-          [:input#question-statement.form-control {:name "question-statement" :value (question-data :question/question-statement)}]]
+          [:input#question-statement.form-control {:name "question-statement" :value (question-data :question/statement)}]]
 
          [:div.form-group
           (optional-error-display :question/points errors)

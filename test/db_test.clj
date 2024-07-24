@@ -42,7 +42,7 @@
         (and (t/is (= (:question/id res) "5"))
              (t/is (s/valid? :question/multiple-choice-question (select-keys res [:question/id
                                                                                   :question/type
-                                                                                  :question/question-statement
+                                                                                  :question/statement
                                                                                   :question/points
                                                                                   :question/possible-solutions
                                                                                   :question/multiple-choice-solution
@@ -54,7 +54,7 @@
               (db/get-question-by-id test-db "42"))))
     (testing "add-question! with valid single-choice question as input and check wether it contains in the db"
       (let [input-question {:question/type :question.type/single-choice
-                            :question/question-statement "What is the answer to everything"
+                            :question/statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
                             :question/single-choice-solution "42"
                             :question/points 1
@@ -62,7 +62,7 @@
             _ (db/add-question! test-db input-question)
             question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
             question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
-                                                                                :question/question-statement
+                                                                                :question/statement
                                                                                 :question/possible-solutions
                                                                                 :question/single-choice-solution
                                                                                 :question/points
@@ -71,7 +71,7 @@
         (t/is (some #(= % input-question) (vec question-list)))))
     (testing "add-question! with valid multiple-choice question as input and check wether it contains in the db"
       (let [input-question {:question/type :question.type/multiple-choice
-                            :question/question-statement "What is the answer to everything and what is the best movie ever?"
+                            :question/statement "What is the answer to everything and what is the best movie ever?"
                             :question/possible-solutions ["21" "42" "Alien"]
                             :question/multiple-choice-solution ["42" "Alien"]
                             :question/points 1
@@ -79,7 +79,7 @@
             _ (db/add-question! test-db input-question)
             question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
             question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
-                                                                                :question/question-statement
+                                                                                :question/statement
                                                                                 :question/possible-solutions
                                                                                 :question/multiple-choice-solution
                                                                                 :question/points
@@ -88,21 +88,21 @@
         (t/is (some #(= % input-question) (vec question-list)))))
     (testing "add-question! with valid free-text-choice question as input and check wether it contains in the db"
       (let [input-question {:question/type :question.type/free-text
-                            :question/question-statement "What does rickrolling mean?"
+                            :question/statement "What does rickrolling mean?"
                             :question/evaluation-criteria "Never gonna give you up"
                             :question/points 2
                             :question/categories ["Cat2" "Cat3"]}
             _ (db/add-question! test-db input-question)
             question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
             question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
-                                                                                :question/question-statement
+                                                                                :question/statement
                                                                                 :question/evaluation-criteria
                                                                                 :question/points
                                                                                 :question/categories])
                                question-ids)]
         (t/is (some #(= % input-question) (vec question-list)))))
     (testing "add-question! with invalid question as input"
-      (let [input-question {:question/question-statement "What is the answer to everything"
+      (let [input-question {:question/statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
                             :question/single-choice-solution "42"
                             :question/points 1
@@ -110,7 +110,7 @@
         (t/is (thrown? clojure.lang.ArityException (db/add-question! test-db input-question)))))
     (testing "add-question! with already existing free-text-choice question as input and check wether it contains in the db"
       (let [input-question {:question/type :question.type/free-text
-                            :question/question-statement "What are some advantages and disadvantages of example-based and generative testing?"
+                            :question/statement "What are some advantages and disadvantages of example-based and generative testing?"
                             :question/evaluation-criteria "The following aspects are explained: Oracle, performance, test-coverage"
                             :question/points 2
                             :question/categories #{"Cat1" "Cat3"}}]
@@ -130,7 +130,7 @@
     ;;                           question-list (map #(db/get-question-by-id test-db %) question-ids)]
     ;;                       (some #(and (= (:question/type input-question) (:question/type %))
     ;;                                   (= (:question/points input-question) (:question/points %))
-    ;;                                   (= (:question/question-statement input-question) (:question/question-statement %))
+    ;;                                   (= (:question/statement input-question) (:question/statement %))
     ;;                                   (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
     ;;                                   (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
     ;;                                   (= (:question/single-choice-solution input-question) (:question/single-choice-solution %)))
@@ -145,7 +145,7 @@
     ;;                           question-list (map #(db/get-question-by-id test-db %) question-ids)]
     ;;                       (some #(and (= (:question/type input-question) (:question/type %))
     ;;                                   (= (:question/points input-question) (:question/points %))
-    ;;                                   (= (:question/question-statement input-question) (:question/question-statement %))
+    ;;                                   (= (:question/statement input-question) (:question/statement %))
     ;;                                   (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
     ;;                                   (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
     ;;                                   (= (sort (distinct (:question/multiple-choice-solution input-question))) (:question/multiple-choice-solution %)))
@@ -160,7 +160,7 @@
     ;;                           question-list (map #(db/get-question-by-id test-db %) question-ids)]
     ;;                       (some #(and (= (:question/type input-question) (:question/type %))
     ;;                                   (= (:question/points input-question) (:question/points %))
-    ;;                                   (= (:question/question-statement input-question) (:question/question-statement %))
+    ;;                                   (= (:question/statement input-question) (:question/statement %))
     ;;                                   (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
     ;;                                   (= (:question/evaluation-criteria input-question) (:question/evaluation-criteria %)))
     ;;                             question-list)))
@@ -310,7 +310,7 @@
             course-iteration-id "1"
             passing-score 1
             questions [{:question/id "6"
-                        :question/question-statement "What type of programming lanuage is java?"
+                        :question/statement "What type of programming lanuage is java?"
                         :question/type :question.type/single-choice
                         :question/possible-solutions #{"object oriented" "functional" "logic"}
                         :question/single-choice-solution "object oriented"
@@ -318,7 +318,7 @@
                         :question/categories #{"Cat2"}}
                        {:question/id "2"
                         :question/type :question.type/free-text
-                        :question/question-statement "What is the JVM?"
+                        :question/statement "What is the JVM?"
                         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
                         :question/points 3
                         :question/categories #{"Cat1" "Cat2"}}]
@@ -339,7 +339,7 @@
             course-iteration-id "lol"
             passing-score 1
             questions [{:question/id "6"
-                        :question/question-statement "What type of programming lanuage is clojure?"
+                        :question/statement "What type of programming lanuage is clojure?"
                         :question/type :question.type/single-choice
                         :question/possible-solutions #{"object oriented" "functional" "logic"}
                         :question/single-choice-solution "functional"
@@ -347,7 +347,7 @@
                         :question/categories #{"Cat2"}}
                        {:question/id "2"
                         :question/type :question.type/free-text
-                        :question/question-statement "What is the JVM?"
+                        :question/statement "What is the JVM?"
                         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
                         :question/points 3
                         :question/categories #{"Cat1"}}]]
@@ -365,7 +365,7 @@
             course-iteration-id "1"
             passing-score 1
             questions [{:question/id "6"
-                        :question/question-statement "What type of programming lanuage is java?"
+                        :question/statement "What type of programming lanuage is java?"
                         :question/type :question.type/single-choice
                         :question/possible-solutions #{"object oriented" "functional" "logic"}
                         :question/single-choice-solution "object oriented"
@@ -373,7 +373,7 @@
                         :question/categories #{"Cat2"}}
                        {:question/id "2"
                         :question/type :question.type/free-text
-                        :question/question-statement "What is the JVM?"
+                        :question/statement "What is the JVM?"
                         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
                         :question/points 3
                         :question/categories #{"Cat1" "Cat2"}}]]
@@ -388,7 +388,7 @@
                   questions)))))
     (testing "add-question-set! with valid question-set, but the question is also new"
       (let [input-question {:question/type :question.type/single-choice
-                            :question/question-statement "What is the answer to everything"
+                            :question/statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
                             :question/single-choice-solution "42"
                             :question/points 1

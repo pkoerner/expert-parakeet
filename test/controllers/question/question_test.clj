@@ -10,7 +10,7 @@
 (deftest test-question-get-validation
   (letfn [(get-question-by-id
             []
-            {:question/question-statement "Why are we still here?"})
+            {:question/statement "Why are we still here?"})
           (validate-user-for-question-success
             []
             {})

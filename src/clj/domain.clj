@@ -160,7 +160,7 @@
   [[answer]]
   (let [answer-unpacked-question-nested (update (merge answer (:answer/question answer)) :answer/answer first)
         answer-unpacked (select-keys answer-unpacked-question-nested [:user/id
-                                                                      :question/question-statement :question/points :question/evaluation-criteria
+                                                                      :question/statement :question/points :question/evaluation-criteria
                                                                       :answer/answer :answer/points :answer/id])]
     answer-unpacked))
 

@@ -43,7 +43,7 @@
                        error-map))
 
         {(str :question/type) "No valid type"}
-        {(str :question/question-statement) "No valid question statement!"}
+        {(str :question/statement) "No valid question statement!"}
         {(str :question/points) "No valid question points"}
         {(str :question/categories) "No valid question categories"}
         {(str :question/evaluation-criteria) "No valid evaluation criteria"}
@@ -97,7 +97,7 @@
     (or (s/valid? :question/question
                   (select-keys question
                                [:question/id
-                                :question/question-statement
+                                :question/statement
                                 :question/type
                                 :question/points
                                 :question/evaluation-criteria
@@ -105,7 +105,7 @@
         (s/valid? :question/single-choice-question
                   (select-keys question
                                [:question/id
-                                :question/question-statement
+                                :question/statement
                                 :question/type
                                 :question/points
                                 :question/possible-solutions
@@ -114,7 +114,7 @@
         (s/valid? :question/multiple-choice-question
                   (select-keys question
                                [:question/id
-                                :question/question-statement
+                                :question/statement
                                 :question/type
                                 :question/points
                                 :question/possible-solutions

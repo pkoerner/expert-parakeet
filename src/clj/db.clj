@@ -322,7 +322,7 @@
                                                                            :question/max-points])
                              question-ids)]
       (if (some #(= % (select-keys question [:question/type :question/statement :question/max-points])) question-list)
-        (throw (AssertionError. (str "There is a similar question already in the data base. Please check the existing question and wether you need to create a new one. " (select-keys question [:question/type :question/question-statement]))))
+        (throw (AssertionError. (str "There is a similar question already in the data base. Please check the existing question and wether you need to create a new one. " (select-keys question [:question/type :question/statement :question/max-points]))))
         (let [id (generate-id this :question/id)
               type (:question/type question)
               trans-map (apply assoc {:db/id        -1

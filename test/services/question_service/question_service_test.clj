@@ -11,7 +11,7 @@
   (let [db-stub (reify Database-Protocol)]
     (testing "Test that valid questions are returned without errors and containing all keys."
       (let [question-service (->QuestionService db-stub)
-            basic-valid-input {:question/question-statement "Valid question statement"
+            basic-valid-input {:question/statement "Valid question statement"
                                :question/categories ["Category"]
                                :question/points 5}
             valid-free-text-question (-> basic-valid-input
@@ -42,7 +42,7 @@
                                                evaluation-criteria
                                                categories)]
                  (and (empty? (result :errors))
-                      (every? #(contains? result %) [:question/question-statement :question/points :question/type
+                      (every? #(contains? result %) [:question/statement :question/points :question/type
                                                      :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
                                                      :question/evaluation-criteria
                                                      :question/categories])))
@@ -57,7 +57,7 @@
       (let [question-service (->QuestionService db-stub)
             solution "Valid possible solution1"
             solution2 "Valid possible solution2"
-            valid-input-for-all {:question/question-statement "Valid question statement"
+            valid-input-for-all {:question/statement "Valid question statement"
                                  :question/categories ["Category"]
                                  :question/points 5
                                  :question/type :question.type/free-text
@@ -81,8 +81,8 @@
           (-> valid-input-for-all (assoc :question/categories 200))
           :question/categories
 
-          (-> valid-input-for-all (assoc :question/question-statement ""))
-          :question/question-statement
+          (-> valid-input-for-all (assoc :question/statement ""))
+          :question/statement
 
           (-> valid-input-for-all (assoc :question/points "Fail"))
           :question/points

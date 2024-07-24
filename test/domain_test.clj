@@ -227,8 +227,8 @@
 (t/deftest test-answers-for-correction-view
   (t/testing "Process a single answer"
     (let [input [{:answer/id "0", :answer/answer ["Antwort"], :answer/points 5,
-                  :answer/question {:question/question-statement "Fragetext", :question/points 6, :question/evaluation-criteria "Loesung"}}]
-          output {:answer/id "0", :answer/answer "Antwort", :answer/points 5, :question/question-statement "Fragetext",
+                  :answer/question {:question/statement "Fragetext", :question/points 6, :question/evaluation-criteria "Loesung"}}]
+          output {:answer/id "0", :answer/answer "Antwort", :answer/points 5, :question/statement "Fragetext",
                   :question/points 6, :question/evaluation-criteria "Loesung"}]
       (t/is (= output (d/answers-for-correction-view input))))))
 
@@ -260,7 +260,7 @@
   (t/testing "Input is fine"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "3" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result {:correction/feedback "Gut!" :correction/points 3 :corrector/id "1"}]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No answer"
@@ -277,42 +277,42 @@
   (t/testing "No correction 1"
     (let [correction-input {:correction/points "3" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :correction-feedback-missing})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No correction 2"
     (let [correction-input {:correction/feedback "" :correction/points "3" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :correction-feedback-missing})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No points 1"
     (let [correction-input {:correction/feedback "Gut!", :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :correction-points-missing})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No points 2"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :correction-points-missing})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No points 1"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "hallo" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :invalid-points})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No points 2"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "-10" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :invalid-points})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "Too many points"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "10" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/question-statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :exceeding-number-of-points})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input))))))

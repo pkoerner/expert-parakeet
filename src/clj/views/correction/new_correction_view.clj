@@ -32,7 +32,7 @@
        [:input#answer-id {:name "answer-id" :type "hidden" :value (:answer/id answer)}]]
       [:div
        [:label {:for "question"} "Frage:"] [:br]
-       [:p#question {:name "question"} (:question/question-statement question)]]
+       [:p#question {:name "question"} (:question/statement question)]]
       [:div
        [:label {:for "evaluation-criteria"} "Evaluationskriterien:"] [:br]
        [:p#evaluation-criteria {:name "evaluation-criteria"} (:question/evaluation-criteria question)]]

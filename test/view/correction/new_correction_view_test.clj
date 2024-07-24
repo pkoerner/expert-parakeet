@@ -13,7 +13,7 @@
              (and
                (string/includes? res (first (:answer/answer answer)))
                (string/includes? res (:answer/id answer))
-               (string/includes? res (:question/question-statement question))
+               (string/includes? res (:question/statement question))
                (string/includes? res (:question/evaluation-criteria question))
                (string/includes? res post-destination)))
 
@@ -24,7 +24,7 @@
         :answer/points 1}
        {:question/id "1"
         :question/type :question.type/free-text
-        :question/question-statement "Describe a use case for transient data structures"
+        :question/statement "Describe a use case for transient data structures"
         :question/evaluation-criteria "The following aspects are explained: performance improvement, mutable variant of persistent data structures, must be made persistent before function return"
         :question/points 3
         :question/categories #{"Cat1" "Cat2" "Cat3"}}
@@ -42,7 +42,7 @@
         :answer/points 3}
        {:question/id "2"
         :question/type :question.type/free-text
-        :question/question-statement "What is the JVM?"
+        :question/statement "What is the JVM?"
         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
         :question/points 3
         :question/categories #{"Cat1" "Cat2"}}
