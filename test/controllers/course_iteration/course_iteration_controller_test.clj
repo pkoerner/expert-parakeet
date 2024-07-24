@@ -118,13 +118,11 @@
                (and (= 302 response-status)
                     (string/includes? response-url (form-encode expected-error))))
         (assoc-in test-request [:multipart-params "course-id"] wrong-course-id)
-        "Der ausgewählte Kurs war inkorrekt!"
+        "The chosen course was incorrect!"
 
         (assoc-in test-request [:multipart-params "year"] wrong-year)
-        "Das ausgewählte Jahr war inkorrekt!"
-
+        "The chosen year was incorrect!"
         (assoc-in test-request [:multipart-params "semester"] wrong-semester)
-        "Das ausgewählte Semester war inkorrekt!"
-
+        "The chosen semester was incorrect!"
         (assoc-in test-request [:multipart-params "question-set-ids"] wrong-question-set-ids)
-        "Das ausgewählte question-set war nicht korrekt!"))))
+        "The chosen question-set was incorrect!"))))

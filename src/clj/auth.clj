@@ -25,12 +25,12 @@
 ;; - User is redirect to GitHub where they are asked          ⎟ Is done by the OAuth2-
 ;;   to give our app permission to access their               ⎟ Middleware
 ;;   user id.                                                 ⎟ 
-;; - We acquire a 'Authorization Gran' with which we          ⎟
+;; - We acquire a 'Authorization Grant' with which we         ⎟
 ;;   are able to get an 'Access Token'                        ⎠
 ;; - With this 'Access Token' we can make calls to the             ⎞
 ;;   GitHub User API and fetch the user-id                         ⎟ Our Magic
 ;; - We add the user id to the session                             ⎠
-;; - (optional) Wir could persits the session, currently the session is deleted when the user closes their browser (Attention!)
+;; - (optional) We could persist the session, currently the session is deleted when the user closes their browser (Attention!)
 
 ;; Secrets from Environment variables
 ;; - it is important to keep the OAUTH_CLIENT_ID and OAUTH_CLIENT_SECRET variables secret!
@@ -117,7 +117,7 @@
 (defn is-logged-in?
   "Checks if the user is logged in as a user from the application."
   [request]
-  (contains? (-> request :session :user) :id))
+  (contains? (-> request :session :user) :id)) ; #'auth/is-logged-in?
 
 
 (defn wrap-authentication-routes

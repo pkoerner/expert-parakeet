@@ -42,10 +42,10 @@
          [:div [:span {:style "color: red;"} (errors :course/course-error)]])
        (when (errors :course/course-already-existed)
          [:div [:span {:style "color: red;"} (errors :course/course-already-existed)]])
-       [:label {:for "course"} "Fachname:"] [:br]
+       [:label {:for "course"} "Course name"] [:br]
        [:input#course {:name "course"
                        :type "text"
-                       :value "Neues Fach"}]]
+                       :value "New Course"}]]
 
       (h/raw (anti-forgery-field))
       (hform/submit-button "submit"))))
@@ -53,7 +53,7 @@
 
 (s/fdef submit-success-view
         :args (s/cat :course :course/course-name)
-        :ret (s/and #(string/includes? % "erfolg")
+        :ret (s/and #(string/includes? % "success")
                     #(instance? hiccup.util.RawString %)))
 
 
@@ -61,4 +61,4 @@
   [course]
   (h/html
     [:div
-     [:p "Das Fach " course " wurde erfolgreich erstellt!\n"]]))
+     [:p "The course " course " was successfully created!\n"]]))

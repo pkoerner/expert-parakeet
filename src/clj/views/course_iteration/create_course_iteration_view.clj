@@ -15,7 +15,7 @@
 
 (def no-courses
   "Simple paragaraph to display when there are no courses in the database."
-  [:p "Es muss erst ein Fach erstellt werden bevor ein Kurs erstellt werden kann!"])
+  [:p "There needs to be a module present, to be able to create a course."])
 
 
 (s/fdef course-iteration-form
@@ -53,13 +53,13 @@
 
         [:div
          (optional-error-display :course-iteration/course errors)
-         [:label {:for "courses"} "Fach auswahl:"] [:br]
+         [:label {:for "courses"} "Course choices"] [:br]
          [:select#courses {:name "course-id"}
           (hform/select-options (mapv course-to-option courses))]]
 
         [:div
          (optional-error-display :course-iteration/year errors)
-         [:label {:for "year"} "Jahr"] [:br]
+         [:label {:for "year"} "Year"] [:br]
          [:input#year {:name "year"
                        :type "number"
                        :min "1900"
@@ -71,7 +71,7 @@
          (optional-error-display :course-iteration/semester errors)
          [:label {:for "semester"} "Semester"] [:br]
          [:select#semester {:name "semester"}
-          (hform/select-options [["Sommer" "SoSe"]
+          (hform/select-options [["Summer" "SuSe"]
                                  ["Winter" "WiSe"]])]]
 
         [:div
@@ -90,9 +90,10 @@
 
 
 (s/fdef submit-success-view
+        ;; todo rewrite this to not test the html
         :args (s/cat :semester :course-iteration/semester
                      :year :course-iteration/semester)
-        :ret (s/and #(string/includes? % "erfolg")
+        :ret (s/and #(string/includes? % "successfully")
                     #(instance? hiccup.util.RawString %)))
 
 
@@ -101,6 +102,6 @@
   [semester year]
   (h/html
     [:div
-     [:p "Der Kurs für das " semester
-      " im Jahr " year
-      " wurde erfolgreich für das Fach erstellt!\n"]]))
+     [:p "The course for the " semester
+      " in the year " year
+      " was successfully created!\n"]]))

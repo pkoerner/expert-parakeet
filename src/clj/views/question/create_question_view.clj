@@ -22,7 +22,7 @@
   (h/html
     [:div#free-text
      (optional-error-display :question/evaluation-criteria errors)
-     [:label {:for "evaluation-criteria"} "Bewertungskriterien:"] [:br]
+     [:label {:for "evaluation-criteria"} "Evaluation criteria"] [:br]
      [:input#evaluation-criteria.form-control {:name "evaluation-criteria"
                                                :value (question-data :question/evaluation-criteria)}]]))
 
@@ -39,7 +39,7 @@
     (h/html
       [:div {:id question-type-container}
        possible-solutions-error
-       [:label {:for solution-container-div-id} "Antwort Möglichkeiten:"] [:br]
+       [:label {:for solution-container-div-id} "Possible answers:"] [:br]
        [:div.form-group {:id solution-container-div-id}
         (when was-selected
           (apply script
@@ -63,7 +63,7 @@ expert_parakeet.question.create_question_view.register_adding_solution_behavior(
 
       [:div
        solution-error
-       [:label {:for solution-list-id} "Korrekte Antwort(/en):"] [:br]
+       [:label {:for solution-list-id} "Correct answer(/en):"] [:br]
        [:ul {:id solution-list-id}]])))
 
 
@@ -122,7 +122,7 @@ expert_parakeet.question.create_question_view.register_adding_solution_behavior(
                         "/cljs/main.js")
       (script "goog.require('expert_parakeet.question.create_question_view');")
       [:div.container
-       [:h1 "Fragenerstellung:"]
+       [:h2 "Create question"]
        (hform/form-to
          {:enctype "multipart/form-data"
           :onsubmit (str "expert_parakeet.question.create_question_view.remove_doms_when_hidden(" question-types-js-arr ")")}
@@ -130,12 +130,12 @@ expert_parakeet.question.create_question_view.register_adding_solution_behavior(
 
          [:div.form-group
           (optional-error-display :question/statement errors)
-          [:label {:for "question-statement"} "Fragestellung:"] [:br]
+          [:label {:for "question-statement"} "Question statement"] [:br]
           [:input#question-statement.form-control {:name "question-statement" :value (question-data :question/statement)}]]
 
          [:div.form-group
           (optional-error-display :question/max-points errors)
-          [:label {:for "achivable-points"} "Maximalpunktzahl:"] [:br]
+          [:label {:for "achivable-points"} "Maxmimum number of points"] [:br]
           [:input#achivable-points.form-control {:name "achivable-points"
                                                  :type "number"
                                                  :min "0"
@@ -145,7 +145,7 @@ expert_parakeet.question.create_question_view.register_adding_solution_behavior(
 
          [:div.form-group
           (optional-error-display :question/type errors)
-          [:label {:for "type"} "Fragentyp"] [:br]
+          [:label {:for "type"} "Question type"] [:br]
           [:select#type.form-control {:name "type"}
            (hform/select-options
              (let [prev-type (question-types (question-data :question/type))
@@ -161,13 +161,13 @@ expert_parakeet.question.create_question_view.register_adding_solution_behavior(
          (free-text-inputs errors question-data)
 
          [:div.form-group
-          [:label {:for "new-category"} "Neue Kategorie erstellen:"]
+          [:label {:for "new-category"} "Create new category: "]
           [:input#new-category.form-control {:type "text"}]
           [:button.btn.btn-outline-info.btn-sm {:type "button" :onclick "expert_parakeet.question.create_question_view.add_new_category()"} "+"]]
 
          [:div {:clas "form-group"}
           (optional-error-display :question/categories errors)
-          [:label {:for "category-container"} "Kategorien:"] [:br]
+          [:label {:for "category-container"} "Categories"] [:br]
           [:div#category-container {:style "max-height: 150px; overflow-y: scroll;" :multiple true}
            (map (fn [cat]
                   (let [id (str "mult-select-" cat)]
@@ -186,7 +186,7 @@ expert_parakeet.question.create_question_view.register_question_type_switch('typ
 
 (defn- possible-solutions-view
   [{:question/keys [possible-solutions]}]
-  [:p.lead [:b "Antwortmöglichkeiten: "]
+  [:p.lead [:b "Possible answers: "]
    [:ul.list-group (for [el possible-solutions]
                      [:li.list-group-item el])]])
 
@@ -195,7 +195,7 @@ expert_parakeet.question.create_question_view.register_question_type_switch('typ
   [{:question/keys [single-choice-solution] :as question}]
   [:div
    (possible-solutions-view question)
-   [:p.lead [:b "Mit der korrekten Antwort: "] single-choice-solution]])
+   [:p.lead [:b "With the correct answer: "] single-choice-solution]])
 
 
 (defn- multiple-choice-question-view
@@ -203,7 +203,7 @@ expert_parakeet.question.create_question_view.register_question_type_switch('typ
   [:div
    (possible-solutions-view question)
 
-   [:p.lead [:b "Mit den korrekten Antworten: "]
+   [:p.lead [:b "With the correct answers: "]
     [:ul.list-group (for [el multiple-choice-solution]
                       [:li.list-group-item el])]]])
 
@@ -211,7 +211,7 @@ expert_parakeet.question.create_question_view.register_question_type_switch('typ
 (defn- free-text-question-view
   [{:question/keys [evaluation-criteria]}]
   [:div
-   [:p.lead [:b "Mit dem Bewertungskriterium: "] evaluation-criteria]])
+   [:p.lead [:b "With the evaluation criteria: "] evaluation-criteria]])
 
 
 (s/fdef question-success-view
@@ -228,15 +228,15 @@ expert_parakeet.question.create_question_view.register_question_type_switch('typ
   (h/html
     [:div.container
 
-     [:h1 "Die Frage vom typ \"" type "\" wurde erfolgreich erstellt."]
+     [:h1 "The question of type \"" type "\" was successfully created."]
      [:div.container
-      [:h2 "Frage: "]
-      [:p.lead [:b "Fragestellung: "] question-statement]
+      [:h2 "Question: "]
+      [:p.lead [:b "Question statement "] question-statement]
       (case type
         :question.type/free-text (free-text-question-view question)
         :question.type/single-choice (single-choice-question-view question)
         :question.type/multiple-choice (multiple-choice-question-view question))
-      [:p.lead [:b "Erreichbare Punkte: "] points]
-      [:p.lead [:b "Kategorien:"]
+      [:p.lead [:b "Reachable points "] points]
+      [:p.lead [:b "Categories "]
        [:ul.list-group (for [cat categories]
                          [:li.list-group-item cat])]]]]))
