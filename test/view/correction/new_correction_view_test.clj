@@ -26,7 +26,7 @@
         :question/type :question.type/free-text
         :question/statement "Describe a use case for transient data structures"
         :question/evaluation-criteria "The following aspects are explained: performance improvement, mutable variant of persistent data structures, must be made persistent before function return"
-        :question/points 3
+        :question/max-points 3
         :question/categories #{"Cat1" "Cat2" "Cat3"}}
        "https://some.url"]
 
@@ -44,6 +44,6 @@
         :question/type :question.type/free-text
         :question/statement "What is the JVM?"
         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
-        :question/points 3
+        :question/max-points 3
         :question/categories #{"Cat1" "Cat2"}}
        "https://some.url"])))

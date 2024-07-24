@@ -43,7 +43,7 @@
              (t/is (s/valid? :question/multiple-choice-question (select-keys res [:question/id
                                                                                   :question/type
                                                                                   :question/statement
-                                                                                  :question/points
+                                                                                  :question/max-points
                                                                                   :question/possible-solutions
                                                                                   :question/multiple-choice-solution
                                                                                   :question/categories]))))))
@@ -57,7 +57,7 @@
                             :question/statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
                             :question/single-choice-solution "42"
-                            :question/points 1
+                            :question/max-points 1
                             :question/categories ["Cat1"]}
             _ (db/add-question! test-db input-question)
             question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
@@ -65,7 +65,7 @@
                                                                                 :question/statement
                                                                                 :question/possible-solutions
                                                                                 :question/single-choice-solution
-                                                                                :question/points
+                                                                                :question/max-points
                                                                                 :question/categories])
                                question-ids)]
         (t/is (some #(= % input-question) (vec question-list)))))
@@ -74,7 +74,7 @@
                             :question/statement "What is the answer to everything and what is the best movie ever?"
                             :question/possible-solutions ["21" "42" "Alien"]
                             :question/multiple-choice-solution ["42" "Alien"]
-                            :question/points 1
+                            :question/max-points 1
                             :question/categories ["Cat2"]}
             _ (db/add-question! test-db input-question)
             question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
@@ -82,7 +82,7 @@
                                                                                 :question/statement
                                                                                 :question/possible-solutions
                                                                                 :question/multiple-choice-solution
-                                                                                :question/points
+                                                                                :question/max-points
                                                                                 :question/categories])
                                question-ids)]
         (t/is (some #(= % input-question) (vec question-list)))))
@@ -90,14 +90,14 @@
       (let [input-question {:question/type :question.type/free-text
                             :question/statement "What does rickrolling mean?"
                             :question/evaluation-criteria "Never gonna give you up"
-                            :question/points 2
+                            :question/max-points 2
                             :question/categories ["Cat2" "Cat3"]}
             _ (db/add-question! test-db input-question)
             question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
             question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
                                                                                 :question/statement
                                                                                 :question/evaluation-criteria
-                                                                                :question/points
+                                                                                :question/max-points
                                                                                 :question/categories])
                                question-ids)]
         (t/is (some #(= % input-question) (vec question-list)))))
@@ -105,14 +105,14 @@
       (let [input-question {:question/statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
                             :question/single-choice-solution "42"
-                            :question/points 1
+                            :question/max-points 1
                             :question/categories ["Cat1"]}]
         (t/is (thrown? clojure.lang.ArityException (db/add-question! test-db input-question)))))
     (testing "add-question! with already existing free-text-choice question as input and check wether it contains in the db"
       (let [input-question {:question/type :question.type/free-text
                             :question/statement "What are some advantages and disadvantages of example-based and generative testing?"
                             :question/evaluation-criteria "The following aspects are explained: Oracle, performance, test-coverage"
-                            :question/points 2
+                            :question/max-points 2
                             :question/categories #{"Cat1" "Cat3"}}]
         (t/is (thrown-with-msg?
                 java.lang.AssertionError
@@ -129,7 +129,7 @@
     ;;                           question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
     ;;                           question-list (map #(db/get-question-by-id test-db %) question-ids)]
     ;;                       (some #(and (= (:question/type input-question) (:question/type %))
-    ;;                                   (= (:question/points input-question) (:question/points %))
+    ;;                                   (= (:question/max-points input-question) (:question/max-points %))
     ;;                                   (= (:question/statement input-question) (:question/statement %))
     ;;                                   (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
     ;;                                   (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
@@ -144,7 +144,7 @@
     ;;                           question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
     ;;                           question-list (map #(db/get-question-by-id test-db %) question-ids)]
     ;;                       (some #(and (= (:question/type input-question) (:question/type %))
-    ;;                                   (= (:question/points input-question) (:question/points %))
+    ;;                                   (= (:question/max-points input-question) (:question/max-points %))
     ;;                                   (= (:question/statement input-question) (:question/statement %))
     ;;                                   (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
     ;;                                   (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
@@ -159,7 +159,7 @@
     ;;                           question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
     ;;                           question-list (map #(db/get-question-by-id test-db %) question-ids)]
     ;;                       (some #(and (= (:question/type input-question) (:question/type %))
-    ;;                                   (= (:question/points input-question) (:question/points %))
+    ;;                                   (= (:question/max-points input-question) (:question/max-points %))
     ;;                                   (= (:question/statement input-question) (:question/statement %))
     ;;                                   (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
     ;;                                   (= (:question/evaluation-criteria input-question) (:question/evaluation-criteria %)))
@@ -314,13 +314,13 @@
                         :question/type :question.type/single-choice
                         :question/possible-solutions #{"object oriented" "functional" "logic"}
                         :question/single-choice-solution "object oriented"
-                        :question/points 1
+                        :question/max-points 1
                         :question/categories #{"Cat2"}}
                        {:question/id "2"
                         :question/type :question.type/free-text
                         :question/statement "What is the JVM?"
                         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
-                        :question/points 3
+                        :question/max-points 3
                         :question/categories #{"Cat1" "Cat2"}}]
             question-set {:question-set/name question-set-name
                           :question-set/passing-score passing-score}
@@ -343,13 +343,13 @@
                         :question/type :question.type/single-choice
                         :question/possible-solutions #{"object oriented" "functional" "logic"}
                         :question/single-choice-solution "functional"
-                        :question/points 1
+                        :question/max-points 1
                         :question/categories #{"Cat2"}}
                        {:question/id "2"
                         :question/type :question.type/free-text
                         :question/statement "What is the JVM?"
                         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
-                        :question/points 3
+                        :question/max-points 3
                         :question/categories #{"Cat1"}}]]
         (t/is (thrown-with-msg?
                 clojure.lang.ExceptionInfo
@@ -369,13 +369,13 @@
                         :question/type :question.type/single-choice
                         :question/possible-solutions #{"object oriented" "functional" "logic"}
                         :question/single-choice-solution "object oriented"
-                        :question/points 1
+                        :question/max-points 1
                         :question/categories #{"Cat2"}}
                        {:question/id "2"
                         :question/type :question.type/free-text
                         :question/statement "What is the JVM?"
                         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
-                        :question/points 3
+                        :question/max-points 3
                         :question/categories #{"Cat1" "Cat2"}}]]
         (t/is (thrown-with-msg?
                 clojure.lang.ExceptionInfo
@@ -391,7 +391,7 @@
                             :question/statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
                             :question/single-choice-solution "42"
-                            :question/points 1
+                            :question/max-points 1
                             :question/categories ["Cat1"]}
             question-set-name "The Truth 2"
             course-iteration-id "1"

@@ -13,7 +13,7 @@
       (let [question-service (->QuestionService db-stub)
             basic-valid-input {:question/statement "Valid question statement"
                                :question/categories ["Category"]
-                               :question/points 5}
+                               :question/max-points 5}
             valid-free-text-question (-> basic-valid-input
                                          (assoc :question/type :question.type/free-text)
                                          (assoc :question/evaluation-criteria "Some valid evaluation criteria."))
@@ -42,7 +42,7 @@
                                                evaluation-criteria
                                                categories)]
                  (and (empty? (result :errors))
-                      (every? #(contains? result %) [:question/statement :question/points :question/type
+                      (every? #(contains? result %) [:question/statement :question/max-points :question/type
                                                      :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
                                                      :question/evaluation-criteria
                                                      :question/categories])))
@@ -59,7 +59,7 @@
             solution2 "Valid possible solution2"
             valid-input-for-all {:question/statement "Valid question statement"
                                  :question/categories ["Category"]
-                                 :question/points 5
+                                 :question/max-points 5
                                  :question/type :question.type/free-text
                                  :question/evaluation-criteria "Some valid evaluation criteria."
                                  :question/possible-solutions [solution solution2]
@@ -84,8 +84,8 @@
           (-> valid-input-for-all (assoc :question/statement ""))
           :question/statement
 
-          (-> valid-input-for-all (assoc :question/points "Fail"))
-          :question/points
+          (-> valid-input-for-all (assoc :question/max-points "Fail"))
+          :question/max-points
 
           (-> valid-input-for-all (assoc :question/type "Not a type"))
           :question/type

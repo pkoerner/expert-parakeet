@@ -15,10 +15,10 @@
   "Creates a map that contains 
    a single key :question-set/questions
    with a vector of maps as the value. 
-   The maps each contain a key :question/points 
+   The maps each contain a key :question/max-points 
    and a natural number of points as its value."
   [points]
-  (assoc {} :question-set/questions (mapv #(assoc {} :question/points %) points)))
+  (assoc {} :question-set/questions (mapv #(assoc {} :question/max-points %) points)))
 
 
 (defspec test-calc-max-points-of-question-set 10
@@ -48,7 +48,7 @@
 
 (t/deftest test-question-set-points
   (t/testing "Two questions in a single question-set"
-    (let [question-set {:question-set/id "1", :question-set/name "Test 1", :question-set/questions [{:question/id "2", :question/points 10},{:question/id "3", :question/points 2}]}
+    (let [question-set {:question-set/id "1", :question-set/name "Test 1", :question-set/questions [{:question/id "2", :question/max-points 10},{:question/id "3", :question/max-points 2}]}
           answer-selection (fn [& _args] [{:answer/points 10, :answer/question {:question/id "2", :question/type :question.type/bool}}])]
       (t/is (= (d/calc-question-set-points answer-selection question-set)
                {:question-set/id "1" :question-set/name "Test 1" :question-set/max-points 12 :question-set/achieved-points 10})))))
@@ -227,9 +227,9 @@
 (t/deftest test-answers-for-correction-view
   (t/testing "Process a single answer"
     (let [input [{:answer/id "0", :answer/answer ["Antwort"], :answer/points 5,
-                  :answer/question {:question/statement "Fragetext", :question/points 6, :question/evaluation-criteria "Loesung"}}]
+                  :answer/question {:question/statement "Fragetext", :question/max-points 6, :question/evaluation-criteria "Loesung"}}]
           output {:answer/id "0", :answer/answer "Antwort", :answer/points 5, :question/statement "Fragetext",
-                  :question/points 6, :question/evaluation-criteria "Loesung"}]
+                  :question/max-points 6, :question/evaluation-criteria "Loesung"}]
       (t/is (= output (d/answers-for-correction-view input))))))
 
 
@@ -260,7 +260,7 @@
   (t/testing "Input is fine"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "3" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/max-points 4 :question/evaluation-criteria "Kriterien"}}]
           result {:correction/feedback "Gut!" :correction/points 3 :corrector/id "1"}]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No answer"
@@ -277,42 +277,42 @@
   (t/testing "No correction 1"
     (let [correction-input {:correction/points "3" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/max-points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :correction-feedback-missing})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No correction 2"
     (let [correction-input {:correction/feedback "" :correction/points "3" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/max-points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :correction-feedback-missing})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No points 1"
     (let [correction-input {:correction/feedback "Gut!", :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/max-points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :correction-points-missing})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No points 2"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/max-points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :correction-points-missing})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No points 1"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "hallo" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/max-points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :invalid-points})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "No points 2"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "-10" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/max-points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :invalid-points})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input)))))
   (t/testing "Too many points"
     (let [correction-input {:correction/feedback "Gut!" :correction/points "10" :corrector/id "1"}
           answer-input [{:answer/id "0" :answer/points 0 :answer/answer "So ist das"
-                         :answer/question {:question/statement "Frage" :question/points 4 :question/evaluation-criteria "Kriterien"}}]
+                         :answer/question {:question/statement "Frage" :question/max-points 4 :question/evaluation-criteria "Kriterien"}}]
           result (merge correction-input {:error :exceeding-number-of-points})]
       (t/is (= result (d/validate-incoming-correction correction-input answer-input))))))

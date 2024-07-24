@@ -16,7 +16,7 @@
         :args (s/cat :self #(satisfies? PQuestionService %) :question-id string?)
         :ret  (s/keys :req [:question/id
                             :question/statement
-                            :question/points
+                            :question/max-points
                             :question/type]))
 
 
@@ -76,7 +76,7 @@ an error-set with a specified error is returned. "
 
 
 (def ^:private question-keys
-  [:question/statement :question/points :question/type
+  [:question/statement :question/max-points :question/type
    :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
    :question/evaluation-criteria
    :question/categories])
@@ -108,7 +108,7 @@ an error-set with a specified error is returned. "
                          categories]} question]
     (merge
       {:question/statement [[#(s/valid? :question/statement question-statement) "Die Fragestellung war inkorrekt!"]]
-       :question/points [[#(s/valid? :question/points points) "Die erreichbaren Punkte waren inkorrekt!"]]
+       :question/max-points [[#(s/valid? :question/max-points points) "Die erreichbaren Punkte waren inkorrekt!"]]
        :question/type [[#(s/valid? :question/type type) "Der ausgewälte question-type war kein korrekter type!"]]}
 
       (when (or (= type :question.type/single-choice) (= type :question.type/multiple-choice))
@@ -156,11 +156,11 @@ an error-set with a specified error is returned. "
           (parse-points
             [points]
             (if (and (not (nil? points)) (number? points))
-              {:question/points points}
+              {:question/max-points points}
               (try (let [points (Long/parseLong (.trim points))]
-                     {:question/points points})
+                     {:question/max-points points})
                    (catch NumberFormatException _
-                     {:errors {:question/points "Die erreichbaren Punkte müssen eine Zahl sein"}}))))]
+                     {:errors {:question/max-points "Die erreichbaren Punkte müssen eine Zahl sein"}}))))]
     (reduce (partial merge-with merge)
             {}
             [{:question/statement question-statement}

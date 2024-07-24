@@ -44,7 +44,7 @@
 
         {(str :question/type) "No valid type"}
         {(str :question/statement) "No valid question statement!"}
-        {(str :question/points) "No valid question points"}
+        {(str :question/max-points) "No valid question points"}
         {(str :question/categories) "No valid question categories"}
         {(str :question/evaluation-criteria) "No valid evaluation criteria"}
         {(str :question/possible-solutions) "No valid possible solutions"}
@@ -99,7 +99,7 @@
                                [:question/id
                                 :question/statement
                                 :question/type
-                                :question/points
+                                :question/max-points
                                 :question/evaluation-criteria
                                 :question/categories]))
         (s/valid? :question/single-choice-question
@@ -107,7 +107,7 @@
                                [:question/id
                                 :question/statement
                                 :question/type
-                                :question/points
+                                :question/max-points
                                 :question/possible-solutions
                                 :question/single-choice-solution
                                 :question/categories]))
@@ -116,7 +116,7 @@
                                [:question/id
                                 :question/statement
                                 :question/type
-                                :question/points
+                                :question/max-points
                                 :question/possible-solutions
                                 :question/multiple-choice-solution
                                 :question/categories])))))

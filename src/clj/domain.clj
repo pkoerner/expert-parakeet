@@ -6,7 +6,7 @@
    achievable number of points for
    a question set."
   [question-set]
-  (apply + (map :question/points (:question-set/questions question-set))))
+  (apply + (map :question/max-points (:question-set/questions question-set))))
 
 
 ;; TODO: wir müssen noch entscheiden ob der beste oder
@@ -160,7 +160,7 @@
   [[answer]]
   (let [answer-unpacked-question-nested (update (merge answer (:answer/question answer)) :answer/answer first)
         answer-unpacked (select-keys answer-unpacked-question-nested [:user/id
-                                                                      :question/statement :question/points :question/evaluation-criteria
+                                                                      :question/statement :question/max-points :question/evaluation-criteria
                                                                       :answer/answer :answer/points :answer/id])]
     answer-unpacked))
 
@@ -171,7 +171,7 @@
    and else the correction with an `:error` entry.
    
    Possible `:error` entries are:
-   * `:no-fitting-answer`: `:question/points` in the `:answer/question` was empty.
+   * `:no-fitting-answer`: `:question/max-points` in the `:answer/question` was empty.
    * `:correction-feedback-missing`: `:correction/feedback` was empty.
    * `:correction-points-missing`: `:correction/points` was empty.
    * `:invalid-points`: `:correction/points` was not a natural number.
@@ -179,7 +179,7 @@
   [correction fitting-answers]
   (if-not (first fitting-answers)
     (assoc correction :error :no-fitting-answer)
-    (let [question-points (get-in (first fitting-answers) [:answer/question :question/points])]
+    (let [question-points (get-in (first fitting-answers) [:answer/question :question/max-points])]
       (cond
         (not question-points)
         (assoc correction :error :no-fitting-answer)

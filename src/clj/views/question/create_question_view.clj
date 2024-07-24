@@ -12,7 +12,7 @@
 
 (def create-question-error-keys
   "Possible keys for which errors can be displayed in the `question-form`."
-  #{:question/statement :question/type :question/points
+  #{:question/statement :question/type :question/max-points
     :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
     :question/evaluation-criteria})
 
@@ -134,13 +134,13 @@ expert_parakeet.question.create_question_view.register_adding_solution_behavior(
           [:input#question-statement.form-control {:name "question-statement" :value (question-data :question/statement)}]]
 
          [:div.form-group
-          (optional-error-display :question/points errors)
+          (optional-error-display :question/max-points errors)
           [:label {:for "achivable-points"} "Maximalpunktzahl:"] [:br]
           [:input#achivable-points.form-control {:name "achivable-points"
                                                  :type "number"
                                                  :min "0"
                                                  :step ".1"
-                                                 :value (let [points (question-data :question/points)]
+                                                 :value (let [points (question-data :question/max-points)]
                                                           (if points points "5"))}]]
 
          [:div.form-group

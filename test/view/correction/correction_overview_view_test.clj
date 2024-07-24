@@ -21,7 +21,7 @@
     {:tabs tabs :active-tab active-tab}))
 
 
-(def correction-gen (s/gen (s/keys :req [:correction/feedback :answer/points :question/points :question/statement :answer/answer])))
+(def correction-gen (s/gen (s/keys :req [:correction/feedback :answer/points :question/max-points :question/statement :answer/answer])))
 
 
 (deftest test-correction-overview
@@ -34,5 +34,5 @@
                                        (t/is (every? #(string/includes? correction-overview (first (:answer/answer %))) (filter #(not-empty (:answer/answer %)) corrections)))
 
                                        (t/is (every? #(string/includes? correction-overview (str (:answer/points %))) corrections))
-                                       (t/is (every? #(string/includes? correction-overview (str (:question/points %))) corrections))
+                                       (t/is (every? #(string/includes? correction-overview (str (:question/max-points %))) corrections))
                                        (t/is (every? #(string/includes? correction-overview (:question/statement %)) corrections)))))))
