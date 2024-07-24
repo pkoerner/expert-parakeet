@@ -13,7 +13,7 @@
 (def create-question-error-keys
   "Possible keys for which errors can be displayed in the `question-form`."
   #{:question/statement :question/type :question/max-points
-    :question/possible-solutions :question/single-choice-solution :question/correct-solutions
+    :question/possible-solutions :question/correct-solutions
     :question/evaluation-criteria})
 
 
@@ -69,20 +69,14 @@ expert_parakeet.question.create_question_view.register_adding_solution_behavior(
 
 (defn- single-choice-inputs
   [errors question-data]
-  (letfn [(as-coll
-            [coll-or-single]
-            (if (or (nil? coll-or-single)
-                    (coll? coll-or-single))
-              coll-or-single
-              [coll-or-single]))]
-    (h/html
-      [:div#single-choice
-       (possible-answers-input "single-choice"
-                               (optional-error-display :question/possible-solutions errors)
-                               (optional-error-display :question/single-choice-solution errors)
-                               (= :question.type/single-choice (question-data :question/type))
-                               (question-data :question/possible-solutions)
-                               (as-coll (question-data :question/single-choice-solution)))])))
+  (h/html
+    [:div#single-choice
+     (possible-answers-input "single-choice"
+                             (optional-error-display :question/possible-solutions errors)
+                             (optional-error-display :question/correct-solutions errors)
+                             (= :question.type/single-choice (question-data :question/type))
+                             (question-data :question/possible-solutions)
+                             (question-data :question/correct-solutions))]))
 
 
 (defn- multiple-choice-inputs
@@ -192,19 +186,19 @@ expert_parakeet.question.create_question_view.register_question_type_switch('typ
 
 
 (defn- single-choice-question-view
-  [{:question/keys [single-choice-solution] :as question}]
+  [{:question/keys [correct-solutions] :as question}]
   [:div
    (possible-solutions-view question)
-   [:p.lead [:b "With the correct answer: "] single-choice-solution]])
+   [:p.lead [:b "With the correct answer: "] (first correct-solutions)]])
 
 
 (defn- multiple-choice-question-view
-  [{:question/keys [multiple-choice-solution] :as question}]
+  [{:question/keys [correct-solutions] :as question}]
   [:div
    (possible-solutions-view question)
 
    [:p.lead [:b "With the correct answers: "]
-    [:ul.list-group (for [el multiple-choice-solution]
+    [:ul.list-group (for [el correct-solutions]
                       [:li.list-group-item el])]]])
 
 
@@ -224,19 +218,19 @@ expert_parakeet.question.create_question_view.register_question_type_switch('typ
 (defn question-success-view
   "Takes a valid question as argument of one of the question types.
    The question is displayed with all its values with a success message."
-  [{:question/keys [type question-statement points categories] :as question}]
+  [{:question/keys [type statement max-points categories] :as question}]
   (h/html
     [:div.container
 
      [:h1 "The question of type \"" type "\" was successfully created."]
      [:div.container
       [:h2 "Question: "]
-      [:p.lead [:b "Question statement "] question-statement]
+      [:p.lead [:b "Question statement "] statement]
       (case type
         :question.type/free-text (free-text-question-view question)
         :question.type/single-choice (single-choice-question-view question)
         :question.type/multiple-choice (multiple-choice-question-view question))
-      [:p.lead [:b "Reachable points "] points]
+      [:p.lead [:b "Reachable points "] max-points]
       [:p.lead [:b "Categories "]
        [:ul.list-group (for [cat categories]
                          [:li.list-group-item cat])]]]]))

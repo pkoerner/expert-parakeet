@@ -77,13 +77,13 @@
 
         (apply dissoc
                (assoc basic-input :question/type :question.type/free-text)
-               [:question/possible-solutions :question/single-choice-solution :question/correct-solutions])
+               [:question/possible-solutions :question/correct-solutions])
         (apply dissoc
                (assoc basic-input :question/type :question.type/single-choice)
-               [:question/evaluation-criteria :question/correct-solutions])
+               [:question/evaluation-criteria])
         (apply dissoc
                (assoc basic-input :question/type :question.type/multiple-choice)
-               [:question/evaluation-criteria :question/single-choice-solution])))))
+               [:question/evaluation-criteria])))))
 
 
 (def ^:private error-map-gen

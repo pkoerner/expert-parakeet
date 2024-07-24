@@ -82,11 +82,11 @@
     (validate-question
       [_self
        question-statement achivable-points type
-       possible-solutions single-choice-solution multiple-choice-solution
+       possible-solutions correct-solutions
        evaluation-criteria
        categories]
       (validate-question question-statement achivable-points type
-                         possible-solutions single-choice-solution multiple-choice-solution
+                         possible-solutions correct-solutions
                          evaluation-criteria
                          categories))))
 

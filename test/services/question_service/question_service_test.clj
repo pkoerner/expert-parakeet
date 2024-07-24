@@ -32,13 +32,13 @@
                                                               (assoc :question/correct-solutions solution))]
 
         (t/are [input-map]
-               (let [{:question/keys [question-statement points type
-                                      possible-solutions single-choice-solution multiple-choice-solution
+               (let [{:question/keys [statement max-points type
+                                      possible-solutions correct-solutions
                                       evaluation-criteria
                                       categories]} input-map
                      result (validate-question question-service
-                                               question-statement points type
-                                               possible-solutions single-choice-solution multiple-choice-solution
+                                               statement max-points type
+                                               possible-solutions correct-solutions
                                                evaluation-criteria
                                                categories)]
                  (and (empty? (result :errors))
@@ -67,13 +67,13 @@
                                  :question/correct-solutions [solution solution2]}]
 
         (t/are [input-map error-key]
-               (let [{:question/keys [question-statement points type
-                                      possible-solutions single-choice-solution multiple-choice-solution
+               (let [{:question/keys [statement max-points type
+                                      possible-solutions correct-solutions
                                       evaluation-criteria
                                       categories]} input-map
                      result (validate-question question-service
-                                               question-statement points type
-                                               possible-solutions single-choice-solution multiple-choice-solution
+                                               statement max-points type
+                                               possible-solutions correct-solutions
                                                evaluation-criteria
                                                categories)]
                  (not-empty (get-in result [:errors error-key])))
@@ -98,13 +98,13 @@
           :question/possible-solutions
 
           (-> valid-input-for-all (assoc :question/type :question.type/single-choice)
-              ;; should not be a collection
-              (assoc :question/single-choice-solution [solution]))
-          :question/single-choice-solution
+              ;; should not be a collection of multiple elements
+              (assoc :question/single-choice-solution [solution solution2]))
+          :question/correct-solutions
 
           (-> valid-input-for-all (assoc :question/type :question.type/single-choice)
-              (assoc :question/single-choice-solution "Should also be in the possible-solutions"))
-          :question/single-choice-solution
+              (assoc :question/correct-solutions "Should also be in the possible-solutions"))
+          :question/correct-solutions
 
           (-> valid-input-for-all (assoc :question/type :question.type/multiple-choice)
               (assoc :question/correct-solutions 300))
