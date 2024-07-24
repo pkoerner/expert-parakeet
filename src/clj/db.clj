@@ -174,7 +174,7 @@
 
   (get-graded-answers-of-question-set
     [this user-id question-set-id]
-    (throw UnsupportedOperationException.) ; we are not saving points in the answer anymore
+    [] ; we are not saving points in the answer anymore
     #_(mapv first
             (d/q '[:find (pull ?a [:answer/points
                                    {:answer/question [:question/id :question/type]}])
@@ -405,7 +405,8 @@
 
   (get-corrections-of-answer
     [this answer-id]
-    (if-let [_existing-answer (not-empty (get-answer-by-id this answer-id))]
+    (if-let [_existing-answer (not-empty (try (get-answer-by-id this answer-id) (catch Exception _ nil)))]
+      (throw (AssertionError. (str "The answer-id " answer-id " does not exist in the database!")))
       (mapv
         (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp}))
         (d/q '[:find (pull ?correction pattern) ?timestamp
@@ -414,8 +415,7 @@
                [?answer :answer/id ?answer-id]
                [?correction :correction/answer ?answer ?tx]
                [?tx :db/txInstant ?timestamp]]
-             @(.conn this) db.schema/correction-slim-pull answer-id))
-      (throw (AssertionError. (str "The answer-id " answer-id " does not exist in the database!")))))
+             @(.conn this) db.schema/correction-slim-pull answer-id))))
 
 
   (add-correction!
@@ -437,15 +437,15 @@
 
   (add-user!
     [this github-id]
-    (if-let [_existing-user (not-empty (get-user-by-github-id this github-id))]
+    (if-let [_existing-user (not-empty (try (get-user-by-github-id this github-id) (catch Exception _ nil)))]
+      (throw (AssertionError. (str "There is already a user with the same github-id in the database.")))
       (let [user-id (generate-id this :user/id)
             tx-result (d/transact (.conn this)
                                   [{:db/id -1
                                     :user/id user-id
                                     :user/github-id github-id}])
             db-after (:db-after tx-result)]
-        (d/pull db-after db.schema/user-pull [:user/id user-id]))
-      (throw (AssertionError. (str "There is already a user with the same github-id in the database.")))))
+        (d/pull db-after db.schema/user-pull [:user/id user-id]))))
 
 
   (get-user-by-id
