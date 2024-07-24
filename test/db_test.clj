@@ -1,6 +1,5 @@
 (ns db-test
   (:require
-    [clojure.instant :as instant]
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [clojure.test :as t :refer [deftest testing]]
