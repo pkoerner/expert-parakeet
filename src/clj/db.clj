@@ -382,7 +382,7 @@
                                   :answer/creator [:user/id user-id]
                                   :answer/answer answer}])
           db-after (:db-after tx-result)]
-      (d/pull db-after [:answer/id {:answer/question [:question/id]}] [:answer/id id])))
+      (d/pull db-after db.schema/answer-slim-pull [:answer/id id])))
 
 
   (add-multiple-user-answers!
