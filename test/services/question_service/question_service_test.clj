@@ -26,10 +26,10 @@
             valid-multiple-choice-question-multiple-answers (-> basic-valid-input
                                                                 (assoc :question/type :question.type/multiple-choice)
                                                                 (assoc :question/possible-solutions [solution solution2])
-                                                                (assoc :question/multiple-choice-solution [solution solution2]))
+                                                                (assoc :question/correct-solutions [solution solution2]))
 
             valid-multiple-choice-question-single-answers (-> valid-multiple-choice-question-multiple-answers
-                                                              (assoc :question/multiple-choice-solution solution))]
+                                                              (assoc :question/correct-solutions solution))]
 
         (t/are [input-map]
                (let [{:question/keys [question-statement points type
@@ -43,7 +43,7 @@
                                                categories)]
                  (and (empty? (result :errors))
                       (every? #(contains? result %) [:question/statement :question/max-points :question/type
-                                                     :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
+                                                     :question/possible-solutions :question/single-choice-solution :question/correct-solutions
                                                      :question/evaluation-criteria
                                                      :question/categories])))
 
@@ -64,7 +64,7 @@
                                  :question/evaluation-criteria "Some valid evaluation criteria."
                                  :question/possible-solutions [solution solution2]
                                  :question/single-choice-solution solution
-                                 :question/multiple-choice-solution [solution solution2]}]
+                                 :question/correct-solutions [solution solution2]}]
 
         (t/are [input-map error-key]
                (let [{:question/keys [question-statement points type
@@ -107,8 +107,8 @@
           :question/single-choice-solution
 
           (-> valid-input-for-all (assoc :question/type :question.type/multiple-choice)
-              (assoc :question/multiple-choice-solution 300))
-          :question/multiple-choice-solution)))))
+              (assoc :question/correct-solutions 300))
+          :question/correct-solutions)))))
 
 
 (deftest test-get-question-categories

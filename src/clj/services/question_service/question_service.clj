@@ -77,7 +77,7 @@ an error-set with a specified error is returned. "
 
 (def ^:private question-keys
   [:question/statement :question/max-points :question/type
-   :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
+   :question/possible-solutions :question/single-choice-solution :question/correct-solutions
    :question/evaluation-criteria
    :question/categories])
 
@@ -122,8 +122,8 @@ an error-set with a specified error is returned. "
           [#((set possible-solutions) single-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
       (when  (= type :question.type/multiple-choice)
-        {:question/multiple-choice-solution
-         [[#(s/valid? :question/multiple-choice-solution multiple-choice-solution) "Die korrekten Antworten waren keine korrekten korrekten Antworten!"]
+        {:question/correct-solutions
+         [[#(s/valid? :question/correct-solutions multiple-choice-solution) "Die korrekten Antworten waren keine korrekten korrekten Antworten!"]
           [#(every? (fn [x] ((set possible-solutions) x)) multiple-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
       (when (= type :question.type/free-text)
@@ -175,7 +175,7 @@ an error-set with a specified error is returned. "
              (if (coll? single-choice-solution)
                {:errors {:question/single-choice-solution "Es sollte nur eine Antwort bei einer single-choice Frage geben!"}}
                {:question/single-choice-solution single-choice-solution})
-             {:question/multiple-choice-solution (as-coll multiple-choice-solution)}
+             {:question/correct-solutions (as-coll multiple-choice-solution)}
              {:question/evaluation-criteria evaluation-criteria}
              {:question/categories (distinct (as-coll categories))}])))
 

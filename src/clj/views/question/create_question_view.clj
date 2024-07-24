@@ -13,7 +13,7 @@
 (def create-question-error-keys
   "Possible keys for which errors can be displayed in the `question-form`."
   #{:question/statement :question/type :question/max-points
-    :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
+    :question/possible-solutions :question/single-choice-solution :question/correct-solutions
     :question/evaluation-criteria})
 
 
@@ -91,10 +91,10 @@ expert_parakeet.question.create_question_view.register_adding_solution_behavior(
     [:div#multiple-choice
      (possible-answers-input "multiple-choice"
                              (optional-error-display :question/possible-solutions errors)
-                             (optional-error-display :question/multiple-choice-solution errors)
+                             (optional-error-display :question/correct-solutions errors)
                              (= :question.type/multiple-choice (question-data :question/type))
                              (question-data :question/possible-solutions)
-                             (question-data :question/multiple-choice-solution))]))
+                             (question-data :question/correct-solutions))]))
 
 
 (s/fdef question-form

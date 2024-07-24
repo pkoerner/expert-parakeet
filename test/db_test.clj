@@ -45,7 +45,7 @@
                                                                                   :question/statement
                                                                                   :question/max-points
                                                                                   :question/possible-solutions
-                                                                                  :question/multiple-choice-solution
+                                                                                  :question/correct-solutions
                                                                                   :question/categories]))))))
     (testing "get-question-by-id with invalid id = 42"
       (t/is (thrown-with-msg?
@@ -73,7 +73,7 @@
       (let [input-question {:question/type :question.type/multiple-choice
                             :question/statement "What is the answer to everything and what is the best movie ever?"
                             :question/possible-solutions ["21" "42" "Alien"]
-                            :question/multiple-choice-solution ["42" "Alien"]
+                            :question/correct-solutions ["42" "Alien"]
                             :question/max-points 1
                             :question/categories ["Cat2"]}
             _ (db/add-question! test-db input-question)
@@ -81,7 +81,7 @@
             question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
                                                                                 :question/statement
                                                                                 :question/possible-solutions
-                                                                                :question/multiple-choice-solution
+                                                                                :question/correct-solutions
                                                                                 :question/max-points
                                                                                 :question/categories])
                                question-ids)]
@@ -148,7 +148,7 @@
     ;;                                   (= (:question/statement input-question) (:question/statement %))
     ;;                                   (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
     ;;                                   (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
-    ;;                                   (= (sort (distinct (:question/multiple-choice-solution input-question))) (:question/multiple-choice-solution %)))
+    ;;                                   (= (sort (distinct (:question/correct-solutions input-question))) (:question/correct-solutions %)))
     ;;                             question-list)))
     ;;                   generated-questions))))
     ;; (testing "add-question! with generated free text questions"

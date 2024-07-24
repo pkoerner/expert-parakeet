@@ -49,7 +49,7 @@
         {(str :question/evaluation-criteria) "No valid evaluation criteria"}
         {(str :question/possible-solutions) "No valid possible solutions"}
         {(str :question/single-choice-solution) "No valid single choice solution"}
-        {(str :question/multiple-choice-solution) "No valid multiple choice solutions"}))
+        {(str :question/correct-solutions) "No valid multiple choice solutions"}))
 
     (testing "unknown keys are not displayed"
       (t/are [error-map]
@@ -118,7 +118,7 @@
                                 :question/type
                                 :question/max-points
                                 :question/possible-solutions
-                                :question/multiple-choice-solution
+                                :question/correct-solutions
                                 :question/categories])))))
 
 
