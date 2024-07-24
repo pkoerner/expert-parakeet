@@ -553,13 +553,13 @@
               clojure.lang.ExceptionInfo
               #"Nothing found for entity id [:user/git\Wid \W 42 \W]"
               (db/get-user-by-github-id test-db "42"))))
-    (testing "add-user! with generated git-ids"
-      (let [git-ids (distinct (gen/sample (s/gen :user/github-id) generator-sample-size))]
+    (testing "add-user! with generated github-ids"
+      (let [github-ids (distinct (gen/sample (s/gen :user/github-id) generator-sample-size))]
         (t/is (every? (fn [act]
                         (let [_ (db/add-user! test-db act)
-                              excisting-git-ids (map #(:user/github-id %) (db/get-all-user test-db))]
-                          (some #(= act %) excisting-git-ids)))
-                      git-ids))))
+                              excisting-github-ids (map #(:user/github-id %) (db/get-all-user test-db))]
+                          (some #(= act %) excisting-github-ids)))
+                      github-ids))))
     (testing "add-user! with existing github-id - should fail"
       (t/is (thrown-with-msg?
               java.lang.AssertionError

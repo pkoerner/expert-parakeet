@@ -20,7 +20,7 @@
     (let [request {:session authenticated-session}
           user-service (reify PUserService
                          (get-user-id-by-github-id
-                           [_self _git-id]
+                           [_self _github-id]
                            "some-user-id"))
           response (login request user-service)]
       (t/is (-> response :session :user :id))))
@@ -28,7 +28,7 @@
     (let [request {:session authenticated-session}
           user-service (reify PUserService
                          (get-user-id-by-github-id
-                           [_self _git-id]
+                           [_self _github-id]
                            nil))
           response (login request user-service)]
       (t/is (= 302 (response :status)))
@@ -41,7 +41,7 @@
     (let [request {:session authenticated-session}
           user-service (reify PUserService
                          (github-id-in-use?
-                           [_self _git-id]
+                           [_self _github-id]
                            true))
           response (submit-create-user request "/" user-service)]
       (t/is (= 401 (response :status)))))
@@ -50,7 +50,7 @@
           redirect-url "/redirect-url"
           user-service (reify PUserService
                          (github-id-in-use?
-                           [_self _git-id]
+                           [_self _github-id]
                            false)
 
                          (create-user!

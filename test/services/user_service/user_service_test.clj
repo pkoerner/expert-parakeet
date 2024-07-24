@@ -11,7 +11,7 @@
     (let [was-called (atom false)
           db-stub (reify Database-Protocol
                     (get-user-id-by-github-id
-                      [_this _git-id]
+                      [_this _github-id]
                       (swap! was-called (fn [_] true))
                       {}))
           user-service (->UserService db-stub)]
@@ -20,7 +20,7 @@
   (testing "Returns false if no user exists for github-id"
     (let [db-stub (reify Database-Protocol
                     (get-user-id-by-github-id
-                      [_this _git-id]
+                      [_this _github-id]
                       nil))
           user-service (->UserService db-stub)
           result (github-id-in-use? user-service "some-github-id")]
@@ -28,7 +28,7 @@
   (testing "Returns true if user exists for github-id"
     (let [db-stub (reify Database-Protocol
                     (get-user-id-by-github-id
-                      [_this _git-id]
+                      [_this _github-id]
                       "some-user-id"))
           user-service (->UserService db-stub)
           result (github-id-in-use? user-service "some-github-id")]
@@ -40,7 +40,7 @@
     (let [was-called (atom false)
           db-stub (reify Database-Protocol
                     (add-user!
-                      [_this _git-id]
+                      [_this _github-id]
                       (swap! was-called (fn [_] true))
                       {}))
           user-service (->UserService db-stub)]
@@ -52,7 +52,7 @@
     (let [was-called (atom false)
           db-stub (reify Database-Protocol
                     (get-user-id-by-github-id
-                      [_this _git-id]
+                      [_this _github-id]
                       (swap! was-called (fn [_] true))
                       {}))
           user-service (->UserService db-stub)]
