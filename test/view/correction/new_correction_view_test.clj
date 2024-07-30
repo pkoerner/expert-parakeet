@@ -1,8 +1,10 @@
-(ns view.correction.new-correction-view-test
-  (:require
-    #_[clojure.string :as string]
-    #_[clojure.test :as t :refer [deftest testing]]
-    #_[views.correction.new-correction-view :refer [new-correction-form]]))
+(ns view.correction.new-correction-view-test)
+
+
+#_(:require
+   [clojure.string :as string]
+   [clojure.test :as t :refer [deftest testing]]
+   [views.correction.new-correction-view :refer [new-correction-form]])
 
 
 ;; TODO: rewrite when logic for getting points of an answer is implemented
