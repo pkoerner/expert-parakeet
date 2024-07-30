@@ -174,7 +174,7 @@ an error-set with a specified error is returned. "
              {:question/possible-solutions (as-coll possible-solutions)}
              (if (and (= type :question.type/single-choice)
                       (not= (count correct-solutions) 1))
-               {:errors {:question/single-choice-solution "Es sollte nur eine Antwort bei einer single-choice Frage geben!"}}
+               {:errors {:question/correct-solutions "Es sollte nur eine Antwort bei einer single-choice Frage geben!"}}
                {:question/correct-solutions correct-solutions})
              {:question/evaluation-criteria evaluation-criteria}
              {:question/categories (distinct (as-coll categories))}])))

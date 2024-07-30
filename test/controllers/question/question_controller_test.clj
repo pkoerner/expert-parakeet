@@ -48,7 +48,7 @@
         {(str :question/categories) "No valid question categories"}
         {(str :question/evaluation-criteria) "No valid evaluation criteria"}
         {(str :question/possible-solutions) "No valid possible solutions"}
-        {(str :question/single-choice-solution) "No valid single choice solution"}
+        {(str :question/correct-solutions) "No valid single choice solution"}
         {(str :question/correct-solutions) "No valid multiple choice solutions"}))
 
     (testing "unknown keys are not displayed"
@@ -109,7 +109,7 @@
                                 :question/type
                                 :question/max-points
                                 :question/possible-solutions
-                                :question/single-choice-solution
+                                :question/correct-solutions
                                 :question/categories]))
         (s/valid? :question/multiple-choice-question
                   (select-keys question

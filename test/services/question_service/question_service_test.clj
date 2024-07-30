@@ -22,7 +22,7 @@
             valid-single-choice-question (-> basic-valid-input
                                              (assoc :question/type :question.type/single-choice)
                                              (assoc :question/possible-solutions [solution solution2])
-                                             (assoc :question/single-choice-solution solution))
+                                             (assoc :question/correct-solutions [solution]))
             valid-multiple-choice-question-multiple-answers (-> basic-valid-input
                                                                 (assoc :question/type :question.type/multiple-choice)
                                                                 (assoc :question/possible-solutions [solution solution2])
@@ -43,7 +43,7 @@
                                                categories)]
                  (and (empty? (result :errors))
                       (every? #(contains? result %) [:question/statement :question/max-points :question/type
-                                                     :question/possible-solutions :question/single-choice-solution :question/correct-solutions
+                                                     :question/possible-solutions :question/correct-solutions
                                                      :question/evaluation-criteria
                                                      :question/categories])))
 
@@ -63,8 +63,7 @@
                                  :question/type :question.type/free-text
                                  :question/evaluation-criteria "Some valid evaluation criteria."
                                  :question/possible-solutions [solution solution2]
-                                 :question/single-choice-solution solution
-                                 :question/correct-solutions [solution solution2]}]
+                                 :question/correct-solutions [solution]}]
 
         (t/are [input-map error-key]
                (let [{:question/keys [statement max-points type
@@ -99,7 +98,7 @@
 
           (-> valid-input-for-all (assoc :question/type :question.type/single-choice)
               ;; should not be a collection of multiple elements
-              (assoc :question/single-choice-solution [solution solution2]))
+              (assoc :question/correct-solutions [solution solution2]))
           :question/correct-solutions
 
           (-> valid-input-for-all (assoc :question/type :question.type/single-choice)

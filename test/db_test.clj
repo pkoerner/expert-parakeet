@@ -56,7 +56,7 @@
       (let [input-question {:question/type :question.type/single-choice
                             :question/statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
-                            :question/single-choice-solution "42"
+                            :question/correct-solutions ["42"]
                             :question/max-points 1
                             :question/categories ["Cat1"]}
             _ (db/add-question! test-db input-question)
@@ -64,7 +64,7 @@
             question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
                                                                                 :question/statement
                                                                                 :question/possible-solutions
-                                                                                :question/single-choice-solution
+                                                                                :question/correct-solutions
                                                                                 :question/max-points
                                                                                 :question/categories])
                                question-ids)]
@@ -102,9 +102,10 @@
                                question-ids)]
         (t/is (some #(= % input-question) (vec question-list)))))
     (testing "add-question! with invalid question as input"
+      ; missing type
       (let [input-question {:question/statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
-                            :question/single-choice-solution "42"
+                            :question/correct-solutions ["42"]
                             :question/max-points 1
                             :question/categories ["Cat1"]}]
         (t/is (thrown? clojure.lang.ArityException (db/add-question! test-db input-question)))))
@@ -313,7 +314,7 @@
                         :question/statement "What type of programming lanuage is java?"
                         :question/type :question.type/single-choice
                         :question/possible-solutions #{"object oriented" "functional" "logic"}
-                        :question/single-choice-solution "object oriented"
+                        :question/correct-solutions ["object oriented"]
                         :question/max-points 1
                         :question/categories #{"Cat2"}}
                        {:question/id "2"
@@ -342,7 +343,7 @@
                         :question/statement "What type of programming lanuage is clojure?"
                         :question/type :question.type/single-choice
                         :question/possible-solutions #{"object oriented" "functional" "logic"}
-                        :question/single-choice-solution "functional"
+                        :question/correct-solutions ["functional"]
                         :question/max-points 1
                         :question/categories #{"Cat2"}}
                        {:question/id "2"
@@ -368,7 +369,7 @@
                         :question/statement "What type of programming lanuage is java?"
                         :question/type :question.type/single-choice
                         :question/possible-solutions #{"object oriented" "functional" "logic"}
-                        :question/single-choice-solution "object oriented"
+                        :question/correct-solutions ["object oriented"]
                         :question/max-points 1
                         :question/categories #{"Cat2"}}
                        {:question/id "2"
@@ -390,7 +391,7 @@
       (let [input-question {:question/type :question.type/single-choice
                             :question/statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
-                            :question/single-choice-solution "42"
+                            :question/correct-solutions ["42"]
                             :question/max-points 1
                             :question/categories ["Cat1"]}
             question-set-name "The Truth 2"
