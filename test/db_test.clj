@@ -485,9 +485,6 @@
               (db/add-user! test-db "12345"))))))
 
 
-(def x)
-
-
 (deftest answer-test
   (let [test-db (-create-test-db "answer-test-db")]
     (testing "get-all-answers"
