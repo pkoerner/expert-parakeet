@@ -316,7 +316,7 @@
    {:course-iteration/course course-slim-pull}
    :course-iteration/year
    :course-iteration/semester
-   :course-iteration/members membership-pull
+   {:course-iteration/members membership-pull}
    {:course-iteration/question-sets question-set-slim-pull}])
 
 
