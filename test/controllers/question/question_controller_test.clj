@@ -1,14 +1,14 @@
 (ns controllers.question.question-controller-test
   (:require
-    [clojure.spec.alpha :as s]
+    #_[clojure.spec.alpha :as s]
     [clojure.string :as string]
     [clojure.test :as t :refer [deftest testing]]
     [controllers.question.question-controller :refer [create-question-get
-                                                      submit-create-question!]]
-    [db :refer [Database-Protocol]]
-    [services.question-service.p-question-service :refer [PQuestionService
+                                                      #_submit-create-question!]]
+    #_[db :refer [Database-Protocol]]
+    #_[services.question-service.p-question-service :refer [PQuestionService
                                                           validate-question]]
-    [services.question-service.question-service :refer [->QuestionService]]))
+    #_[services.question-service.question-service :refer [->QuestionService]]))
 
 
 (deftest test-create-question-get
@@ -64,7 +64,7 @@
         {":something-else" "No valid question points"}))))
 
 
-(defn- stub-question-service
+#_(defn- stub-question-service
   [& {:keys [create-question! get-question-categories validate-question]
       :or {create-question! (fn [& _] {})
            get-question-categories (fn [& _] {})
@@ -91,7 +91,7 @@
                          categories))))
 
 
-(defn- valid-question
+#_(defn- valid-question
   [question]
   (let [question (assoc question :question/id "some id")]
     (or (s/valid? :question/question
