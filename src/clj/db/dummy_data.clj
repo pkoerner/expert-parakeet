@@ -212,17 +212,17 @@
 
 (def user1
   {:user/id (gen-id! :user)
-   :user/github-id "1337"})
+   :user/github-id "12345"})
 
 
 (def user2
   {:user/id (gen-id! :user)
-   :user/github-id "5555"})
+   :user/github-id "45678"})
 
 
 (def user3
   {:user/id (gen-id! :user)
-   :user/github-id "9001"})
+   :user/github-id "13579"})
 
 
 (def users

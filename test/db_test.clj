@@ -478,15 +478,15 @@
   (let [test-db (-create-test-db "user-test-db")]
     (testing "get-all-users of dummy-data"
       (let [res (db/get-all-users test-db)
-            reference-user [#:user{:id "0"
+            reference-user [#:user{:id "1"
                                    :github-id "12345"}
                             #:user{:id "2"
                                    :github-id "45678"}
                             #:user{:id "3"
                                    :github-id "13579"}]]
         (t/is (every? (fn [act] (some #(= act %) reference-user)) res))))
-    (testing "get-user-by-id with id = 0"
-      (t/is (= (db/get-user-by-id test-db "0") {:user/id "0"
+    (testing "get-user-by-id with id = 1"
+      (t/is (= (db/get-user-by-id test-db "1") {:user/id "1"
                                                 :user/github-id "12345"})))
     (testing "get-user-by-id with id = 2"
       (t/is (= (db/get-user-by-id test-db "2") {:user/id "2"
@@ -497,7 +497,7 @@
               #"Nothing found for entity id [:user/id \W 42 \W]"
               (db/get-user-by-id test-db "42"))))
     (testing "get-user-by-github-id with id = 12345"
-      (t/is (= (db/get-user-by-github-id test-db "12345") {:user/id "0"
+      (t/is (= (db/get-user-by-github-id test-db "12345") {:user/id "1"
                                                            :user/github-id "12345"})))
     (testing "get-user-by-id with id = 45678"
       (t/is (= (db/get-user-by-github-id test-db "45678") {:user/id "2"
@@ -517,7 +517,7 @@
     (testing "add-user! with existing github-id - should fail"
       (t/is (thrown-with-msg?
               java.lang.AssertionError
-              #"There is already a user with the same github-id in the database. Please check the existing course and wether you need to create a new one."
+              #"There is already a user with the same github-id in the database."
               (db/add-user! test-db "12345"))))))
 
 
@@ -588,15 +588,15 @@
   (let [test-db (-create-test-db "correction-test-db")]
     (testing "get-all-corrections-from-corrector with corrector-id = 3"
       (let [res (db/get-all-corrections-from-corrector test-db "3")
-            ref-corrections [#:correction{:answer #:answer{:id "2"}}
-                             #:correction{:answer #:answer{:id "1"}}
-                             #:correction{:answer #:answer{:id "4"}}
-                             #:correction{:answer #:answer{:id "12"}}]]
-        (t/is (every? (fn [act] (some #(= act %) ref-corrections)) res))))
+            ref-corrections #{#:correction{:answer #:answer{:id "1"}}
+                              #:correction{:answer #:answer{:id "2"}}
+                              #:correction{:answer #:answer{:id "10"}}}]
+        (t/is (= ref-corrections (set (map (fn [c] {:correction/answer {:answer/id (get-in c [:correction/answer :answer/id])}}) res))))))
     (testing "get-all-corrections-from-corrector with corrector-id = 2"
       (let [res (db/get-all-corrections-from-corrector test-db "2")
-            ref-corrections [#:correction{:answer #:answer{:id "14"}}]]
-        (t/is (every? (fn [act] (some #(= act %) ref-corrections)) res))))
+            ref-corrections #{#:correction{:answer #:answer{:id "11"}}
+                              #:correction{:answer #:answer{:id "13"}}}]
+        (t/is (= ref-corrections (set (map (fn [c] {:correction/answer {:answer/id (get-in c [:correction/answer :answer/id])}}) res))))))
     (testing "get-all-corrections-from-corrector with invalid corrector-id = 42"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
@@ -604,10 +604,10 @@
               (db/get-all-corrections-from-corrector test-db "42"))))
     (testing "add-correction! with valid correction"
       (let [answer-id "1"
-            correction {:correction/feedback "not good" :correction/points 0 :corrector/id "3"}
+            correction {:correction/feedback "#not good#" :correction/points 0 :corrector/id "3"}
             _ (db/add-correction! test-db answer-id correction)
             corrections-of-corrector (db/get-all-corrections-from-corrector test-db "3")]
-        (t/is (= 2 (count (filter #(= (first (vals (first (vals %)))) "1") corrections-of-corrector))))))
+        (t/is (some #(= (% :correction/feedback) (correction :correction/feedback)) corrections-of-corrector))))
     (testing "add-correction! with invalid answer-id"
       (let [answer-id "42"
             correction {:correction/feedback "not good" :correction/points 0 :corrector/id "3"}]
@@ -626,7 +626,7 @@
       (let [answer-id "2"
             res (db/get-corrections-of-answer test-db answer-id)
             ref-correction #:correction{:feedback "Please elaborate about the aspects of example-based testing"}]
-        (t/is (= (:feedback res) (:feedback ref-correction)))))
+        (t/is (= (mapv :correction/feedback res) [(:correction/feedback ref-correction)]))))
     (testing "get-corrections-of-answer with answer-id = 1"
       (let [answer-id "1"
             res (db/get-corrections-of-answer test-db answer-id)
@@ -637,5 +637,5 @@
       (let [answer-id "42"]
         (t/is (thrown-with-msg?
                 java.lang.AssertionError
-                (re-pattern (str "The answer-id: " answer-id "does not exist in the database!"))
+                (re-pattern (str "The answer-id " answer-id " does not exist in the database!"))
                 (db/get-corrections-of-answer test-db answer-id)))))))
