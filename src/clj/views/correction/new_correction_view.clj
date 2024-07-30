@@ -38,7 +38,8 @@
        [:p#evaluation-criteria {:name "evaluation-criteria"} (:question/evaluation-criteria question)]]
       [:div
        [:label {:for "answer"} "Answer:"] [:br]
-       [:p#answer {:name "answer"} (map str (:answer/answer answer))]]
+       [:p#answer {:name "answer"} (or (:answer/answer answer)
+                                       (mapv :solution/statement (answer :answer/selected-solutions)))]]
       [:div
        (optional-error-display :correction/points errors)
        [:label {:for "points"} "Points:"] [:br]

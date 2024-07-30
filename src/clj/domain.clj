@@ -21,7 +21,7 @@
    question the answer with the
    highest points is taken."
   [_answers]
-  0 ; TODO: fix this
+  0 ; TODO: rewrite when logic for getting points of an answer is implemented
   #_(->> answers
        (group-by #(get-in % [:answer/question :question/id]))
        (map (fn [[_ answers]]

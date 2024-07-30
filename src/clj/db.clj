@@ -359,13 +359,14 @@
   (add-user-answer!
     [this user-id question-id answer]
     (let [id (generate-id this :answer/id)
-          ;; TODO: we need to set :answer/selected-solution instead of :answer/answer when required
+          ;; TODO: we need to set :answer/selected-solutions instead of :answer/answer when required
           tx-result (d/transact (.conn this)
                                 [{:db/id -1
                                   :answer/id id
                                   :answer/question [:question/id question-id]
                                   :answer/creator [:user/id user-id]
-                                  :answer/answer answer}])
+                                  :answer/answer answer
+                                  :answer/selected-solutions []}])
           db-after (:db-after tx-result)]
       (d/pull db-after db.schema/answer-slim-pull [:answer/id id])))
 
