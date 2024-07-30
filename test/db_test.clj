@@ -102,7 +102,7 @@
                                question-ids)]
         (t/is (some #(= % input-question) (vec question-list)))))
     (testing "add-question! with invalid question as input"
-      ; missing type
+      ;; missing type
       (let [input-question {:question/statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
                             :question/correct-solutions ["42"]
