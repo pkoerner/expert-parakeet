@@ -1,5 +1,6 @@
 (ns util.spec-functions-test
   (:require
+    [clojure.edn]
     [clojure.spec.alpha :as s]
     [clojure.test :as t :refer [deftest testing]]
     [domain.spec]
@@ -8,7 +9,7 @@
 
 (deftest test-map-spec-works-for-a-map
   (let [test-spec (map-spec {"course-id" :course/id
-                             "year" (s/and string? #(s/valid? :course-iteration/year (read-string %)))
+                             "year" (s/and string? #(s/valid? :course-iteration/year (clojure.edn/read-string %)))
                              "semester" :course-iteration/semester
                              "question-set-ids" (s/coll-of :question-set/id)})
         valid-map {"course-id" "123"

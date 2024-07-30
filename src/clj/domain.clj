@@ -1,4 +1,6 @@
-(ns domain)
+(ns domain
+  (:require
+    [clojure.edn]))
 
 
 (defn calc-max-points-of-question-set
@@ -178,13 +180,13 @@
         (or (not (:correction/points correction)) (empty? (:correction/points correction)))
         (assoc correction :error :correction-points-missing)
 
-        (not (nat-int? (read-string (:correction/points correction))))
+        (not (nat-int? (clojure.edn/read-string (:correction/points correction))))
         (assoc correction :error :invalid-points)
 
-        (> (read-string (:correction/points correction)) question-points)
+        (> (clojure.edn/read-string (:correction/points correction)) question-points)
         (assoc correction :error :exceeding-number-of-points)
 
-        :else (update correction :correction/points read-string)))))
+        :else (update correction :correction/points clojure.edn/read-string)))))
 
 
 (defn add-correction-if-no-error

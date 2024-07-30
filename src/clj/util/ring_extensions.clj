@@ -1,5 +1,6 @@
 (ns util.ring-extensions
   (:require
+    [clojure.edn]
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [hiccup2.core :as h]
@@ -31,7 +32,7 @@
   (let [query-params (:query-params request)]
     (if query-params
       (->> query-params
-           (map (fn [[key val]] [(read-string key) val]))
+           (map (fn [[key val]] [(clojure.edn/read-string key) val]))
            (into {}))
       {})))
 
