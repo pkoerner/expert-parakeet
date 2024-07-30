@@ -13,8 +13,7 @@
         :args (s/cat :self #(satisfies? PUserService %)
                      :oauth-github-id :general/non-blank-string)
         :ret (s/keys :req [:user/id
-                           :user/github-id
-                           :user/course-iterations]))
+                           :user/github-id]))
 
 
 (defn- create-user-impl

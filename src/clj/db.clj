@@ -109,7 +109,7 @@
     [this course-id]
     "get the corresponding course given the id")
 
-  (get-all-user
+  (get-all-users
     [this]
     "get all users in database")
 
@@ -456,12 +456,14 @@
             [:course/id course-id]))
 
 
-  (get-all-user
+  (get-all-users
     [this]
     (mapv first
-          (d/q '[:find (pull ?e [:user/id :user/github-id {:user/course-iterations [:course-iteration/id]}])
-                 :where [?e :user/id]]
-               @(.conn this))))
+          (d/q '[:find (pull ?e pattern)
+                 :in $ pattern
+                 :where
+                 [?e :user/id]]
+               @(.conn this) db.schema/user-pull)))
 
 
   (get-user-id-by-github-id

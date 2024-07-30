@@ -481,8 +481,8 @@
 
 (deftest user-test
   (let [test-db (-create-test-db "user-test-db")]
-    (testing "get-all-user of dummy-data"
-      (let [res (db/get-all-user test-db)
+    (testing "get-all-users of dummy-data"
+      (let [res (db/get-all-users test-db)
             reference-user [#:user{:id "0"
                                    :github-id "12345"
                                    :course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]}
@@ -495,12 +495,10 @@
         (t/is (every? (fn [act] (some #(= act %) reference-user)) res))))
     (testing "get-user-by-id with id = 0"
       (t/is (= (db/get-user-by-id test-db "0") {:user/id "0"
-                                                :user/github-id "12345"
-                                                :user/course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]})))
+                                                :user/github-id "12345"})))
     (testing "get-user-by-id with id = 2"
       (t/is (= (db/get-user-by-id test-db "2") {:user/id "2"
-                                                :user/github-id "45678"
-                                                :user/course-iterations [#:course-iteration{:id "1"}]})))
+                                                :user/github-id "45678"})))
     (testing "get-user-by-id with invalid id = 42"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
@@ -508,12 +506,10 @@
               (db/get-user-by-id test-db "42"))))
     (testing "get-user-by-github-id with id = 12345"
       (t/is (= (db/get-user-by-github-id test-db "12345") {:user/id "0"
-                                                           :user/github-id "12345"
-                                                           :user/course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]})))
+                                                           :user/github-id "12345"})))
     (testing "get-user-by-id with id = 45678"
       (t/is (= (db/get-user-by-github-id test-db "45678") {:user/id "2"
-                                                           :user/github-id "45678"
-                                                           :user/course-iterations [#:course-iteration{:id "1"}]})))
+                                                           :user/github-id "45678"})))
     (testing "get-user-by-id with invalid id = 42"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
@@ -523,7 +519,7 @@
       (let [github-ids (distinct (gen/sample (s/gen :user/github-id) generator-sample-size))]
         (t/is (every? (fn [act]
                         (let [_ (db/add-user! test-db act)
-                              excisting-github-ids (map #(:user/github-id %) (db/get-all-user test-db))]
+                              excisting-github-ids (map #(:user/github-id %) (db/get-all-users test-db))]
                           (some #(= act %) excisting-github-ids)))
                       github-ids))))
     (testing "add-user! with existing github-id - should fail"
