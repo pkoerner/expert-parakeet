@@ -84,7 +84,9 @@
   (let [form-data (-> request (:multipart-params) (dissoc :__anti-forgery-token))
         course-id (form-data "course-id")
         year (read-string (form-data "year"))
-        semester (form-data "semester")
+        semester (case (form-data "semester")
+                   "WiSe" :semester/winter
+                   "SoSe" :semester/summer)
         ;; If there is only one id, it is send as a single value. If there are multiple, they are send in a col.
         question-set-ids (let [ids-or-id (form-data "question-set-ids")]
                            (cond (coll? ids-or-id) ids-or-id
