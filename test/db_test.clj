@@ -264,25 +264,20 @@
              (t/is (= course-iterations-content  '(("1"
                                                      2022
                                                      :semester/winter
-                                                     #:course{:course-name "Specialization Functional Programming: Clojure"}
+                                                     #:course{:name "Specialization Functional Programming: Clojure"}
                                                      [#:question-set{:id "1",
                                                                      :name "Test 01: Generative Testing",
-                                                                     :questions [#:question{:id "1", :points 3}
-                                                                                 #:question{:id "3", :points 2}
-                                                                                 #:question{:id "4", :points 1}
-                                                                                 #:question{:id "5", :points 1}]}
+                                                                     :required-points 1}
                                                       #:question-set{:id "3",
                                                                      :name "Test 00: Alien",
-                                                                     :questions [#:question{:id "7", :points 1}
-                                                                                 #:question{:id "8", :points 1}]}])
+                                                                     :required-points 1}])
                                                    ("2"
                                                      2020
                                                      :semester/summer
-                                                     #:course{:course-name "Programming 1"}
+                                                     #:course{:name "Programming 1"}
                                                      [#:question-set{:id "2",
                                                                      :name "Week 1:",
-                                                                     :questions [#:question{:id "2", :points 3}
-                                                                                 #:question{:id "6", :points 1}]}])))))))
+                                                                     :required-points 1}])))))))
     (testing "get-course-iterations-of-student with invalid student-id"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
@@ -439,10 +434,10 @@
   (let [test-db (-create-test-db "course-test-db")]
     (testing "get-all-courses of the dummy dataset"
       (let [ref-courses [#:course{:id "1",
-                                  :course-name "Programming 1",
+                                  :name "Programming 1",
                                   :question-sets [#:question-set{:id "2", :name "Week 1:"}]}
                          #:course{:id "0",
-                                  :course-name "Specialization Functional Programming: Clojure",
+                                  :name "Specialization Functional Programming: Clojure",
                                   :question-sets [#:question-set{:id "1", :name "Test 01: Generative Testing"}
                                                   #:question-set{:id "3", :name "Test 00: Alien"}]}]
             res (db/get-all-courses test-db)]
@@ -451,13 +446,13 @@
       (let [course-id "1"
             res (db/get-course-by-id test-db course-id)]
         (t/is (= res #:course{:id "1",
-                              :course-name "Programming 1",
+                              :name "Programming 1",
                               :question-sets [#:question-set{:id "2", :name "Week 1:"}]}))))
     (testing "get-course-by-id with id = 0"
       (let [course-id "0"
             res (db/get-course-by-id test-db course-id)]
         (t/is (= res #:course{:id "0",
-                              :course-name "Specialization Functional Programming: Clojure",
+                              :name "Specialization Functional Programming: Clojure",
                               :question-sets [#:question-set{:id "1", :name "Test 01: Generative Testing"}
                                               #:question-set{:id "3", :name "Test 00: Alien"}]}))))
     (testing "get-course-by-id with invalid id = 42"
@@ -484,14 +479,11 @@
     (testing "get-all-users of dummy-data"
       (let [res (db/get-all-users test-db)
             reference-user [#:user{:id "0"
-                                   :github-id "12345"
-                                   :course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]}
+                                   :github-id "12345"}
                             #:user{:id "2"
-                                   :github-id "45678"
-                                   :course-iterations [#:course-iteration{:id "1"}]}
+                                   :github-id "45678"}
                             #:user{:id "3"
-                                   :github-id "13579"
-                                   :course-iterations [#:course-iteration{:id "2"}]}]]
+                                   :github-id "13579"}]]
         (t/is (every? (fn [act] (some #(= act %) reference-user)) res))))
     (testing "get-user-by-id with id = 0"
       (t/is (= (db/get-user-by-id test-db "0") {:user/id "0"
@@ -534,72 +526,58 @@
     (testing "get-all-answers"
       (let [ref-answers [#:answer{:id "1"
                                   :answer ["transients are a non persistent data structures in clojure. They are used to increase performance."]
-                                  :points 1
                                   :question #:question{:id "1"}
                                   :user #:user{:id "0"}}
                          #:answer{:id "2"
                                   :answer ["generative Tests are only a good choice, if you have an oracle or you can write an inverse function. But they have very high costs compared to example based testing"]
-                                  :points 1
                                   :question #:question{:id "3"}
                                   :user #:user{:id "0"}}
                          #:answer{:id "3"
                                   :answer ["I like transients"]
-                                  :points 0
                                   :question #:question{:id "1"}
                                   :user #:user{:id "2"}}
                          #:answer{:id "4"
                                   :answer ["JVM, i.e., Java Virtual Machine. JVM is the engine that drives the Java code. Mostly in other Programming Languages, compiler produce code for a particular system but Java compiler produce Bytecode for a Java Virtual Machine. When we compile a Java program, then bytecode is generated. Bytecode is the source code that can be used to run on any platform. Bytecode is an intermediary language between Java source and the host system. It is the medium which compiles Java code to bytecode which gets interpreted on a different machine and hence it makes it Platform/Operating system independent."]
-                                  :points 3
                                   :question #:question{:id "2"}
                                   :user #:user{:id "0"}}
                          #:answer{:id "5"
                                   :answer ["immutable"]
-                                  :points 0
                                   :question #:question{:id "4"}
                                   :user #:user{:id "2"}}
                          #:answer{:id "6"
                                   :answer ["example based testing is good for documentation"]
-                                  :points 0
                                   :question #:question{:id "3"}
                                   :user #:user{:id "2"}}
                          #:answer{:id "7"
                                   :answer ["Oracle" "inverse function" "specs"]
-                                  :points 1
                                   :question #:question{:id "5"}
                                   :user #:user{:id "0"}}
                          #:answer{:id "8",
                                   :answer ["mutable"],
-                                  :points 1
                                   :question #:question{:id "4"},
                                   :user #:user{:id "0"}}
                          #:answer{:id "9"
                                   :answer ["object oriented"]
-                                  :points 1
                                   :question #:question{:id "6"}
                                   :user #:user{:id "0"}}
                          #:answer{:id "10"
                                   :answer ["Oracle" "specs"]
-                                  :points 1
                                   :question #:question{:id "5"}
                                   :user #:user{:id "2"}}
                          #:answer{:id "11"
                                   :answer ["1979"]
-                                  :points 1
                                   :question #:question{:id "7"}
                                   :user #:user{:id "0"}}
                          #:answer{:id "12"
                                   :answer ["Alien is the best movie of all time <3"]
-                                  :points 1
                                   :question #:question{:id "8"}
                                   :user #:user{:id "0"}}
                          #:answer{:id "13"
                                   :answer ["logic"]
-                                  :points 0
                                   :question #:question{:id "6"}
                                   :user #:user{:id "3"}}
                          #:answer{:id "14"
                                   :answer ["I don't know, pls give me points :D"]
-                                  :points 0
                                   :question #:question{:id "2"}
                                   :user #:user{:id "3"}}]
             res (db/get-all-answers test-db)]

@@ -119,12 +119,12 @@ an error-set with a specified error is returned. "
         {:question/correct-solutions
          [[#(= (count correct-solutions) 1) "Single choice questions must have exactly one correct answer!"]
           [#(s/valid? :question/correct-solutions correct-solutions) "Die korrekte Antwort war keine korrekte Antwort!"]
-          [#((set possible-solutions) correct-solutions) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
+          [#(every? (fn [x] (contains? (set possible-solutions) x)) correct-solutions) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
       (when  (= type :question.type/multiple-choice)
         {:question/correct-solutions
          [[#(s/valid? :question/correct-solutions correct-solutions) "Die korrekten Antworten waren keine korrekten korrekten Antworten!"]
-          [#(every? (fn [x] ((set possible-solutions) x)) correct-solutions) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
+          [#(every? (fn [x] (contains? (set possible-solutions) x)) correct-solutions) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
       (when (= type :question.type/free-text)
         {:question/evaluation-criteria

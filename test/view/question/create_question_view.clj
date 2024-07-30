@@ -30,12 +30,12 @@
     (let [[categories post-destination] [[] "https://some.url"]
           categories-error #:question{:categories "Wrong categories"}
           type-error #:question{:type "Wrong type"}
-          question-statement-error #:question{:question-statement "Wrong question-statement"}
-          points-error #:question{:points "Wrong points"}
+          question-statement-error #:question{:statement "Wrong question-statement"}
+          points-error #:question{:max-points "Wrong points"}
           evaluation-criteria-error #:question{:evaluation-criteria "Wrong evaluation-criteria"}
           possible-solutions-error #:question{:possible-solutions "Wrong possible-solutions"}
-          single-choice-solution-error #:question{:single-choice-solution "Wrong single-choice-solution"}
-          multiple-choice-solution-error #:question{:multiple-choice-solution "Wrong multiple-choice-solution"}]
+          single-choice-solution-error #:question{:correct-solutions "Wrong single-choice-solution"}
+          multiple-choice-solution-error #:question{:correct-solutions "Wrong multiple-choice-solution"}]
       (t/are [errors]
              (let [test-result (question-form categories post-destination :errors errors)]
                (every? #(string/includes? test-result %) (vals errors)))
@@ -57,14 +57,13 @@
   (testing "Testing that data to populate the view is displayed in the form."
     (let [[categories post-destination] [["Cat1" "Cat2"] "https://some.url"]
           possible-solutions ["Solution1" "Solution2" "More solutions"]
-          basic-input #:question{:question-statement "Valid question statement."
+          basic-input #:question{:statement "Valid question statement."
                                  :categories [(first categories)]
-                                 :points 5
+                                 :max-points 5
 
                                  :evaluation-criteria "Some evaluation criteria"
                                  :possible-solutions possible-solutions
-                                 :single-choice-solution (first possible-solutions)
-                                 :multiple-choice-solution (rest possible-solutions)}]
+                                 :correct-solutions [(first possible-solutions)]}]
       (t/are [question-data]
              (let [test-result (question-form categories post-destination :question-data question-data)]
                (every? (fn [val]

@@ -23,16 +23,16 @@
                (every? #(string/includes? test-result (:question-set/name %)) question-sets)
                (string/includes? test-result post-destination)))
 
-      [[#:course{:id "2Jw0c5U", :course-name "0x0"}]
+      [[#:course{:id "2Jw0c5U", :name "0x0"}]
        [#:question-set{:id "nA1", :name "T897OJj4U1"}]
        "https://some.url"]
 
       [[] [] "https://some.url"]
 
-      [[#:course{:id "4091undas", :course-name "HHello"}
-        #:course{:id "21408uisdh5U", :course-name "Hell"}
-        #:course{:id "dasdaU", :course-name "Bye"}
-        #:course{:id "2JwaadsU", :course-name "Tschau"}]
+      [[#:course{:id "4091undas", :name "HHello"}
+        #:course{:id "21408uisdh5U", :name "Hell"}
+        #:course{:id "dasdaU", :name "Bye"}
+        #:course{:id "2JwaadsU", :name "Tschau"}]
        [#:question-set{:id "nA1", :name "T897OJj4U1"}
         #:question-set{:id "2", :name "Test 2"}
         #:question-set{:id "3", :name "Test 3"}
