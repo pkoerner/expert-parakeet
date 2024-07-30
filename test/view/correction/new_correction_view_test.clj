@@ -19,7 +19,7 @@
 
       [{:answer/id "1"
         :answer/question [:question/id "1"]
-        :answer/user [:user/id "0"]
+        :answer/creator [:user/id "0"]
         :answer/answer ["transients are a non persistent data structures in clojure. They are used to increase performance."]
         :answer/points 1}
        {:question/id "1"
@@ -32,7 +32,7 @@
 
       [{:answer/id "4"
         :answer/question [:question/id "2"]
-        :answer/user [:user/id "0"]
+        :answer/creator [:user/id "0"]
         :answer/answer [" JVM, i.e., Java Virtual Machine.
            JVM is the engine that drives the Java code.
            Mostly in other Programming Languages, compiler produce code for a particular system but Java compiler produce Bytecode for a Java Virtual Machine.
