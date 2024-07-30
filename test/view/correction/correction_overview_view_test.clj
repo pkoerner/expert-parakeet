@@ -21,7 +21,7 @@
     {:tabs tabs :active-tab active-tab}))
 
 
-(def correction-gen (s/gen (s/keys :req [:correction/feedback :answer/points :question/max-points :question/statement :answer/answer])))
+(def correction-gen (s/gen (s/keys :req [:correction/feedback :correction/points :question/max-points :question/statement :answer/answer])))
 
 
 (deftest test-correction-overview

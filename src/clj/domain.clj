@@ -153,19 +153,6 @@
       answer)))
 
 
-(defn answers-for-correction-view
-  "Takes a col which contains one answer as input.
-   In the answer `:question/answer` is a vector containing answers.
-   Merges the question of the answer with the answer and returns the `:question/answer` 
-   as a unnested map."
-  [[answer]]
-  (let [answer-unpacked-question-nested (update (merge answer (:answer/question answer)) :answer/answer first)
-        answer-unpacked (select-keys answer-unpacked-question-nested [:user/id
-                                                                      :question/statement :question/max-points :question/evaluation-criteria
-                                                                      :answer/answer :answer/points :answer/id])]
-    answer-unpacked))
-
-
 (defn validate-incoming-correction
   "Takes a `correction` and a col of answers as input.
    Checks if the answer is 'valid' and returns the correction with points if it is valid

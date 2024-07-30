@@ -52,11 +52,11 @@
            [:div.card-text
             (card-entry "Given answer: " (or (not-empty (correction :answer/answer)) "No answer given"))
             (card-entry "Feedback:" (correction :correction/feedback))
-            (card-entry "Points: " (str (correction :answer/points) " of " (correction :question/max-points)))]]])
+            (card-entry "Points: " (str (correction :correction/points) " of " (correction :question/max-points)))]]])
        corrections))
 
 
-(s/def ::correction (s/keys :req [:correction/feedback :answer/points :question/max-points :question/statement :answer/answer]))
+(s/def ::correction (s/keys :req [:correction/feedback :correction/points :question/max-points :question/statement :answer/answer]))
 
 
 (s/fdef correction-overview

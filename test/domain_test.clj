@@ -224,15 +224,6 @@
       (t/is (= result (d/corrected-answers corrected-answers answers))))))
 
 
-(t/deftest test-answers-for-correction-view
-  (t/testing "Process a single answer"
-    (let [input [{:answer/id "0", :answer/answer ["Antwort"], :answer/points 5,
-                  :answer/question {:question/statement "Fragetext", :question/max-points 6, :question/evaluation-criteria "Loesung"}}]
-          output {:answer/id "0", :answer/answer "Antwort", :answer/points 5, :question/statement "Fragetext",
-                  :question/max-points 6, :question/evaluation-criteria "Loesung"}]
-      (t/is (= output (d/answers-for-correction-view input))))))
-
-
 (t/deftest test-merging-latest-correction-with-answer
   (t/testing "No correction available"
     (let [answer {:answer/id "0"}

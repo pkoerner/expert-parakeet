@@ -38,7 +38,7 @@
   [answer-id points feedback]
   (conj
     (conj (conj {}
-                (when-not (s/valid? :answer/points points) [:correction/points "Die angegebenen Punkte sind ungültig."]))
+                (when-not (s/valid? :correction/points points) [:correction/points "Die angegebenen Punkte sind ungültig."]))
           (when-not (s/valid? :correction/feedback feedback) [:correction/answer "Das angegebene Feedback ist ungültig."]))
     (when-not (s/valid? :answer/id answer-id) [:correction/answer "Die Frage ist ungültig."])))
 
