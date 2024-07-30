@@ -13,7 +13,7 @@
                              "question-set-ids" (s/coll-of :question-set/id)})
         valid-map {"course-id" "123"
                    "year" "2023"
-                   "semester" "WiSe"
+                   "semester" :semester/winter
                    "question-set-ids" ["1"]}]
     (testing "Testing that the provided spec for a map reports `true` with valid data."
       (t/is (s/valid? test-spec valid-map)))

@@ -198,13 +198,13 @@
       (let [course-iteration-id "1"
             res (db/get-course-iteration-by-id test-db course-iteration-id)]
         (and (t/is (= (:course-iteration/id res) "1"))
-             (t/is (= (:course-iteration/semester res) "WiSe"))
+             (t/is (= (:course-iteration/semester res) :semester/winter))
              (t/is (= (:course-iteration/year res) 2022)))))
     (testing "get-course-iteration-by-id with id = 2"
       (let [course-iteration-id "2"
             res (db/get-course-iteration-by-id test-db course-iteration-id)]
         (and (t/is (= (:course-iteration/id res) "2"))
-             (t/is (= (:course-iteration/semester res) "SoSe"))
+             (t/is (= (:course-iteration/semester res) :semester/summer))
              (t/is (= (:course-iteration/year res) 2020)))))
     (testing "get-course-iteration-by-id with invalid id = 42"
       (t/is (thrown-with-msg?
@@ -214,7 +214,7 @@
     (testing "add-course-iteration-with-question-sets! with valid course-iteration as input and check wether it contains in the db"
       (let [course-id "0"
             course-iteration-year 1999
-            course-iteration-semester "SoSe"
+            course-iteration-semester :semester/summer
             course-iteration-question-sets [3 1]
             _ (db/add-course-iteration-with-question-sets!
                 test-db
@@ -225,11 +225,11 @@
             course-iterations (map #(select-keys % [:course-iteration/semester
                                                     :course-iteration/year])
                                    (db/get-course-iterations-of-course test-db course-id))]
-        (t/is (some #(= % {:course-iteration/semester "SoSe" :course-iteration/year 1999}) course-iterations))))
+        (t/is (some #(= % {:course-iteration/semester :semester/summer :course-iteration/year 1999}) course-iterations))))
     (testing "add-course-iteration-with-question-sets! with invalid question-set as input"
       (let [course-id "1"
             course-iteration-year 1999
-            course-iteration-semester "SoSe"
+            course-iteration-semester :semester/summer
             course-iteration-question-sets ["lol"]]
         (t/is (thrown-with-msg?
                 clojure.lang.ExceptionInfo
@@ -243,7 +243,7 @@
     (testing "add-course-iteration-with-question-sets! with invalid course-id as input"
       (let [course-id "5"
             course-iteration-year 1999
-            course-iteration-semester "SoSe"
+            course-iteration-semester :semester/summer
             course-iteration-question-sets [3]]
         (t/is (thrown-with-msg?
                 clojure.lang.ExceptionInfo
@@ -263,7 +263,7 @@
         (and (t/is (= course-iteration-ids '("1" "2")))
              (t/is (= course-iterations-content  '(("1"
                                                      2022
-                                                     "WiSe"
+                                                     :semester/winter
                                                      #:course{:course-name "Specialization Functional Programming: Clojure"}
                                                      [#:question-set{:id "1",
                                                                      :name "Test 01: Generative Testing",
@@ -277,7 +277,7 @@
                                                                                  #:question{:id "8", :points 1}]}])
                                                    ("2"
                                                      2020
-                                                     "SoSe"
+                                                     :semester/summer
                                                      #:course{:course-name "Programming 1"}
                                                      [#:question-set{:id "2",
                                                                      :name "Week 1:",

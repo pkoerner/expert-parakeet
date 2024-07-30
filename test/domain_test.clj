@@ -96,38 +96,38 @@
 
 (t/deftest test-extraction-of-free-text-questions
   (t/testing "Remove one question"
-    (let [input-map [{:course-iteration/semester "WiSe", :course-iteration/year 2000, :course-iteration/course {:course/name "Fach 1"},
+    (let [input-map [{:course-iteration/semester :semester/winter, :course-iteration/year 2000, :course-iteration/course {:course/name "Fach 1"},
                       :course-iteration/question-sets [{:question-set/id "1", :question-set/name "Test 1",
                                                         :question-set/questions [{:question/id "2", :question/type :question.type/bool},{:question/id "3",:question/type :question.type/free-text}]}]},
-                     {:course-iteration/semester "SoSe", :course-iteration/year 2001, :course-iteration/course {:course/name "Fach 2"},
+                     {:course-iteration/semester :semester/summer, :course-iteration/year 2001, :course-iteration/course {:course/name "Fach 2"},
                       :course-iteration/question-sets [{:question-set/id "1", :question-set/name "Test 1",
                                                         :question-set/questions [{:question/id "2", :question/type :question.type/bool},{:question/id "3", :question/type :question.type/free-text}]},
                                                        {:question-set/id "2", :question-set/name "Test 2", :question-set/questions [{:question/id "1", :question/type :question.type/free-text}]}]}]
-          result-map [{:course-iteration/semester "WiSe", :course-iteration/year 2000, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"},
-                      {:course-iteration/semester "SoSe", :course-iteration/year 2001, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"},
-                      {:course-iteration/semester "SoSe", :course-iteration/year 2001, :question-set/id "2", :question-set/name "Test 2", :question/id "1", :question/type :question.type/free-text, :course/name "Fach 2"}]]
+          result-map [{:course-iteration/semester :semester/winter, :course-iteration/year 2000, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"},
+                      {:course-iteration/semester :semester/summer, :course-iteration/year 2001, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"},
+                      {:course-iteration/semester :semester/summer, :course-iteration/year 2001, :question-set/id "2", :question-set/name "Test 2", :question/id "1", :question/type :question.type/free-text, :course/name "Fach 2"}]]
       (t/is (= result-map (d/extract-free-text-questions input-map)))))
   (t/testing "No questions for one test"
-    (let [input-map [{:course-iteration/semester "WiSe", :course-iteration/year 2000, :course-iteration/course {:course/name "Fach 1"},
+    (let [input-map [{:course-iteration/semester :semester/winter, :course-iteration/year 2000, :course-iteration/course {:course/name "Fach 1"},
                       :course-iteration/question-sets [{:question-set/id "1", :question-set/name "Test 1",
                                                         :question-set/questions []}]},
-                     {:course-iteration/semester "SoSe", :course-iteration/year 2001, :course-iteration/course {:course/name "Fach 2"},
+                     {:course-iteration/semester :semester/summer, :course-iteration/year 2001, :course-iteration/course {:course/name "Fach 2"},
                       :course-iteration/question-sets [{:question-set/id "1", :question-set/name "Test 1",
                                                         :question-set/questions [{:question/id "2", :question/type :question.type/bool},{:question/id "3", :question/type :question.type/free-text}]},
                                                        {:question-set/id "2", :question-set/name "Test 2", :question-set/questions [{:question/id "1", :question/type :question.type/free-text}]}]}]
-          result-map [{:course-iteration/semester "SoSe", :course-iteration/year 2001, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"},
-                      {:course-iteration/semester "SoSe", :course-iteration/year 2001, :question-set/id "2", :question-set/name "Test 2", :question/id "1", :question/type :question.type/free-text, :course/name "Fach 2"}]]
+          result-map [{:course-iteration/semester :semester/summer, :course-iteration/year 2001, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"},
+                      {:course-iteration/semester :semester/summer, :course-iteration/year 2001, :question-set/id "2", :question-set/name "Test 2", :question/id "1", :question/type :question.type/free-text, :course/name "Fach 2"}]]
       (t/is (= result-map (d/extract-free-text-questions input-map)))))
   (t/testing "Only bool questions for one test"
-    (let [input-map [{:course-iteration/semester "WiSe", :course-iteration/year 2000, :course-iteration/course {:course/name "Fach 1"},
+    (let [input-map [{:course-iteration/semester :semester/winter, :course-iteration/year 2000, :course-iteration/course {:course/name "Fach 1"},
                       :course-iteration/question-sets [{:question-set/id "1", :question-set/name "Test 1",
                                                         :question-set/questions [{:question/id "2", :question/type :question.type/bool},{:question/id "3",:question/type :question.type/bool}]}]},
-                     {:course-iteration/semester "SoSe", :course-iteration/year 2001, :course-iteration/course {:course/name "Fach 2"},
+                     {:course-iteration/semester :semester/summer, :course-iteration/year 2001, :course-iteration/course {:course/name "Fach 2"},
                       :course-iteration/question-sets [{:question-set/id "1", :question-set/name "Test 1",
                                                         :question-set/questions [{:question/id "2", :question/type :question.type/bool},{:question/id "3", :question/type :question.type/free-text}]},
                                                        {:question-set/id "2", :question-set/name "Test 2", :question-set/questions [{:question/id "1", :question/type :question.type/free-text}]}]}]
-          result-map [{:course-iteration/semester "SoSe", :course-iteration/year 2001, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"},
-                      {:course-iteration/semester "SoSe", :course-iteration/year 2001, :question-set/id "2", :question-set/name "Test 2", :question/id "1", :question/type :question.type/free-text, :course/name "Fach 2"}]]
+          result-map [{:course-iteration/semester :semester/summer, :course-iteration/year 2001, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"},
+                      {:course-iteration/semester :semester/summer, :course-iteration/year 2001, :question-set/id "2", :question-set/name "Test 2", :question/id "1", :question/type :question.type/free-text, :course/name "Fach 2"}]]
       (t/is (= result-map (d/extract-free-text-questions input-map))))))
 
 
@@ -138,29 +138,29 @@
                    {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")},
                    {:answer/id "3", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-06")}]
           answer-selection (fn [_id] answers)
-          free-text-questions [{:course-iteration/semester "WiSe", :course-iteration/year 2000, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"}]
-          result [{:answer/id "1", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04"), :course-iteration/semester "WiSe", :course-iteration/year 2000,
+          free-text-questions [{:course-iteration/semester :semester/winter, :course-iteration/year 2000, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"}]
+          result [{:answer/id "1", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-04"), :course-iteration/semester :semester/winter, :course-iteration/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"}
-                  {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester "WiSe", :course-iteration/year 2000,
+                  {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester :semester/winter, :course-iteration/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"},
-                  {:answer/id "3", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-06"), :course-iteration/semester "WiSe", :course-iteration/year 2000,
+                  {:answer/id "3", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-06"), :course-iteration/semester :semester/winter, :course-iteration/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"}
-                  {:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester "WiSe", :course-iteration/year 2000,
+                  {:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester :semester/winter, :course-iteration/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"}]]
       (t/is (= result (d/sort-answers-of-free-text-questions-by-timestamp answer-selection free-text-questions)))))
   (t/testing "Two questions, two answers"
     (let [answers [{:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07")},
                    {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05")}]
           answer-selection (fn [_id] answers)
-          free-text-questions [{:course-iteration/semester "WiSe", :course-iteration/year 2000, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"},
-                               {:course-iteration/semester "SoSe", :course-iteration/year 2001, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"}]
-          result [{:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester "WiSe", :course-iteration/year 2000,
+          free-text-questions [{:course-iteration/semester :semester/winter, :course-iteration/year 2000, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"},
+                               {:course-iteration/semester :semester/summer, :course-iteration/year 2001, :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"}]
+          result [{:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester :semester/winter, :course-iteration/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"},
-                  {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester "SoSe", :course-iteration/year 2001,
+                  {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester :semester/summer, :course-iteration/year 2001,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"},
-                  {:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester "WiSe", :course-iteration/year 2000,
+                  {:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester :semester/winter, :course-iteration/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"},
-                  {:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester "SoSe", :course-iteration/year 2001,
+                  {:answer/id "1", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester :semester/summer, :course-iteration/year 2001,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"}]]
       (t/is (= result (d/sort-answers-of-free-text-questions-by-timestamp answer-selection free-text-questions))))))
 
@@ -168,37 +168,37 @@
 (t/deftest test-uncorrected-answers-with-distinct-user-question-question-set-id
   (t/testing "Corrected answers are removed"
     (let [answers-with-corrections [{:answer/id "3"} {:answer/id "2"} {:answer/id "0"}]
-          answers [{:answer/id "0", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester "WiSe", :course-iteration/year 2000,
+          answers [{:answer/id "0", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester :semester/winter, :course-iteration/year 2000,
                     :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"},
-                   {:answer/id "1", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester "SoSe", :course-iteration/year 2001,
+                   {:answer/id "1", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester :semester/summer, :course-iteration/year 2001,
                     :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"},
-                   {:answer/id "2", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester "WiSe", :course-iteration/year 2000,
+                   {:answer/id "2", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester :semester/winter, :course-iteration/year 2000,
                     :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"},
-                   {:answer/id "3", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester "SoSe", :course-iteration/year 2001,
+                   {:answer/id "3", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester :semester/summer, :course-iteration/year 2001,
                     :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"}]
-          result [{:answer/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester "SoSe", :course-iteration/year 2001,
+          result [{:answer/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester :semester/summer, :course-iteration/year 2001,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"}]]
       (t/is (= result (d/uncorrected-answers-with-distinct-ids answers-with-corrections answers)))))
   (t/testing "Answers with same user, question, and question-set-id are removed"
     (let [answers-with-corrections []
-          answers [{:answer/id "0", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester "WiSe", :course-iteration/year 2000,
+          answers [{:answer/id "0", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester :semester/winter, :course-iteration/year 2000,
                     :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"},
-                   {:answer/id "1", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester "SoSe", :course-iteration/year 2001,
+                   {:answer/id "1", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester :semester/summer, :course-iteration/year 2001,
                     :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"},
-                   {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester "WiSe", :course-iteration/year 2000,
+                   {:answer/id "2", :user/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester :semester/winter, :course-iteration/year 2000,
                     :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"},
-                   {:answer/id "3", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester "SoSe", :course-iteration/year 2001,
+                   {:answer/id "3", :user/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester :semester/summer, :course-iteration/year 2001,
                     :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"}]
-          result [{:answer/id "2", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester "WiSe", :course-iteration/year 2000,
+          result [{:answer/id "2", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester :semester/winter, :course-iteration/year 2000,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"},
-                  {:answer/id "3", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester "SoSe", :course-iteration/year 2001,
+                  {:answer/id "3", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-07"), :course-iteration/semester :semester/summer, :course-iteration/year 2001,
                    :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"}]]
       (t/is (= result (d/uncorrected-answers-with-distinct-ids answers-with-corrections answers)))))
   (t/testing "Uncorrected question and a later corrected question"
     (let [answers-with-corrections [{:answer/id "1"}]
-          answers [{:answer/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester "WiSe", :course-iteration/year 2000,
+          answers [{:answer/id "0", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-05"), :course-iteration/semester :semester/winter, :course-iteration/year 2000,
                     :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 1"},
-                   {:answer/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-06"), :course-iteration/semester "WiSe", :course-iteration/year 2000,
+                   {:answer/id "1", :answer/timestamp (.parse (SimpleDateFormat. "yyyy-MM-dd") "2022-08-06"), :course-iteration/semester :semester/winter, :course-iteration/year 2000,
                     :question-set/id "1", :question-set/name "Test 1", :question/id "3", :question/type :question.type/free-text, :course/name "Fach 2"}]
           result []]
       (t/is (= result (d/uncorrected-answers-with-distinct-ids answers-with-corrections answers))))))
