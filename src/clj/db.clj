@@ -1,6 +1,7 @@
 (ns db
   (:require
     [clojure.string :as string]
+    [clojure.walk]
     [datahike.api :as d]
     [db.dummy-data :as dummy-data]
     [db.schema]
@@ -131,6 +132,17 @@
     "get an answer given its id"))
 
 
+(defn- resolve-enums
+  [entity]
+  (clojure.walk/postwalk
+    (fn [x]
+      (if (and (map? x)
+               (= (keys x) [:db/ident]))
+        (x :db/ident)
+        x))
+    entity))
+
+
 (deftype Database
   [conn]
 
@@ -150,28 +162,34 @@
 
   (get-course-iterations-of-student
     [this user-id]
-    (mapv first
-          (d/q '[:find (pull ?ci pattern)
-                 :in $ pattern ?u
-                 :where
-                 [?m :membership/user ?u]
-                 [?ci :course-iteration/members ?m]]
-               @(.conn this) db.schema/course-iteration-slim-pull [:user/id user-id])))
+    (->> (d/q '[:find (pull ?ci pattern)
+                :in $ pattern ?u
+                :where
+                [?m :membership/user ?u]
+                [?ci :course-iteration/members ?m]]
+              @(.conn this) db.schema/course-iteration-slim-pull [:user/id user-id])
+         (mapv first)
+         (resolve-enums)))
 
 
   (get-all-course-iterations
     [this]
-    (mapv first (d/q '[:find (pull ?e pattern)
-                       :in $ pattern
-                       :where [?e :course-iteration/id]]
-                     @(.conn this) db.schema/course-iteration-very-slim-pull)))
+    (->>
+      (d/q '[:find (pull ?e pattern)
+             :in $ pattern
+             :where [?e :course-iteration/id]]
+           @(.conn this) db.schema/course-iteration-very-slim-pull)
+      (mapv first)
+      (resolve-enums)))
 
 
   (get-graded-answers-of-question-set
     [_this _user-id _question-set-id]
-    [] ; TODO: we are not saving points in the answer anymore
-    #_(mapv first
-            (d/q '[:find (pull ?a [:answer/points
+    ;; TODO: we are not saving points in the answer anymore
+    (->> []
+         (mapv first)
+         (resolve-enums))
+    #_(d/q '[:find (pull ?a [:answer/points
                                    {:answer/question [:question/id :question/type]}])
                    :in $ ?u ?t
                    :where
@@ -179,74 +197,85 @@
                    [?a :answer/question ?f]
                    [?t :question-set/questions ?f]
                    [?a :answer/points]]
-                 @(.conn this) [:user/id user-id] [:question-set/id question-set-id])))
+                 @(.conn this) [:user/id user-id] [:question-set/id question-set-id]))
 
 
   (get-question-ids-for-user
     [this user-id]
-    (mapv first
-          (d/q '[:find (pull ?q [:question/id])
-                 :in $ ?u
-                 :where
-                 [?m :membership/user ?u]
-                 [?ci :course-iteration/members ?m]
-                 [?ci :course-iteration/question-sets ?qs]
-                 [?qs :question-set/questions ?q]]
-               @(.conn this) [:user/id user-id])))
+    (->> (d/q '[:find (pull ?q [:question/id])
+                :in $ ?u
+                :where
+                [?m :membership/user ?u]
+                [?ci :course-iteration/members ?m]
+                [?ci :course-iteration/question-sets ?qs]
+                [?qs :question-set/questions ?q]]
+              @(.conn this) [:user/id user-id])
+         (mapv first)
+         (resolve-enums)))
 
 
   (get-question-set-by-id
     [this id]
-    (d/pull @(.conn this)
-            db.schema/question-set-pull
-            [:question-set/id id]))
+    (->> (d/pull @(.conn this)
+                 db.schema/question-set-pull
+                 [:question-set/id id])
+         (resolve-enums)))
 
 
   (get-all-question-sets
     [this]
-    (mapv first (d/q '[:find (pull ?e pattern)
-                       :in $ pattern
-                       :where
-                       [?e :question-set/id]]
-                     @(.conn this) db.schema/question-set-no-questions-pull)))
+    (->> (d/q '[:find (pull ?e pattern)
+                :in $ pattern
+                :where
+                [?e :question-set/id]]
+              @(.conn this) db.schema/question-set-no-questions-pull)
+         (mapv first)
+         (resolve-enums)))
 
 
   (get-all-courses
     [this]
-    (mapv first
-          (d/q '[:find (pull ?e pattern)
-                 :in $ pattern
-                 :where
-                 [?e :course/id]]
-               @(.conn this) db.schema/course-slim-pull)))
+    (->> (d/q '[:find (pull ?e pattern)
+                :in $ pattern
+                :where
+                [?e :course/id]]
+              @(.conn this) db.schema/course-slim-pull)
+         (mapv first)
+         (resolve-enums)))
 
 
   (get-course-iterations-of-course
     [this course-id]
-    (mapv first (d/q '[:find (pull ?ci pattern)
-                       :in $ pattern ?course-id
-                       :where
-                       [?c :course/id ?course-id]
-                       [?ci :course-iteration/course ?c]]
-                     @(.conn this) db.schema/course-iteration-pull course-id)))
+    (->> (d/q '[:find (pull ?ci pattern)
+                :in $ pattern ?course-id
+                :where
+                [?c :course/id ?course-id]
+                [?ci :course-iteration/course ?c]]
+              @(.conn this) db.schema/course-iteration-pull course-id)
+         (mapv first)
+         (resolve-enums)))
 
 
   (get-all-question-ids
     [this]
-    (mapv first (d/q '[:find (pull ?e pattern)
-                       :in $ pattern
-                       :where
-                       [?e :question/id]]
-                     @(.conn this) db.schema/question-slim-pull)))
+    (->>
+      (d/q '[:find (pull ?e pattern)
+             :in $ pattern
+             :where
+             [?e :question/id]]
+           @(.conn this) db.schema/question-slim-pull)
+      (mapv first)
+      (resolve-enums)))
 
 
   (get-all-question-categories
     [this]
-    (mapv first
-          (d/q '[:find ?c
-                 :where
-                 [_ :question/categories ?c]]
-               @(.conn this))))
+    (->> (d/q '[:find ?c
+                :where
+                [_ :question/categories ?c]]
+              @(.conn this))
+         (mapv first)
+         (resolve-enums)))
 
 
   (add-course!
@@ -260,14 +289,16 @@
                                       :course/id id
                                       :course/name course-name}])
               db-after (:db-after tx-result)]
-          (d/pull db-after db.schema/course-slim-pull [:course/id id])))))
+          (->> (d/pull db-after db.schema/course-slim-pull [:course/id id])
+               (resolve-enums))))))
 
 
   (get-course-iteration-by-id
     [this course-iteration-id]
-    (d/pull @(.conn this)
-            db.schema/course-iteration-pull
-            [:course-iteration/id course-iteration-id]))
+    (->> (d/pull @(.conn this)
+                 db.schema/course-iteration-pull
+                 [:course-iteration/id course-iteration-id])
+         (resolve-enums)))
 
 
   (add-course-iteration-with-question-sets!
@@ -283,8 +314,8 @@
                                   :course-iteration/semester semester
                                   :course-iteration/question-sets question-set-ids-keyed}])
           db-after (:db-after tx-result)]
-      (d/pull db-after db.schema/course-iteration-slim-pull
-              [:course-iteration/id id])))
+      (->> (d/pull db-after db.schema/course-iteration-slim-pull [:course-iteration/id id])
+           (resolve-enums))))
 
 
   (add-course-iteration!
@@ -294,9 +325,10 @@
 
   (get-question-by-id
     [this id]
-    (d/pull @(.conn this)
-            db.schema/question-pull
-            [:question/id id]))
+    (->> (d/pull @(.conn this)
+                 db.schema/question-pull
+                 [:question/id id])
+         (resolve-enums)))
 
 
   (add-question!
@@ -328,7 +360,8 @@
                                       :question/correct-solutions (:question/correct-solutions question)]))
               tx-result (d/transact (.conn this) [trans-map])
               db-after (:db-after tx-result)]
-          (d/pull db-after db.schema/question-pull [:question/id id])))))
+          (->> (d/pull db-after db.schema/question-pull [:question/id id])
+               (resolve-enums))))))
 
 
   (add-question-set!
@@ -353,7 +386,8 @@
                                                          :course-iteration/year     (:course-iteration/year course-iteration)
                                                          :course-iteration/question-sets    (conj (:course-iteration/question-sets course-iteration) [:question-set/id id])}])
           db-after (:db-after tx-result-question-set)]
-      (d/pull db-after db.schema/question-set-no-questions-pull [:question-set/id id])))
+      (->> (d/pull db-after db.schema/question-set-no-questions-pull [:question-set/id id])
+           (resolve-enums))))
 
 
   (add-user-answer!
@@ -368,41 +402,42 @@
                                   :answer/answer answer
                                   :answer/selected-solutions []}])
           db-after (:db-after tx-result)]
-      (d/pull db-after db.schema/answer-slim-pull [:answer/id id])))
+      (->> (d/pull db-after db.schema/answer-slim-pull [:answer/id id])
+           (resolve-enums))))
 
 
   (add-multiple-user-answers!
     [this user-id answers]
-    (mapv
-      (fn [[question-id answer]]
-        (add-user-answer! this user-id question-id answer))
-      answers))
+    (mapv (fn [[question-id answer]]
+            (add-user-answer! this user-id question-id answer))
+          answers))
 
 
   (get-all-answers
     [this]
-    (mapv first
-          (d/q '[:find (pull ?e pattern)
-                 :in $ pattern
-                 :where
-                 [?e :answer/id]]
-               @(.conn this) db.schema/answer-slim-pull)))
+    (->> (d/q '[:find (pull ?e pattern)
+                :in $ pattern
+                :where
+                [?e :answer/id]]
+              @(.conn this) db.schema/answer-slim-pull)
+         (mapv first)
+         (resolve-enums)))
 
 
   (get-corrections-of-answer
     [this answer-id]
     (if-let [_existing-answer (not-empty (try (get-answer-by-id this answer-id) (catch Exception _ nil)))]
-      (throw (AssertionError. (str "The answer-id " answer-id " does not exist in the database!")))
-      (mapv
-        (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp}))
-        (d/q '[:find (pull ?correction pattern) ?timestamp
-               :in $ pattern ?answer-id
-               :where
-               [?answer :answer/id ?answer-id]
-               [?correction :correction/answer ?answer ?tx]
-               [?tx :db/txInstant ?timestamp]]
-             ;; slim pull, because we assume the caller knows the question already
-             @(.conn this) db.schema/correction-slim-pull answer-id))))
+      (->> (d/q '[:find (pull ?correction pattern) ?timestamp
+                  :in $ pattern ?answer-id
+                  :where
+                  [?answer :answer/id ?answer-id]
+                  [?correction :correction/answer ?answer ?tx]
+                  [?tx :db/txInstant ?timestamp]]
+                ;; slim pull, because we assume the caller knows the question already
+                @(.conn this) db.schema/correction-slim-pull answer-id)
+           (mapv (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp})))
+           (resolve-enums))
+      (throw (AssertionError. (str "The answer-id " answer-id " does not exist in the database!")))))
 
 
   (add-correction!
@@ -419,7 +454,8 @@
                                   :correction/feedback feedback
                                   :correction/points points}])
           db-after (:db-after tx-result)]
-      (d/pull db-after db.schema/correction-slim-pull [:correction/id id])))
+      (->> (d/pull db-after db.schema/correction-slim-pull [:correction/id id])
+           (resolve-enums))))
 
 
   (add-user!
@@ -432,81 +468,90 @@
                                     :user/id user-id
                                     :user/github-id github-id}])
             db-after (:db-after tx-result)]
-        (d/pull db-after db.schema/user-pull [:user/id user-id]))))
+        (->> (d/pull db-after db.schema/user-pull [:user/id user-id])
+             (resolve-enums)))))
 
 
   (get-user-by-id
     [this user-id]
-    (d/pull @(.conn this)
-            db.schema/user-pull
-            [:user/id user-id]))
+    (->> (d/pull @(.conn this)
+                 db.schema/user-pull
+                 [:user/id user-id])
+         (resolve-enums)))
 
 
   (get-user-by-github-id
     [this github-id]
     ;; TODO: use d/q to mitigate logs and exceptions when there is no user for the given id
-    (d/pull @(.conn this)
-            db.schema/user-pull
-            [:user/github-id github-id]))
+    (->> (d/pull @(.conn this)
+                 db.schema/user-pull
+                 [:user/github-id github-id])
+         (resolve-enums)))
 
 
   (get-course-by-id
     [this course-id]
-    (d/pull @(.conn this)
-            db.schema/course-pull
-            [:course/id course-id]))
+    (->> (d/pull @(.conn this)
+                 db.schema/course-pull
+                 [:course/id course-id])
+         (resolve-enums)))
 
 
   (get-all-users
     [this]
-    (mapv first
-          (d/q '[:find (pull ?e pattern)
-                 :in $ pattern
-                 :where
-                 [?e :user/id]]
-               @(.conn this) db.schema/user-pull)))
+    (->> (d/q '[:find (pull ?e pattern)
+                :in $ pattern
+                :where
+                [?e :user/id]]
+              @(.conn this) db.schema/user-pull)
+         (mapv first)
+         (resolve-enums)))
 
 
   (get-user-id-by-github-id
     [this github-id]
-    (first (d/q '[:find ?id
-                  :in $ ?github-id
-                  :where
-                  [?e :user/github-id ?github-id]
-                  [?e :user/id ?id]]
-                @(.conn this) github-id)))
+    (->> (d/q '[:find ?id
+                :in $ ?github-id
+                :where
+                [?e :user/github-id ?github-id]
+                [?e :user/id ?id]]
+              @(.conn this) github-id)
+         ffirst
+         (resolve-enums)))
 
 
   (get-all-corrections-from-user
     [this student-id]
-    (mapv
-      (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp}))
-      (d/q '[:find (pull ?correction pattern) ?timestamp
-             :in $ pattern ?student-id
-             :where
-             [?answer :answer/creator ?student-id]
-             [?correction :correction/answer ?answer ?tx]
-             [?tx :db/txInstant ?timestamp]]
-           @(.conn this) db.schema/correction-pull [:user/id student-id])))
+    (->> (d/q '[:find (pull ?correction pattern) ?timestamp
+                :in $ pattern ?student-id
+                :where
+                [?answer :answer/creator ?student-id]
+                [?correction :correction/answer ?answer ?tx]
+                [?tx :db/txInstant ?timestamp]]
+              @(.conn this) db.schema/correction-pull [:user/id student-id])
+         (mapv (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp})))
+         (resolve-enums)))
 
 
   (get-all-corrections-from-corrector
     [this corrector-id]
-    (mapv
-      (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp}))
+    (->>
       (d/q '[:find (pull ?correction pattern) ?timestamp
              :in $ pattern ?corrector-id
              :where
              [?correction :correction/corrector ?corrector-id ?tx]
              [?tx :db/txInstant ?timestamp]]
-           @(.conn this) db.schema/correction-pull [:user/id corrector-id])))
+           @(.conn this) db.schema/correction-pull [:user/id corrector-id])
+      (mapv (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp})))
+      (resolve-enums)))
 
 
   (get-answer-by-id
     [this answer-id]
-    (d/pull @(.conn this)
-            db.schema/answer-pull
-            [:answer/id answer-id])))
+    (->> (d/pull @(.conn this)
+                 db.schema/answer-pull
+                 [:answer/id answer-id])
+         (resolve-enums))))
 
 
 ;; use mem db

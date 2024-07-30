@@ -25,8 +25,8 @@
     ;; else search user in the database and put it into the session or redirect to user creation
     (let [session (req :session)
           oauth-github-id (-> session :user :oauth-github-id)
-          [user-id] (get-user-id-by-github-id user-service (str (-> session :user :oauth-github-id)))]
-      (if user-id
+          user-id (get-user-id-by-github-id user-service (str (-> session :user :oauth-github-id)))]
+      (if (some? user-id)
         (-> (redirect "/") (assoc :session {:user {:id user-id :oauth-github-id oauth-github-id}}))
         (redirect "/create-user")))))
 

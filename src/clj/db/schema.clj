@@ -8,6 +8,10 @@
   {:db/ident enum-value})
 
 
+(def ident-pull
+  [:db/ident])
+
+
 (def user-pull
   [:user/id
    :user/github-id])
@@ -28,14 +32,17 @@
         :doc "GitHub user id, used for authentication"}])
 
 
-(def user-roles-schema
+(def user-role-pull ident-pull)
+
+
+(def user-role-schema
   (mapv to-ident domain.spec/user-roles))
 
 
 (def membership-pull
   [:membership/id
    {:membership/user user-pull}
-   :membership/role])
+   {:membership/role user-role-pull}])
 
 
 (def membership-schema
@@ -73,13 +80,16 @@
         :doc "Solution statement"}])
 
 
+(def question-type-pull ident-pull)
+
+
 (def question-type-schema
   (mapv to-ident domain.spec/question-types))
 
 
 (def question-slim-pull
   [:question/id
-   :question/type
+   {:question/type question-type-pull}
    :question/statement
    :question/max-points])
 
@@ -289,6 +299,9 @@
         :doc "All question sets owned by this course, consisting out of questions owned by this course"}])
 
 
+(def semester-pull ident-pull)
+
+
 (def semester-schema
   (mapv to-ident domain.spec/semesters))
 
@@ -297,7 +310,7 @@
   [:course-iteration/id
    {:course-iteration/course course-slim-pull}
    :course-iteration/year
-   :course-iteration/semester
+   {:course-iteration/semester semester-pull}
    ;; no members and no question sets
    ])
 
@@ -306,7 +319,7 @@
   [:course-iteration/id
    {:course-iteration/course course-slim-pull}
    :course-iteration/year
-   :course-iteration/semester
+   {:course-iteration/semester semester-pull}
    ;; no members
    {:course-iteration/question-sets question-set-no-questions-pull}])
 
@@ -315,7 +328,7 @@
   [:course-iteration/id
    {:course-iteration/course course-slim-pull}
    :course-iteration/year
-   :course-iteration/semester
+   {:course-iteration/semester semester-pull}
    {:course-iteration/members membership-pull}
    {:course-iteration/question-sets question-set-slim-pull}])
 
@@ -356,7 +369,7 @@
           answer-schema
           correction-schema
           question-set-schema
-          user-roles-schema
+          user-role-schema
           membership-schema
           user-schema
           course-schema

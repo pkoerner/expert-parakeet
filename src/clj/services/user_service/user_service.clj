@@ -29,7 +29,7 @@
 
 (defn- github-id-in-use?-impl
   [this oauth-github-id]
-  (boolean (db/get-user-id-by-github-id (.db this) oauth-github-id)))
+  (some? (db/get-user-id-by-github-id (.db this) oauth-github-id)))
 
 
 (s/fdef get-user-id-by-github-id-impl
