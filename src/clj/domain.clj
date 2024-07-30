@@ -18,8 +18,9 @@
    of points of answers. For each
    question the answer with the
    highest points is taken."
-  [answers]
-  (->> answers
+  [_answers]
+  0 ; TODO: fix this
+  #_(->> answers
        (group-by #(get-in % [:answer/question :question/id]))
        (map (fn [[_ answers]]
               (apply max (map :answer/points answers))))

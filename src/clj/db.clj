@@ -29,10 +29,6 @@
     [this user-id]
     "Fetches all question-ids that a user can see/answer in their course iterations.")
 
-  ;; only used for testing?
-  (get-all-corrections-of-corrector
-    [this corrector-id])
-
   (get-question-set-by-id
     [this id])
 
@@ -126,7 +122,6 @@
     [this user-id]
     "get all corrections by the user-id of the creator of the answer it belongs to")
 
-  ;; TODO: merge this with get-all-corrections-of-corrector and add a timestamp
   (get-all-corrections-from-corrector
     [this corrector-id]
     "get all corrections by the user-id of the corrector")
@@ -174,7 +169,7 @@
 
   (get-graded-answers-of-question-set
     [_this _user-id _question-set-id]
-    [] ; we are not saving points in the answer anymore
+    [] ; TODO: we are not saving points in the answer anymore
     #_(mapv first
             (d/q '[:find (pull ?a [:answer/points
                                    {:answer/question [:question/id :question/type]}])
@@ -198,16 +193,6 @@
                  [?ci :course-iteration/question-sets ?qs]
                  [?qs :question-set/questions ?q]]
                @(.conn this) [:user/id user-id])))
-
-
-  (get-all-corrections-of-corrector
-    [this corrector-id]
-    (mapv first
-          (d/q '[:find (pull ?correction pattern)
-                 :in $ pattern ?corr
-                 :where
-                 [?correction :correction/corrector ?corr]]
-               @(.conn this) db.schema/correction-slim-pull [:user/id corrector-id])))
 
 
   (get-question-set-by-id
@@ -415,6 +400,7 @@
                [?answer :answer/id ?answer-id]
                [?correction :correction/answer ?answer ?tx]
                [?tx :db/txInstant ?timestamp]]
+             ;; slim pull, because we assume the caller knows the question already
              @(.conn this) db.schema/correction-slim-pull answer-id))))
 
 
@@ -489,45 +475,28 @@
 
 
   (get-all-corrections-from-user
-    [this user-id]
+    [this student-id]
     (mapv
-      #(zipmap [:correction/feedback :answer/points :question/max-points :question/statement :correction/timestamp :answer/selected-solutions :answer/answer] %)
-      (d/q '[:find ?feedback ?points-reached ?reachable-points ?question-statement ?timestamp ?selected-solutions ?answers
-             :in $ ?user-id
+      (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp}))
+      (d/q '[:find (pull ?correction pattern) ?timestamp
+             :in $ pattern ?student-id
              :where
-             [?user :user/id ?user-id]
-             [?answer :answer/creator ?user]
-             [?answer :answer/selected-solutions ?selected-solutions]
-             [?answer :answer/answer ?answers]
-             [?answer :answer/question ?question]
+             [?answer :answer/creator ?student-id]
              [?correction :correction/answer ?answer ?tx]
-             [?correction :correction/feedback ?feedback]
-             [?correction :correction/points ?points-reached]
-             [?question :question/statement ?question-statement]
-             [?question :question/max-points ?reachable-points]
              [?tx :db/txInstant ?timestamp]]
-           @(.conn this) user-id)))
+           @(.conn this) db.schema/correction-pull [:user/id student-id])))
 
 
   (get-all-corrections-from-corrector
     [this corrector-id]
     (mapv
-      #(zipmap [:correction/feedback :answer/points :question/max-points :question/statement :correction/timestamp :answer/selected-solutions :answer/answer] %)
-      (d/q '[:find ?feedback ?points-reached ?reachable-points ?question-statement ?timestamp ?selected-solutions ?answers
-             :in $ ?user-id
+      (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp}))
+      (d/q '[:find (pull ?correction pattern) ?timestamp
+             :in $ pattern ?corrector-id
              :where
-             [?user :user/id ?user-id]
-             [?correction :correction/corrector ?user ?tx]
-             [?correction :correction/feedback ?feedback]
-             [?correction :correction/answer ?answer]
-             [?correction :correction/points ?points-reached]
-             [?answer :answer/answer ?answers]
-             [?answer :answer/selected-solutions ?selected-solutions]
-             [?answer :answer/question ?question]
-             [?question :question/statement ?question-statement]
-             [?question :question/max-points ?reachable-points]
+             [?correction :correction/corrector ?corrector-id ?tx]
              [?tx :db/txInstant ?timestamp]]
-           @(.conn this) corrector-id)))
+           @(.conn this) db.schema/correction-pull [:user/id corrector-id])))
 
 
   (get-answer-by-id

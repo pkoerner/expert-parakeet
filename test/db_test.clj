@@ -611,27 +611,27 @@
 
 (deftest correction-test
   (let [test-db (-create-test-db "correction-test-db")]
-    (testing "get-all-corrections-of-corrector with corrector-id = 3"
-      (let [res (db/get-all-corrections-of-corrector test-db "3")
+    (testing "get-all-corrections-from-corrector with corrector-id = 3"
+      (let [res (db/get-all-corrections-from-corrector test-db "3")
             ref-corrections [#:correction{:answer #:answer{:id "2"}}
                              #:correction{:answer #:answer{:id "1"}}
                              #:correction{:answer #:answer{:id "4"}}
                              #:correction{:answer #:answer{:id "12"}}]]
         (t/is (every? (fn [act] (some #(= act %) ref-corrections)) res))))
-    (testing "get-all-corrections-of-corrector with corrector-id = 2"
-      (let [res (db/get-all-corrections-of-corrector test-db "2")
+    (testing "get-all-corrections-from-corrector with corrector-id = 2"
+      (let [res (db/get-all-corrections-from-corrector test-db "2")
             ref-corrections [#:correction{:answer #:answer{:id "14"}}]]
         (t/is (every? (fn [act] (some #(= act %) ref-corrections)) res))))
-    (testing "get-all-corrections-of-corrector with invalid corrector-id = 42"
+    (testing "get-all-corrections-from-corrector with invalid corrector-id = 42"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
               #"Nothing found for entity id [:user/id \W 42 \W]"
-              (db/get-all-corrections-of-corrector test-db "42"))))
+              (db/get-all-corrections-from-corrector test-db "42"))))
     (testing "add-correction! with valid correction"
       (let [answer-id "1"
             correction {:correction/feedback "not good" :correction/points 0 :corrector/id "3"}
             _ (db/add-correction! test-db answer-id correction)
-            corrections-of-corrector (db/get-all-corrections-of-corrector test-db "3")]
+            corrections-of-corrector (db/get-all-corrections-from-corrector test-db "3")]
         (t/is (= 2 (count (filter #(= (first (vals (first (vals %)))) "1") corrections-of-corrector))))))
     (testing "add-correction! with invalid answer-id"
       (let [answer-id "42"
