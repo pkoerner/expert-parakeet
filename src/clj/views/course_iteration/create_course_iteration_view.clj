@@ -19,7 +19,7 @@
 
 
 (s/fdef course-iteration-form
-        :args (s/cat :courses (s/coll-of (s/keys :req [:course/id :course/course-name]) :distinct true)
+        :args (s/cat :courses (s/coll-of (s/keys :req [:course/id :course/name]) :distinct true)
                      :question-sets (s/coll-of (s/keys :req [:question-set/id :question-set/name]) :distinct true)
                      :post-destination :general/non-blank-string
                      :kwargs (s/? (s/or :empty empty?
@@ -29,7 +29,7 @@
         :fn (fn [spec-map]
               (let [{{:keys [courses question-sets post-destination]} :args
                      ret :ret} spec-map]
-                (s/and (every? #(string/includes? (str ret) (:course/course-name %)) courses)
+                (s/and (every? #(string/includes? (str ret) (:course/name %)) courses)
                        (every? #(string/includes? (str ret) (:question-set/name %)) question-sets)
                        #(string/includes? ret post-destination)))))
 
@@ -45,7 +45,7 @@
   [courses question-sets post-destination & {:keys [errors] :or {errors {}}}]
   (letfn [(course-to-option
             [course]
-            [(:course/course-name course) (:course/id course)])]
+            [(:course/name course) (:course/id course)])]
     (h/html
       (hform/form-to
         {:enctype "multipart/form-data"}

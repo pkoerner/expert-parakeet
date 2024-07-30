@@ -19,7 +19,7 @@
            (let [[courses question-sets post-destination] test-input
                  test-result (str (course-iteration-form courses question-sets post-destination))]
              (and
-               (every? #(string/includes? test-result (:course/course-name %)) courses)
+               (every? #(string/includes? test-result (:course/name %)) courses)
                (every? #(string/includes? test-result (:question-set/name %)) question-sets)
                (string/includes? test-result post-destination)))
 

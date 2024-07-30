@@ -38,12 +38,12 @@
 (defn- add-to-db-and-get-success-msg
   [course db-add-fun]
   (let [db-result (db-add-fun course)]
-    (view/submit-success-view (:course/course-name db-result))))
+    (view/submit-success-view (:course/name db-result))))
 
 
 (s/def ::req-data
   (map-spec {:__anti-forgery-token any?
-             :multipart-params (map-spec {"course-name" :course/course-name})}))
+             :multipart-params (map-spec {"course-name" :course/name})}))
 
 
 (s/fdef submit-create-course!

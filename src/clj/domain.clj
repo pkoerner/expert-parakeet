@@ -36,7 +36,7 @@
       (assoc :question-set/max-points (calc-max-points-of-question-set question-set))
       (assoc :question-set/achieved-points (calc-achieved-points
                                              (question-set->answer (:question-set/id question-set))))
-      (select-keys [:question-set/id :question-set/name :question-set/max-points :question-set/achieved-points :question-set/passing-score])))
+      (select-keys [:question-set/id :question-set/name :question-set/max-points :question-set/achieved-points :question-set/required-points])))
 
 
 (defn course-iterations-with-total-points
@@ -65,7 +65,7 @@
   [course-iterations-with-inner-question-sets]
   (let [question-sets-with-inner-questions (flatten (map (partial unpack-map-in-map :course-iteration/question-sets) course-iterations-with-inner-question-sets))
         questions-with-inner-course-iteration (flatten (map (partial unpack-map-in-map :question-set/questions) question-sets-with-inner-questions))
-        questions (map #(dissoc (assoc % :course/course-name (:course/course-name (:course-iteration/course %))) :course-iteration/course) questions-with-inner-course-iteration)
+        questions (map #(dissoc (assoc % :course/name (:course/name (:course-iteration/course %))) :course-iteration/course) questions-with-inner-course-iteration)
         only-free-text-questions (filter #(= :question.type/free-text (:question/type %)) questions)]
     only-free-text-questions))
 

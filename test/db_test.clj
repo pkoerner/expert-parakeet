@@ -324,7 +324,7 @@
                         :question/max-points 3
                         :question/categories #{"Cat1" "Cat2"}}]
             question-set {:question-set/name question-set-name
-                          :question-set/passing-score passing-score}
+                          :question-set/required-points passing-score}
             _ (db/add-question-set!
                 test-db
                 question-set-name
@@ -332,7 +332,7 @@
                 passing-score
                 questions)
             question-set-list (map #(select-keys % [:question-set/name
-                                                    :question-set/passing-score])
+                                                    :question-set/required-points])
                                    (db/get-all-question-sets test-db))]
         (t/is (some #(= % question-set) (vec question-set-list)))))
     (testing "add-question-set! with invalid couse-iteration as input and check wether it contains in the db"
@@ -399,7 +399,7 @@
             passing-score 1
             questions [input-question]
             question-set {:question-set/name question-set-name
-                          :question-set/passing-score passing-score}
+                          :question-set/required-points passing-score}
             _ (db/add-question-set!
                 test-db
                 question-set-name
@@ -407,18 +407,18 @@
                 passing-score
                 questions)
             question-set-list (map #(select-keys % [:question-set/name
-                                                    :question-set/passing-score])
+                                                    :question-set/required-points])
                                    (db/get-all-question-sets test-db))]
         (t/is (some #(= % question-set) (vec question-set-list)))))
     (testing "add-question-set! with semi generated question-set"
       (dotimes [_ 10]
         (let [question-set-name (gen/generate (s/gen :question-set/name))
               course-iteration-id "1" ; must be existing iteration for success
-              passing-score (gen/generate (s/gen :question-set/passing-score))
+              passing-score (gen/generate (s/gen :question-set/required-points))
               questions []
               question-set {:question-set/name question-set-name
                             :question-set/questions questions
-                            :question-set/passing-score passing-score}
+                            :question-set/required-points passing-score}
               _ (db/add-question-set!
                   test-db
                   question-set-name
@@ -427,11 +427,11 @@
                   questions)
               question-set-list (map #(select-keys % [:question-set/name
                                                       :question-set/questions
-                                                      :question-set/passing-score])
+                                                      :question-set/required-points])
                                      (db/get-all-question-sets test-db))]
           (t/is (some (fn [act-set]
                         (and (= (:question-set/name question-set) (:question-set/name act-set))
-                             (= (:question-set/passing-score question-set) (:question-set/passing-score question-set))))
+                             (= (:question-set/required-points question-set) (:question-set/required-points question-set))))
                       question-set-list)))))))
 
 
@@ -466,10 +466,10 @@
               #"Nothing found for entity id [:course/id \W 42 \W]"
               (db/get-course-by-id test-db "42"))))
     (testing "add-course! with generated course names"
-      (let [course-names (distinct (map #(string/lower-case %) (gen/sample (s/gen :course/course-name) generator-sample-size)))]
+      (let [course-names (distinct (map #(string/lower-case %) (gen/sample (s/gen :course/name) generator-sample-size)))]
         (t/is (every? (fn [act]
                         (let [_ (db/add-course! test-db act)
-                              excisting-course-names (map #(:course/course-name %) (db/get-all-courses test-db))]
+                              excisting-course-names (map #(:course/name %) (db/get-all-courses test-db))]
                           (some #(= act %) excisting-course-names)))
                       course-names))))
     (testing "add-course! with existing name - should fail"

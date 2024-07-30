@@ -92,8 +92,6 @@
     (s/keys :req [:question-set/id
                   :question-set/name
                   :question-set/questions
-                  :question-set/start
-                  :question-set/end
                   :question-set/required-points])))
 
 
