@@ -209,9 +209,7 @@ expert_parakeet.question.create_question_view.register_question_type_switch('typ
 
 
 (s/fdef question-success-view
-        :args (s/cat :question (s/or :free-text-question :question/question
-                                     :single-choice-question :question/single-choice-question
-                                     :multiple-choice-question :question/multiple-choice-question))
+        :args (s/cat :question :question/question)
         :ret #(instance? hiccup.util.RawString %))
 
 

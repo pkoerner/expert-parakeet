@@ -52,12 +52,8 @@ an error-set with a specified error is returned. "
 
 (s/fdef create-question-impl!
         :args (s/cat :self #(= PQuestionService (type %))
-                     :question (s/or :free-text-question :question/question
-                                     :single-choice-question :question/single-choice-question
-                                     :multiple-choice-question :question/multiple-choice-question))
-        :ret (s/or :free-text-question :question/question
-                   :single-choice-question :question/single-choice-question
-                   :multiple-choice-question :question/multiple-choice-question))
+                     :question :question/question)
+        :ret :question/question)
 
 
 (defn- create-question-impl!
@@ -220,10 +216,8 @@ an error-set with a specified error is returned. "
                      :correct-solutions (s/or :nil nil? :solution string? :multiple-solutions (s/coll-of string?))
                      :evaluation-criteria (s/or :nil nil? :criteria string?)
                      :categories (s/or :nil nil? :single string? :multiple (s/coll-of string?)))
-        :ret (s/or :free-text-question :question/question
-                   :single-choice-question :question/single-choice-question
-                   :multiple-choice-question :question/multiple-choice-question
-                   :errors #(contains? % :errors)))
+        :ret (s/or :errors #(contains? % :errors)
+                   :question :question/question))
 
 
 (defn- validate-question-impl

@@ -29,7 +29,7 @@
 (s/def :question/categories (s/coll-of :general/non-blank-string :distinct true :into #{}))
 
 
-(s/def :question/question
+(s/def :question/free-text-question
   (s/and
     (s/keys :req [:question/id
                   :question/type
@@ -71,8 +71,8 @@
               (:question/correct-solutions q)))))
 
 
-(s/def ::question
-  (s/or :free-text :question/question
+(s/def :question/question
+  (s/or :free-text :question/free-text-question
         :single-choice :question/single-choice-question
         :multiple-choice :question/multiple-choice-question))
 
@@ -83,7 +83,7 @@
 
 (s/def :question-set/id :general/non-blank-string)
 (s/def :question-set/name :general/non-blank-string)
-(s/def :question-set/questions (s/coll-of ::question))
+(s/def :question-set/questions (s/coll-of :question/question))
 (s/def :question-set/required-points nat-int?)
 
 
@@ -97,7 +97,7 @@
 
 (s/def :course/id :general/non-blank-string)
 (s/def :course/name :general/non-blank-string)
-(s/def :course/questions (s/coll-of ::question))
+(s/def :course/questions (s/coll-of :question/question))
 (s/def :course/question-sets (s/coll-of ::question-set))
 
 
@@ -146,7 +146,7 @@
 
 
 (s/def :answer/id string?)
-(s/def :answer/question ::question)
+(s/def :answer/question :question/question)
 (s/def :answer/creator ::user)
 (s/def :answer/selected-solutions (s/coll-of ::solution :min-count 1))
 (s/def :answer/answer string?)

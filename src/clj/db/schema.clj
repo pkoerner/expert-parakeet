@@ -99,7 +99,7 @@
         :question/evaluation-criteria
         {:question/possible-solutions solution-pull}
         {:question/correct-solutions solution-pull}
-        :question/categories))
+        [:question/categories :default []]))
 
 
 (def question-schema

@@ -8,13 +8,7 @@
     [nano-id.core :refer [nano-id]]))
 
 
-(def id-len 10)
-
-
 (defprotocol Database-Protocol
-
-  (generate-id
-    [this attr])
 
   (get-course-iterations-of-student
     [this user-id])
@@ -132,6 +126,21 @@
     "get an answer given its id"))
 
 
+(def id-len 10)
+
+
+;; provide the db attr of the id you want to check for collisions
+(defn- generate-id
+  [db attr]
+  (loop [id (nano-id id-len)]
+    (if (seq (d/q '[:find ?e
+                    :in $ ?attr ?id
+                    :where [?e ?attr ?id]]
+                  db attr id))
+      (recur (nano-id id-len))
+      id)))
+
+
 (defn- resolve-enums
   [entity]
   (clojure.walk/postwalk
@@ -147,18 +156,6 @@
   [conn]
 
   Database-Protocol
-
-  ;; provide the db attr of the id you want to check for collisions
-  (generate-id
-    [this attr]
-    (loop [id (nano-id id-len)]
-      (if (seq (d/q '[:find ?e
-                      :in $ ?attr ?id
-                      :where [?e ?attr ?id]]
-                    @(.conn this) attr id))
-        (recur (nano-id id-len))
-        id)))
-
 
   (get-course-iterations-of-student
     [this user-id]
@@ -283,7 +280,7 @@
     (let [existing-course-names (map :course/name (get-all-courses this))]
       (if (some #(= (string/lower-case course-name) (string/lower-case %)) existing-course-names)
         (throw (AssertionError. (str "There is already a course with the same name in the database. Please check the existing course and wether you need to create a new one.")))
-        (let [id (generate-id this :course/id)
+        (let [id (generate-id @(.conn this) :course/id)
               tx-result (d/transact (.conn this)
                                     [{:db/id -1
                                       :course/id id
@@ -303,7 +300,7 @@
 
   (add-course-iteration-with-question-sets!
     [this course-id year semester question-set-ids]
-    (let [id (generate-id this :course-iteration/id)
+    (let [id (generate-id @(.conn this) :course-iteration/id)
           question-set-ids-keyed (mapv (fn [question-set-id] [:question-set/id question-set-id])
                                        question-set-ids)
           tx-result (d/transact (.conn this)
@@ -334,17 +331,28 @@
   (add-question!
     [this question]
     (let [question-ids (map :question/id (get-all-question-ids this))
-          question-list (map #(select-keys (db/get-question-by-id this %) [:question/type
-                                                                           :question/statement
-                                                                           :question/max-points])
+          question-list (map #(select-keys (db/get-question-by-id this %)
+                                           [:question/type
+                                            :question/statement
+                                            :question/max-points])
                              question-ids)]
       (if (some #(= % (select-keys question [:question/type :question/statement :question/max-points])) question-list)
         (throw (AssertionError. (str "There is a similar question already in the data base. Please check the existing question and wether you need to create a new one. " (select-keys question [:question/type :question/statement :question/max-points]))))
-        (let [id (generate-id this :question/id)
+        (let [possible-solutions (->> (question :question/possible-solutions)
+                                      (mapv (fn [sol]
+                                              {:solution/id (generate-id @(.conn this) :solution/id)
+                                               :solution/statement sol})))
+              possible-solutions-lookup (->> possible-solutions
+                                             (map (fn [sol]
+                                                    [(sol :solution/statement) (sol :solution/id)]))
+                                             (into {}))
+              correct-solutions (->> (question :question/correct-solutions)
+                                     (mapv (fn [sol]
+                                             [:solution/id (possible-solutions-lookup sol)])))
+              id (generate-id @(.conn this) :question/id)
               type (:question/type question)
-              trans-map (apply assoc {:db/id        -1
-                                      :question/id     id
-                                      :question/type    type
+              trans-map (apply assoc {:question/id id
+                                      :question/type type
                                       :question/max-points (:question/max-points question)
                                       :question/statement (:question/statement question)
                                       :question/categories (:question/categories question)}
@@ -352,12 +360,12 @@
                                      [:question/evaluation-criteria (:question/evaluation-criteria question)]
 
                                      (= type :question.type/single-choice)
-                                     [:question/possible-solutions (:question/possible-solutions question)
-                                      :question/correct-solutions (:question/correct-solutions question)]
+                                     [:question/possible-solutions possible-solutions
+                                      :question/correct-solutions correct-solutions]
 
                                      (= type :question.type/multiple-choice)
-                                     [:question/possible-solutions (:question/possible-solutions question)
-                                      :question/correct-solutions (:question/correct-solutions question)]))
+                                     [:question/possible-solutions possible-solutions
+                                      :question/correct-solutions correct-solutions]))
               tx-result (d/transact (.conn this) [trans-map])
               db-after (:db-after tx-result)]
           (->> (d/pull db-after db.schema/question-pull [:question/id id])
@@ -366,25 +374,25 @@
 
   (add-question-set!
     [this question-set-name course-iteration-id required-points questions]
-    (let [id (generate-id this :question-set/id)
+    (let [id (generate-id @(.conn this) :question-set/id)
           question-ids (doall (map (fn [question]
                                      (if (contains? question :question/id)
                                        (:question/id question)
                                        (:question/id (add-question! this question)))) ; frage war noch nicht in db
                                    questions))
           tx-result-question-set (d/transact (.conn this)
-                                             [{:db/id                      -1
-                                               :question-set/id            id
-                                               :question-set/name          question-set-name
+                                             [{:question-set/id id
+                                               :question-set/name question-set-name
                                                :question-set/required-points required-points
                                                :question-set/questions (mapv (fn [q-id] [:question/id q-id]) question-ids)}])
           course-iteration (get-course-iteration-by-id this course-iteration-id)
-          ;; TODO: reduce this transaction to the minimum required data to add a new question set
-          _tx-result-course-iteration (d/transact conn [{:db/id         -1
-                                                         :course-iteration/id       (:course-iteration/id course-iteration)
-                                                         :course-iteration/semester (:course-iteration/semester course-iteration)
-                                                         :course-iteration/year     (:course-iteration/year course-iteration)
-                                                         :course-iteration/question-sets    (conj (:course-iteration/question-sets course-iteration) [:question-set/id id])}])
+          ;; TODO: reduce this transaction to the minimum required data to add a new question set to an existing course iteration
+          _tx-result-course-iteration (d/transact (.conn this)
+                                                  [{:db/id -1
+                                                    :course-iteration/id (:course-iteration/id course-iteration)
+                                                    :course-iteration/semester (:course-iteration/semester course-iteration)
+                                                    :course-iteration/year (:course-iteration/year course-iteration)
+                                                    :course-iteration/question-sets (conj (:course-iteration/question-sets course-iteration) [:question-set/id id])}])
           db-after (:db-after tx-result-question-set)]
       (->> (d/pull db-after db.schema/question-set-no-questions-pull [:question-set/id id])
            (resolve-enums))))
@@ -392,7 +400,7 @@
 
   (add-user-answer!
     [this user-id question-id answer]
-    (let [id (generate-id this :answer/id)
+    (let [id (generate-id @(.conn this) :answer/id)
           ;; TODO: we need to set :answer/selected-solutions instead of :answer/answer when required
           tx-result (d/transact (.conn this)
                                 [{:db/id -1
@@ -445,7 +453,7 @@
                      points :correction/points
                      corrector-id :corrector/id ; TODO rename this to :correction/corrector
                      }]
-    (let [id (generate-id this :answer/id)
+    (let [id (generate-id @(.conn this) :answer/id)
           tx-result (d/transact (.conn this)
                                 [{:db/id -1
                                   :correction/id id
@@ -462,7 +470,7 @@
     [this github-id]
     (if-let [_existing-user (not-empty (try (get-user-by-github-id this github-id) (catch Exception _ nil)))]
       (throw (AssertionError. (str "There is already a user with the same github-id in the database.")))
-      (let [user-id (generate-id this :user/id)
+      (let [user-id (generate-id @(.conn this) :user/id)
             tx-result (d/transact (.conn this)
                                   [{:db/id -1
                                     :user/id user-id
