@@ -1,5 +1,11 @@
 .PHONY: dev-server format test lint uber
 # this rule is first, so that just running 'make' will start the server
+
+include .env
+
+export OAUTH_CLIENT_ID
+export OAUTH_CLIENT_SECRET
+
 dev-server: compile-cljs
 	clj -X core/start-dev-server
 
