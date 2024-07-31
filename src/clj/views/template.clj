@@ -18,9 +18,11 @@
   (map (fn [item] (apply ->MenuItem item))
        [["Login" "/login" not-logged-in]
         ["Home" "/" is-logged-in?]
+        ["Course Overview" "/user-overview" is-logged-in?]  ; FIXME: Check for admin permissions
+        ["Correction Overview" "/correction-overview" is-logged-in?]   ; FIXME: Check for admin permissions
+        ["Create Course" "/create-course" is-logged-in?]  ; FIXME: Check for admin permissions
         ["Create Course Iteration" "/create-course-iteration" is-logged-in?]  ; FIXME: Check for admin permissions
-        ["Create Question" "/create-question" is-logged-in?] ; FIXME: Check for admin permissions
-        ["Correction Overview" "/correction-overview" is-logged-in?]]))  ; FIXME: Check for admin permissions
+        ["Create Question" "/create-question" is-logged-in?]])) ; FIXME: Check for admin permissions
 
 
 ;; this is the bootstrap 4.0 example "stick-footer-navbar" without the javascript
