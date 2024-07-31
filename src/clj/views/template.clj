@@ -40,6 +40,7 @@
             {:name "viewport",
              :content "width=device-width, initial-scale=1, shrink-to-fit=no"}]
            [:title "Expert Parakeet"]
+           [:link {:href "/img/parakeet.ico", :rel "icon", :type "image/x-icon"}]
            (comment "Bootstrap core CSS")
            [:link {:href "/css/bootstrap.min.css", :rel "stylesheet"}]
            (comment "Custom styles for this template")
