@@ -98,7 +98,7 @@
 
   (get-user-by-github-id
     [this github-id]
-    "get the user given the github-id of the user")
+    "get the user given the github-id of the user, returns nil when github-id is unknown")
 
   (get-course-by-id
     [this course-id]
@@ -107,11 +107,6 @@
   (get-all-users
     [this]
     "get all users in database")
-
-  ;; TODO: remove this, just use get-user-by-github-id
-  (get-user-id-by-github-id
-    [this github-id]
-    "get the user id given the github-id of the user. This function returns nil in case the user does not exist.")
 
   (get-all-corrections-from-user
     [this user-id]
@@ -326,7 +321,7 @@
 
   (add-question!
     [this question]
-   ;; TODO: this needs to take a course as an argument so we can add the question to the owning course
+    ;; TODO: this needs to take a course as an argument so we can add the question to the owning course
     (let [question-ids (map :question/id (get-all-question-ids this))
           question-list (map #(select-keys (db/get-question-by-id this %)
                                            [:question/type
@@ -420,18 +415,15 @@
 
   (get-corrections-of-answer
     [this answer-id]
-    (if-let [_existing-answer (not-empty (try (get-answer-by-id this answer-id) (catch Exception _ nil)))]
-      (->> (d/q '[:find (pull ?correction pattern) ?timestamp
-                  :in $ pattern ?answer-id
-                  :where
-                  [?answer :answer/id ?answer-id]
-                  [?correction :correction/answer ?answer ?tx]
-                  [?tx :db/txInstant ?timestamp]]
-                ;; slim pull, because we assume the caller knows the question already
-                @(.conn this) db.schema/correction-slim-pull answer-id)
-           (mapv (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp})))
-           (resolve-enums))
-      (throw (AssertionError. (str "The answer-id " answer-id " does not exist in the database!")))))
+    (->> (d/q '[:find (pull ?correction pattern) ?timestamp
+                :in $ pattern ?answer
+                :where
+                [?correction :correction/answer ?answer ?tx]
+                [?tx :db/txInstant ?timestamp]]
+              ;; slim pull, because we assume the caller knows the question already
+              @(.conn this) db.schema/correction-slim-pull [:answer/id answer-id])
+         (mapv (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp})))
+         (resolve-enums)))
 
 
   (add-correction!
@@ -453,7 +445,7 @@
 
   (add-user!
     [this github-id]
-    (if-let [_existing-user (not-empty (try (get-user-by-github-id this github-id) (catch Exception _ nil)))]
+    (if (some? (get-user-by-github-id this github-id))
       (throw (AssertionError. (str "There is already a user with the same github-id in the database.")))
       (let [user-id (generate-id @(.conn this) :user/id)
             tx-result (d/transact (.conn this)
@@ -474,10 +466,12 @@
 
   (get-user-by-github-id
     [this github-id]
-    ;; TODO: use d/q to mitigate logs and exceptions when there is no user for the given id
-    (->> (d/pull @(.conn this)
-                 db.schema/user-pull
-                 [:user/github-id github-id])
+    (->> (d/q '[:find (pull ?e pattern)
+                :in $ pattern ?github-id
+                :where
+                [?e :user/github-id ?github-id]]
+              @(.conn this) db.schema/user-pull github-id)
+         (ffirst)
          (resolve-enums)))
 
 
@@ -497,18 +491,6 @@
                 [?e :user/id]]
               @(.conn this) db.schema/user-pull)
          (mapv first)
-         (resolve-enums)))
-
-
-  (get-user-id-by-github-id
-    [this github-id]
-    (->> (d/q '[:find ?id
-                :in $ ?github-id
-                :where
-                [?e :user/github-id ?github-id]
-                [?e :user/id ?id]]
-              @(.conn this) github-id)
-         ffirst
          (resolve-enums)))
 
 

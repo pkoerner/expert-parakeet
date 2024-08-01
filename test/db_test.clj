@@ -467,10 +467,7 @@
       (t/is (= (db/get-user-by-github-id test-db "45678") {:user/id "2"
                                                            :user/github-id "45678"})))
     (testing "get-user-by-id with invalid id = 42"
-      (t/is (thrown-with-msg?
-              clojure.lang.ExceptionInfo
-              #"Nothing found for entity id [:user/git\Wid \W 42 \W]"
-              (db/get-user-by-github-id test-db "42"))))
+      (t/is (nil? (db/get-user-by-github-id test-db "42"))))
     (testing "add-user! with generated github-ids"
       (let [github-ids (distinct (gen/sample (s/gen :user/github-id) generator-sample-size))]
         (t/is (every? (fn [act]
@@ -600,6 +597,6 @@
     (testing "get-corrections-of-answer with invalid answer-id"
       (let [answer-id "42"]
         (t/is (thrown-with-msg?
-                java.lang.AssertionError
-                (re-pattern (str "The answer-id " answer-id " does not exist in the database!"))
+                clojure.lang.ExceptionInfo
+                #"Nothing found for entity id [:answer/id \W 42 \W]"
                 (db/get-corrections-of-answer test-db answer-id)))))))
