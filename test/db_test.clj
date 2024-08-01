@@ -85,7 +85,7 @@
                             :question/correct-solutions ["42"]
                             :question/max-points 1
                             :question/categories ["Cat1"]}]
-        (t/is (thrown? clojure.lang.ArityException (db/add-question! test-db input-question)))))
+        (t/is (thrown? java.lang.IllegalArgumentException (db/add-question! test-db input-question)))))
     (testing "add-question! with already existing free-text-choice question as input and check wether it contains in the db"
       (let [input-question {:question/type :question.type/free-text
                             :question/statement "What are some advantages and disadvantages of example-based and generative testing?"
