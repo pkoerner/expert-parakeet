@@ -18,9 +18,11 @@
   (map (fn [item] (apply ->MenuItem item))
        [["Login" "/login" not-logged-in]
         ["Home" "/" is-logged-in?]
+        ["Course Overview" "/user-overview" is-logged-in?]  ; FIXME: Check for admin permissions
+        ["Correction Overview" "/correction-overview" is-logged-in?]   ; FIXME: Check for admin permissions
+        ["Create Course" "/create-course" is-logged-in?]  ; FIXME: Check for admin permissions
         ["Create Course Iteration" "/create-course-iteration" is-logged-in?]  ; FIXME: Check for admin permissions
-        ["Create Question" "/create-question" is-logged-in?] ; FIXME: Check for admin permissions
-        ["Correction Overview" "/correction-overview" is-logged-in?]]))  ; FIXME: Check for admin permissions
+        ["Create Question" "/create-question" is-logged-in?]])) ; FIXME: Check for admin permissions
 
 
 ;; this is the bootstrap 4.0 example "stick-footer-navbar" without the javascript
@@ -38,6 +40,7 @@
             {:name "viewport",
              :content "width=device-width, initial-scale=1, shrink-to-fit=no"}]
            [:title "Expert Parakeet"]
+           [:link {:href "/img/parakeet.ico", :rel "icon", :type "image/x-icon"}]
            (comment "Bootstrap core CSS")
            [:link {:href "/css/bootstrap.min.css", :rel "stylesheet"}]
            (comment "Custom styles for this template")
