@@ -12,7 +12,7 @@
         question "This is the question."
         evaluation  "This the evaluation criteria."
         get-answer-fn (fn [_] {:answer/id "0" :answer/question "0" :answer/answer answer})
-        get-question-fn (fn [_] {:question/question-statement question :question/evaluation-criteria evaluation})]
+        get-question-fn (fn [_] {:question/type :question.type/free-text :question/statement question :question/evaluation-criteria evaluation})]
     (testing "Returns a form object on normal invocation."
       (let [post-destination "post-destination"
             res (new-correction-get empty-request
@@ -30,13 +30,13 @@
   (let [answer-id "123"
         req {:multipart-params {"answer-id" answer-id}}
         add-correction-fn (fn [_] nil)
-        get-user-by-git-id-fn (fn [_] nil)]
+        get-user-by-github-id-fn (fn [_] nil)]
     (testing "Returns errors on wrong submit data."
       (let [redirect-uri "redirect-uri"
             res (submit-new-correction! req
                                         redirect-uri
                                         add-correction-fn
-                                        get-user-by-git-id-fn)]
+                                        get-user-by-github-id-fn)]
         (t/is (and (string/includes? res redirect-uri)
                    (string/includes? res answer-id)
                    (string/includes? res (url-encode "Die angegebenen Punkte sind ungültig."))
@@ -54,13 +54,13 @@
         add-correction-fn (fn [id correction]
                             (swap! call-arg-answer-id (fn [_] id))
                             (swap! call-arg-correction (fn [_] correction)))
-        get-user-by-git-id-fn (fn [_] corrector)]
+        get-user-by-github-id-fn (fn [_] corrector)]
     (testing "add-correction-fn is called with the right arguments."
       (let [redirect-uri "redirect-uri"
             res (submit-new-correction! req
                                         redirect-uri
                                         add-correction-fn
-                                        get-user-by-git-id-fn)]
+                                        get-user-by-github-id-fn)]
         (t/is (string/includes? res "Die Korrektur wurde erfolgreich hinzugefügt."))
         (t/is (= @call-arg-answer-id answer-id))
         (t/is (= @call-arg-correction {:correction/feedback feedback :correction/points points :corrector/id corrector}))))))

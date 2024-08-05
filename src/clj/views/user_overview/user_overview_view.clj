@@ -22,10 +22,12 @@
    unlocked for the user"
   [course-iteration]
   [:p
-   [:h3 (str (:course/course-name
+   [:h3 (str (:course/name
                (:course-iteration/course course-iteration)) " "
              (:course-iteration/year course-iteration) " "
-             (:course-iteration/semester course-iteration))]
+             (case (:course-iteration/semester course-iteration)
+               :semester/winter "WiSe"
+               :semester/summer "SuSe"))]
    (let [questions-sets (:course-iteration/question-sets course-iteration)]
      [:ul
       (for [question-set questions-sets]
@@ -39,10 +41,9 @@
                           " Points")]
                 ;; Idea if passing-score is implemented
                 ;; [:td (if (or (nil? (:question-set/achieved-points question-set))
-                ;;              (>= (:question-set/achieved-points question-set) (:question-set/passing-score question-set)))
+                ;;              (>= (:question-set/achieved-points question-set) (:question-set/required-points question-set)))
                 ;;        "failed"
                 ;;        "passed")]
-                [:td (str "deadline: " (:question-set/end question-set))]
                 [:td [:a {:href "/question-set:id"} [:button "details"]]]]]]])])])
 
 

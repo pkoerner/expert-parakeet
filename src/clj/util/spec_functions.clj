@@ -20,7 +20,7 @@
    Example:
    ```
    (map-spec {\"course-id\" :course/id
-              \"year\" (s/and string? #(s/valid? :course-iteration/year (read-string %)))
+              \"year\" (s/and string? #(s/valid? :course-iteration/year (clojure.edn/read-string %)))
               \"semester\" :course-iteration/semester
               \"question-set-ids\" (s/coll-of :question-set/id)})
    ```

@@ -1,4 +1,6 @@
-(ns domain)
+(ns domain
+  (:require
+    [clojure.edn]))
 
 
 (defn calc-max-points-of-question-set
@@ -6,7 +8,7 @@
    achievable number of points for
    a question set."
   [question-set]
-  (apply + (map :question/points (:question-set/questions question-set))))
+  (apply + (map :question/max-points (:question-set/questions question-set))))
 
 
 ;; TODO: wir müssen noch entscheiden ob der beste oder
@@ -18,8 +20,9 @@
    of points of answers. For each
    question the answer with the
    highest points is taken."
-  [answers]
-  (->> answers
+  [_answers]
+  0 ; TODO: rewrite when logic for getting points of an answer is implemented
+  #_(->> answers
        (group-by #(get-in % [:answer/question :question/id]))
        (map (fn [[_ answers]]
               (apply max (map :answer/points answers))))
@@ -35,7 +38,7 @@
       (assoc :question-set/max-points (calc-max-points-of-question-set question-set))
       (assoc :question-set/achieved-points (calc-achieved-points
                                              (question-set->answer (:question-set/id question-set))))
-      (select-keys [:question-set/id :question-set/name :question-set/max-points :question-set/achieved-points :question-set/passing-score])))
+      (select-keys [:question-set/id :question-set/name :question-set/max-points :question-set/achieved-points :question-set/required-points])))
 
 
 (defn course-iterations-with-total-points
@@ -64,7 +67,7 @@
   [course-iterations-with-inner-question-sets]
   (let [question-sets-with-inner-questions (flatten (map (partial unpack-map-in-map :course-iteration/question-sets) course-iterations-with-inner-question-sets))
         questions-with-inner-course-iteration (flatten (map (partial unpack-map-in-map :question-set/questions) question-sets-with-inner-questions))
-        questions (map #(dissoc (assoc % :course/course-name (:course/course-name (:course-iteration/course %))) :course-iteration/course) questions-with-inner-course-iteration)
+        questions (map #(dissoc (assoc % :course/name (:course/name (:course-iteration/course %))) :course-iteration/course) questions-with-inner-course-iteration)
         only-free-text-questions (filter #(= :question.type/free-text (:question/type %)) questions)]
     only-free-text-questions))
 
@@ -152,26 +155,13 @@
       answer)))
 
 
-(defn answers-for-correction-view
-  "Takes a col which contains one answer as input.
-   In the answer `:question/answer` is a vector containing answers.
-   Merges the question of the answer with the answer and returns the `:question/answer` 
-   as a unnested map."
-  [[answer]]
-  (let [answer-unpacked-question-nested (update (merge answer (:answer/question answer)) :answer/answer first)
-        answer-unpacked (select-keys answer-unpacked-question-nested [:user/id
-                                                                      :question/question-statement :question/points :question/evaluation-criteria
-                                                                      :answer/answer :answer/points :answer/id])]
-    answer-unpacked))
-
-
 (defn validate-incoming-correction
   "Takes a `correction` and a col of answers as input.
    Checks if the answer is 'valid' and returns the correction with points if it is valid
    and else the correction with an `:error` entry.
    
    Possible `:error` entries are:
-   * `:no-fitting-answer`: `:question/points` in the `:answer/question` was empty.
+   * `:no-fitting-answer`: `:question/max-points` in the `:answer/question` was empty.
    * `:correction-feedback-missing`: `:correction/feedback` was empty.
    * `:correction-points-missing`: `:correction/points` was empty.
    * `:invalid-points`: `:correction/points` was not a natural number.
@@ -179,7 +169,7 @@
   [correction fitting-answers]
   (if-not (first fitting-answers)
     (assoc correction :error :no-fitting-answer)
-    (let [question-points (get-in (first fitting-answers) [:answer/question :question/points])]
+    (let [question-points (get-in (first fitting-answers) [:answer/question :question/max-points])]
       (cond
         (not question-points)
         (assoc correction :error :no-fitting-answer)
@@ -190,13 +180,13 @@
         (or (not (:correction/points correction)) (empty? (:correction/points correction)))
         (assoc correction :error :correction-points-missing)
 
-        (not (nat-int? (read-string (:correction/points correction))))
+        (not (nat-int? (clojure.edn/read-string (:correction/points correction))))
         (assoc correction :error :invalid-points)
 
-        (> (read-string (:correction/points correction)) question-points)
+        (> (clojure.edn/read-string (:correction/points correction)) question-points)
         (assoc correction :error :exceeding-number-of-points)
 
-        :else (update correction :correction/points read-string)))))
+        :else (update correction :correction/points clojure.edn/read-string)))))
 
 
 (defn add-correction-if-no-error

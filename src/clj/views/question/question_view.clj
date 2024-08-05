@@ -49,7 +49,7 @@
       [:put put-destination]
       [:div [:p
              {:id (:question/id question)}
-             (:question/question-statement question)]
+             (:question/statement question)]
        (println question)
        (dispatch-question-type question)]
       (h/raw (anti-forgery-field))

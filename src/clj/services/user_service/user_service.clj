@@ -13,8 +13,7 @@
         :args (s/cat :self #(satisfies? PUserService %)
                      :oauth-github-id :general/non-blank-string)
         :ret (s/keys :req [:user/id
-                           :user/git-id
-                           :user/course-iterations]))
+                           :user/github-id]))
 
 
 (defn- create-user-impl
@@ -22,26 +21,27 @@
   (db/add-user! (.db this) oauth-github-id))
 
 
-(s/fdef git-id-in-use?-impl
+(s/fdef github-id-in-use?-impl
         :args (s/cat :self #(satisfies? PUserService %)
                      :oauth-github-id :general/non-blank-string)
         :ret boolean?)
 
 
-(defn- git-id-in-use?-impl
+(defn- github-id-in-use?-impl
   [this oauth-github-id]
-  (boolean (db/get-user-id-by-git-id (.db this) oauth-github-id)))
+  (some? (db/get-user-by-github-id (.db this) oauth-github-id)))
 
 
-(s/fdef get-user-id-by-git-id-impl
+(s/fdef get-user-id-by-github-id-impl
         :args (s/cat :self #(satisfies? PUserService %)
                      :oauth-github-id :general/non-blank-string)
         :ret (s/or :user-id int? :nil nil?))
 
 
-(defn- get-user-id-by-git-id-impl
+(defn- get-user-id-by-github-id-impl
   [this oauth-github-id]
-  (db/get-user-id-by-git-id (.db this) oauth-github-id))
+  (-> (db/get-user-by-github-id (.db this) oauth-github-id)
+      (:user/id)))
 
 
-(extend UserService PUserService {:create-user! create-user-impl :git-id-in-use? git-id-in-use?-impl :get-user-id-by-git-id get-user-id-by-git-id-impl})
+(extend UserService PUserService {:create-user! create-user-impl :github-id-in-use? github-id-in-use?-impl :get-user-id-by-github-id get-user-id-by-github-id-impl})

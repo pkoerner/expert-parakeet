@@ -7,10 +7,10 @@
     [self oauth-github-id]
     "Creates a new user entry in the database and returns it.")
 
-  (git-id-in-use?
+  (github-id-in-use?
     [self oauth-github-id]
     "Checks if the given github-id is already in use or not. Returns true or false.")
 
-  (get-user-id-by-git-id
+  (get-user-id-by-github-id
     [self oauth-github-id]
     "Gets the user id associated with the given github-id, returns nil if there is none."))

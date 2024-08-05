@@ -52,7 +52,7 @@
 
 
 (s/fdef submit-success-view
-        :args (s/cat :course :course/course-name)
+        :args (s/cat :course :course/name)
         :ret (s/and #(string/includes? % "success")
                     #(instance? hiccup.util.RawString %)))
 

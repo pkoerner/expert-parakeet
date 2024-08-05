@@ -15,14 +15,14 @@
 (s/fdef get-question-by-id
         :args (s/cat :self #(satisfies? PQuestionService %) :question-id string?)
         :ret  (s/keys :req [:question/id
-                            :question/question-statement
-                            :question/points
+                            :question/statement
+                            :question/max-points
                             :question/type]))
 
 
-(defn get-question-and-possible-solutions-by-id
+(defn get-question-by-id
   [this question-id]
-  (db/get-question-and-possible-solutions-by-id (.db this) question-id))
+  (db/get-question-by-id (.db this) question-id))
 
 
 (s/fdef validate-user-for-question
@@ -52,12 +52,8 @@ an error-set with a specified error is returned. "
 
 (s/fdef create-question-impl!
         :args (s/cat :self #(= PQuestionService (type %))
-                     :question (s/or :free-text-question :question/question
-                                     :single-choice-question :question/single-choice-question
-                                     :multiple-choice-question :question/multiple-choice-question))
-        :ret (s/or :free-text-question :question/question
-                   :single-choice-question :question/single-choice-question
-                   :multiple-choice-question :question/multiple-choice-question))
+                     :question :question/question)
+        :ret :question/question)
 
 
 (defn- create-question-impl!
@@ -76,8 +72,8 @@ an error-set with a specified error is returned. "
 
 
 (def ^:private question-keys
-  [:question/question-statement :question/points :question/type
-   :question/possible-solutions :question/single-choice-solution :question/multiple-choice-solution
+  [:question/statement :question/max-points :question/type
+   :question/possible-solutions :question/correct-solutions
    :question/evaluation-criteria
    :question/categories])
 
@@ -98,17 +94,16 @@ an error-set with a specified error is returned. "
    
    The returned map will contain all keys for a single-choice, multiple-choice, or free-text question, with corresponding validation functions."
   [question]
-  (let [{:question/keys [question-statement
-                         points
+  (let [{:question/keys [statement
+                         max-points
                          type
                          possible-solutions
-                         single-choice-solution
-                         multiple-choice-solution
+                         correct-solutions
                          evaluation-criteria
                          categories]} question]
     (merge
-      {:question/question-statement [[#(s/valid? :question/question-statement question-statement) "Die Fragestellung war inkorrekt!"]]
-       :question/points [[#(s/valid? :question/points points) "Die erreichbaren Punkte waren inkorrekt!"]]
+      {:question/statement [[#(s/valid? :question/statement statement) "Die Fragestellung war inkorrekt!"]]
+       :question/max-points [[#(s/valid? :question/max-points max-points) "Die erreichbaren Punkte waren inkorrekt!"]]
        :question/type [[#(s/valid? :question/type type) "Der ausgewälte question-type war kein korrekter type!"]]}
 
       (when (or (= type :question.type/single-choice) (= type :question.type/multiple-choice))
@@ -117,14 +112,15 @@ an error-set with a specified error is returned. "
           [#(if possible-solutions (apply distinct? possible-solutions) true) "Zwei Antwortmglichkeiten waren identisch!"]]})
 
       (when  (= type :question.type/single-choice)
-        {:question/single-choice-solution
-         [[#(s/valid? :question/single-choice-solution single-choice-solution) "Die korrekte Antwort war keine korrekte Antwort!"]
-          [#((set possible-solutions) single-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
+        {:question/correct-solutions
+         [[#(= (count correct-solutions) 1) "Single choice questions must have exactly one correct answer!"]
+          [#(s/valid? :question/correct-solutions correct-solutions) "Die korrekte Antwort war keine korrekte Antwort!"]
+          [#(every? (fn [x] (contains? (set possible-solutions) x)) correct-solutions) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
       (when  (= type :question.type/multiple-choice)
-        {:question/multiple-choice-solution
-         [[#(s/valid? :question/multiple-choice-solution multiple-choice-solution) "Die korrekten Antworten waren keine korrekten korrekten Antworten!"]
-          [#(every? (fn [x] ((set possible-solutions) x)) multiple-choice-solution) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
+        {:question/correct-solutions
+         [[#(s/valid? :question/correct-solutions correct-solutions) "Die korrekten Antworten waren keine korrekten korrekten Antworten!"]
+          [#(every? (fn [x] (contains? (set possible-solutions) x)) correct-solutions) "Die korrekte Antwort war nicht in den möglichen Antworten enthalten!"]]})
 
       (when (= type :question.type/free-text)
         {:question/evaluation-criteria
@@ -145,7 +141,7 @@ an error-set with a specified error is returned. "
    Returns a question map. If an error occured while parsing, the map will contain an `:errors` key which indicates an error while parsing.
    Values that are not required may be `nil`."
   [question-statement achivable-points type
-   possible-solutions single-choice-solution multiple-choice-solution
+   possible-solutions correct-solutions
    evaluation-criteria
    categories]
   (letfn [(as-coll
@@ -156,14 +152,14 @@ an error-set with a specified error is returned. "
           (parse-points
             [points]
             (if (and (not (nil? points)) (number? points))
-              {:question/points points}
+              {:question/max-points points}
               (try (let [points (Long/parseLong (.trim points))]
-                     {:question/points points})
+                     {:question/max-points points})
                    (catch NumberFormatException _
-                     {:errors {:question/points "Die erreichbaren Punkte müssen eine Zahl sein"}}))))]
+                     {:errors {:question/max-points "Die erreichbaren Punkte müssen eine Zahl sein"}}))))]
     (reduce (partial merge-with merge)
             {}
-            [{:question/question-statement question-statement}
+            [{:question/statement question-statement}
              (if (s/valid? :question/type type)
                {:question/type type}
                (let [question-type (to-question-type type)]
@@ -172,10 +168,10 @@ an error-set with a specified error is returned. "
                    {:question/type question-type})))
              (parse-points achivable-points)
              {:question/possible-solutions (as-coll possible-solutions)}
-             (if (coll? single-choice-solution)
-               {:errors {:question/single-choice-solution "Es sollte nur eine Antwort bei einer single-choice Frage geben!"}}
-               {:question/single-choice-solution single-choice-solution})
-             {:question/multiple-choice-solution (as-coll multiple-choice-solution)}
+             (if (and (= type :question.type/single-choice)
+                      (not= (count correct-solutions) 1))
+               {:errors {:question/correct-solutions "Es sollte nur eine Antwort bei einer single-choice Frage geben!"}}
+               {:question/correct-solutions correct-solutions})
              {:question/evaluation-criteria evaluation-criteria}
              {:question/categories (distinct (as-coll categories))}])))
 
@@ -217,14 +213,11 @@ an error-set with a specified error is returned. "
                      :type (s/or :question-type question-types
                                  :question-type-as-string string?)
                      :possible-solutions (s/or :nil nil? :single string? :multiple (s/coll-of string?))
-                     :single-choice-solution (s/or :nil nil? :solution string?)
-                     :multiple-choice-solution (s/or :nil nil? :solution string? :multiple-solutions (s/coll-of string?))
+                     :correct-solutions (s/or :nil nil? :solution string? :multiple-solutions (s/coll-of string?))
                      :evaluation-criteria (s/or :nil nil? :criteria string?)
                      :categories (s/or :nil nil? :single string? :multiple (s/coll-of string?)))
-        :ret (s/or :free-text-question :question/question
-                   :single-choice-question :question/single-choice-question
-                   :multiple-choice-question :question/multiple-choice-question
-                   :errors #(contains? % :errors)))
+        :ret (s/or :errors #(contains? % :errors)
+                   :question :question/question))
 
 
 (defn- validate-question-impl
@@ -233,12 +226,12 @@ an error-set with a specified error is returned. "
    If the returned map has no `:errors` key, the returned map is a valid question of the type under the `:question/type` key."
   [_
    question-statement achivable-points type
-   possible-solutions single-choice-solution multiple-choice-solution
+   possible-solutions correct-solutions
    evaluation-criteria
    categories]
 
   (let [question (parse-question question-statement achivable-points type
-                                 possible-solutions single-choice-solution multiple-choice-solution
+                                 possible-solutions correct-solutions
                                  evaluation-criteria
                                  categories)
         errors (question :errors)]
@@ -250,7 +243,7 @@ an error-set with a specified error is returned. "
 (extend QuestionService
   PQuestionService
   {:validate-user-for-question validate-user-for-question
-   :get-question-by-id get-question-and-possible-solutions-by-id
+   :get-question-by-id get-question-by-id
    :create-question! create-question-impl!
    :get-question-categories get-question-categories
    :validate-question validate-question-impl})

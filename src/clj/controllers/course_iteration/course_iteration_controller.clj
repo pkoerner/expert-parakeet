@@ -1,5 +1,6 @@
 (ns controllers.course-iteration.course-iteration-controller
   (:require
+    [clojure.edn]
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [db]
@@ -63,7 +64,7 @@
 (s/def ::request-data
   (map-spec {:__anti-forgery-token any?
              :multipart-params (map-spec {"course-id" :course/id
-                                          "year" (s/and string? #(s/valid? :course-iteration/year (read-string %)))
+                                          "year" (s/and string? #(s/valid? :course-iteration/year (clojure.edn/read-string %)))
                                           "semester" :course-iteration/semester
                                           "question-set-ids" (s/coll-of :question-set/id)})}))
 
@@ -83,8 +84,11 @@
   [request redirect-uri course-iteration-service]
   (let [form-data (-> request (:multipart-params) (dissoc :__anti-forgery-token))
         course-id (form-data "course-id")
-        year (read-string (form-data "year"))
-        semester (form-data "semester")
+        year (clojure.edn/read-string (form-data "year"))
+        semester (case (form-data "semester")
+                   "WiSe" :semester/winter
+                   "SuSe" :semester/summer
+                   nil)
         ;; If there is only one id, it is send as a single value. If there are multiple, they are send in a col.
         question-set-ids (let [ids-or-id (form-data "question-set-ids")]
                            (cond (coll? ids-or-id) ids-or-id

@@ -64,7 +64,7 @@
     (let [test-request {:__anti-forgery-token ""
                         :multipart-params {"course" "nice name"}}
           db-add-fun-stub (fn [course-name]
-                            (t/is (s/valid? :course/course-name course-name)))
+                            (t/is (s/valid? :course/name course-name)))
           course-service (stub-course-service :create-course db-add-fun-stub)
           redirect-uri "https://some.url"]
       (doseq [course-name ["name1" "name2"]]

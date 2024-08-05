@@ -23,8 +23,8 @@
         [:tr
          [:td
           [:a {:href (str "/question/" (:question/id question))}
-           (:question/question-statement question)]]
-         [:td (:question/points question)]])]]))
+           (:question/statement question)]]
+         [:td (:question/max-points question)]])]]))
 
 
 (defn no-assignement-form

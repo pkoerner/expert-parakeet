@@ -5,8 +5,8 @@
     [ring.util.response :refer [redirect]]
     [services.user-service.p-user-service :refer [PUserService
                                                   create-user!
-                                                  git-id-in-use?
-                                                  get-user-id-by-git-id]]
+                                                  github-id-in-use?
+                                                  get-user-id-by-github-id]]
     [views.user.create-user-view :as view]))
 
 
@@ -25,8 +25,8 @@
     ;; else search user in the database and put it into the session or redirect to user creation
     (let [session (req :session)
           oauth-github-id (-> session :user :oauth-github-id)
-          [user-id] (get-user-id-by-git-id user-service (str (-> session :user :oauth-github-id)))]
-      (if user-id
+          user-id (get-user-id-by-github-id user-service (str (-> session :user :oauth-github-id)))]
+      (if (some? user-id)
         (-> (redirect "/") (assoc :session {:user {:id user-id :oauth-github-id oauth-github-id}}))
         (redirect "/create-user")))))
 
@@ -42,7 +42,7 @@
   "Returns an html form to create a user, but only if the session is authenticated via github and the
    associated github id is not yet in use by any user."
   [req post-destination user-service]
-  (if (and (auth/is-authenticated? req) (not (git-id-in-use? user-service (str (-> req :session :user :oauth-github-id)))))
+  (if (and (auth/is-authenticated? req) (not (github-id-in-use? user-service (str (-> req :session :user :oauth-github-id)))))
     (view/create-user-form post-destination)
     {:status 401 :body "Unauthorized"}))
 
@@ -58,10 +58,10 @@
   "This function takes a request, containing an oauth-github-id in the session, and an 
    implementation of the `PUserService` protocol, which is used to insert a new user into the database.
    After creating a user the request will be redirected to the provided `redirect-uri`.
-   In case the git-id is already in use the request is denied.
+   In case the github-id is already in use the request is denied.
    "
   [req redirect-uri user-service]
-  (if (and (auth/is-authenticated? req) (not (git-id-in-use? user-service (str (-> req :session :user :oauth-github-id)))))
+  (if (and (auth/is-authenticated? req) (not (github-id-in-use? user-service (str (-> req :session :user :oauth-github-id)))))
     (let [oauth-github-id (-> req :session :user :oauth-github-id)]
       (create-user! user-service (str oauth-github-id))
       (redirect redirect-uri))

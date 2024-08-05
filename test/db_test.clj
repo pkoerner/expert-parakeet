@@ -1,6 +1,5 @@
 (ns db-test
   (:require
-    [clojure.instant :as instant]
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [clojure.test :as t :refer [deftest testing]]
@@ -41,13 +40,7 @@
     (testing "get-question-by-id with id = 5"
       (let [res (db/get-question-by-id test-db "5")]
         (and (t/is (= (:question/id res) "5"))
-             (t/is (s/valid? :question/multiple-choice-question (select-keys res [:question/id
-                                                                                  :question/type
-                                                                                  :question/question-statement
-                                                                                  :question/points
-                                                                                  :question/possible-solutions
-                                                                                  :question/multiple-choice-solution
-                                                                                  :question/categories]))))))
+             (t/is (s/valid? :question/question res)))))
     (testing "get-question-by-id with invalid id = 42"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
@@ -55,65 +48,49 @@
               (db/get-question-by-id test-db "42"))))
     (testing "add-question! with valid single-choice question as input and check wether it contains in the db"
       (let [input-question {:question/type :question.type/single-choice
-                            :question/question-statement "What is the answer to everything"
+                            :question/statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
-                            :question/single-choice-solution "42"
-                            :question/points 1
+                            :question/correct-solutions ["42"]
+                            :question/max-points 1
                             :question/categories ["Cat1"]}
             _ (db/add-question! test-db input-question)
-            question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
-            question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
-                                                                                :question/question-statement
-                                                                                :question/possible-solutions
-                                                                                :question/single-choice-solution
-                                                                                :question/points
-                                                                                :question/categories])
-                               question-ids)]
-        (t/is (some #(= % input-question) (vec question-list)))))
+            question-ids (map :question/id (db/get-all-question-ids test-db))
+            question-list (map #(db/get-question-by-id test-db %) question-ids)]
+        (t/is (some #(= % (input-question :question/statement)) (map :question/statement question-list)))))
     (testing "add-question! with valid multiple-choice question as input and check wether it contains in the db"
       (let [input-question {:question/type :question.type/multiple-choice
-                            :question/question-statement "What is the answer to everything and what is the best movie ever?"
+                            :question/statement "What is the answer to everything and what is the best movie ever?"
                             :question/possible-solutions ["21" "42" "Alien"]
-                            :question/multiple-choice-solution ["42" "Alien"]
-                            :question/points 1
+                            :question/correct-solutions ["42" "Alien"]
+                            :question/max-points 1
                             :question/categories ["Cat2"]}
             _ (db/add-question! test-db input-question)
             question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
-            question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
-                                                                                :question/question-statement
-                                                                                :question/possible-solutions
-                                                                                :question/multiple-choice-solution
-                                                                                :question/points
-                                                                                :question/categories])
-                               question-ids)]
-        (t/is (some #(= % input-question) (vec question-list)))))
+            question-list (map #(db/get-question-by-id test-db %) question-ids)]
+        (t/is (some #(= % (input-question :question/statement)) (map :question/statement question-list)))))
     (testing "add-question! with valid free-text-choice question as input and check wether it contains in the db"
       (let [input-question {:question/type :question.type/free-text
-                            :question/question-statement "What does rickrolling mean?"
+                            :question/statement "What does rickrolling mean?"
                             :question/evaluation-criteria "Never gonna give you up"
-                            :question/points 2
+                            :question/max-points 2
                             :question/categories ["Cat2" "Cat3"]}
             _ (db/add-question! test-db input-question)
             question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
-            question-list (map #(select-keys (db/get-question-by-id test-db %) [:question/type
-                                                                                :question/question-statement
-                                                                                :question/evaluation-criteria
-                                                                                :question/points
-                                                                                :question/categories])
-                               question-ids)]
-        (t/is (some #(= % input-question) (vec question-list)))))
+            question-list (map #(db/get-question-by-id test-db %) question-ids)]
+        (t/is (some #(= % (input-question :question/statement)) (map :question/statement question-list)))))
     (testing "add-question! with invalid question as input"
-      (let [input-question {:question/question-statement "What is the answer to everything"
+      ;; missing type
+      (let [input-question {:question/statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
-                            :question/single-choice-solution "42"
-                            :question/points 1
+                            :question/correct-solutions ["42"]
+                            :question/max-points 1
                             :question/categories ["Cat1"]}]
-        (t/is (thrown? clojure.lang.ArityException (db/add-question! test-db input-question)))))
+        (t/is (thrown? java.lang.IllegalArgumentException (db/add-question! test-db input-question)))))
     (testing "add-question! with already existing free-text-choice question as input and check wether it contains in the db"
       (let [input-question {:question/type :question.type/free-text
-                            :question/question-statement "What are some advantages and disadvantages of example-based and generative testing?"
+                            :question/statement "What are some advantages and disadvantages of example-based and generative testing?"
                             :question/evaluation-criteria "The following aspects are explained: Oracle, performance, test-coverage"
-                            :question/points 2
+                            :question/max-points 2
                             :question/categories #{"Cat1" "Cat3"}}]
         (t/is (thrown-with-msg?
                 java.lang.AssertionError
@@ -130,8 +107,8 @@
     ;;                           question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
     ;;                           question-list (map #(db/get-question-by-id test-db %) question-ids)]
     ;;                       (some #(and (= (:question/type input-question) (:question/type %))
-    ;;                                   (= (:question/points input-question) (:question/points %))
-    ;;                                   (= (:question/question-statement input-question) (:question/question-statement %))
+    ;;                                   (= (:question/max-points input-question) (:question/max-points %))
+    ;;                                   (= (:question/statement input-question) (:question/statement %))
     ;;                                   (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
     ;;                                   (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
     ;;                                   (= (:question/single-choice-solution input-question) (:question/single-choice-solution %)))
@@ -145,11 +122,11 @@
     ;;                           question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
     ;;                           question-list (map #(db/get-question-by-id test-db %) question-ids)]
     ;;                       (some #(and (= (:question/type input-question) (:question/type %))
-    ;;                                   (= (:question/points input-question) (:question/points %))
-    ;;                                   (= (:question/question-statement input-question) (:question/question-statement %))
+    ;;                                   (= (:question/max-points input-question) (:question/max-points %))
+    ;;                                   (= (:question/statement input-question) (:question/statement %))
     ;;                                   (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
     ;;                                   (= (sort (distinct (:question/possible-solutions input-question))) (sort (:question/possible-solutions %)))
-    ;;                                   (= (sort (distinct (:question/multiple-choice-solution input-question))) (:question/multiple-choice-solution %)))
+    ;;                                   (= (sort (distinct (:question/correct-solutions input-question))) (:question/correct-solutions %)))
     ;;                             question-list)))
     ;;                   generated-questions))))
     ;; (testing "add-question! with generated free text questions"
@@ -160,8 +137,8 @@
     ;;                           question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
     ;;                           question-list (map #(db/get-question-by-id test-db %) question-ids)]
     ;;                       (some #(and (= (:question/type input-question) (:question/type %))
-    ;;                                   (= (:question/points input-question) (:question/points %))
-    ;;                                   (= (:question/question-statement input-question) (:question/question-statement %))
+    ;;                                   (= (:question/max-points input-question) (:question/max-points %))
+    ;;                                   (= (:question/statement input-question) (:question/statement %))
     ;;                                   (= (sort (distinct (:question/categories input-question))) (sort (:question/categories %)))
     ;;                                   (= (:question/evaluation-criteria input-question) (:question/evaluation-criteria %)))
     ;;                             question-list)))
@@ -173,20 +150,26 @@
   (let [test-db (-create-test-db "course-iteration-test-db")]
     (testing "get-all-course-iterations of dummy data"
       (let [res (db/get-all-course-iterations test-db)
-            reference-ids ["1", "2"]
-            res-ids (sort (map #(:course-iteration/id %) res))]
+            reference-ids #{"1", "2"}
+            res-ids (->> res
+                         (map :course-iteration/id)
+                         (set))]
         (t/is (= reference-ids res-ids))))
-    (testing "get-course-iterations-of-course programming 1"
+    (testing "get-course-iterations-of-course functional programming clojure"
       (let [course-id "1"
             res (db/get-course-iterations-of-course test-db course-id)
-            reference-ids ["2"]
-            res-ids (sort (map #(:course-iteration/id %) res))]
+            reference-ids #{"1"}
+            res-ids (->> res
+                         (map :course-iteration/id)
+                         (set))]
         (t/is (= reference-ids res-ids))))
-    (testing "get-course-iterations-of-course specialization functional programming clojure"
-      (let [course-id "0"
+    (testing "get-course-iterations-of-course programming"
+      (let [course-id "2"
             res (db/get-course-iterations-of-course test-db course-id)
-            reference-ids ["1"]
-            res-ids (sort (map #(:course-iteration/id %) res))]
+            reference-ids #{"2"}
+            res-ids (->> res
+                         (map :course-iteration/id)
+                         (set))]
         (t/is (= reference-ids res-ids))))
     (testing "get-course-iterations-of-course with invalid course-id"
       (let [course-id "lol"]
@@ -198,13 +181,13 @@
       (let [course-iteration-id "1"
             res (db/get-course-iteration-by-id test-db course-iteration-id)]
         (and (t/is (= (:course-iteration/id res) "1"))
-             (t/is (= (:course-iteration/semester res) "WiSe"))
+             (t/is (= (:course-iteration/semester res) :semester/winter))
              (t/is (= (:course-iteration/year res) 2022)))))
     (testing "get-course-iteration-by-id with id = 2"
       (let [course-iteration-id "2"
             res (db/get-course-iteration-by-id test-db course-iteration-id)]
         (and (t/is (= (:course-iteration/id res) "2"))
-             (t/is (= (:course-iteration/semester res) "SoSe"))
+             (t/is (= (:course-iteration/semester res) :semester/summer))
              (t/is (= (:course-iteration/year res) 2020)))))
     (testing "get-course-iteration-by-id with invalid id = 42"
       (t/is (thrown-with-msg?
@@ -212,10 +195,10 @@
               #"Nothing found for entity id [:course-iteration/id \W 42\W ]"
               (db/get-course-iteration-by-id test-db "42"))))
     (testing "add-course-iteration-with-question-sets! with valid course-iteration as input and check wether it contains in the db"
-      (let [course-id "0"
+      (let [course-id "1"
             course-iteration-year 1999
-            course-iteration-semester "SoSe"
-            course-iteration-question-sets [3 1]
+            course-iteration-semester :semester/summer
+            course-iteration-question-sets ["3" "1"]
             _ (db/add-course-iteration-with-question-sets!
                 test-db
                 course-id
@@ -225,11 +208,11 @@
             course-iterations (map #(select-keys % [:course-iteration/semester
                                                     :course-iteration/year])
                                    (db/get-course-iterations-of-course test-db course-id))]
-        (t/is (some #(= % {:course-iteration/semester "SoSe" :course-iteration/year 1999}) course-iterations))))
+        (t/is (some #(= % {:course-iteration/semester :semester/summer :course-iteration/year 1999}) course-iterations))))
     (testing "add-course-iteration-with-question-sets! with invalid question-set as input"
       (let [course-id "1"
             course-iteration-year 1999
-            course-iteration-semester "SoSe"
+            course-iteration-semester :semester/summer
             course-iteration-question-sets ["lol"]]
         (t/is (thrown-with-msg?
                 clojure.lang.ExceptionInfo
@@ -243,8 +226,8 @@
     (testing "add-course-iteration-with-question-sets! with invalid course-id as input"
       (let [course-id "5"
             course-iteration-year 1999
-            course-iteration-semester "SoSe"
-            course-iteration-question-sets [3]]
+            course-iteration-semester :semester/summer
+            course-iteration-question-sets ["3"]]
         (t/is (thrown-with-msg?
                 clojure.lang.ExceptionInfo
                 #"Nothing found for entity id [:question-set/id \W lol \W]"
@@ -256,33 +239,11 @@
                   course-iteration-question-sets)))))
     ;; no test for add-course-iteration! because it only uses add-course-iteration-with-question-sets! with an empty set
     (testing "get-course-iterations-of-student with valid student-id"
-      (let [user-id "0"
+      (let [user-id "1"
             res (db/get-course-iterations-of-student test-db user-id)
-            course-iteration-ids (map #(:course-iteration/id %) res)
-            course-iterations-content (map #(vals %) res)]
-        (and (t/is (= course-iteration-ids '("1" "2")))
-             (t/is (= course-iterations-content  '(("1"
-                                                     2022
-                                                     "WiSe"
-                                                     #:course{:course-name "Specialization Functional Programming: Clojure"}
-                                                     [#:question-set{:id "1",
-                                                                     :name "Test 01: Generative Testing",
-                                                                     :questions [#:question{:id "1", :points 3}
-                                                                                 #:question{:id "3", :points 2}
-                                                                                 #:question{:id "4", :points 1}
-                                                                                 #:question{:id "5", :points 1}]}
-                                                      #:question-set{:id "3",
-                                                                     :name "Test 00: Alien",
-                                                                     :questions [#:question{:id "7", :points 1}
-                                                                                 #:question{:id "8", :points 1}]}])
-                                                   ("2"
-                                                     2020
-                                                     "SoSe"
-                                                     #:course{:course-name "Programming 1"}
-                                                     [#:question-set{:id "2",
-                                                                     :name "Week 1:",
-                                                                     :questions [#:question{:id "2", :points 3}
-                                                                                 #:question{:id "6", :points 1}]}])))))))
+            ref-course-iteration #{#:course-iteration{:id "1", :year 2022, :course #:course{:id "1", :name "Functional Programming: Clojure", :question-sets [#:question-set{:id "1", :name "Test 01: Generative Testing"} #:question-set{:id "2", :name "Test 00: Alien"}]}, :semester :semester/winter, :question-sets [#:question-set{:id "1", :name "Test 01: Generative Testing"} #:question-set{:id "2", :name "Test 00: Alien"}]}
+                                   #:course-iteration{:id "2", :year 2020, :course #:course{:id "2", :name "Programming", :question-sets [#:question-set{:id "3", :name "Week 1"}]}, :semester :semester/summer, :question-sets [#:question-set{:id "3", :name "Week 1"}]}}]
+        (t/is (= ref-course-iteration (set res)))))
     (testing "get-course-iterations-of-student with invalid student-id"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
@@ -311,36 +272,28 @@
             course-iteration-id "1"
             passing-score 1
             questions [{:question/id "6"
-                        :question/question-statement "What type of programming lanuage is java?"
+                        :question/statement "What type of programming lanuage is java?"
                         :question/type :question.type/single-choice
                         :question/possible-solutions #{"object oriented" "functional" "logic"}
-                        :question/single-choice-solution "object oriented"
-                        :question/points 1
+                        :question/correct-solutions ["object oriented"]
+                        :question/max-points 1
                         :question/categories #{"Cat2"}}
                        {:question/id "2"
                         :question/type :question.type/free-text
-                        :question/question-statement "What is the JVM?"
+                        :question/statement "What is the JVM?"
                         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
-                        :question/points 3
+                        :question/max-points 3
                         :question/categories #{"Cat1" "Cat2"}}]
-            start (instant/read-instant-date "2020-04-25T15:09:16.437Z")
-            end (instant/read-instant-date "2020-04-25T15:17:16.437Z")
             question-set {:question-set/name question-set-name
-                          :question-set/passing-score passing-score
-                          :question-set/start start
-                          :question-set/end end}
+                          :question-set/required-points passing-score}
             _ (db/add-question-set!
                 test-db
                 question-set-name
                 course-iteration-id
                 passing-score
-                questions
-                start
-                end)
+                questions)
             question-set-list (map #(select-keys % [:question-set/name
-                                                    :question-set/passing-score
-                                                    :question-set/start
-                                                    :question-set/end])
+                                                    :question-set/required-points])
                                    (db/get-all-question-sets test-db))]
         (t/is (some #(= % question-set) (vec question-set-list)))))
     (testing "add-question-set! with invalid couse-iteration as input and check wether it contains in the db"
@@ -348,20 +301,18 @@
             course-iteration-id "lol"
             passing-score 1
             questions [{:question/id "6"
-                        :question/question-statement "What type of programming lanuage is clojure?"
+                        :question/statement "What type of programming lanuage is clojure?"
                         :question/type :question.type/single-choice
                         :question/possible-solutions #{"object oriented" "functional" "logic"}
-                        :question/single-choice-solution "functional"
-                        :question/points 1
+                        :question/correct-solutions ["functional"]
+                        :question/max-points 1
                         :question/categories #{"Cat2"}}
                        {:question/id "2"
                         :question/type :question.type/free-text
-                        :question/question-statement "What is the JVM?"
+                        :question/statement "What is the JVM?"
                         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
-                        :question/points 3
-                        :question/categories #{"Cat1"}}]
-            start (instant/read-instant-date "2020-04-25T15:09:16.437Z")
-            end (instant/read-instant-date "2020-04-25T15:17:16.437Z")]
+                        :question/max-points 3
+                        :question/categories #{"Cat1"}}]]
         (t/is (thrown-with-msg?
                 clojure.lang.ExceptionInfo
                 #"Nothing found for entity id [:course-iteration/id \W lol \W]"
@@ -370,28 +321,24 @@
                   question-set-name
                   course-iteration-id
                   passing-score
-                  questions
-                  start
-                  end)))))
+                  questions)))))
     (testing "add-question-set! with invalid question-set-name as input and check wether it contains in the db"
       (let [question-set-name 3
             course-iteration-id "1"
             passing-score 1
             questions [{:question/id "6"
-                        :question/question-statement "What type of programming lanuage is java?"
+                        :question/statement "What type of programming lanuage is java?"
                         :question/type :question.type/single-choice
                         :question/possible-solutions #{"object oriented" "functional" "logic"}
-                        :question/single-choice-solution "object oriented"
-                        :question/points 1
+                        :question/correct-solutions ["object oriented"]
+                        :question/max-points 1
                         :question/categories #{"Cat2"}}
                        {:question/id "2"
                         :question/type :question.type/free-text
-                        :question/question-statement "What is the JVM?"
+                        :question/statement "What is the JVM?"
                         :question/evaluation-criteria "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"
-                        :question/points 3
-                        :question/categories #{"Cat1" "Cat2"}}]
-            start (instant/read-instant-date "2020-04-25T15:09:16.437Z")
-            end (instant/read-instant-date "2020-04-25T15:17:16.437Z")]
+                        :question/max-points 3
+                        :question/categories #{"Cat1" "Cat2"}}]]
         (t/is (thrown-with-msg?
                 clojure.lang.ExceptionInfo
                 #"Bad entity value 3"
@@ -400,274 +347,228 @@
                   question-set-name
                   course-iteration-id
                   passing-score
-                  questions
-                  start
-                  end)))))
+                  questions)))))
     (testing "add-question-set! with valid question-set, but the question is also new"
       (let [input-question {:question/type :question.type/single-choice
-                            :question/question-statement "What is the answer to everything"
+                            :question/statement "What is the answer to everything"
                             :question/possible-solutions ["21" "42"]
-                            :question/single-choice-solution "42"
-                            :question/points 1
+                            :question/correct-solutions ["42"]
+                            :question/max-points 1
                             :question/categories ["Cat1"]}
             question-set-name "The Truth 2"
             course-iteration-id "1"
             passing-score 1
             questions [input-question]
-            start (instant/read-instant-date "2020-04-25T15:09:16.437Z")
-            end (instant/read-instant-date "2020-04-25T15:17:16.437Z")
             question-set {:question-set/name question-set-name
-                          :question-set/passing-score passing-score
-                          :question-set/start start
-                          :question-set/end end}
+                          :question-set/required-points passing-score}
             _ (db/add-question-set!
                 test-db
                 question-set-name
                 course-iteration-id
                 passing-score
-                questions
-                start
-                end)
+                questions)
             question-set-list (map #(select-keys % [:question-set/name
-                                                    :question-set/passing-score
-                                                    :question-set/start
-                                                    :question-set/end])
+                                                    :question-set/required-points])
                                    (db/get-all-question-sets test-db))]
         (t/is (some #(= % question-set) (vec question-set-list)))))
     (testing "add-question-set! with semi generated question-set"
       (dotimes [_ 10]
         (let [question-set-name (gen/generate (s/gen :question-set/name))
               course-iteration-id "1" ; must be existing iteration for success
-              passing-score (gen/generate (s/gen :question-set/passing-score))
+              passing-score (gen/generate (s/gen :question-set/required-points))
               questions []
-              start (gen/generate (s/gen :question-set/start))
-              end (gen/generate (s/gen :question-set/end))
               question-set {:question-set/name question-set-name
-                            :question-set/start start
-                            :question-set/end end
                             :question-set/questions questions
-                            :question-set/passing-score passing-score}
+                            :question-set/required-points passing-score}
               _ (db/add-question-set!
                   test-db
                   question-set-name
                   course-iteration-id
                   passing-score
-                  questions
-                  start
-                  end)
+                  questions)
               question-set-list (map #(select-keys % [:question-set/name
-                                                      :question-set/start
-                                                      :question-set/end
                                                       :question-set/questions
-                                                      :question-set/passing-score])
+                                                      :question-set/required-points])
                                      (db/get-all-question-sets test-db))]
           (t/is (some (fn [act-set]
                         (and (= (:question-set/name question-set) (:question-set/name act-set))
-                             (= (:question-set/start question-set) (:question-set/start act-set))
-                             (= (:question-set/end question-set) (:question-set/end act-set))
-                             (= (:question-set/passing-score question-set) (:question-set/passing-score question-set))))
+                             (= (:question-set/required-points question-set) (:question-set/required-points question-set))))
                       question-set-list)))))))
 
 
 (deftest course-test
   (let [test-db (-create-test-db "course-test-db")]
     (testing "get-all-courses of the dummy dataset"
-      (let [ref-courses [#:course{:id "1",
-                                  :course-name "Programming 1",
-                                  :question-sets [#:question-set{:id "2", :name "Week 1:"}]}
-                         #:course{:id "0",
-                                  :course-name "Specialization Functional Programming: Clojure",
-                                  :question-sets [#:question-set{:id "1", :name "Test 01: Generative Testing"}
-                                                  #:question-set{:id "3", :name "Test 00: Alien"}]}]
+      (let [ref-courses #{#:course{:id "1",
+                                   :name "Functional Programming: Clojure",
+                                   :question-sets [#:question-set{:id "1", :name "Test 01: Generative Testing"} #:question-set{:id "2", :name "Test 00: Alien"}]}
+                          #:course{:id "2",
+                                   :name "Programming",
+                                   :question-sets [#:question-set{:id "3", :name "Week 1"}]}}
             res (db/get-all-courses test-db)]
-        (t/is (every? (fn [act] (some #(= act %) ref-courses)) res))))
+        (t/is (= ref-courses (set res)))))
     (testing "get-course-by-id with id = 1"
       (let [course-id "1"
-            res (db/get-course-by-id test-db course-id)]
+            res (-> (db/get-course-by-id test-db course-id)
+                    (dissoc :course/questions :course/question-sets))] ; not checking questions and question sets because they contain randomly generated ids
         (t/is (= res #:course{:id "1",
-                              :course-name "Programming 1",
-                              :question-sets [#:question-set{:id "2", :name "Week 1:"}]}))))
-    (testing "get-course-by-id with id = 0"
-      (let [course-id "0"
-            res (db/get-course-by-id test-db course-id)]
-        (t/is (= res #:course{:id "0",
-                              :course-name "Specialization Functional Programming: Clojure",
-                              :question-sets [#:question-set{:id "1", :name "Test 01: Generative Testing"}
-                                              #:question-set{:id "3", :name "Test 00: Alien"}]}))))
+                              :name "Functional Programming: Clojure",}))))
+    (testing "get-course-by-id with id = 2"
+      (let [course-id "2"
+            res (-> (db/get-course-by-id test-db course-id)
+                    (dissoc :course/questions :course/question-sets))] ; ditto
+        (t/is (= res #:course{:id "2",
+                              :name "Programming"}))))
     (testing "get-course-by-id with invalid id = 42"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
               #"Nothing found for entity id [:course/id \W 42 \W]"
               (db/get-course-by-id test-db "42"))))
     (testing "add-course! with generated course names"
-      (let [course-names (distinct (map #(string/lower-case %) (gen/sample (s/gen :course/course-name) generator-sample-size)))]
+      (let [course-names (distinct (map #(string/lower-case %) (gen/sample (s/gen :course/name) generator-sample-size)))]
         (t/is (every? (fn [act]
                         (let [_ (db/add-course! test-db act)
-                              excisting-course-names (map #(:course/course-name %) (db/get-all-courses test-db))]
+                              excisting-course-names (map #(:course/name %) (db/get-all-courses test-db))]
                           (some #(= act %) excisting-course-names)))
                       course-names))))
     (testing "add-course! with existing name - should fail"
       (t/is (thrown-with-msg?
               java.lang.AssertionError
               #"There is already a course with the same name in the database. Please check the existing course and wether you need to create a new one."
-              (db/add-course! test-db "Programming 1"))))))
+              (db/add-course! test-db "Programming"))))))
 
 
 (deftest user-test
   (let [test-db (-create-test-db "user-test-db")]
-    (testing "get-all-user of dummy-data"
-      (let [res (db/get-all-user test-db)
-            reference-user [#:user{:id "0"
-                                   :git-id "12345"
-                                   :course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]}
+    (testing "get-all-users of dummy-data"
+      (let [res (db/get-all-users test-db)
+            reference-user [#:user{:id "1"
+                                   :github-id "12345"}
                             #:user{:id "2"
-                                   :git-id "45678"
-                                   :course-iterations [#:course-iteration{:id "1"}]}
+                                   :github-id "45678"}
                             #:user{:id "3"
-                                   :git-id "13579"
-                                   :course-iterations [#:course-iteration{:id "2"}]}]]
+                                   :github-id "13579"}]]
         (t/is (every? (fn [act] (some #(= act %) reference-user)) res))))
-    (testing "get-user-by-id with id = 0"
-      (t/is (= (db/get-user-by-id test-db "0") {:user/id "0"
-                                                :user/git-id "12345"
-                                                :user/course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]})))
+    (testing "get-user-by-id with id = 1"
+      (t/is (= (db/get-user-by-id test-db "1") {:user/id "1"
+                                                :user/github-id "12345"})))
     (testing "get-user-by-id with id = 2"
       (t/is (= (db/get-user-by-id test-db "2") {:user/id "2"
-                                                :user/git-id "45678"
-                                                :user/course-iterations [#:course-iteration{:id "1"}]})))
+                                                :user/github-id "45678"})))
     (testing "get-user-by-id with invalid id = 42"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
               #"Nothing found for entity id [:user/id \W 42 \W]"
               (db/get-user-by-id test-db "42"))))
-    (testing "get-user-by-git-id with id = 12345"
-      (t/is (= (db/get-user-by-git-id test-db "12345") {:user/id "0"
-                                                        :user/git-id "12345"
-                                                        :user/course-iterations [#:course-iteration{:id "1"} #:course-iteration{:id "2"}]})))
+    (testing "get-user-by-github-id with id = 12345"
+      (t/is (= (db/get-user-by-github-id test-db "12345") {:user/id "1"
+                                                           :user/github-id "12345"})))
     (testing "get-user-by-id with id = 45678"
-      (t/is (= (db/get-user-by-git-id test-db "45678") {:user/id "2"
-                                                        :user/git-id "45678"
-                                                        :user/course-iterations [#:course-iteration{:id "1"}]})))
+      (t/is (= (db/get-user-by-github-id test-db "45678") {:user/id "2"
+                                                           :user/github-id "45678"})))
     (testing "get-user-by-id with invalid id = 42"
-      (t/is (thrown-with-msg?
-              clojure.lang.ExceptionInfo
-              #"Nothing found for entity id [:user/git\Wid \W 42 \W]"
-              (db/get-user-by-git-id test-db "42"))))
-    (testing "add-user! with generated git-ids"
-      (let [git-ids (distinct (gen/sample (s/gen :user/git-id) generator-sample-size))]
+      (t/is (nil? (db/get-user-by-github-id test-db "42"))))
+    (testing "add-user! with generated github-ids"
+      (let [github-ids (distinct (gen/sample (s/gen :user/github-id) generator-sample-size))]
         (t/is (every? (fn [act]
                         (let [_ (db/add-user! test-db act)
-                              excisting-git-ids (map #(:user/git-id %) (db/get-all-user test-db))]
-                          (some #(= act %) excisting-git-ids)))
-                      git-ids))))
-    (testing "add-user! with existing git-id - should fail"
+                              excisting-github-ids (map #(:user/github-id %) (db/get-all-users test-db))]
+                          (some #(= act %) excisting-github-ids)))
+                      github-ids))))
+    (testing "add-user! with existing github-id - should fail"
       (t/is (thrown-with-msg?
               java.lang.AssertionError
-              #"There is already a user with the same git-id in the database. Please check the existing course and wether you need to create a new one."
+              #"There is already a user with the same github-id in the database."
               (db/add-user! test-db "12345"))))))
 
 
 (deftest answer-test
   (let [test-db (-create-test-db "answer-test-db")]
     (testing "get-all-answers"
-      (let [ref-answers [#:answer{:id "1"
-                                  :answer ["transients are a non persistent data structures in clojure. They are used to increase performance."]
-                                  :points 1
-                                  :question #:question{:id "1"}
-                                  :user #:user{:id "0"}}
-                         #:answer{:id "2"
-                                  :answer ["generative Tests are only a good choice, if you have an oracle or you can write an inverse function. But they have very high costs compared to example based testing"]
-                                  :points 1
-                                  :question #:question{:id "3"}
-                                  :user #:user{:id "0"}}
-                         #:answer{:id "3"
-                                  :answer ["I like transients"]
-                                  :points 0
-                                  :question #:question{:id "1"}
-                                  :user #:user{:id "2"}}
-                         #:answer{:id "4"
-                                  :answer ["JVM, i.e., Java Virtual Machine. JVM is the engine that drives the Java code. Mostly in other Programming Languages, compiler produce code for a particular system but Java compiler produce Bytecode for a Java Virtual Machine. When we compile a Java program, then bytecode is generated. Bytecode is the source code that can be used to run on any platform. Bytecode is an intermediary language between Java source and the host system. It is the medium which compiles Java code to bytecode which gets interpreted on a different machine and hence it makes it Platform/Operating system independent."]
-                                  :points 3
-                                  :question #:question{:id "2"}
-                                  :user #:user{:id "0"}}
-                         #:answer{:id "5"
-                                  :answer ["immutable"]
-                                  :points 0
-                                  :question #:question{:id "4"}
-                                  :user #:user{:id "2"}}
-                         #:answer{:id "6"
-                                  :answer ["example based testing is good for documentation"]
-                                  :points 0
-                                  :question #:question{:id "3"}
-                                  :user #:user{:id "2"}}
-                         #:answer{:id "7"
-                                  :answer ["Oracle" "inverse function" "specs"]
-                                  :points 1
-                                  :question #:question{:id "5"}
-                                  :user #:user{:id "0"}}
-                         #:answer{:id "8",
-                                  :answer ["mutable"],
-                                  :points 1
-                                  :question #:question{:id "4"},
-                                  :user #:user{:id "0"}}
-                         #:answer{:id "9"
-                                  :answer ["object oriented"]
-                                  :points 1
-                                  :question #:question{:id "6"}
-                                  :user #:user{:id "0"}}
-                         #:answer{:id "10"
-                                  :answer ["Oracle" "specs"]
-                                  :points 1
-                                  :question #:question{:id "5"}
-                                  :user #:user{:id "2"}}
-                         #:answer{:id "11"
-                                  :answer ["1979"]
-                                  :points 1
-                                  :question #:question{:id "7"}
-                                  :user #:user{:id "0"}}
-                         #:answer{:id "12"
-                                  :answer ["Alien is the best movie of all time <3"]
-                                  :points 1
-                                  :question #:question{:id "8"}
-                                  :user #:user{:id "0"}}
-                         #:answer{:id "13"
-                                  :answer ["logic"]
-                                  :points 0
-                                  :question #:question{:id "6"}
-                                  :user #:user{:id "3"}}
-                         #:answer{:id "14"
-                                  :answer ["I don't know, pls give me points :D"]
-                                  :points 0
-                                  :question #:question{:id "2"}
-                                  :user #:user{:id "3"}}]
+      (let [ref-answers #{#:answer{:id "1",
+                                   :answer "transients are a non persistent data structures in clojure. They are used to increase performance.",
+                                   :question #:question{:id "1", :statement "Describe a use case for transient data structures", :max-points 3, :type :question.type/free-text},
+                                   :creator #:user{:id "1", :github-id "12345"}}
+                          #:answer{:id "2",
+                                   :answer "generative Tests are only a good choice, if you have an oracle or you can write an inverse function. But they have very high costs compared to example based testing",
+                                   :question #:question{:id "2", :statement "What are some advantages and disadvantages of example-based and generative testing?", :max-points 2, :type :question.type/free-text},
+                                   :creator #:user{:id "1", :github-id "12345"}}
+                          #:answer{:id "3",
+                                   :question #:question{:id "3", :statement "Transient data structures are:", :max-points 1, :type :question.type/single-choice},
+                                   :creator #:user{:id "1", :github-id "12345"},
+                                   :selected-solutions [#:solution{:id "1", :statement "mutable"}]}
+                          #:answer{:id "4",
+                                   :question #:question{:id "4", :statement "Which keywords are suitable for generative testing?", :max-points 1, :type :question.type/multiple-choice},
+                                   :creator #:user{:id "1", :github-id "12345"},
+                                   :selected-solutions [#:solution{:id "3", :statement "Oracle"} #:solution{:id "4", :statement "inverse function"} #:solution{:id "5", :statement "specs"}]}
+                          #:answer{:id "5",
+                                   :answer "I like transients",
+                                   :question #:question{:id "1", :statement "Describe a use case for transient data structures", :max-points 3, :type :question.type/free-text},
+                                   :creator #:user{:id "2", :github-id "45678"}}
+                          #:answer{:id "6",
+                                   :answer "example based testing is good for documentation",
+                                   :question #:question{:id "2", :statement "What are some advantages and disadvantages of example-based and generative testing?", :max-points 2, :type :question.type/free-text},
+                                   :creator #:user{:id "2", :github-id "45678"}}
+                          #:answer{:id "7",
+                                   :question #:question{:id "3", :statement "Transient data structures are:", :max-points 1, :type :question.type/single-choice},
+                                   :creator #:user{:id "2", :github-id "45678"},
+                                   :selected-solutions [#:solution{:id "2", :statement "immutable"}]}
+                          #:answer{:id "8",
+                                   :question #:question{:id "4", :statement "Which keywords are suitable for generative testing?", :max-points 1, :type :question.type/multiple-choice},
+                                   :creator #:user{:id "2", :github-id "45678"},
+                                   :selected-solutions [#:solution{:id "3", :statement "Oracle"} #:solution{:id "5", :statement "specs"}]}
+                          #:answer{:id "9",
+                                   :question #:question{:id "5", :statement "When was the movie Alien by ridley scott released?", :max-points 1, :type :question.type/single-choice},
+                                   :creator #:user{:id "1", :github-id "12345"},
+                                   :selected-solutions [#:solution{:id "7", :statement "1979"}]}
+                          #:answer{:id "10",
+                                   :answer "Alien is the best movie of all time <3",
+                                   :question #:question{:id "6", :statement "Which one is the greates movie of all time? ;D", :max-points 1, :type :question.type/free-text},
+                                   :creator #:user{:id "1", :github-id "12345"}}
+                          #:answer{:id "11",
+                                   :answer "JVM, i.e., Java Virtual Machine. JVM is the engine that drives the Java code. Mostly in other Programming Languages, compiler produce code for a particular system but Java compiler produce Bytecode for a Java Virtual Machine. When we compile a Java program, then bytecode is generated. Bytecode is the source code that can be used to run on any platform. Bytecode is an intermediary language between Java source and the host system. It is the medium which compiles Java code to bytecode which gets interpreted on a different machine and hence it makes it Platform/Operating system independent.",
+                                   :question #:question{:id "7", :statement "What is the JVM?", :max-points 3, :type :question.type/free-text},
+                                   :creator #:user{:id "1", :github-id "12345"}}
+                          #:answer{:id "12",
+                                   :question #:question{:id "8", :statement "What type of programming lanuage is java?", :max-points 1, :type :question.type/single-choice},
+                                   :creator #:user{:id "1", :github-id "12345"},
+                                   :selected-solutions [#:solution{:id "11", :statement "object oriented"}]}
+                          #:answer{:id "13",
+                                   :answer "I don't know, pls give me points :D",
+                                   :question #:question{:id "7", :statement "What is the JVM?", :max-points 3, :type :question.type/free-text},
+                                   :creator #:user{:id "3", :github-id "13579"}}
+                          #:answer{:id "14",
+                                   :question #:question{:id "8", :statement "What type of programming lanuage is java?", :max-points 1, :type :question.type/single-choice},
+                                   :creator #:user{:id "3", :github-id "13579"},
+                                   :selected-solutions [#:solution{:id "13", :statement "logic"}]}}
             res (db/get-all-answers test-db)]
-        (t/is (every? (fn [act] (some #(= act %) ref-answers)) res))))))
+        (t/is (= ref-answers (set res)))))))
 
 
 (deftest correction-test
   (let [test-db (-create-test-db "correction-test-db")]
-    (testing "get-all-corrections-of-corrector with corrector-id = 3"
-      (let [res (db/get-all-corrections-of-corrector test-db "3")
-            ref-corrections [#:correction{:answer #:answer{:id "2"}}
-                             #:correction{:answer #:answer{:id "1"}}
-                             #:correction{:answer #:answer{:id "4"}}
-                             #:correction{:answer #:answer{:id "12"}}]]
-        (t/is (every? (fn [act] (some #(= act %) ref-corrections)) res))))
-    (testing "get-all-corrections-of-corrector with corrector-id = 2"
-      (let [res (db/get-all-corrections-of-corrector test-db "2")
-            ref-corrections [#:correction{:answer #:answer{:id "14"}}]]
-        (t/is (every? (fn [act] (some #(= act %) ref-corrections)) res))))
-    (testing "get-all-corrections-of-corrector with invalid corrector-id = 42"
+    (testing "get-all-corrections-from-corrector with corrector-id = 3"
+      (let [res (db/get-all-corrections-from-corrector test-db "3")
+            ref-corrections #{#:correction{:answer #:answer{:id "1"}}
+                              #:correction{:answer #:answer{:id "2"}}
+                              #:correction{:answer #:answer{:id "10"}}}]
+        (t/is (= ref-corrections (set (map (fn [c] {:correction/answer {:answer/id (get-in c [:correction/answer :answer/id])}}) res))))))
+    (testing "get-all-corrections-from-corrector with corrector-id = 2"
+      (let [res (db/get-all-corrections-from-corrector test-db "2")
+            ref-corrections #{#:correction{:answer #:answer{:id "11"}}
+                              #:correction{:answer #:answer{:id "13"}}}]
+        (t/is (= ref-corrections (set (map (fn [c] {:correction/answer {:answer/id (get-in c [:correction/answer :answer/id])}}) res))))))
+    (testing "get-all-corrections-from-corrector with invalid corrector-id = 42"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
               #"Nothing found for entity id [:user/id \W 42 \W]"
-              (db/get-all-corrections-of-corrector test-db "42"))))
+              (db/get-all-corrections-from-corrector test-db "42"))))
     (testing "add-correction! with valid correction"
       (let [answer-id "1"
-            correction {:correction/feedback "not good" :correction/points 0 :corrector/id "3"}
+            correction {:correction/feedback "#not good#" :correction/points 0 :corrector/id "3"}
             _ (db/add-correction! test-db answer-id correction)
-            corrections-of-corrector (db/get-all-corrections-of-corrector test-db "3")]
-        (t/is (= 2 (count (filter #(= (first (vals (first (vals %)))) "1") corrections-of-corrector))))))
+            corrections-of-corrector (db/get-all-corrections-from-corrector test-db "3")]
+        (t/is (some #(= (% :correction/feedback) (correction :correction/feedback)) corrections-of-corrector))))
     (testing "add-correction! with invalid answer-id"
       (let [answer-id "42"
             correction {:correction/feedback "not good" :correction/points 0 :corrector/id "3"}]
@@ -686,7 +587,7 @@
       (let [answer-id "2"
             res (db/get-corrections-of-answer test-db answer-id)
             ref-correction #:correction{:feedback "Please elaborate about the aspects of example-based testing"}]
-        (t/is (= (:feedback res) (:feedback ref-correction)))))
+        (t/is (= (mapv :correction/feedback res) [(:correction/feedback ref-correction)]))))
     (testing "get-corrections-of-answer with answer-id = 1"
       (let [answer-id "1"
             res (db/get-corrections-of-answer test-db answer-id)
@@ -696,6 +597,6 @@
     (testing "get-corrections-of-answer with invalid answer-id"
       (let [answer-id "42"]
         (t/is (thrown-with-msg?
-                java.lang.AssertionError
-                (re-pattern (str "The answer-id: " answer-id "does not exist in the database!"))
+                clojure.lang.ExceptionInfo
+                #"Nothing found for entity id [:answer/id \W 42 \W]"
                 (db/get-corrections-of-answer test-db answer-id)))))))

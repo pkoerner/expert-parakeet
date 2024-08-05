@@ -48,15 +48,17 @@
   (map (fn [correction]
          [:div.card.my-2
           [:div.card-body
-           [:h5.card-title (correction :question/question-statement)]
+           [:h5.card-title (correction :question/statement)]
            [:div.card-text
-            (card-entry "Given answer: " (or (not-empty (correction :answer/answer)) "No answer given"))
+            (card-entry "Given answer: " (or (correction :answer/answer)
+                                             (mapv :solution/statement (correction :answer/selected-solutions))
+                                             "No answer given"))
             (card-entry "Feedback:" (correction :correction/feedback))
-            (card-entry "Points: " (str (correction :answer/points) " of " (correction :question/points)))]]])
+            (card-entry "Points: " (str (correction :correction/points) " of " (correction :question/max-points)))]]])
        corrections))
 
 
-(s/def ::correction (s/keys :req [:correction/feedback :answer/points :question/points :question/question-statement :answer/answer]))
+(s/def ::correction (s/keys :req [:correction/feedback :correction/points :question/max-points :question/statement :answer/answer :answer/selected-solutions]))
 
 
 (s/fdef correction-overview

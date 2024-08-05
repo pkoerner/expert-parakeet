@@ -38,7 +38,7 @@
   [answer-id points feedback]
   (conj
     (conj (conj {}
-                (when-not (s/valid? :answer/points points) [:correction/points "Die angegebenen Punkte sind ungültig."]))
+                (when-not (s/valid? :correction/points points) [:correction/points "Die angegebenen Punkte sind ungültig."]))
           (when-not (s/valid? :correction/feedback feedback) [:correction/answer "Das angegebene Feedback ist ungültig."]))
     (when-not (s/valid? :answer/id answer-id) [:correction/answer "Die Frage ist ungültig."])))
 
@@ -47,7 +47,7 @@
         :args (s/cat :req coll?
                      :redirect-uri :general/non-blank-string
                      :add-correction-fn (s/? (s/get-spec `db/add-correction!))
-                     :get-user-by-git-id-fn (s/? (s/get-spec `db/get-user-by-git-id)))
+                     :get-user-by-github-id-fn (s/? (s/get-spec `db/get-user-by-github-id)))
         :ret #(instance? hiccup.util.RawString %))
 
 

@@ -13,7 +13,7 @@
 
 (s/fdef get-all-courses
         :args (s/cat :self #(satisfies? PCourseService %))
-        :ret (s/coll-of (s/keys :req [:course/id :course/course-name])))
+        :ret (s/coll-of (s/keys :req [:course/id :course/name])))
 
 
 (defn get-all-courses
@@ -23,9 +23,9 @@
 
 (s/fdef create-course-impl
         :args (s/cat :self #(satisfies? PCourseService %)
-                     :course-name :course/course-name)
+                     :course-name :course/name)
         :ret (s/keys :req [:course/id
-                           :course/course-name]))
+                           :course/name]))
 
 
 (defn- create-course-impl
@@ -35,7 +35,7 @@
 
 (s/fdef validate-course-impl
         :args (s/cat :self #(= PCourseService (type %))
-                     :course-name :course/course-name)
+                     :course-name :course/name)
         :ret (s/map-of view/create-course-error-keys
                        string?))
 
@@ -43,9 +43,9 @@
 (defn- validate-course-impl
   [this course-name]
   (let [courses (db/get-all-courses (.db this))
-        courses-with-same-name (filter (fn [course] (= course-name (course :course/course-name))) courses)]
+        courses-with-same-name (filter (fn [course] (= course-name (course :course/name))) courses)]
     (-> {}
-        (#(if (s/valid? :course/course-name course-name)
+        (#(if (s/valid? :course/name course-name)
             %
             (assoc % :course/course-error "Der ausgewählte Name war inkorrekt!")))
         (#(if (empty? courses-with-same-name)

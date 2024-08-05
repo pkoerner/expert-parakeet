@@ -1,7 +1,6 @@
 {:paths   ["src/clj" "resources"]
  :deps    {org.clojure/clojure {:mvn/version "1.11.3"}
            io.replikativ/datahike {:mvn/version "0.6.1568"}
-           provisdom/spectomic {:mvn/version "1.0.78"}
            compojure/compojure {:mvn/version "1.7.1"}
            ring/ring {:mvn/version "1.12.2"} 
            org.slf4j/slf4j-simple {:mvn/version "2.0.13"}
@@ -9,16 +8,15 @@
            ring/ring-defaults {:mvn/version "0.5.0"}
            ring-oauth2/ring-oauth2 {:mvn/version "0.3.0"}
            clj-http/clj-http {:mvn/version "3.13.0"}
-           hiccup/hiccup {:mvn/version "2.0.0-RC3"}
-           ;; -> besides on running the tests, test/check is required at least on build time by spectomic, so I'll leave it here
-           org.clojure/test.check {:mvn/version "1.1.1"}}
+           hiccup/hiccup {:mvn/version "2.0.0-RC3"}}
 
  :aliases {;; Test runner in console.
            :build       {:deps {io.github.clojure/tools.build {:mvn/version "0.10.4"}}
                          :ns-default build}
 
            :test {:extra-paths ["test"]
-                  :extra-deps  {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
+                  :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}
+                                com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
                                                            :sha     "7284cda41fb9edc0f3bc6b6185cfb7138fc8a023"}}
                   :main-opts   ["-m" "cognitect.test-runner"]
                   :exec-fn     cognitect.test-runner.api/test}

@@ -32,13 +32,14 @@
        [:input#answer-id {:name "answer-id" :type "hidden" :value (:answer/id answer)}]]
       [:div
        [:label {:for "question"} "Question:"] [:br]
-       [:p#question {:name "question"} (:question/question-statement question)]]
+       [:p#question {:name "question"} (:question/statement question)]]
       [:div
        [:label {:for "evaluation-criteria"} "Evaluation criteria:"] [:br]
        [:p#evaluation-criteria {:name "evaluation-criteria"} (:question/evaluation-criteria question)]]
       [:div
        [:label {:for "answer"} "Answer:"] [:br]
-       [:p#answer {:name "answer"} (map str (:answer/answer answer))]]
+       [:p#answer {:name "answer"} (or (:answer/answer answer)
+                                       (mapv :solution/statement (answer :answer/selected-solutions)))]]
       [:div
        (optional-error-display :correction/points errors)
        [:label {:for "points"} "Points:"] [:br]

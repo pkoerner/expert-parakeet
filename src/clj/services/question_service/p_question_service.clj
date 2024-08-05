@@ -22,7 +22,7 @@
   (validate-question
     [self
      question-statement achivable-points type
-     possible-solutions single-choice-solution multiple-choice-solution
+     possible-solutions correct-solutions
      evaluation-criteria
      categories]
     "Takes all possible values for a question as arguments and validates them.

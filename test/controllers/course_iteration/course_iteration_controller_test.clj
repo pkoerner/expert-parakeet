@@ -79,7 +79,7 @@
           redirect-uri "S"]
       (doseq [course-id ["1" "50009"]
               year ["2023" "2024"]
-              semester ["WiSe" "SoSe"]
+              semester ["WiSe" "SuSe"]
               question-set-ids [[] ["1" "2" "3"]]]
         (submit-create-course-iteration!
           (-> test-request
