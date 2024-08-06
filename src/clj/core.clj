@@ -76,11 +76,11 @@
 
   (GET "/question/:id"
        req
-       (question-get req "/question/" (:question-service services)))
+       (question-get req "/question/:id/answer" (:question-service services)))
 
-  (PUT "/question/:id"
-       req
-       (submit-user-answer! req (:answer-service services)))
+  (POST "/question/:id/answer"
+        req
+        (submit-user-answer! req (:answer-service services)))
 
   (GET "/create-question" req
        (html-response (create-question-get req (partial get-question-categories (:question-service services)) "/create-question")))

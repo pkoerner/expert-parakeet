@@ -9,54 +9,49 @@
   #{:not-assigned-to-question})
 
 
-;; I dont know how this exactly works.
-;; This function and the subsequent usage
-;; in the dispatch-question-type is
-;; sourced from: https://github.com/yokolet/hiccup-samples
-;; Changed after review by deleting unnecessary attributes.
-(defn labeled-radio
-  [label]
-  [:label (form/radio-button "answer" false label)
-   [:span.mx-1 label]])
-
-
 (defn dispatch-question-type
   [question]
-  (cond
-    (= (:question/type question)
-       :question.type/free-text)
-    (form/text-area {:type "free-text"} "answer")
-    (= (:question/type question)
-       :question.type/single-choice)
-    [:div {:class "form-group"} (reduce conj
-                                        [:div {:class "btn-group" :type "single-choice"}]
-                                        (for [possible-solution (:question/possible-solutions question)]
-                                          [:div
-                                           [:p possible-solution]
-                                           (labeled-radio possible-solution)]))]
-    (= (:question/type question)
-       :question.type/multiple-choice)
-    (for [possible-solution (:question/possible-solutions question)]
-      [:div {:type "multiple-choice"}
-       [:p possible-solution]
-       (form/check-box possible-solution)])))
+  (case (:question/type question)
+    :question.type/free-text
+    (form/text-area {:class "form-control"} "answer")
+
+    :question.type/single-choice
+    [:fieldset
+     (for [possible-solution (:question/possible-solutions question)]
+       [:div {:class "form-check"}
+        (form/radio-button {:class "form-check-input" :required "true"}
+                           "answer"
+                           false
+                           (possible-solution :solution/id))
+        (form/label {:class "form-check-label"}
+                    (str "answer-" (possible-solution :solution/id))
+                    (possible-solution :solution/statement))])]
+
+    :question.type/multiple-choice
+    [:fieldset
+     (for [possible-solution (:question/possible-solutions question)]
+       [:div {:type "form-check"}
+        (form/check-box {:class "form-check-input"}
+                        "answer"
+                        false
+                        (possible-solution :solution/id))
+        (form/label {:class "form-check-label"}
+                    (str "answer-" (possible-solution :solution/id))
+                    (possible-solution :solution/statement))])]))
 
 
 (defn question-form
-  [question put-destination]
+  [question post-destination]
   (h/html
     (form/form-to
-      [:put put-destination]
-      [:div [:p
-             {:id (:question/id question)}
-             (:question/statement question)]
-       (println question)
-       (dispatch-question-type question)]
+      [:post post-destination]
+      [:p (:question/statement question)]
+      (dispatch-question-type question)
       (h/raw (anti-forgery-field))
-      (form/submit-button "submit"))))
+      (form/submit-button {:class "btn btn-primary"} "Submit"))))
 
 
 (defn no-question-assignment
   [permission-error]
   (when (contains? permission-error :not-assigned-to-question)
-    [:p (str "ERROR: You are not assigned to this question!")]))
+    [:p "ERROR: You are not assigned to this question!"]))
