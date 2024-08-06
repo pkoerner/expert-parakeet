@@ -9,8 +9,8 @@
 
 
 (defn add-user-answer-to-question!
-  [this user-id question-id answer]
-  (db/add-user-answer! (.db this) user-id question-id answer))
+  [this user-id question-id answer-or-solution-ids]
+  (db/add-user-answer! (.db this) user-id question-id answer-or-solution-ids))
 
 
 (extend AnswerService

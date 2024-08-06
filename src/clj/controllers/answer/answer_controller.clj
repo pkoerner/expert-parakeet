@@ -6,8 +6,8 @@
 
 
 (defn- add-to-db-and-get-success-msg
-  [user-id question-id answer db-add-fun]
-  (let [db-result (db-add-fun user-id question-id answer)]
+  [user-id question-id answer-or-solution-ids db-add-fun]
+  (let [db-result (db-add-fun user-id question-id answer-or-solution-ids)]
     (view/submit-success-view (:question/id db-result))))
 
 
