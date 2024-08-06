@@ -22,8 +22,8 @@
         question    (get-question-by-id question-service question-id)
         permission-error (validate-user-for-question question-service user-id question-id)]
     (if (empty? permission-error)
-        (html-response (question-view/question-form question (clojure.string/replace post-destination-root ":id" question-id)))
-        (html-response (question-view/no-question-assignment permission-error)))))
+      (html-response (question-view/question-form question (clojure.string/replace post-destination-root ":id" question-id)))
+      (html-response (question-view/no-question-assignment permission-error)))))
 
 
 (s/fdef create-question-get
