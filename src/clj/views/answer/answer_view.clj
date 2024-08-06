@@ -7,5 +7,5 @@
   [response]
   (h/html
     [:div
-     [:p "The question was successfully submited!"]
+     [:p "The answer was successfully submitted!"]
      [:p response]]))

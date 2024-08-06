@@ -13,18 +13,18 @@
   [question]
   (case (:question/type question)
     :question.type/free-text
-    (form/text-area {:class "form-control"} "answer")
+    (form/text-area {:class "form-control"} "free-text")
 
     :question.type/single-choice
     [:fieldset
      (for [possible-solution (:question/possible-solutions question)]
        [:div {:class "form-check"}
         (form/radio-button {:class "form-check-input" :required "true"}
-                           "answer"
+                           "selected-solutions"
                            false
                            (possible-solution :solution/id))
         (form/label {:class "form-check-label"}
-                    (str "answer-" (possible-solution :solution/id))
+                    (str "selected-solutions-" (possible-solution :solution/id))
                     (possible-solution :solution/statement))])]
 
     :question.type/multiple-choice
@@ -32,11 +32,11 @@
      (for [possible-solution (:question/possible-solutions question)]
        [:div {:type "form-check"}
         (form/check-box {:class "form-check-input"}
-                        "answer"
+                        "selected-solutions"
                         false
                         (possible-solution :solution/id))
         (form/label {:class "form-check-label"}
-                    (str "answer-" (possible-solution :solution/id))
+                    (str "selected-solutions-" (possible-solution :solution/id))
                     (possible-solution :solution/statement))])]))
 
 
