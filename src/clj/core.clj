@@ -2,7 +2,7 @@
   (:gen-class)
   (:require
     [auth :refer [wrap-authentication]]
-    [compojure.core :refer [defroutes GET POST PUT]]
+    [compojure.core :refer [defroutes GET POST]]
     [compojure.route :as route]
     [controllers.answer.answer-controller :refer [submit-user-answer!]]
     [controllers.correction.correction-controller :refer [correction-overview-get]]
