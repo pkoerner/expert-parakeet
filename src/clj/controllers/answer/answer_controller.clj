@@ -13,9 +13,9 @@
 
 (defn submit-user-answer!
   [req answer-service]
-  (let [form-data (-> req (:params) (dissoc :__anti-forgery-token))
+  (let [form-data (-> req :params (dissoc :__anti-forgery-token))
         user-id (str (-> req :session :user :id))
-        question-id (:id form-data)
+        question-id (-> req :route-params :id)
         free-text (:free-text form-data)
         solution-ids (:selected-solutions form-data)]
     (if (some? free-text)
