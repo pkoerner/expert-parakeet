@@ -68,15 +68,15 @@
     [this question-set-name course-iteration-id required-points questions])
 
   (add-user-answer!
-    [this user-id question-id answer]
-    "Adds an answer of a user to a question.")
+    [this user-id question-id answer-or-solution-ids]
+    "Adds an answer/solution-ids of a user to a question.")
 
   ;; no test because it only uses add-user-answer!
   (add-multiple-user-answers!
-    [this user-id answers]
+    [this user-id question-ids-and-answer-or-solution-ids]
     "Adds multiple answers of a user to multiple questions.
-               Remark: Answers has to be a collection of tuples containing a question-id
-               and an answer.")
+     Remark: Answers has to be a collection of tuples containing a question-id
+     and an answer/solution ids.")
 
   (get-all-answers
     [this])
@@ -381,15 +381,15 @@
 
 
   (add-user-answer!
-    [this user-id question-id answer]
+    [this user-id question-id answer-or-solution-ids]
     (let [id (generate-id @(.conn this) :answer/id)
-          ;; TODO: we need to set :answer/selected-solutions instead of :answer/answer when required
-          tx-result (d/transact (.conn this)
-                                [{:answer/id id
-                                  :answer/question [:question/id question-id]
-                                  :answer/creator [:user/id user-id]
-                                  :answer/answer answer
-                                  :answer/selected-solutions []}])
+          tx {:answer/id id
+              :answer/question [:question/id question-id]
+              :answer/creator [:user/id user-id]}
+          tx (merge tx (if (string? answer-or-solution-ids)
+                         {:answer/answer answer-or-solution-ids}
+                         {:answer/selected-solutions (mapv (fn [sol] [:solution/id sol]) answer-or-solution-ids)}))
+          tx-result (d/transact (.conn this) [tx])
           db-after (:db-after tx-result)]
       (->> (d/pull db-after db.schema/answer-slim-pull [:answer/id id])
            (resolve-enums))))
@@ -397,8 +397,8 @@
 
   (add-multiple-user-answers!
     [this user-id answers]
-    (mapv (fn [[question-id answer]]
-            (add-user-answer! this user-id question-id answer))
+    (mapv (fn [[question-id answer-or-soution-ids]]
+            (add-user-answer! this user-id question-id answer-or-soution-ids))
           answers))
 
 

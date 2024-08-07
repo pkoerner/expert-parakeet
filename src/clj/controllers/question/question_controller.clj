@@ -1,6 +1,7 @@
 (ns controllers.question.question-controller
   (:require
     [clojure.spec.alpha :as s]
+    [clojure.string]
     [db]
     [services.question-service.p-question-service :refer [create-question!
                                                           get-question-categories
@@ -15,13 +16,13 @@
 
 
 (defn question-get
-  [req put-destination-root question-service]
+  [req post-destination-root question-service]
   (let [question-id (-> req :route-params :id)
         user-id     (str (-> req :session :user :id))
         question    (get-question-by-id question-service question-id)
         permission-error (validate-user-for-question question-service user-id question-id)]
     (if (empty? permission-error)
-      (html-response (question-view/question-form question (str put-destination-root question-id)))
+      (html-response (question-view/question-form question (clojure.string/replace post-destination-root ":id" question-id)))
       (html-response (question-view/no-question-assignment permission-error)))))
 
 
@@ -75,8 +76,7 @@
                                           achivable-points
                                           type
                                           possible-solutions
-                                          single-choice-solution
-                                          multiple-choice-solution
+                                          (or single-choice-solution multiple-choice-solution)
                                           evaluation-criteria
                                           categories)
         validation-errors (result-map :errors)]
