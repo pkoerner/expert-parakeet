@@ -135,7 +135,7 @@
   
    Notes: The current implementation heavily relies on the current display of categories.
    This will need to change when the clj code changes. (Bad but inevitable from my point of view.)"
-  []
+  [event]
   (let [new-cat (dom/getElement "new-category")
         new-cat-name (.-value new-cat)]
     (if (or (not (string? new-cat-name))
@@ -154,4 +154,5 @@
                                                       #js {:class "form-check-label"
                                                            :for new-cat-id}
                                                       new-cat-name))]
-        (-> "category-container" (dom/getElement) (dom/appendChild new-cat-div))))))
+        (-> "category-container" (dom/getElement) (dom/appendChild new-cat-div))))
+    (.preventDefault event)))
