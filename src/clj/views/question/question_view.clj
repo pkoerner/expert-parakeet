@@ -9,35 +9,37 @@
   #{:not-assigned-to-question})
 
 
+(defn- render-choice
+  [input-fn possible-solution-id possible-solution-statement required?]
+  [:div {:class "form-check"}
+   (input-fn {:class "form-check-input", :required required?}
+             "selected-solutions"
+             false
+             possible-solution-id)
+   (form/label {:class "form-check-label"}
+               possible-solution-id
+               possible-solution-statement)])
+
+
+(defn- render-choices
+  [possible-solutions radio?]
+  (let [input-fn (if radio? form/radio-button form/check-box)]
+    [:fieldset
+     (map
+       #(render-choice
+          input-fn
+          (:solution/id %)
+          (:solution/statement %)
+          radio?)
+       possible-solutions)]))
+
+
 (defn dispatch-question-type
   [question]
   (case (:question/type question)
-    :question.type/free-text
-    (form/text-area {:class "form-control"} "free-text")
-
-    :question.type/single-choice
-    [:fieldset
-     (for [possible-solution (:question/possible-solutions question)]
-       [:div {:class "form-check"}
-        (form/radio-button {:class "form-check-input" :required "true"}
-                           "selected-solutions"
-                           false
-                           (possible-solution :solution/id))
-        (form/label {:class "form-check-label"}
-                    (str "selected-solutions-" (possible-solution :solution/id))
-                    (possible-solution :solution/statement))])]
-
-    :question.type/multiple-choice
-    [:fieldset
-     (for [possible-solution (:question/possible-solutions question)]
-       [:div {:type "form-check"}
-        (form/check-box {:class "form-check-input"}
-                        "selected-solutions"
-                        false
-                        (possible-solution :solution/id))
-        (form/label {:class "form-check-label"}
-                    (str "selected-solutions-" (possible-solution :solution/id))
-                    (possible-solution :solution/statement))])]))
+    :question.type/free-text (form/text-area {:class "form-control"} "free-text")
+    :question.type/single-choice (render-choices (:question/possible-solutions question) true)
+    :question.type/multiple-choice (render-choices (:question/possible-solutions question) false)))
 
 
 (defn question-form
