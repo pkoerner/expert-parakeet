@@ -76,8 +76,7 @@
                                           achivable-points
                                           type
                                           possible-solutions
-                                          single-choice-solution
-                                          multiple-choice-solution
+                                          (or single-choice-solution multiple-choice-solution)
                                           evaluation-criteria
                                           categories)
         validation-errors (result-map :errors)]
