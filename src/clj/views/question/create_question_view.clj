@@ -24,15 +24,15 @@
     [:fieldset#free-text
      [:legend {:class "form-label"} "Evaluation criteria"]
      (optional-error-display :evaluation-criteria errors)
-     (hform/text-area {:class "form-control"} "evaluation-criteria" (question-data :evaluation-criteria))]))
+     (hform/text-area {:class "form-control"} "evaluation-criteria" (get question-data :evaluation-criteria))]))
 
 
 (defn- choice-input
   [errors question-data choice-type radio?]
   (let [possible-solutions-error (optional-error-display (keyword (str "possible-" choice-type "-solutions")) errors)
         correct-solutions-error (optional-error-display (keyword (str "correct-" choice-type "-solutions")) errors)
-        possible-solutions (as-coll (question-data (keyword (str "possible-" choice-type "-solutions"))))
-        correct-solutions (set (as-coll (question-data (keyword (str "correct-" choice-type "-solutions")))))
+        possible-solutions (as-coll (get question-data (keyword (str "possible-" choice-type "-solutions"))))
+        correct-solutions (set (as-coll (get question-data (keyword (str "correct-" choice-type "-solutions")))))
         choice-container (str choice-type "-container")
         new-choice-form-id  (str "new-" choice-type "-form")
         new-choice-input-id  (str "new-" choice-type)
@@ -116,7 +116,7 @@
          [:div
           (hform/label {:class "form-label"} "statement" "Question statement")
           (optional-error-display :statement errors)
-          (hform/text-area {:class "form-control" :required true} "statement" (question-data :statement))]
+          (hform/text-area {:class "form-control" :required true} "statement" (get question-data :statement))]
 
          [:div
           (hform/label {:class "form-label"} "max-points" "Maximum number of points")
@@ -149,7 +149,7 @@
           [:fieldset
            [:legend {:class "form-label"} "Categories"]
            (optional-error-display :categories errors)
-           (let [prev-categories (set (as-coll (question-data :categories)))
+           (let [prev-categories (set (as-coll (get question-data :categories)))
                  all-categories (set (concat categories prev-categories))]
              [:div#category-container.ps-1 {:style "max-height: 150px; overflow-y: scroll"}
               ;; keep this in sync with the cljs function!

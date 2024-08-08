@@ -3,6 +3,7 @@
     [clojure.edn :as edn]
     [clojure.set :as set]
     [clojure.spec.alpha :as s]
+    [clojure.string :as string]
     [db]
     [services.question-service.p-question-service :refer [PQuestionService]]
     [views.question.question-view :as view]))
@@ -95,7 +96,7 @@ an error-set with a specified error is returned. "
               {:question/type question-type}
               {:error "The given question type is invalid"}))]
    [:statement (fn [_ value]
-                 (let [parsed-value (str value)]
+                 (let [parsed-value (-> value (str) (string/trim))]
                    (if (s/valid? :question/statement parsed-value)
                      {:question/statement parsed-value}
                      {:error "The question statement must be a non-empty string"})))]
@@ -108,57 +109,62 @@ an error-set with a specified error is returned. "
                   (let [categories (->> value
                                         (as-coll)
                                         (map str)
+                                        (map string/trim)
                                         (filter (complement empty?))
                                         (set))]
                     (if (s/valid? :question/categories categories)
                       {:question/categories categories}
                       {:error "The categories must be non-empty strings"})))]
-   [:evaluation-criteria (fn [{:keys [type]} value]
+   [:evaluation-criteria (fn [{:question/keys [type]} value]
                            (when (= type :question.type/free-text)
-                             (let [parsed-value (str value)]
+                             (let [parsed-value (-> value (str) (string/trim))]
                                (if (s/valid? :question/evaluation-criteria parsed-value)
                                  {:question/evaluation-criteria parsed-value}
                                  {:error "The evalatuation criteria must be a string"}))))]
-   [:possible-single-choice-solutions (fn [{:keys [type]} value]
+   [:possible-single-choice-solutions (fn [{:question/keys [type]} value]
                                         (when (= type :question.type/single-choice)
                                           (let [possible-choices (->> value
                                                                       (as-coll)
                                                                       (map str)
+                                                                      (map string/trim)
                                                                       (filter (complement empty?))
                                                                       (set))]
                                             (if (>= (count possible-choices) 1)
                                               {:question/possible-solutions possible-choices}
                                               {:error "There must be at least one possible choice"}))))]
-   [:possible-multiple-choice-solutions (fn [{:keys [type]} value]
+   [:possible-multiple-choice-solutions (fn [{:question/keys [type]} value]
                                           (when (= type :question.type/multiple-choice)
                                             (let [possible-choices (->> value
                                                                         (as-coll)
                                                                         (map str)
+                                                                        (map string/trim)
                                                                         (filter (complement empty?))
                                                                         (set))]
                                               (if (>= (count possible-choices) 1)
                                                 {:question/possible-solutions possible-choices}
                                                 {:error "There must be at least one possible choice"}))))]
-   [:correct-single-choice-solutions (fn [{:keys [type possible-choices]} value]
+   [:correct-single-choice-solutions (fn [{:question/keys [type possible-solutions]} value]
                                        (when (= type :question.type/single-choice)
                                          (let [correct-choices (->> value
                                                                     (as-coll)
                                                                     (map str)
+                                                                    (map string/trim)
                                                                     (filter (complement empty?))
                                                                     (set))]
                                            (cond
-                                             (not (set/subset? correct-choices possible-choices)) {:error "The correct choices must be a subset of the possible choices"}
+                                             (not (set/subset? correct-choices possible-solutions)) {:error "The correct choices must be a subset of the possible choices"}
                                              (not= (count correct-choices) 1) {:error "There must be exactly one correct choice"}
                                              :else {:question/correct-solutions correct-choices}))))]
-   [:correct-multiple-choice-solutions (fn [{:keys [type possible-choices]} value]
+   [:correct-multiple-choice-solutions (fn [{:question/keys [type possible-solutions]} value]
                                          (when (= type :question.type/multiple-choice)
                                            (let [correct-choices (->> value
                                                                       (as-coll)
                                                                       (map str)
+                                                                      (map string/trim)
                                                                       (filter (complement empty?))
                                                                       (set))]
                                              (cond
-                                               (not (set/subset? correct-choices possible-choices)) {:error "The correct choices must be a subset of the possible choices"}
+                                               (not (set/subset? correct-choices possible-solutions)) {:error "The correct choices must be a subset of the possible choices"}
                                                :else {:question/correct-solutions correct-choices}))))]])
 
 
