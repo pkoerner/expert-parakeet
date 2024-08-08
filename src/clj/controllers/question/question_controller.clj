@@ -47,11 +47,10 @@
 
 (defn submit-create-question!
   "Takes a ring request, a url to which the post should be send, if it needs to be filled out again, and a question-service as parameters.  
-   Form the ring request the parameters for the question to be created are extracted and validated.
+   From the ring request the parameters for the question to be created are extracted and validated.
    If it is a valid question the question is created, persisted, and a success html view is returned.
-   If it is not a valid question, the old question data with the error messages is passed to the `question-createion-form`, 
+   If it is not a valid question, the old question data with the error messages is passed to the `question-creation-form` again, 
    to display the old values with the corresponding error messages.
-   The form is afterwards send to the past in `post-url`.
 
    Considered `:params`:
    ```clj

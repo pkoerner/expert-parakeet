@@ -12,9 +12,10 @@
 
 (defn- as-coll
   [coll-or-single]
-  (if (or (nil? coll-or-single) (coll? coll-or-single))
-    coll-or-single
-    [coll-or-single]))
+  (cond
+    (nil? coll-or-single) []
+    (coll? coll-or-single) coll-or-single
+    :else [coll-or-single]))
 
 
 (defn- free-text-inputs
