@@ -182,9 +182,9 @@
 
 (defn- possible-solutions-view
   [{:question/keys [possible-solutions]}]
-  [:p.lead [:b "Possible answers: "]
+  [:p.lead [:b "Possible choices: "]
    [:ul.list-group (for [el possible-solutions]
-                     [:li.list-group-item el])]])
+                     [:li.list-group-item (el :solution/statement)])]])
 
 
 (defn- single-choice-question-view
