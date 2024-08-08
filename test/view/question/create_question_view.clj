@@ -5,7 +5,7 @@
     [clojure.test.check.generators :as gen]
     [clojure.test.check.properties :as prop]
     [domain.spec]
-    [views.question.create-question-view :refer [create-question-error-keys question-form]]))
+    [views.question.create-question-view :refer [question-form]]))
 
 
 (deftest test-question-form
@@ -86,7 +86,10 @@
 
 
 (def ^:private error-map-gen
-  (let [rand-error-map (->> create-question-error-keys
+  (let [rand-error-map (->> [:statement :max-points :type
+                             :possible-single-choice-solutions :correct-single-choice-solutions
+                             :possible-multiple-choice-solutions :correct-multiple-choice-solutions
+                             :categories]
                             (map (fn [key] {key (str "Error for key " key)}))
                             (gen/elements))]
     (gen/fmap #(apply merge %)

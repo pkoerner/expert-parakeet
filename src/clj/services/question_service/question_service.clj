@@ -3,7 +3,6 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [db]
-    [domain.spec :refer [question-types]]
     [services.question-service.p-question-service :refer [PQuestionService]]
     [views.question.question-view :as view]))
 
@@ -50,6 +49,7 @@ an error-set with a specified error is returned. "
       error-set)))
 
 
+;; TODO: the spec for the question argument is incorrect, must not include ids and the solutions must be strings
 (s/fdef create-question-impl!
         :args (s/cat :self #(= PQuestionService (type %))
                      :question :question/question)
@@ -69,6 +69,13 @@ an error-set with a specified error is returned. "
 (defn- get-question-categories
   [this]
   (db/get-all-question-categories (.db this)))
+
+
+(defn- as-coll
+  [coll-or-single]
+  (if (or (nil? coll-or-single) (coll? coll-or-single))
+    coll-or-single
+    [coll-or-single]))
 
 
 (def ^:private question-keys
@@ -140,16 +147,8 @@ an error-set with a specified error is returned. "
    
    Returns a question map. If an error occured while parsing, the map will contain an `:errors` key which indicates an error while parsing.
    Values that are not required may be `nil`."
-  [question-statement achivable-points type
-   possible-solutions correct-solutions
-   evaluation-criteria
-   categories]
-  (letfn [(as-coll
-            [coll-or-single]
-            (if (or (nil? coll-or-single) (coll? coll-or-single))
-              coll-or-single
-              [coll-or-single]))
-          (parse-points
+  [question]
+  (letfn [(parse-points
             [points]
             (if (and (not (nil? points)) (number? points))
               {:question/max-points points}
@@ -157,23 +156,27 @@ an error-set with a specified error is returned. "
                      {:question/max-points points})
                    (catch NumberFormatException _
                      {:errors {:question/max-points "Die erreichbaren Punkte müssen eine Zahl sein"}}))))]
-    (reduce (partial merge-with merge)
-            {}
-            [{:question/statement question-statement}
-             (if (s/valid? :question/type type)
-               {:question/type type}
-               (let [question-type (to-question-type type)]
-                 (if (nil? question-type)
-                   {:errors {:question/type "Der angegebene question-type war kein valider type!"}}
-                   {:question/type question-type})))
-             (parse-points achivable-points)
-             {:question/possible-solutions (as-coll possible-solutions)}
-             (if (and (= type :question.type/single-choice)
-                      (not= (count correct-solutions) 1))
-               {:errors {:question/correct-solutions "Es sollte nur eine Antwort bei einer single-choice Frage geben!"}}
-               {:question/correct-solutions correct-solutions})
-             {:question/evaluation-criteria evaluation-criteria}
-             {:question/categories (distinct (as-coll categories))}])))
+    (let [{:strs [question-statement achivable-points type
+                  possible-solutions correct-solutions
+                  evaluation-criteria
+                  categories]} question]
+      (reduce (partial merge-with merge)
+              {}
+              [{:question/statement question-statement}
+               (if (s/valid? :question/type type)
+                 {:question/type type}
+                 (let [question-type (to-question-type type)]
+                   (if (nil? question-type)
+                     {:errors {:question/type "Der angegebene question-type war kein valider type!"}}
+                     {:question/type question-type})))
+               (parse-points achivable-points)
+               {:question/possible-solutions (as-coll possible-solutions)}
+               (if (and (= type :question.type/single-choice)
+                        (not= (count correct-solutions) 1))
+                 {:errors {:question/correct-solutions "Es sollte nur eine Antwort bei einer single-choice Frage geben!"}}
+                 {:question/correct-solutions correct-solutions})
+               {:question/evaluation-criteria evaluation-criteria}
+               {:question/categories (distinct (as-coll categories))}]))))
 
 
 (defn- validate-parsed-question
@@ -206,38 +209,21 @@ an error-set with a specified error is returned. "
               keys-to-validate))))
 
 
+;; TODO: the spec for the question argument is incorrect, this is the form-data from the client
+;; the resulting question map also does not contain ids and solutions are inlined as strings
 (s/fdef validate-question-impl
         :args (s/cat :self #(= PQuestionService (type %))
-                     :question-statement string?
-                     :achivable-points (s/or :to-parse string? :valid number?)
-                     :type (s/or :question-type question-types
-                                 :question-type-as-string string?)
-                     :possible-solutions (s/or :nil nil? :single string? :multiple (s/coll-of string?))
-                     :correct-solutions (s/or :nil nil? :solution string? :multiple-solutions (s/coll-of string?))
-                     :evaluation-criteria (s/or :nil nil? :criteria string?)
-                     :categories (s/or :nil nil? :single string? :multiple (s/coll-of string?)))
+                     :question :question/question)
         :ret (s/or :errors #(contains? % :errors)
                    :question :question/question))
 
 
 (defn- validate-question-impl
-  "Takes all possible values for a question as arguments and validates them.
-   If a parsing/validation error occurs the return map will contain an error message for each key that had an error.
-   If the returned map has no `:errors` key, the returned map is a valid question of the type under the `:question/type` key."
-  [_
-   question-statement achivable-points type
-   possible-solutions correct-solutions
-   evaluation-criteria
-   categories]
-
-  (let [question (parse-question question-statement achivable-points type
-                                 possible-solutions correct-solutions
-                                 evaluation-criteria
-                                 categories)
-        errors (question :errors)]
-    (if errors
-      question
-      (merge question (validate-parsed-question question)))))
+  [_ question]
+  (let [parsed-question (parse-question question)]
+    (if (seq (parsed-question :errors))
+      parsed-question
+      (validate-parsed-question parsed-question))))
 
 
 (extend QuestionService
