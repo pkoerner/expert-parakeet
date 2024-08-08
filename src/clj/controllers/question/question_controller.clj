@@ -34,7 +34,7 @@
 
 (defn create-question-get
   "Takes a ring request, a function to get question categories, and a post-destination as arguments.
-  It returns a form for question creation, which post result will be send to the provieded `post-destination`."
+  It returns a form for question creation, which post result will be send to the provided `post-destination`."
   [req get-question-categories-fun post-destination]
   (creation-view/question-form (get-question-categories-fun) post-destination :errors (extract-errors req)))
 

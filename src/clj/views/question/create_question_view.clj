@@ -189,7 +189,9 @@
   [{:question/keys [correct-solutions] :as question}]
   [:div
    (possible-solutions-view question)
-   [:p.lead [:b "With the correct answer: "] (first correct-solutions)]])
+   [:p.lead [:b "With the correct choice: "] (-> correct-solutions
+                                                 (first)
+                                                 :solution/statement)]])
 
 
 (defn- multiple-choice-question-view
@@ -197,9 +199,9 @@
   [:div
    (possible-solutions-view question)
 
-   [:p.lead [:b "With the correct answers: "]
+   [:p.lead [:b "With the correct choices: "]
     [:ul.list-group (for [el correct-solutions]
-                      [:li.list-group-item el])]]])
+                      [:li.list-group-item (el :solution/statement)])]]])
 
 
 (defn- free-text-question-view
@@ -223,12 +225,12 @@
      [:h1 "The question of type \"" type "\" was successfully created."]
      [:div.container
       [:h2 "Question: "]
-      [:p.lead [:b "Question statement "] statement]
+      [:p.lead [:b "Question statement: "] statement]
       (case type
         :question.type/free-text (free-text-question-view question)
         :question.type/single-choice (single-choice-question-view question)
         :question.type/multiple-choice (multiple-choice-question-view question))
-      [:p.lead [:b "Reachable points "] max-points]
-      [:p.lead [:b "Categories "]
+      [:p.lead [:b "Maximum points: "] max-points]
+      [:p.lead [:b "Categories: "]
        [:ul.list-group (for [cat categories]
                          [:li.list-group-item cat])]]]]))
