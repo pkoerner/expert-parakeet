@@ -42,24 +42,26 @@
      [:legend {:class "form-label"} "Choices"]
      possible-solutions-error
      correct-solutions-error
-     [:div {:id choice-container}
+     [:div {:id choice-container :class "list-group"}
       ;; keep this in sync with the cljs function!
       (map-indexed (fn [idx stmt]
                      (let [div-id (str choice-type "-div-" idx)
                            input-id (str choice-type "-input-" idx)]
-                       [:div {:id div-id :class "form-check"}
-                        [:input {:type "hidden" :name possible-input-name :value stmt}]
-                        [:input {:class "form-check-input"
-                                 :id input-id
-                                 :type (if radio? "radio" "checkbox")
-                                 :name correct-input-name
-                                 :value stmt
-                                 :checked (contains? correct-solutions stmt)
-                                 :required radio?}]
-                        [:label {:class "form-check-label" :for input-id} stmt]
-                        [:button {:class "btn"
+                       [:div {:id div-id :class "list-group-item p-2 d-flex justify-content-between align-items-center"}
+                        [:div {:class "form-check d-flex align-items-center"}
+                         [:input {:type "hidden" :name possible-input-name :value stmt}]
+                         [:input {:class "form-check-input me-2"
+                                  :id input-id
+                                  :type (if radio? "radio" "checkbox")
+                                  :name correct-input-name
+                                  :value stmt
+                                  :checked (contains? correct-solutions stmt)
+                                  :required radio?}]
+                         [:label {:class "form-check-label" :for input-id} stmt]]
+                        [:button {:class "btn btn-danger"
                                   :type "button"
-                                  :onclick (str "expert_parakeet.question.create_question_view.delete_element('" div-id "')")} "-"]]))
+                                  :onclick (str "expert_parakeet.question.create_question_view.delete_element('" div-id "')")}
+                         "-"]]))
                    possible-solutions)]
      [:div.input-group
       (hform/text-field {:class "form-control" :form new-choice-form-id :required true :placeholder "Create new choice"} new-choice-input-id)

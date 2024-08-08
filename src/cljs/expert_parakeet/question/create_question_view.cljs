@@ -20,12 +20,10 @@
             [question-type-id]
             (let [e (dom/getElement question-type-id)]
               (set! (.-hidden e) false)
-              (set! (.-disabled e) false)
               (doseq [other-id question-type-fields
                       :when (not= other-id question-type-id)]
                 (let [other-e (dom/getElement other-id)]
-                  (set! (.-hidden other-e) true)
-                  (set! (.-disabled other-e) true)))))]
+                  (set! (.-hidden other-e) true)))))]
 
     (let [type-switch (dom/getElement switch-id)]
       (hide-all-except (.-value type-switch))
@@ -58,22 +56,25 @@
                                               :type "button"}
                                          "-")
             new-element (dom/createDom "div"
-                                       #js {:class "form-check" :id div-id}
-                                       (dom/createDom "input"
-                                                      #js {:type "hidden"
-                                                           :name possible-input-name
-                                                           :value choice-statement})
-                                       (dom/createDom "input"
-                                                      #js {:class "form-check-input"
-                                                           :id input-id
-                                                           :type (if radio? "radio" "checkbox")
-                                                           :name correct-input-name
-                                                           :value choice-statement
-                                                           :required radio?})
-                                       (dom/createDom "label"
-                                                      #js {:class "form-check-label"
-                                                           :for input-id}
-                                                      choice-statement)
+                                       #js {:class "list-group-item p-2 d-flex justify-content-between align-items-center"
+                                            :id div-id}
+                                       (dom/createDom "div"
+                                                      #js {:class "form-check d-flex align-items-center"}
+                                                      (dom/createDom "input"
+                                                                     #js {:type "hidden"
+                                                                          :name possible-input-name
+                                                                          :value choice-statement})
+                                                      (dom/createDom "input"
+                                                                     #js {:class "form-check-input me-2"
+                                                                          :id input-id
+                                                                          :type (if radio? "radio" "checkbox")
+                                                                          :name correct-input-name
+                                                                          :value choice-statement
+                                                                          :required radio?})
+                                                      (dom/createDom "label"
+                                                                     #js {:class "form-check-label"
+                                                                          :for input-id}
+                                                                     choice-statement))
                                        delete-button)]
         (set! (.-onclick delete-button) (fn [] (delete-element div-id)))
         (.reset form)
@@ -94,7 +95,7 @@
     (if (or (not (string? new-cat-name))
             (empty? new-cat-name))
       (js/window.alert "Invalid new category")
-      (let [new-cat-id (str "mult-select-" new-cat-name)
+      (let [new-cat-id (str "category-" new-cat-name)
             new-cat-div (dom/createDom "div"
                                        #js {:class "form-check"}
                                        (dom/createDom "input"
