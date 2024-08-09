@@ -1,14 +1,13 @@
 (ns controllers.question.question-controller-test
   (:require
-    #_[clojure.spec.alpha :as s]
     [clojure.string :as string]
     [clojure.test :as t :refer [deftest testing]]
     [controllers.question.question-controller :refer [create-question-get
-                                                      #_submit-create-question!]]
-    #_[db :refer [Database-Protocol]]
-    #_[services.question-service.p-question-service :refer [PQuestionService
+                                                      submit-create-question!]]
+    [db :refer [Database-Protocol]]
+    [services.question-service.p-question-service :refer [PQuestionService
                                                           validate-question]]
-    #_[services.question-service.question-service :refer [->QuestionService]]))
+    [services.question-service.question-service :refer [->QuestionService]]))
 
 
 (deftest test-create-question-get
@@ -33,8 +32,7 @@
 (deftest test-create-question-get-error-display
   (let [get-categories-fun (fn [] [])]
 
-
-    (testing "Errors are displayed"
+    (testing "Errors are displayed on GET with query params"
       (t/are [error-map]
              (let [request-with-params {:query-params error-map}
                    res (create-question-get request-with-params get-categories-fun "post-destination")]
@@ -42,14 +40,15 @@
                          (string/includes? res error))
                        error-map))
 
-        {(str :question/type) "No valid type"}
-        {(str :question/statement) "No valid question statement!"}
-        {(str :question/max-points) "No valid question points"}
-        {(str :question/categories) "No valid question categories"}
-        {(str :question/evaluation-criteria) "No valid evaluation criteria"}
-        {(str :question/possible-solutions) "No valid possible solutions"}
-        {(str :question/correct-solutions) "No valid single choice solution"}
-        {(str :question/correct-solutions) "No valid multiple choice solutions"}))
+        {(str :type) "No valid type"}
+        {(str :statement) "No valid question statement!"}
+        {(str :max-points) "No valid question points"}
+        {(str :categories) "No valid question categories"}
+        {(str :evaluation-criteria) "No valid evaluation criteria"}
+        {(str :possible-single-choice-solutions) "No valid possible single choice solutions"}
+        {(str :correct-single-choice-solutions) "No valid correct single choice solutions"}
+        {(str :possible-multiple-choice-solutions) "No valid possible multiple choice solution"}
+        {(str :correct-multiple-choice-solutions) "No valid correct multiple choice solution"}))
 
     (testing "unknown keys are not displayed"
       (t/are [error-map]
@@ -64,7 +63,7 @@
         {":something-else" "No valid question points"}))))
 
 
-#_(defn- stub-question-service
+(defn- stub-question-service
   [& {:keys [create-question! get-question-categories validate-question]
       :or {create-question! (fn [& _] {})
            get-question-categories (fn [& _] {})
@@ -80,82 +79,49 @@
       (get-question-categories))
 
     (validate-question
-      [_self
-       question-statement achivable-points type
-       possible-solutions correct-solutions
-       evaluation-criteria
-       categories]
-      (validate-question question-statement achivable-points type
-                         possible-solutions correct-solutions
-                         evaluation-criteria
-                         categories))))
+      [_self question-form-data]
+      (validate-question question-form-data))))
 
 
-#_(defn- valid-question
-  [question]
-  (let [question (assoc question :question/id "some id")]
-    (or (s/valid? :question/question
-                  (select-keys question
-                               [:question/id
-                                :question/statement
-                                :question/type
-                                :question/max-points
-                                :question/evaluation-criteria
-                                :question/categories]))
-        (s/valid? :question/single-choice-question
-                  (select-keys question
-                               [:question/id
-                                :question/statement
-                                :question/type
-                                :question/max-points
-                                :question/possible-solutions
-                                :question/correct-solutions
-                                :question/categories]))
-        (s/valid? :question/multiple-choice-question
-                  (select-keys question
-                               [:question/id
-                                :question/statement
-                                :question/type
-                                :question/max-points
-                                :question/possible-solutions
-                                :question/correct-solutions
-                                :question/categories])))))
-
-
-;; TODO: rework parsing/validating question form parameters
-#_(deftest test-submit-create-question!
+(deftest test-submit-create-question!
   (let [db-stub (reify Database-Protocol)]
-    (testing "Test that the db-add-function get's called with the correct values with different parameters."
+    (testing "Test that the db-add-function gets called with valid parameters."
       (let [test-request {:__anti-forgery-token ""
-                          :multipart-params {}}
+                          :params {}}
             question-service (->QuestionService db-stub)
-            basic-valid-input {"question-statement" "Valid question statement"
-                               "categories" ["Valid Category"]
-                               "achivable-points" 5}
+            basic-valid-input {:statement "Valid question statement"
+                               :categories ["Valid Category"]
+                               :max-points "5"}
             redirect-uri "S"
-            free-text-question (merge basic-valid-input {"type" "free-text"
-                                                         "evaluation-criteria" "Valid evaluation criteria"})
-            single-choice-question (merge basic-valid-input {"type" "single-choice"
-                                                             "single-choice-solution" "Solution1"
-                                                             "possible-solutions" ["Solution1"]})
-            multiple-choice-question (merge basic-valid-input {"type" "multiple-choice"
-                                                               "multiple-choice-solution" ["Solution1" "Solution2"]
-                                                               "possible-solutions" ["Solution1" "Solution2" "Solution3"]})]
-        (t/are [question]
-               (let [was-valid (atom false)
+            free-text-question (merge basic-valid-input {:type "free-text"
+                                                         :evaluation-criteria "Valid evaluation criteria"})
+            single-choice-question (merge basic-valid-input {:type "single-choice"
+                                                             :possible-single-choice-solutions ["Solution1" "Solution2" "Solution3"]
+                                                             :correct-single-choice-solutions ["Solution1"]})
+            multiple-choice-question (merge basic-valid-input {:type "multiple-choice"
+                                                               :possible-multiple-choice-solutions ["Solution1" "Solution2" "Solution3"]
+                                                               :correct-multiple-choice-solutions ["Solution1" "Solution2"]})]
+        (t/are [question-form-data]
+               (let [was-called (atom false)
                      db-add-fun-stub (fn [question]
-                                       (swap! was-valid (fn [_] (valid-question question)))
-                                       question)
+                                       (reset! was-called true)
+                                       (-> question
+                                           (update :question/possible-solutions (fn [sols]
+                                                                                  (if-let [sols (seq sols)]
+                                                                                    (mapv (fn [sol] #:solution{:id "sol-id-XYZ" :statement sol}) sols)
+                                                                                    nil)))
+                                           (update :question/correct-solutions (fn [sols]
+                                                                                 (if-let [sols (seq sols)]
+                                                                                   (mapv (fn [sol] #:solution{:id "sol-id-XYZ" :statement sol}) sols)
+                                                                                   nil)))
+                                           (assoc :question/id "question-id")))
                      question-service-stub (stub-question-service
                                              :create-question! db-add-fun-stub
                                              :validate-question (partial validate-question question-service))]
-                 (submit-create-question! (->> question
-                                               (map (fn [[key val]] {(str key) val}))
-                                               (into {})
-                                               (assoc test-request :multipart-params))
+                 (submit-create-question! (update test-request :params merge question-form-data)
                                           redirect-uri
                                           question-service-stub)
-                 @was-valid)
+                 @was-called)
           free-text-question
           single-choice-question
           multiple-choice-question)))
@@ -163,35 +129,42 @@
 
     (testing "Test that the db-add-function is not called with invalid parameters"
       (let [test-request {:__anti-forgery-token ""
-                          :multipart-params {}}
+                          :params {}}
             question-service (->QuestionService db-stub)
-            basic-valid-input {"question-statement" "Valid question statement"
-                               "categories" ["Valid Category"]
-                               "achivable-points" 5}
+            basic-valid-input {:statement "Valid question statement"
+                               :categories ["Valid Category"]
+                               :max-points "5"}
             redirect-uri "S"
-            free-text-question-invalid (merge basic-valid-input {"type" "free-text"
-                                                                 "evaluation-criteria" 123})
-            single-choice-question (merge basic-valid-input {"type" "single-choice"
-                                                             "single-choice-solution" "Solution not in possible-solutions"
-                                                             "possible-solutions" ["Solution1"]})
-            multiple-choice-question (merge basic-valid-input {"type" "multiple-choice"
-                                                               "multiple-choice-solution" ["Solution1" "Solution2" "Solution not in possible-solutions"]
-                                                               "possible-solutions" ["Solution1" "Solution2" "Solution3"]})]
-        (t/are [question]
+            single-choice-question1 (merge basic-valid-input {:type "single-choice"
+                                                              :possible-single-choice-solutions ["Solution1" "Solution2" "Solution3"]
+                                                              :correct-single-choice-solutions ["Unknown solution"]})
+            single-choice-question2 (merge basic-valid-input {:type "single-choice"
+                                                              :possible-single-choice-solutions ["Solution1" "Solution2" "Solution3"]
+                                                              :correct-single-choice-solutions ["Solution1" "Solution2"]})
+            multiple-choice-question (merge basic-valid-input {:type "multiple-choice"
+                                                               :possible-multiple-choice-solutions ["Solution1" "Solution2" "Solution3"]
+                                                               :correct-multiple-choice-solutions ["Solution1" "Unknown solution"]})]
+        (t/are [question-form-data]
                (let [was-not-called (atom true)
                      db-add-fun-stub (fn [question]
-                                       (swap! was-not-called (fn [_] false))
-                                       question)
+                                       (reset! was-not-called false)
+                                       (-> question
+                                           (update :question/possible-solution (fn [sols]
+                                                                                 (if-let [sols (seq sols)]
+                                                                                   (mapv (fn [sol] #:solution{:id "sol-id-XYZ" :statement sol}) sols)
+                                                                                   nil)))
+                                           (update :question/correct-solution (fn [sols]
+                                                                                (if-let [sols (seq sols)]
+                                                                                  (mapv (fn [sol] #:solution{:id "sol-id-XYZ" :statement sol}) sols)
+                                                                                  nil)))
+                                           (assoc :question/id "question-id")))
                      question-service-stub (stub-question-service
                                              :create-question! db-add-fun-stub
                                              :validate-question (partial validate-question question-service))]
-                 (submit-create-question! (->> question
-                                               (map (fn [[key val]] {(str key) val}))
-                                               (into {})
-                                               (assoc test-request :multipart-params))
+                 (submit-create-question! (update test-request :params merge question-form-data)
                                           redirect-uri
                                           question-service-stub)
                  @was-not-called)
-          free-text-question-invalid
-          single-choice-question
+          single-choice-question1
+          single-choice-question2
           multiple-choice-question)))))

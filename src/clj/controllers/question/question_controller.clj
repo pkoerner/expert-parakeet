@@ -34,7 +34,7 @@
 
 (defn create-question-get
   "Takes a ring request, a function to get question categories, and a post-destination as arguments.
-  It returns a form for question creation, which post result will be send to the provieded `post-destination`."
+  It returns a form for question creation, the result of which will be sent to the provided `post-destination`."
   [req get-question-categories-fun post-destination]
   (creation-view/question-form (get-question-categories-fun) post-destination :errors (extract-errors req)))
 
@@ -46,45 +46,32 @@
 
 
 (defn submit-create-question!
-  "Takes a ring request, a url to which the post should be send, if it needs to be filled out again, and a question-service as parameters.  
-   Form the ring request the parameters for the question to be created are extracted and validated.
-   If it is a valid question the question is created, persisted, and a success html view is returned.
-   If it is not a valid question, the old question data with the error messages is passed to the `question-createion-form`, 
+  "Takes a ring request, a url to which the post should be sent, if it needs to be filled out again, and a question-service as parameters.  
+   From the ring request the parameters for the question to be created are extracted and validated.
+   If it is a valid question, the question is created, persisted, and a success html view is returned.
+   If it is not a valid question, the old question data with the error messages is passed to the `question-creation-form` again, 
    to display the old values with the corresponding error messages.
-   The form is afterwards send to the past in `post-url`.
 
-   Considered `:multipart-params`
+   Considered `:params`:
    ```clj
-   {\"question-statement\" String,
-   \"achivable-points\" String/Int,
-   \"type\" \"single-choice\"/\"multiple-choice\"/\"free-text\",
-   \"possible-solutions\" Array of strings,
-   \"single-choice-solution\" String
-   \"multiple-choice-solution\" Array of strings
-   \"evaluation-criteria\" String}
+   {\"statement\" String,
+    \"max-points\" String,
+    \"type\" \"single-choice\"/\"multiple-choice\"/\"free-text\",
+    \"possible-single-choice-solutions\" String or array of strings,
+    \"correct-single-choice-solutions\" String or array of strings,
+    \"possible-multiple-choice-solutions\" String or array of strings,
+    \"correct-multiple-choice-solutions\" String or array of strings,
+    \"evaluation-criteria\" String,
+    \"categories\" String or array of strings}
    ```"
   [req post-destination question-service]
-  (let [validate-question-fun (partial validate-question question-service)
-        add-question-fun (partial create-question! question-service)
-
-        form-data (-> req (:multipart-params) (dissoc "__anti-forgery-token"))
-        {:strs [question-statement achivable-points type
-                possible-solutions single-choice-solution multiple-choice-solution
-                evaluation-criteria
-                categories]} form-data
-        result-map (validate-question-fun question-statement
-                                          achivable-points
-                                          type
-                                          possible-solutions
-                                          (or single-choice-solution multiple-choice-solution)
-                                          evaluation-criteria
-                                          categories)
-        validation-errors (result-map :errors)]
+  (let [form-data (-> req :params (dissoc :__anti-forgery-token))
+        question-or-errors (validate-question question-service form-data)
+        validation-errors (question-or-errors :errors)]
     (if (empty? validation-errors)
-      (let [question result-map
-            question (add-question-fun question)]
-        (html-response (question-success-view question)))
+      (let [added-question (create-question! question-service question-or-errors)]
+        (html-response (question-success-view added-question)))
       (html-response (creation-view/question-form (get-question-categories question-service)
                                                   post-destination
                                                   :errors validation-errors
-                                                  :question-data (dissoc result-map :errors))))))
+                                                  :question-data form-data)))))
