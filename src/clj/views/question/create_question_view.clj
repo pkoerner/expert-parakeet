@@ -89,12 +89,12 @@
 
 
 (defn question-form
-  "Takes as arguments a collection of arguments and a destination to which the form post should be send.
+  "Takes as arguments a collection of categories and a destination to which the form's post request should be sent.
    Optional keyword arguemnts:
    `:errors`: Takes a map with form data keys mapped to error messages.
    These are displayed as errors in the form with their corresponding input field.
    `:question-data`: Takes a map with form data keys mapped to values.
-   When present the values are put into the input fields corresponding to the name.
+   When present, the values are put into the input fields corresponding to the name.
    This way the form can be re-/prepopulated."
   [categories post-destination & {:keys [errors question-data] :or {errors {} question-data {}}}]
   (let [question-types (->> question-types
@@ -105,7 +105,7 @@
       (hpage/include-js "/cljs/goog/base.js"
                         "/cljs/main.js")
       (script "goog.require('expert_parakeet.question.create_question_view');")
-      ;; we use dummy forms so that the input fields that are used to specify the name of the element to add do not interfere with the outer form
+      ;; we use dummy forms so that the input fields, that are used to specify the name of the element to add, do not interfere with the outer form
       [:div#dummy-forms
        [:form#new-category-form {:onsubmit "expert_parakeet.question.create_question_view.add_new_category(event)"}]
        [:form#new-single-choice-form {:onsubmit "expert_parakeet.question.create_question_view.add_new_choice(event, 'single-choice', true)"}]

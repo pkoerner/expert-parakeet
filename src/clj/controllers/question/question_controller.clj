@@ -34,7 +34,7 @@
 
 (defn create-question-get
   "Takes a ring request, a function to get question categories, and a post-destination as arguments.
-  It returns a form for question creation, which post result will be send to the provided `post-destination`."
+  It returns a form for question creation, the result of which will be sent to the provided `post-destination`."
   [req get-question-categories-fun post-destination]
   (creation-view/question-form (get-question-categories-fun) post-destination :errors (extract-errors req)))
 
@@ -46,9 +46,9 @@
 
 
 (defn submit-create-question!
-  "Takes a ring request, a url to which the post should be send, if it needs to be filled out again, and a question-service as parameters.  
+  "Takes a ring request, a url to which the post should be sent, if it needs to be filled out again, and a question-service as parameters.  
    From the ring request the parameters for the question to be created are extracted and validated.
-   If it is a valid question the question is created, persisted, and a success html view is returned.
+   If it is a valid question, the question is created, persisted, and a success html view is returned.
    If it is not a valid question, the old question data with the error messages is passed to the `question-creation-form` again, 
    to display the old values with the corresponding error messages.
 

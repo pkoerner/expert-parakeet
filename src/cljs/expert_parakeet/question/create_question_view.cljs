@@ -86,7 +86,7 @@
   "Creates a new category entry for the list of categories.
    The user still needs to select it but it makes it possible to add new categories for questions.
   
-   Notes: The current implementation heavily relies on the current display of categories.
+   Notes: The current implementation relies heavily on the current display of categories.
    This will need to change when the clj code changes. (Bad but inevitable from my point of view.)"
   [event]
   (let [form (.-target event)
