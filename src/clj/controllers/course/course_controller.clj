@@ -19,7 +19,7 @@
   "Returns an html-form to create a course.
    The form is posted to the `post-destination` parameter."
   [_req post-destination]
-  (html-response (view/course-form post-destination)))
+  (html-response (view/create-course-form post-destination)))
 
 
 (s/fdef submit-create-course!
@@ -38,4 +38,4 @@
     (if (empty? validation-errors)
       (let [added-course (create-course course-service course-or-errors)]
         (html-response (view/submit-success-view added-course)))
-      (html-response (view/course-form post-destination :errors validation-errors :course-data form-data)))))
+      (html-response (view/create-course-form post-destination :errors validation-errors :course-data form-data)))))

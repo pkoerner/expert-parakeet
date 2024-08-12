@@ -17,7 +17,7 @@
         :ret #(instance? hiccup.util.RawString %))
 
 
-(defn course-form
+(defn create-course-form
   "Returns a html-form for course creation.
    Field of the response is: [name].
    It can display errors provided in a map behind the optional `:errors` parameter

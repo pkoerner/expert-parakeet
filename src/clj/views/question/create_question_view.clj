@@ -101,7 +101,7 @@
         :ret #(instance? hiccup.util.RawString %))
 
 
-(defn question-form
+(defn create-question-form
   "Takes as arguments a collection of categories and a destination to which the form's post request should be sent.
    Optional keyword arguemnts:
    `:errors`: Takes a map with form data keys mapped to error messages.

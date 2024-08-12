@@ -427,15 +427,15 @@
     (testing "add-course! with generated course names"
       (let [course-names (distinct (map #(string/lower-case %) (gen/sample (s/gen :course/name) generator-sample-size)))]
         (t/is (every? (fn [act]
-                        (let [_ (db/add-course! test-db act)
-                              excisting-course-names (map #(:course/name %) (db/get-all-courses test-db))]
-                          (some #(= act %) excisting-course-names)))
+                        (let [_ (db/add-course! test-db {:course/name act})
+                              existing-course-names (map #(:course/name %) (db/get-all-courses test-db))]
+                          (some #(= act %) existing-course-names)))
                       course-names))))
     (testing "add-course! with existing name - should fail"
       (t/is (thrown-with-msg?
               java.lang.AssertionError
               #"There is already a course with the same name in the database. Please check the existing course and wether you need to create a new one."
-              (db/add-course! test-db "Programming"))))))
+              (db/add-course! test-db {:course/name "Programming"}))))))
 
 
 (deftest user-test
