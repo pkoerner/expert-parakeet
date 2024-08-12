@@ -10,199 +10,219 @@
     [util.hiccup-extensions :refer [optional-error-display script]]))
 
 
-(def create-question-error-keys
-  "Possible keys for which errors can be displayed in the `question-form`."
-  #{:question/statement :question/type :question/max-points
-    :question/possible-solutions :question/correct-solutions
-    :question/evaluation-criteria})
+(defn- as-coll
+  "Wraps the parameter in a vector if it is not already a collection."
+  [coll-or-single]
+  (cond
+    (nil? coll-or-single) []
+    (coll? coll-or-single) coll-or-single
+    :else [coll-or-single]))
 
 
 (defn- free-text-inputs
+  "Build input(s) for free text questions.
+   The containing element needs to to have the id `free-text` to be accessible from clojurescript.
+   The id/name strings must not be changed, they are used in the clojurescript and in the validation logic."
   [errors question-data]
   (h/html
-    [:div#free-text
-     (optional-error-display :question/evaluation-criteria errors)
-     [:label {:for "evaluation-criteria"} "Evaluation criteria"] [:br]
-     [:input#evaluation-criteria.form-control {:name "evaluation-criteria"
-                                               :value (question-data :question/evaluation-criteria)}]]))
+    [:fieldset#free-text
+     [:legend {:class "form-label"} "Evaluation criteria"]
+     (optional-error-display :evaluation-criteria errors)
+     (hform/text-area {:class "form-control"} "evaluation-criteria" (get question-data :evaluation-criteria))]))
 
 
-(defn- possible-answers-input
-  [choice-type
-   possible-solutions-error solution-error
-   was-selected possible-solutions solutions]
-  (let [question-type-container (str choice-type "-container")
-        possible-solution-input-id (str "possible-" choice-type "-solution")
-        solution-container-div-id (str possible-solution-input-id "-container")
-        add-possible-solution-btn-id (str "add-" possible-solution-input-id "-btn")
-        solution-list-id (str choice-type "-solution")]
-    (h/html
-      [:div {:id question-type-container}
-       possible-solutions-error
-       [:label {:for solution-container-div-id} "Possible answers:"] [:br]
-       [:div.form-group {:id solution-container-div-id}
-        (when was-selected
-          (apply script
-                 (concat ["window.onload = () => {"]
-                         (for [curr-solution possible-solutions]
-                           (str "
-expert_parakeet.question.create_question_view.add_to_possible_solution(
-  '" solution-container-div-id "',
-  '" possible-solution-input-id "',
-  '" solution-list-id "',
-  '" curr-solution "',
-  " (contains?  (set solutions) curr-solution) "
-);\n"))
-                         ["};"])))]
-       [:button.btn.btn-outline-info.btn-sm {:id add-possible-solution-btn-id :type "button"} "+"]
-       ;; When the add button is klicked
-       (script "
-expert_parakeet.question.create_question_view.register_adding_solution_behavior(
-    '" add-possible-solution-btn-id "', '" solution-container-div-id "', '" possible-solution-input-id "', '" solution-list-id "'
-)")]
-
-      [:div
-       solution-error
-       [:label {:for solution-list-id} "Correct answer(/en):"] [:br]
-       [:ul {:id solution-list-id}]])))
+(defn- choice-input
+  "Build input(s) for single-/multiple-choice questions.
+   The containing element needs to to have the correct id to be accessible from clojurescript.
+   The id/name strings must not be changed, they are used in the clojurescript and in the validation logic."
+  [errors question-data choice-type radio?]
+  (let [possible-solutions-error (optional-error-display (keyword (str "possible-" choice-type "-solutions")) errors)
+        correct-solutions-error (optional-error-display (keyword (str "correct-" choice-type "-solutions")) errors)
+        possible-solutions (as-coll (get question-data (keyword (str "possible-" choice-type "-solutions"))))
+        correct-solutions (set (as-coll (get question-data (keyword (str "correct-" choice-type "-solutions")))))
+        choice-container (str choice-type "-container")
+        new-choice-form-id  (str "new-" choice-type "-form")
+        new-choice-input-id  (str "new-" choice-type)
+        possible-input-name (str "possible-" choice-type "-solutions")
+        correct-input-name (str "correct-" choice-type "-solutions")]
+    [:fieldset {:id choice-type}
+     [:legend {:class "form-label"} "Choices"]
+     possible-solutions-error
+     correct-solutions-error
+     [:div {:id choice-container :class "list-group"}
+      ;; keep this in sync with the cljs function!
+      (map-indexed (fn [idx stmt]
+                     (let [div-id (str choice-type "-div-" idx)
+                           input-id (str choice-type "-input-" idx)]
+                       [:div {:id div-id :class "list-group-item p-2 d-flex justify-content-between align-items-center"}
+                        [:div {:class "form-check d-flex align-items-center"}
+                         [:input {:type "hidden" :name possible-input-name :value stmt}]
+                         [:input {:class "form-check-input me-2"
+                                  :id input-id
+                                  :type (if radio? "radio" "checkbox")
+                                  :name correct-input-name
+                                  :value stmt
+                                  :checked (contains? correct-solutions stmt)
+                                  :required radio?}]
+                         [:label {:class "form-check-label" :for input-id} stmt]]
+                        [:button {:class "btn btn-danger"
+                                  :type "button"
+                                  :onclick (str "expert_parakeet.question.create_question_view.delete_element('" div-id "')")}
+                         "-"]]))
+                   possible-solutions)]
+     [:div.input-group
+      (hform/text-field {:class "form-control" :form new-choice-form-id :required true :placeholder "Create new choice"} new-choice-input-id)
+      (hform/submit-button {:class "btn btn-outline-secondary" :form new-choice-form-id} "+")]]))
 
 
 (defn- single-choice-inputs
+  "Build input(s) for single-choice questions.
+   The containing element needs to to have the id `single-choice` to be accessible from clojurescript.
+   The id/name strings must not be changed, they are used in the clojurescript and in the validation logic."
   [errors question-data]
-  (h/html
-    [:div#single-choice
-     (possible-answers-input "single-choice"
-                             (optional-error-display :question/possible-solutions errors)
-                             (optional-error-display :question/correct-solutions errors)
-                             (= :question.type/single-choice (question-data :question/type))
-                             (question-data :question/possible-solutions)
-                             (question-data :question/correct-solutions))]))
+  (choice-input errors question-data "single-choice" true))
 
 
 (defn- multiple-choice-inputs
+  "Build input(s) for multiple-choice questions.
+   The containing element needs to to have the id `multiple-choice` to be accessible from clojurescript.
+   The id/name strings must not be changed, they are used in the clojurescript and in the validation logic."
   [errors question-data]
-  (h/html
-    [:div#multiple-choice
-     (possible-answers-input "multiple-choice"
-                             (optional-error-display :question/possible-solutions errors)
-                             (optional-error-display :question/correct-solutions errors)
-                             (= :question.type/multiple-choice (question-data :question/type))
-                             (question-data :question/possible-solutions)
-                             (question-data :question/correct-solutions))]))
+  (choice-input errors question-data "multiple-choice" false))
 
 
 (s/fdef question-form
-        :args (s/cat :categories (s/coll-of :question/categories)
+        :args (s/cat :categories :question/categories
                      :post-destination :general/non-blank-string
-                     :errors (s/cat :errors  (s/? #{:errors})
-                                    :error-map (s/? (s/map-of create-question-error-keys string?))
+                     :errors (s/cat :errors (s/? #{:errors})
+                                    :error-map (s/? (s/map-of keyword? string?))
                                     :question-data (s/? #{:question-data})
                                     :question-data-map (s/? map?)))
         :ret #(instance? hiccup.util.RawString %))
 
 
 (defn question-form
-  "Takes as arguments a collection of arguments and a destination to which the form post should be send.
-   Optional keyword arguemnts:  
-   `:errors`: Takes a map with keys from the `:question` namespace mapped to strings. 
-   These are displayed as errors in the form with their corresponding input field.  
-   `:question-data`: Takes a map  with keys from the `:question` namespace mapped to valid values.  
-   When present the values are set put into the input fields corresponding to the name.
-   This way the form can be re/prepopulated.  "
+  "Takes as arguments a collection of categories and a destination to which the form's post request should be sent.
+   Optional keyword arguemnts:
+   `:errors`: Takes a map with form data keys mapped to error messages.
+   These are displayed as errors in the form with their corresponding input field.
+   `:question-data`: Takes a map with form data keys mapped to values.
+   When present, the values are put into the input fields corresponding to the name.
+   This way the form can be re-/prepopulated."
   [categories post-destination & {:keys [errors question-data] :or {errors {} question-data {}}}]
-  (let [question-types-js-arr (str "[" (string/join ", "  (map #(str "'" % "'") (map name question-types))) "]")]
+  (let [question-types (->> question-types
+                            (map name)
+                            (sort))
+        question-types-js-arr (str "[" (string/join ", " (map #(str "'" % "'") question-types)) "]")]
     (h/html
       (hpage/include-js "/cljs/goog/base.js"
                         "/cljs/main.js")
       (script "goog.require('expert_parakeet.question.create_question_view');")
+      ;; we use dummy forms so that the input fields, that are used to specify the name of the element to add, do not interfere with the outer form
+      [:div#dummy-forms
+       [:form#new-category-form {:onsubmit "expert_parakeet.question.create_question_view.add_new_category(event)"}]
+       [:form#new-single-choice-form {:onsubmit "expert_parakeet.question.create_question_view.add_new_choice(event, 'single-choice', true)"}]
+       [:form#new-multiple-choice-form {:onsubmit "expert_parakeet.question.create_question_view.add_new_choice(event, 'multiple-choice', false)"}]]
       [:div.container
        [:h2 "Create question"]
        (hform/form-to
-         {:enctype "multipart/form-data"
-          :onsubmit (str "expert_parakeet.question.create_question_view.remove_doms_when_hidden(" question-types-js-arr ")")}
          [:post post-destination]
 
-         [:div.form-group
-          (optional-error-display :question/statement errors)
-          [:label {:for "question-statement"} "Question statement"] [:br]
-          [:input#question-statement.form-control {:name "question-statement" :value (question-data :question/statement)}]]
+         [:div
+          (hform/label {:class "form-label"} "statement" "Question statement")
+          (optional-error-display :statement errors)
+          (hform/text-area {:class "form-control" :required true} "statement" (get question-data :statement))]
 
-         [:div.form-group
-          (optional-error-display :question/max-points errors)
-          [:label {:for "achivable-points"} "Maxmimum number of points"] [:br]
-          [:input#achivable-points.form-control {:name "achivable-points"
-                                                 :type "number"
-                                                 :min "0"
-                                                 :step ".1"
-                                                 :value (let [points (question-data :question/max-points)]
-                                                          (if points points "5"))}]]
+         [:div
+          (hform/label {:class "form-label"} "max-points" "Maximum number of points")
+          (optional-error-display :max-points errors)
+          [:input {:id "max-points"
+                   :class "form-control"
+                   :name "max-points"
+                   :type "number"
+                   :min "0"
+                   :step "1"
+                   :required true
+                   :value (get question-data :max-points 1)}]]
 
-         [:div.form-group
-          (optional-error-display :question/type errors)
-          [:label {:for "type"} "Question type"] [:br]
-          [:select#type.form-control {:name "type"}
-           (hform/select-options
-             (let [prev-type (question-types (question-data :question/type))
-                   default-selected (if prev-type prev-type (first question-types))
-                   without-selected (remove #{default-selected} question-types)
-                   to-select-option (fn [type] [type type])]
-
-               (conj (map to-select-option without-selected)
-                     (to-select-option default-selected))))]]
+         [:div
+          (hform/label {:class "form-label"} "type" "Question type")
+          (optional-error-display :type errors)
+          (let [selected-type (get question-data :type (first question-types))
+                type-names {"free-text" "Free text"
+                            "single-choice" "Single choice"
+                            "multiple-choice" "Multiple choice"}
+                options (->> question-types (map (juxt type-names identity)))]
+            (hform/drop-down {:class "form-select" :required true} "type" options selected-type))]
 
          (single-choice-inputs errors question-data)
          (multiple-choice-inputs errors question-data)
          (free-text-inputs errors question-data)
+         (script "expert_parakeet.question.create_question_view.register_question_type_switch('type', " question-types-js-arr ");")
 
-         [:div.form-group
-          [:label {:for "new-category"} "Create new category: "]
-          [:input#new-category.form-control {:type "text"}]
-          [:button.btn.btn-outline-info.btn-sm {:type "button" :onclick "expert_parakeet.question.create_question_view.add_new_category()"} "+"]]
-
-         [:div {:clas "form-group"}
-          (optional-error-display :question/categories errors)
-          [:label {:for "category-container"} "Categories"] [:br]
-          [:div#category-container {:style "max-height: 150px; overflow-y: scroll;" :multiple true}
-           (map (fn [cat]
-                  (let [id (str "mult-select-" cat)]
-                    [:div.form-check
-                     [:input.form-check-input {:id id :type "checkbox" :name "categories" :value cat
-                                               :checked (some #{cat} (question-data :question/categories))}]
-                     [:label.form-check-label {:for id} cat]]))
-                (sort categories))]]
+         [:div
+          [:fieldset
+           [:legend {:class "form-label"} "Categories"]
+           (optional-error-display :categories errors)
+           (let [prev-categories (set (as-coll (get question-data :categories)))
+                 all-categories (set (concat categories prev-categories))]
+             [:div#category-container.ps-1 {:style "max-height: 150px; overflow-y: scroll"}
+              ;; keep this in sync with the cljs function!
+              (->> all-categories
+                   (sort)
+                   (map-indexed (fn [idx cat]
+                                  (let [id (str "category-" idx)]
+                                    [:div.form-check
+                                     (hform/check-box {:class "form-check-input"
+                                                       :name "categories"}
+                                                      id
+                                                      (contains? prev-categories cat)
+                                                      cat)
+                                     [:input {:class "form-check-input"
+                                              :id id
+                                              :type "checkbox"
+                                              :name "categories"
+                                              :value cat
+                                              :checked (contains? prev-categories cat)}]
+                                     [:label {:class "form-check-label" :for id} cat]]))))])
+           [:div.input-group
+            (hform/text-field {:class "form-control" :form "new-category-form" :required true :placeholder "Create new category"} "new-category")
+            (hform/submit-button {:class "btn btn-outline-secondary" :form "new-category-form"} "+")]]]
 
          (h/raw (anti-forgery-field))
-         (hform/submit-button {:class "btn btn-primary"} "submit"))
-       (script "
-expert_parakeet.question.create_question_view.register_question_type_switch('type', " question-types-js-arr ");
-")])))
+         (hform/submit-button {:class "btn btn-primary"} "Submit"))])))
 
 
 (defn- possible-solutions-view
+  "Part of the success view: show possible choices."
   [{:question/keys [possible-solutions]}]
-  [:p.lead [:b "Possible answers: "]
+  [:p.lead [:b "Possible choices: "]
    [:ul.list-group (for [el possible-solutions]
-                     [:li.list-group-item el])]])
+                     [:li.list-group-item (el :solution/statement)])]])
 
 
 (defn- single-choice-question-view
+  "Part of the success view: show possible and choices for single-choice questions."
   [{:question/keys [correct-solutions] :as question}]
   [:div
    (possible-solutions-view question)
-   [:p.lead [:b "With the correct answer: "] (first correct-solutions)]])
+   [:p.lead [:b "With the correct choice: "] (-> correct-solutions
+                                                 (first)
+                                                 :solution/statement)]])
 
 
 (defn- multiple-choice-question-view
+  "Part of the success view: show possible and choices for multiple-choice questions."
   [{:question/keys [correct-solutions] :as question}]
   [:div
    (possible-solutions-view question)
-
-   [:p.lead [:b "With the correct answers: "]
+   [:p.lead [:b "With the correct choices: "]
     [:ul.list-group (for [el correct-solutions]
-                      [:li.list-group-item el])]]])
+                      [:li.list-group-item (el :solution/statement)])]]])
 
 
 (defn- free-text-question-view
+  "Part of the success view: show free-text-question-specific data."
   [{:question/keys [evaluation-criteria]}]
   [:div
    [:p.lead [:b "With the evaluation criteria: "] evaluation-criteria]])
@@ -223,12 +243,12 @@ expert_parakeet.question.create_question_view.register_question_type_switch('typ
      [:h1 "The question of type \"" type "\" was successfully created."]
      [:div.container
       [:h2 "Question: "]
-      [:p.lead [:b "Question statement "] statement]
+      [:p.lead [:b "Question statement: "] statement]
       (case type
         :question.type/free-text (free-text-question-view question)
         :question.type/single-choice (single-choice-question-view question)
         :question.type/multiple-choice (multiple-choice-question-view question))
-      [:p.lead [:b "Reachable points "] max-points]
-      [:p.lead [:b "Categories "]
+      [:p.lead [:b "Maximum points: "] max-points]
+      [:p.lead [:b "Categories: "]
        [:ul.list-group (for [cat categories]
                          [:li.list-group-item cat])]]]]))

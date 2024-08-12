@@ -20,12 +20,8 @@
     "Returns a collection of all `:question/categories`.")
 
   (validate-question
-    [self
-     question-statement achivable-points type
-     possible-solutions correct-solutions
-     evaluation-criteria
-     categories]
+    [self question-form-data]
     "Takes all possible values for a question as arguments and validates them.
      If there was no parsing/validation error, a valid question map is returned.
-     If there were parsing/validation errors, a map is returned that atleast contains an `:error` key 
-     mapped to a map of keys from the :question namespace to `str` error messages."))
+     If there were parsing/validation errors, a map is returned that at least contains an `:errors` key 
+     mapped to a map of keys to `str` error messages."))
