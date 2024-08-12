@@ -44,7 +44,7 @@
 
 
 (defn submit-success-view
-  [course]
+  [{:course/keys [name]}]
   (h/html
     [:div
-     [:p "The course " (course :course/name) " was successfully created!"]]))
+     [:p "The course " name " was successfully created!"]]))
