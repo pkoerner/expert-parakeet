@@ -39,10 +39,10 @@
 
 
 (defn validate-user-for-question
-  " Checks if a user is assgined to a
-requested question. If so an
-empty error map is returned. Otherwise
-an error-set with a specified error is returned. "
+  "Checks if a user is assigned to a
+   requested question. If so an
+   empty error map is returned. Otherwise
+   an error-set with a specified error is returned."
   [this user-id question-id]
   (let [users-questions (get-question-ids-for-user (.db this) user-id)
         error-set view/question-errors]
@@ -74,6 +74,7 @@ an error-set with a specified error is returned. "
 
 
 (defn- as-coll
+  "Wraps the parameter in a vector if it is not already a collection."
   [coll-or-single]
   (cond
     (nil? coll-or-single) []
@@ -87,8 +88,12 @@ an error-set with a specified error is returned. "
    "multiple-choice" :question.type/multiple-choice})
 
 
-;; we are using a vector to preserve the iteration order!
 (def ^:private question-validators
+  "List of validator/parsing functions for questions.
+   Each element is a tuple containing the form data key and
+   a function which takes the currently parsed question result and the value that is saved in the form data (may be nil).
+   The validator function either returns an error in the form `{:error \"message\"}` or question fields that get merged with the current result.
+   We are using a vector and not a map to preserve the iteration order!"
   [[:type (fn [_ value]
             (if-let [question-type (to-question-type (if (keyword? value)
                                                        (name value)
@@ -169,6 +174,9 @@ an error-set with a specified error is returned. "
 
 
 (defn- validate-question-impl
+  "Uses `question-validators` to parse and validate the form data.
+   This either returns a question map or a partial question map with an `:errors` key.
+   The `:errors` key contains a map with form data keys mapped to error messages which may be displayed in the web form."
   [_ question-form-data]
   (loop [result {}
          validators (seq question-validators)]

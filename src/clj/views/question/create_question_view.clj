@@ -11,6 +11,7 @@
 
 
 (defn- as-coll
+  "Wraps the parameter in a vector if it is not already a collection."
   [coll-or-single]
   (cond
     (nil? coll-or-single) []
@@ -19,6 +20,9 @@
 
 
 (defn- free-text-inputs
+  "Build input(s) for free text questions.
+   The containing element needs to to have the id `free-text` to be accessible from clojurescript.
+   The id/name strings must not be changed, they are used in the clojurescript and in the validation logic."
   [errors question-data]
   (h/html
     [:fieldset#free-text
@@ -28,6 +32,9 @@
 
 
 (defn- choice-input
+  "Build input(s) for single-/multiple-choice questions.
+   The containing element needs to to have the correct id to be accessible from clojurescript.
+   The id/name strings must not be changed, they are used in the clojurescript and in the validation logic."
   [errors question-data choice-type radio?]
   (let [possible-solutions-error (optional-error-display (keyword (str "possible-" choice-type "-solutions")) errors)
         correct-solutions-error (optional-error-display (keyword (str "correct-" choice-type "-solutions")) errors)
@@ -69,11 +76,17 @@
 
 
 (defn- single-choice-inputs
+  "Build input(s) for single-choice questions.
+   The containing element needs to to have the id `single-choice` to be accessible from clojurescript.
+   The id/name strings must not be changed, they are used in the clojurescript and in the validation logic."
   [errors question-data]
   (choice-input errors question-data "single-choice" true))
 
 
 (defn- multiple-choice-inputs
+  "Build input(s) for multiple-choice questions.
+   The containing element needs to to have the id `multiple-choice` to be accessible from clojurescript.
+   The id/name strings must not be changed, they are used in the clojurescript and in the validation logic."
   [errors question-data]
   (choice-input errors question-data "multiple-choice" false))
 
@@ -181,6 +194,7 @@
 
 
 (defn- possible-solutions-view
+  "Part of the success view: show possible choices."
   [{:question/keys [possible-solutions]}]
   [:p.lead [:b "Possible choices: "]
    [:ul.list-group (for [el possible-solutions]
@@ -188,6 +202,7 @@
 
 
 (defn- single-choice-question-view
+  "Part of the success view: show possible and choices for single-choice questions."
   [{:question/keys [correct-solutions] :as question}]
   [:div
    (possible-solutions-view question)
@@ -197,16 +212,17 @@
 
 
 (defn- multiple-choice-question-view
+  "Part of the success view: show possible and choices for multiple-choice questions."
   [{:question/keys [correct-solutions] :as question}]
   [:div
    (possible-solutions-view question)
-
    [:p.lead [:b "With the correct choices: "]
     [:ul.list-group (for [el correct-solutions]
                       [:li.list-group-item (el :solution/statement)])]]])
 
 
 (defn- free-text-question-view
+  "Part of the success view: show free-text-question-specific data."
   [{:question/keys [evaluation-criteria]}]
   [:div
    [:p.lead [:b "With the evaluation criteria: "] evaluation-criteria]])

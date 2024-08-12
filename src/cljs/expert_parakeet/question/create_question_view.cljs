@@ -4,6 +4,8 @@
 
 
 (defn- gen-dom-id
+  "Generate a new random id which is unused in the current dom.
+   The prefix parameter will be prefixed to a random number to generate it."
   [prefix]
   (loop []
     (let [id (str prefix (rand-int 1000000))]
