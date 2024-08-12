@@ -12,14 +12,13 @@
     [ring.util.codec :refer [form-encode]]
     [services.course-service.course-service :as cs :refer [->CourseService]]
     [services.course-service.p-course-service :refer [PCourseService
-                                                      validate-course]]
-    [views.course.create-course-view :refer [create-course-error-keys]]))
+                                                      validate-course]]))
 
 
 (def ^:private error-map-gen
-  (let [rand-error-map (->> create-course-error-keys
-                            (map (fn [key] {(str key) (str "Error for key " key)}))
-                            (gen/elements))]
+  (let [rand-error-map (->>  #{:course/course-error :course/course-already-existed}
+                             (map (fn [key] {(str key) (str "Error for key " key)}))
+                             (gen/elements))]
     (gen/fmap #(apply merge %)
               (gen/vector rand-error-map 1 2))))
 

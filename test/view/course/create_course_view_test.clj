@@ -6,7 +6,7 @@
     [clojure.test.check.generators :as gen]
     [clojure.test.check.properties :as prop]
     [test-extensions :refer [test-with-check]]
-    [views.course.create-course-view :refer [course-form create-course-error-keys submit-success-view]]))
+    [views.course.create-course-view :refer [course-form submit-success-view]]))
 
 
 (def ^:private opts {:clojure.spec.test.check/opts {:num-tests 200}})
@@ -37,9 +37,9 @@
 
 
 (def ^:private error-map-gen
-  (let [rand-error-map (->> create-course-error-keys
-                            (map (fn [key] {key (str "Error for key " key)}))
-                            (gen/elements))]
+  (let [rand-error-map (->>  #{:course/course-error :course/course-already-existed}
+                             (map (fn [key] {key (str "Error for key " key)}))
+                             (gen/elements))]
     (gen/fmap #(apply merge %)
               (gen/vector rand-error-map 1 2))))
 

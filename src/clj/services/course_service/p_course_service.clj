@@ -8,9 +8,9 @@
     "Returns a collection of all available courses.")
 
   (create-course
-    [self course-name]
+    [self course]
     "Creates a course entry in the database and returns a course map.")
 
   (validate-course
-    [self course-name]
+    [self course-form-data]
     "Validates the values for the creation of a course. Returns a map of error keys."))

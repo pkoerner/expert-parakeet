@@ -4,51 +4,37 @@
     [clojure.string :as string]
     [hiccup.form :as hform]
     [hiccup2.core :as h]
-    [ring.util.anti-forgery :refer [anti-forgery-field]]))
-
-
-(def create-course-error-keys
-  "Possible keys for which errors can be displayed in the `course-form`."
-  #{:course/course-error :course/course-already-existed})
+    [ring.util.anti-forgery :refer [anti-forgery-field]]
+    [util.hiccup-extensions :refer [optional-error-display]]))
 
 
 (s/fdef course-form
         :args (s/cat :post-destination :general/non-blank-string
-                     :kwargs (s/? (s/or :empty empty?
-                                        :map (s/map-of create-course-error-keys
-                                                       string?))))
-        :ret #(instance? hiccup.util.RawString %)
-        :fn (fn [spec-map]
-              (let [{{:keys [post-destination]} :args
-                     ret :ret} spec-map]
-                #(string/includes? ret post-destination))))
-
-
-#_{:clj-kondo/ignore [:unresolved-var]}
+                     :kwargs (s/cat :errors (s/? #{:errors})
+                                    :error-map (s/? (s/map-of keyword? string?))
+                                    :course-data (s/? #{:course-data})
+                                    :course-data-map (s/? map?)))
+        :ret #(instance? hiccup.util.RawString %))
 
 
 (defn course-form
   "Returns a html-form for course creation.
-   Field of the response is: [course].
-   It can display errors provided in a map behind the optional `:errors` parameter."
-  [post-destination & {:keys [errors] :or {errors {}}}]
+   Field of the response is: [name].
+   It can display errors provided in a map behind the optional `:errors` parameter
+   and pre-populate the form with the data in the optional `:course-data` parameter."
+  [post-destination & {:keys [errors course-data] :or {errors {} course-data {}}}]
   (h/html
     (hform/form-to
-      {:enctype "multipart/form-data"}
       [:post post-destination]
 
       [:div
-       (when (errors :course/course-error)
-         [:div [:span {:style "color: red;"} (errors :course/course-error)]])
-       (when (errors :course/course-already-existed)
-         [:div [:span {:style "color: red;"} (errors :course/course-already-existed)]])
-       [:label {:for "course"} "Course name"] [:br]
-       [:input#course {:name "course"
-                       :type "text"
-                       :value "New Course"}]]
+       (hform/label {:class "form-label"} "name" "Course name")
+       (optional-error-display :course/course-error errors)
+       (optional-error-display :course/course-already-existed errors)
+       (hform/text-field {:class "form-control" :required true} "name" (get course-data :name))]
 
       (h/raw (anti-forgery-field))
-      (hform/submit-button "submit"))))
+      (hform/submit-button {:class "btn btn-primary"} "Submit"))))
 
 
 (s/fdef submit-success-view
@@ -61,4 +47,4 @@
   [course]
   (h/html
     [:div
-     [:p "The course " course " was successfully created!\n"]]))
+     [:p "The course " (course :course/name) " was successfully created!"]]))
