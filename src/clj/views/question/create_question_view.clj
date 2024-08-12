@@ -94,7 +94,7 @@
 (s/fdef question-form
         :args (s/cat :categories :question/categories
                      :post-destination :general/non-blank-string
-                     :errors (s/cat :errors (s/? #{:errors})
+                     :kwargs (s/cat :errors (s/? #{:errors})
                                     :error-map (s/? (s/map-of keyword? string?))
                                     :question-data (s/? #{:question-data})
                                     :question-data-map (s/? map?)))
