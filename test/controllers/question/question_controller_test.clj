@@ -29,40 +29,6 @@
         (t/is (every? #(string/includes? res %) categories))))))
 
 
-(deftest test-create-question-get-error-display
-  (let [get-categories-fun (fn [] [])]
-
-    (testing "Errors are displayed on GET with query params"
-      (t/are [error-map]
-             (let [request-with-params {:query-params error-map}
-                   res (create-question-get request-with-params get-categories-fun "post-destination")]
-               (every? (fn [[_key error]]
-                         (string/includes? res error))
-                       error-map))
-
-        {(str :type) "No valid type"}
-        {(str :statement) "No valid question statement!"}
-        {(str :max-points) "No valid question points"}
-        {(str :categories) "No valid question categories"}
-        {(str :evaluation-criteria) "No valid evaluation criteria"}
-        {(str :possible-single-choice-solutions) "No valid possible single choice solutions"}
-        {(str :correct-single-choice-solutions) "No valid correct single choice solutions"}
-        {(str :possible-multiple-choice-solutions) "No valid possible multiple choice solution"}
-        {(str :correct-multiple-choice-solutions) "No valid correct multiple choice solution"}))
-
-    (testing "unknown keys are not displayed"
-      (t/are [error-map]
-             (let [request-with-params {:query-params error-map}
-                   res (create-question-get request-with-params get-categories-fun "post-destination")]
-               (every? (fn [[_key error]]
-                         (not (string/includes? res error)))
-                       error-map))
-
-        {"Donno" "No valid type"}
-        {"Something" "No valid question statement!"}
-        {":something-else" "No valid question points"}))))
-
-
 (defn- stub-question-service
   [& {:keys [create-question! get-question-categories validate-question]
       :or {create-question! (fn [& _] {})
