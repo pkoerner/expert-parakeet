@@ -83,7 +83,7 @@
         (submit-user-answer! req (:answer-service services)))
 
   (GET "/create-question" req
-       (html-response (create-question-get req (partial get-question-categories (:question-service services)) "/create-question")))
+       (create-question-get req (partial get-question-categories (:question-service services)) "/create-question"))
 
   (POST "/create-question" req
         (submit-create-question! req "/create-question" (:question-service services)))

@@ -10,7 +10,7 @@
                                                           get-question-by-id
                                                           validate-user-for-question]]
     [services.question-service.question-service :as q-ser]
-    [util.ring-extensions :refer [extract-errors html-response]]
+    [util.ring-extensions :refer [html-response]]
     [views.question.create-question-view :as creation-view :refer [question-success-view]]
     [views.question.question-view :as question-view]))
 
@@ -35,8 +35,8 @@
 (defn create-question-get
   "Takes a ring request, a function to get question categories, and a post-destination as arguments.
   It returns a form for question creation, the result of which will be sent to the provided `post-destination`."
-  [req get-question-categories-fun post-destination]
-  (creation-view/question-form (get-question-categories-fun) post-destination :errors (extract-errors req)))
+  [_req get-question-categories-fun post-destination]
+  (html-response (creation-view/create-question-form (get-question-categories-fun) post-destination)))
 
 
 (s/fdef submit-create-question!
@@ -71,7 +71,7 @@
     (if (empty? validation-errors)
       (let [added-question (create-question! question-service question-or-errors)]
         (html-response (question-success-view added-question)))
-      (html-response (creation-view/question-form (get-question-categories question-service)
-                                                  post-destination
-                                                  :errors validation-errors
-                                                  :question-data form-data)))))
+      (html-response (creation-view/create-question-form (get-question-categories question-service)
+                                                         post-destination
+                                                         :errors validation-errors
+                                                         :question-data form-data)))))

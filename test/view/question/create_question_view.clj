@@ -5,14 +5,14 @@
     [clojure.test.check.generators :as gen]
     [clojure.test.check.properties :as prop]
     [domain.spec]
-    [views.question.create-question-view :refer [question-form]]))
+    [views.question.create-question-view :refer [create-question-form]]))
 
 
 (deftest test-question-form
   (testing "Testing that the question-form contains every category and test that is sent to post-address."
     (t/are [test-input]
            (let [[categories post-destination] test-input
-                 test-result (str (question-form categories post-destination))]
+                 test-result (str (create-question-form categories post-destination))]
              (and
                (every? #(string/includes? test-result %) categories)
                (string/includes? test-result post-destination)))
@@ -37,7 +37,7 @@
           single-choice-solution-error #:question{:correct-solutions "Wrong single-choice-solution"}
           multiple-choice-solution-error #:question{:correct-solutions "Wrong multiple-choice-solution"}]
       (t/are [errors]
-             (let [test-result (question-form categories post-destination :errors errors)]
+             (let [test-result (create-question-form categories post-destination :errors errors)]
                (every? #(string/includes? test-result %) (vals errors)))
 
         categories-error
@@ -65,7 +65,7 @@
                                  :possible-solutions possible-solutions
                                  :correct-solutions [(first possible-solutions)]}]
       (t/are [question-data]
-             (let [test-result (question-form categories post-destination :question-data question-data)]
+             (let [test-result (create-question-form categories post-destination :question-data question-data)]
                (every? (fn [val]
                          (if (coll? val)
                            (every? #(string/includes? test-result %) (map str val))
