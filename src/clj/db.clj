@@ -46,7 +46,7 @@
     [this])
 
   (add-course!
-    [this course-name])
+    [this course])
 
   (get-course-iteration-by-id
     [this course-iteration-id])
@@ -271,8 +271,9 @@
 
 
   (add-course!
-    [this course-name]
-    (let [existing-course-names (map :course/name (get-all-courses this))]
+    [this course]
+    (let [course-name (get course :course/name)
+          existing-course-names (map :course/name (get-all-courses this))]
       (if (some #(= (string/lower-case course-name) (string/lower-case %)) existing-course-names)
         (throw (AssertionError. (str "There is already a course with the same name in the database. Please check the existing course and wether you need to create a new one.")))
         (let [id (generate-id @(.conn this) :course/id)

@@ -89,7 +89,7 @@
         (submit-create-question! req "/create-question" (:question-service services)))
 
   (GET "/create-course" req
-       (html-response (create-course-get req "/create-course")))
+       (create-course-get req "/create-course"))
 
   (POST "/create-course" req
         (submit-create-course! req "/create-course" (:course-service services)))

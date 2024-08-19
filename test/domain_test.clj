@@ -1,6 +1,4 @@
 (ns domain-test
-  {:clj-kondo/config '{:linters {:unresolved-symbol
-                                 {:exclude (test-calc-max-points-of-question-set)}}}}
   (:require
     [clojure.test :as t]
     [clojure.test.check.clojure-test :refer [defspec]]
@@ -19,6 +17,9 @@
    and a natural number of points as its value."
   [points]
   (assoc {} :question-set/questions (mapv #(assoc {} :question/max-points %) points)))
+
+
+#_{:clj-kondo/ignore [:unresolved-symbol]}
 
 
 (defspec test-calc-max-points-of-question-set 10

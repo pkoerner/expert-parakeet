@@ -26,7 +26,6 @@
       ["cat1" "Cat2" "more" "Categories" "than" "I" "can" "count" "so" "much"]
       "https://some.url"))
 
-
   (testing "Testing that errors are displayed in the form, when errors are passed to the view."
     (let [categories []
           post-destination "https://some.url"

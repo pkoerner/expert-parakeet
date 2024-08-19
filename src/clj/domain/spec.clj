@@ -101,7 +101,7 @@
 (s/def :course/question-sets (s/coll-of ::question-set))
 
 
-(s/def ::course
+(s/def :course/course
   (s/keys :req [:course/id
                 :course/name
                 :course/questions
@@ -109,7 +109,7 @@
 
 
 (s/def :course-iteration/id string?)
-(s/def :course-iteration/course ::course)
+(s/def :course-iteration/course :course/course)
 (s/def :course-iteration/year pos-int?)
 (s/def :course-iteration/semester semesters)
 (s/def :course-iteration/members (s/coll-of ::membership))
