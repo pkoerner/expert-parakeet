@@ -23,12 +23,15 @@
       []
       "https://some.url"
 
+      ["cat1" "Cat2" "more" "Categories" "than" "I" "can" "count" "so" "much"]
+      "https://some.url")))
+
 
 (deftest test-question-form-dispatch
   (testing "Test that a text-area is shown in the view, when the question is a free text question."
     (let [question {:question/type :question.type/free-text
                     :question/statement "Why 42?"}
-          dispatched-form (question-form question "https://some.url")]
+          dispatched-form (create-question-form question "https://some.url")]
       (t/is (string/includes? dispatched-form "textarea"))))
 
   (testing "Testing that errors are displayed in the form, when errors are passed to the view."
