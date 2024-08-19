@@ -91,17 +91,17 @@
   (choice-input errors question-data "multiple-choice" false))
 
 
-(s/fdef question-form
+(s/fdef create-question-form
         :args (s/cat :categories :question/categories
                      :post-destination :general/non-blank-string
-                     :errors (s/cat :errors (s/? #{:errors})
+                     :kwargs (s/cat :errors (s/? #{:errors})
                                     :error-map (s/? (s/map-of keyword? string?))
                                     :question-data (s/? #{:question-data})
                                     :question-data-map (s/? map?)))
         :ret #(instance? hiccup.util.RawString %))
 
 
-(defn question-form
+(defn create-question-form
   "Takes as arguments a collection of categories and a destination to which the form's post request should be sent.
    Optional keyword arguemnts:
    `:errors`: Takes a map with form data keys mapped to error messages.
