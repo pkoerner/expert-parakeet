@@ -91,7 +91,7 @@
   (choice-input errors question-data "multiple-choice" false))
 
 
-(s/fdef question-form
+(s/fdef create-question-form
         :args (s/cat :categories :question/categories
                      :post-destination :general/non-blank-string
                      :kwargs (s/cat :errors (s/? #{:errors})

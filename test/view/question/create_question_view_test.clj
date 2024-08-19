@@ -10,7 +10,7 @@
 
 
 (deftest test-create-question-form
-  (testing "Testing that the question-form contains every category and test that is sent to post-address."
+  (testing "Testing that the create-question-form contains every category and test that is sent to post-address."
     (t/are [categories post-destination]
            (let [test-result (str (create-question-form categories post-destination))]
              (and
@@ -20,11 +20,16 @@
       ["Cat1" "Cat2" "Cat3"]
       "https://some.url"
 
-      [] "https://some.url"
+      []
+      "https://some.url"
 
-      ["cat1" "Cat2" "more" "Categories" "than" "I" "can" "count" "so" "much"]
-      "https://some.url"))
 
+(deftest test-question-form-dispatch
+  (testing "Test that a text-area is shown in the view, when the question is a free text question."
+    (let [question {:question/type :question.type/free-text
+                    :question/statement "Why 42?"}
+          dispatched-form (question-form question "https://some.url")]
+      (t/is (string/includes? dispatched-form "textarea"))))
 
   (testing "Testing that errors are displayed in the form, when errors are passed to the view."
     (let [categories []
@@ -34,10 +39,10 @@
           question-statement-error {:statement "Wrong question-statement"}
           points-error {:max-points "Wrong points"}
           evaluation-criteria-error {:evaluation-criteria "Wrong evaluation-criteria"}
-          possible-single-choice-solutions-error {:possible-single-choice-solutions "Wrong possible-solutions"}
-          possible-multiple-choice-solutions-error {:possible-multiple-choice-solutions "Wrong possible-solutions"}
-          correct-single-choice-solution-error {:correct-single-choice-solutions "Wrong single-choice-solution"}
-          correct-multiple-choice-solution-error {:correct-multiple-choice-solutions "Wrong multiple-choice-solution"}]
+          possible-single-choice-solutions-error {:possible-single-choice-solutions "Wrong possible-single-choice-solutions"}
+          possible-multiple-choice-solutions-error {:possible-multiple-choice-solutions "Wrong possible-multiple-choice-solutions"}
+          correct-single-choice-solution-error {:correct-single-choice-solutions "Wrong correct-single-choice-solutions"}
+          correct-multiple-choice-solution-error {:correct-multiple-choice-solutions "Wrong correct-multiple-choice-solutions"}]
       (t/are [errors]
              (let [test-result (create-question-form categories post-destination :errors errors)]
                (every? #(string/includes? test-result %) (vals errors)))
@@ -53,13 +58,13 @@
         correct-multiple-choice-solution-error
         ;; some random merges of the error messages. No particular reason why those are tested.
         (merge categories-error type-error question-statement-error)
-        (merge points-error evaluation-criteria-error possible-single-choice-solutions-error)
+        (merge points-error evaluation-criteria-error possible-multiple-choice-solutions-error)
         (merge correct-single-choice-solution-error correct-multiple-choice-solution-error))))
 
 
   (testing "Testing that data to populate the view is displayed in the form."
     (let [categories ["Cat1" "Cat2"]
-          post-destination  "https://some.url"
+          post-destination "https://some.url"
           possible-solutions ["Solution1" "Solution2" "More solutions"]
           basic-input {:statement "Valid question statement."
                        :categories [(first categories)]
@@ -67,15 +72,15 @@
                        :evaluation-criteria "Some evaluation criteria"
                        :possible-single-choice-solutions possible-solutions
                        :possible-multiple-choice-solutions possible-solutions
-                       :correct-single-choice-solutions [(first possible-solutions)]
-                       :correct-multiple-choice-solutions [(first possible-solutions) (second possible-solutions)]}]
+                       :correct-single-choice-solution-error [(first possible-solutions)]
+                       :correct-multiple-choice-solution-error [(first possible-solutions) (second possible-solutions)]}]
       (t/are [question-data]
              (let [test-result (create-question-form categories post-destination :question-data question-data)]
                (every? (fn [val]
                          (if (coll? val)
                            (every? #(string/includes? test-result %) (map str val))
                            (string/includes? test-result (str val))))
-                       (vals ; question/type is not displayed
+                       (vals ; :type is not displayed
                         (dissoc question-data :type))))
 
         (assoc basic-input :type "free-text")
