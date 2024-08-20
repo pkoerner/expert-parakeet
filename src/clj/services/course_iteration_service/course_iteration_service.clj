@@ -1,10 +1,12 @@
 (ns services.course-iteration-service.course-iteration-service
   (:require
+    [clojure.edn :as edn]
     [clojure.spec.alpha :as s]
+    [clojure.string :as str]
     [db]
     [domain]
     [services.course-iteration-service.p-course-iteration-service :refer [PCourseIterationService]]
-    [util.forms :refer [validate-form-data]]))
+    [util.forms :refer [as-coll validate-form-data]]))
 
 
 ;; todo replace all direct db calls and inject repositories
@@ -21,7 +23,7 @@
 
 (defn- create-course-iteration-impl
   [this course-iteration]
-  (db/add-course-iteration-with-question-sets! (.db this) course-iteration))
+  (db/add-course-iteration! (.db this) course-iteration))
 
 
 (def ^:private course-iteration-validators
@@ -30,8 +32,33 @@
    a function which takes the currently parsed course iteration result and the value that is saved in the form data (may be nil).
    The validator function either returns an error of the form `{:error \"message\"}` or course iteration fields that get merged with the current result.
    We are using a vector and not a map to preserve the iteration order!"
-  [;; TODO
-   ])
+  [[:course (fn [_ _ value]
+              (let [parsed-value (-> value
+                                     (str)
+                                     ((fn [id] {:course/id id})))]
+                (if (s/valid? (s/keys :req [:course/id]) parsed-value)
+                  {:course-iteration/course parsed-value}
+                  {:error "The given course id was invalid"})))]
+   [:year (fn [_ _ value]
+            (let [parsed-value (-> value (str) (edn/read-string))]
+              (if (s/valid? :course-iteration/year parsed-value)
+                {:course-iteration/year parsed-value}
+                {:error "The course iteration year must be positive integer"})))]
+   [:semester (fn [_ _ value]
+                (let [parsed-value (keyword "semester" (if (keyword? value)
+                                                         (name value)
+                                                         (str value)))]
+                  (if (s/valid? :course-iteration/semester parsed-value)
+                    {:course-iteration/semester parsed-value}
+                    {:error "The given course iteration semester was invalid"})))]
+   [:question-sets (fn [_ _ value]
+                     (let [parsed-values (->> value
+                                              (as-coll)
+                                              (map str)
+                                              (mapv (fn [id] {:question-set/id id})))]
+                       (if (s/valid? (s/coll-of (s/keys :req [:question-set/id])) parsed-values)
+                         {:course-iteration/question-sets parsed-values}
+                         {:error "The given course iteration question sets were invalid"})))]])
 
 
 (s/fdef get-all-question-sets
