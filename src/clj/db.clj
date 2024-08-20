@@ -52,11 +52,11 @@
     [this course-iteration-id])
 
   (add-course-iteration-with-question-sets!
-    [this course-id year semester question-set-ids])
+    [this course])
 
   ;; no test because it only uses add-course-iteration-with-question-sets!
   (add-course-iteration!
-    [this course-id year semester])
+    [this course])
 
   (get-question-by-id
     [this id])
@@ -294,22 +294,23 @@
 
 
   (add-course-iteration-with-question-sets!
-    [this course-id year semester question-set-ids]
+    [this course]
     (let [id (generate-id @(.conn this) :course-iteration/id)
           tx-result (d/transact (.conn this)
                                 [{:course-iteration/id id
-                                  :course-iteration/course [:course/id course-id]
-                                  :course-iteration/year year
-                                  :course-iteration/semester semester
-                                  :course-iteration/question-sets (mapv (fn [id] [:question-set/id id]) question-set-ids)}])
+                                  :course-iteration/course [:course/id (get-in course [:course-iteration/course :course/id])]
+                                  :course-iteration/year (course :course-iteration/year)
+                                  :course-iteration/semester (course :course-iteration/semester)
+                                  :course-iteration/question-sets (mapv (fn [qs] [:question-set/id (qs :question-set/id)])
+                                                                        (course :course-iteration/question-sets))}])
           db-after (:db-after tx-result)]
       (->> (d/pull db-after db.schema/course-iteration-slim-pull [:course-iteration/id id])
            (resolve-enums))))
 
 
   (add-course-iteration!
-    [this course-id year semester]
-    (add-course-iteration-with-question-sets! this course-id year semester []))
+    [this course]
+    (add-course-iteration-with-question-sets! this course))
 
 
   (get-question-by-id

@@ -3,7 +3,8 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as str]
     [db]
-    [services.course-service.p-course-service :refer [PCourseService]]))
+    [services.course-service.p-course-service :refer [PCourseService]]
+    [util.forms :refer [validate-form-data]]))
 
 
 ;; todo replace all direct db calls and inject repositories
@@ -40,24 +41,24 @@
                                  #(contains? % :errors))))
 
 
-(defn- validate-course-impl
-  [this course-form-data]
-  (let [courses (db/get-all-courses (.db this))
-        course-name (-> course-form-data
-                        :name
-                        (str/trim))
-        courses-with-same-name (filter (fn [course] (= course-name (course :course/name))) courses)]
-    (-> {:course/name course-name}
-        (#(if (s/valid? :course/name course-name)
-            %
-            (update % :errors merge {:course/course-error "The course name must be a non-empty string"})))
-        (#(if (empty? courses-with-same-name)
-            %
-            (update % :errors merge {:course/course-already-existed "The given course name already exists"}))))))
+(def ^:private course-validators
+  "List of validator/parsing functions for courses.
+   Each element is a tuple containing the form data key and
+   a function which takes the currently parsed course result and the value that is saved in the form data (may be nil).
+   The validator function either returns an error of the form `{:error \"message\"}` or course fields that get merged with the current result.
+   We are using a vector and not a map to preserve the iteration order!"
+  [[:name (fn [this _ value]
+            (let [parsed-value (-> value (str) (str/trim))]
+              (cond
+                (not (s/valid? :course/name parsed-value)) {:error "The course name must be a non-empty string"}
+                (let [courses (db/get-all-courses (.db this))
+                      courses-with-same-name (filter (fn [course] (= parsed-value (course :course/name))) courses)]
+                  (seq courses-with-same-name)) {:error "The given course name already exists"}
+                :else {:course/name parsed-value})))]])
 
 
 (extend CourseService
   PCourseService
   {:get-all-courses get-all-courses
    :create-course create-course-impl
-   :validate-course validate-course-impl})
+   :validate-course (partial validate-form-data course-validators)})

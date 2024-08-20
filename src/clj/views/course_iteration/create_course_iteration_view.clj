@@ -99,7 +99,7 @@
 
 (defn submit-success-view
   "Returns a div with a success messag displaying the `semester` and the `year` of the created course-iteration."
-  [semester year]
+  [{:course-iteration/keys [semester year]}]
   (h/html
     [:div
      [:p "The course for the " semester

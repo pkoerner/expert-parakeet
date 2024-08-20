@@ -116,7 +116,7 @@
 (s/def :course-iteration/question-sets (s/coll-of ::question-set))
 
 
-(s/def ::course-iteration
+(s/def :course-iteration/course-iteration
   (s/keys :req [:course-iteration/id
                 :course-iteration/course
                 :course-iteration/year
