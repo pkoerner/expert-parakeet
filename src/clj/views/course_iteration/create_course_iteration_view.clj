@@ -36,7 +36,7 @@
    
    Fields of the response are: [course, year, semester, question-sets].
    
-   It can display error values if they are provided in a map behind the optional `:errors` param and pre-populate the form with the optional `:course-iteration-data` param"
+   It can display error values if they are provided in a map behind the optional `:errors` param and pre-populate the form with the optional `:course-iteration-data` param."
   [courses question-sets post-destination & {:keys [errors course-iteration-data] :or {errors {} course-iteration-data {}}}]
   (letfn [(course-to-option
             [course]

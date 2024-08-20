@@ -9,8 +9,8 @@
 
   (validate-course-iteration
     [self course-iteration-form-data]
-    "Validates the values for the createion of a course-iteration. Returns a map of error keys with")
+    "Validates the values for the creation of a course-iteration. Returns a map of error keys or the validated course iteration.")
 
   (get-all-course-iterations-for-user
     [self user-github-id]
-    "Returns a collection of all available course iterations with the course-iterations for a student."))
+    "Returns a collection of all available course iterations for a student."))

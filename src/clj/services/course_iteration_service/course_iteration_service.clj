@@ -62,7 +62,7 @@
 
 (s/fdef get-all-question-sets
         :args (s/cat :self #(satisfies? PCourseIterationService %)
-                     :user-gihub-id :user/github-id)
+                     :user-github-id :user/github-id)
         :ret (s/coll-of (s/keys :req [:question-set/id])))
 
 

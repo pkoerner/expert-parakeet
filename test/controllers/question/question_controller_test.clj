@@ -100,7 +100,7 @@
             basic-valid-input {:statement "Valid question statement"
                                :categories ["Valid Category"]
                                :max-points "5"}
-            redirect-uri "S"
+            post-destination "S"
             single-choice-question1 (merge basic-valid-input {:type "single-choice"
                                                               :possible-single-choice-solutions ["Solution1" "Solution2" "Solution3"]
                                                               :correct-single-choice-solutions ["Unknown solution"]})
@@ -128,7 +128,7 @@
                                              :create-question! db-add-fun-stub
                                              :validate-question (partial validate-question question-service))]
                  (submit-create-question! (update test-request :params merge question-form-data)
-                                          redirect-uri
+                                          post-destination
                                           question-service-stub)
                  @was-not-called)
           single-choice-question1

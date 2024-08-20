@@ -52,7 +52,7 @@
   "This function takes a `request`, and `post-destination`, `get-courses-fun` and `get-question-sets-fun` that are used to re-render the form when the data was invalid.  
    It also takes an implementation of the `PCourseIterationService` protocol, 
    which is used for validation and persisting the final course-iteration in the database. 
-   If the data was invalid the request is redirected to the provided `redirect-uri` with the errors as query parameters."
+   If the data was invalid the form is shown again with the validation errors."
   [req post-destination get-courses-fun get-question-sets-fun course-iteration-service]
   (let [form-data (-> req :params (dissoc :__anti-forgery-token))
         course-iteration-or-errors (validate-course-iteration course-iteration-service form-data)
