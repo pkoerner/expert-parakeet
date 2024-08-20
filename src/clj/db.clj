@@ -51,10 +51,6 @@
   (get-course-iteration-by-id
     [this course-iteration-id])
 
-  (add-course-iteration-with-question-sets!
-    [this course])
-
-  ;; no test because it only uses add-course-iteration-with-question-sets!
   (add-course-iteration!
     [this course])
 
@@ -293,7 +289,7 @@
          (resolve-enums)))
 
 
-  (add-course-iteration-with-question-sets!
+  (add-course-iteration!
     [this course]
     (let [id (generate-id @(.conn this) :course-iteration/id)
           tx-result (d/transact (.conn this)
@@ -306,11 +302,6 @@
           db-after (:db-after tx-result)]
       (->> (d/pull db-after db.schema/course-iteration-slim-pull [:course-iteration/id id])
            (resolve-enums))))
-
-
-  (add-course-iteration!
-    [this course]
-    (add-course-iteration-with-question-sets! this course))
 
 
   (get-question-by-id

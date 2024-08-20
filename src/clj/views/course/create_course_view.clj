@@ -29,8 +29,7 @@
 
       [:div
        (hform/label {:class "form-label"} "name" "Course name")
-       (optional-error-display :course/course-error errors)
-       (optional-error-display :course/course-already-existed errors)
+       (optional-error-display :name errors)
        (hform/text-field {:class "form-control" :required true} "name" (get course-data :name))]
 
       (h/raw (anti-forgery-field))
