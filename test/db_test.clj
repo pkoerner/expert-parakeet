@@ -196,47 +196,49 @@
               (db/get-course-iteration-by-id test-db "42"))))
     (testing "add-course-iteration! with valid course-iteration as input and check wether it contains in the db"
       (let [course-id "1"
+            course {:course/id course-id}
             course-iteration-year 1999
             course-iteration-semester :semester/summer
-            course-iteration-question-sets ["3" "1"]
+            course-iteration-question-sets [{:question-set/id "3"}
+                                            {:question-set/id "1"}]
             _ (db/add-course-iteration!
                 test-db
-                course-id
-                course-iteration-year
-                course-iteration-semester
-                course-iteration-question-sets)
+                {:course-iteration/course course
+                 :course-iteration/year course-iteration-year
+                 :course-iteration/semester course-iteration-semester
+                 :course-iteration/question-sets course-iteration-question-sets})
             course-iterations (map #(select-keys % [:course-iteration/semester
                                                     :course-iteration/year])
                                    (db/get-course-iterations-of-course test-db course-id))]
-        (t/is (some #(= % {:course-iteration/semester :semester/summer :course-iteration/year 1999}) course-iterations))))
+        (t/is (some #(= % {:course-iteration/semester course-iteration-semester :course-iteration/year course-iteration-year}) course-iterations))))
     (testing "add-course-iteration! with invalid question-set as input"
-      (let [course-id "1"
+      (let [course {:course/id "1"}
             course-iteration-year 1999
             course-iteration-semester :semester/summer
-            course-iteration-question-sets ["lol"]]
+            course-iteration-question-sets [{:question-set/id "lol"}]]
         (t/is (thrown-with-msg?
                 clojure.lang.ExceptionInfo
                 #"Nothing found for entity id [:question-set/id \W lol \W]"
                 (db/add-course-iteration!
                   test-db
-                  course-id
-                  course-iteration-year
-                  course-iteration-semester
-                  course-iteration-question-sets)))))
+                  {:course-iteration/course course
+                   :course-iteration/year course-iteration-year
+                   :course-iteration/semester course-iteration-semester
+                   :course-iteration/question-sets course-iteration-question-sets})))))
     (testing "add-course-iteration! with invalid course-id as input"
-      (let [course-id "5"
+      (let [course {:course/id "lol"}
             course-iteration-year 1999
             course-iteration-semester :semester/summer
-            course-iteration-question-sets ["3"]]
+            course-iteration-question-sets [{:question-set/id "3"}]]
         (t/is (thrown-with-msg?
                 clojure.lang.ExceptionInfo
-                #"Nothing found for entity id [:question-set/id \W lol \W]"
+                #"Nothing found for entity id [:course/id \W lol \W]"
                 (db/add-course-iteration!
                   test-db
-                  course-id
-                  course-iteration-year
-                  course-iteration-semester
-                  course-iteration-question-sets)))))
+                  {:course-iteration/course course
+                   :course-iteration/year course-iteration-year
+                   :course-iteration/semester course-iteration-semester
+                   :course-iteration/question-sets course-iteration-question-sets})))))
     ;; no test for add-course-iteration! because it only uses add-course-iteration! with an empty set
     (testing "get-course-iterations-of-student with valid student-id"
       (let [user-id "1"

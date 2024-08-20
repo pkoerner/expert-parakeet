@@ -62,4 +62,4 @@
         (html-response (view/submit-success-view added-course-iteration)))
       (let [courses (get-courses-fun)
             question-sets (get-question-sets-fun)]
-        (html-response (view/course-iteration-form courses question-sets post-destination))))))
+        (html-response (view/course-iteration-form courses question-sets post-destination :errors validation-errors :course-iteration-data form-data))))))

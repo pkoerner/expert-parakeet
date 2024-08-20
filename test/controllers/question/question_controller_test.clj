@@ -58,7 +58,7 @@
             basic-valid-input {:statement "Valid question statement"
                                :categories ["Valid Category"]
                                :max-points "5"}
-            redirect-uri "S"
+            post-destination "S"
             free-text-question (merge basic-valid-input {:type "free-text"
                                                          :evaluation-criteria "Valid evaluation criteria"})
             single-choice-question (merge basic-valid-input {:type "single-choice"
@@ -85,7 +85,7 @@
                                              :create-question! db-add-fun-stub
                                              :validate-question (partial validate-question question-service))]
                  (submit-create-question! (update test-request :params merge question-form-data)
-                                          redirect-uri
+                                          post-destination
                                           question-service-stub)
                  @was-called)
           free-text-question

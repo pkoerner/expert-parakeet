@@ -1,20 +1,21 @@
 (ns views.course-iteration.create-course-iteration-view
   (:require
     [clojure.spec.alpha :as s]
-    [clojure.string :as string]
     [hiccup.form :as hform]
     [hiccup2.core :as h]
     [ring.util.anti-forgery :refer [anti-forgery-field]]
+    [util.forms :refer [as-coll]]
     [util.hiccup-extensions :refer [optional-error-display]]))
 
 
-(def create-course-iteration-error-keys
-  "Possible keys for which errors can be displayed in the `course-iteration-form`."
-  #{:course-iteration/course :course-iteration/year :course-iteration/semester :course-iteration/question-sets})
+(s/fdef no-courses
+        :args (s/cat)
+        :ret #(instance? hiccup.util.RawString %))
 
 
-(def no-courses
+(defn no-courses
   "Simple paragaraph to display when there are no courses in the database."
+  []
   [:p "There needs to be a module present, to be able to create a course."])
 
 
@@ -71,7 +72,7 @@
          [:legend {:class "form-label"} "Question sets"]
          (optional-error-display :question-sets errors)
          (let
-           [selected-question-sets (set (get course-iteration-data :question-sets))]
+           [selected-question-sets (set (as-coll (get course-iteration-data :question-sets)))]
            [:div {:class "list-group"}
             (map-indexed (fn [idx question-set]
                            (let [input-id (str "question-set-input-" idx)
@@ -93,15 +94,16 @@
 
 
 (s/fdef submit-success-view
-        :args (s/cat :course-iteration :course-iteration/course-iteration)
+        :args (s/cat :course-iteration (s/keys :req [:course-iteration/year
+                                                     :course-iteration/semester]))
         :ret #(instance? hiccup.util.RawString %))
 
 
 (defn submit-success-view
-  "Returns a div with a success messag displaying the `semester` and the `year` of the created course-iteration."
+  "Returns a div with a success message displaying the `semester` and the `year` of the created course-iteration."
   [{:course-iteration/keys [semester year]}]
   (h/html
     [:div
-     [:p "The course for the " semester
+     [:p "The course iteration for the " semester
       " in the year " year
       " was successfully created!\n"]]))

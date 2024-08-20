@@ -2,7 +2,6 @@
   (:require
     [clojure.edn :as edn]
     [clojure.spec.alpha :as s]
-    [clojure.string :as str]
     [db]
     [domain]
     [services.course-iteration-service.p-course-iteration-service :refer [PCourseIterationService]]
@@ -38,7 +37,7 @@
                                      ((fn [id] {:course/id id})))]
                 (if (s/valid? (s/keys :req [:course/id]) parsed-value)
                   {:course-iteration/course parsed-value}
-                  {:error "The given course id was invalid"})))]
+                  {:error "The given course was invalid"})))]
    [:year (fn [_ _ value]
             (let [parsed-value (-> value (str) (edn/read-string))]
               (if (s/valid? :course-iteration/year parsed-value)

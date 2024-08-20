@@ -81,12 +81,13 @@
    The validator function either returns an error of the form `{:error \"message\"}` or question fields that get merged with the current result.
    We are using a vector and not a map to preserve the iteration order!"
   [[:type (fn [_ _ value]
-            (if-let [question-type (keyword "question.type"
-                                            (if (keyword? value)
-                                              (name value)
-                                              (str value)))]
-              {:question/type question-type}
-              {:error "The given question type is invalid"}))]
+            (let [parsed-value (keyword "question.type"
+                                        (if (keyword? value)
+                                          (name value)
+                                          (str value)))]
+              (if (s/valid? :question/type parsed-value)
+                {:question/type parsed-value}
+                {:error "The given question type is invalid"})))]
    [:statement (fn [_ _ value]
                  (let [parsed-value (-> value (str) (string/trim))]
                    (if (s/valid? :question/statement parsed-value)
@@ -113,7 +114,7 @@
                                (if (s/valid? :question/evaluation-criteria parsed-value)
                                  {:question/evaluation-criteria parsed-value}
                                  {:error "The evalatuation criteria must be a string"}))))]
-   [:possible-single-choice-solutions (fn [{:question/keys [type]} value]
+   [:possible-single-choice-solutions (fn [_ {:question/keys [type]} value]
                                         (when (= type :question.type/single-choice)
                                           (let [possible-choices (->> value
                                                                       (as-coll)
