@@ -239,7 +239,6 @@
                    :course-iteration/year course-iteration-year
                    :course-iteration/semester course-iteration-semester
                    :course-iteration/question-sets course-iteration-question-sets})))))
-    ;; no test for add-course-iteration! because it only uses add-course-iteration! with an empty set
     (testing "get-course-iterations-of-student with valid student-id"
       (let [user-id "1"
             res (db/get-course-iterations-of-student test-db user-id)
