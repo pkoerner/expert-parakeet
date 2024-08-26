@@ -43,11 +43,15 @@
                                    :year "2023"
                                    :semester "winter"
                                    :question-sets ["1"]}}
+            course-iteration-object {:course-iteration/semester :semester/winter
+                                     :course-iteration/year 2023
+                                     :course-iteration/course {:course/name "course"}}
             db-add-fun-stub (fn [{:course-iteration/keys [course year semester question-sets]}]
                               (t/is (s/valid? (s/keys :req [:course/id]) course))
                               (t/is (s/valid? :course-iteration/year year))
                               (t/is (s/valid? :course-iteration/semester semester))
-                              (t/is (s/valid? (s/coll-of (s/keys :req [:question-set/id])) (as-coll question-sets))))
+                              (t/is (s/valid? (s/coll-of (s/keys :req [:question-set/id])) (as-coll question-sets)))
+                              course-iteration-object)
             course-iteration-service (stub-course-iteration-service
                                        :validate-course-iteration (partial validate-course-iteration (->CourseIterationService db-stub))
                                        :create-course-iteration db-add-fun-stub)
