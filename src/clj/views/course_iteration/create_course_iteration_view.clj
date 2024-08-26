@@ -104,6 +104,6 @@
   [{:course-iteration/keys [semester year]}]
   (h/html
     [:div
-     [:p "The course iteration for the " semester
-      " in the year " year
+     [:p "The course iteration for the " (name semester)
+      " semester in the year " year
       " was successfully created!\n"]]))
