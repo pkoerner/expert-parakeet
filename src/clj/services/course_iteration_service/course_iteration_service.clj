@@ -78,9 +78,15 @@
       (db/get-course-iterations-of-student (.db this) user-id)
       (partial db/get-graded-answers-of-question-set (.db this) user-id))))
 
+(defn- get-all-course-iterations
+  "Returns a list of all created course iterations"
+  [this]
+  (db/get-all-course-iterations (.db this)))
 
+  
 (extend CourseIterationService
   PCourseIterationService
   {:create-course-iteration create-course-iteration-impl
    :validate-course-iteration validate-course-iteration-impl
-   :get-all-course-iterations-for-user get-all-course-iterations-for-user})
+   :get-all-course-iterations-for-user get-all-course-iterations-for-user
+   :get-all-course-iterations get-all-course-iterations})

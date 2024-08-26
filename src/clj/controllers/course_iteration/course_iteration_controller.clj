@@ -1,17 +1,20 @@
 (ns controllers.course-iteration.course-iteration-controller
-  (:require
-    [clojure.edn]
-    [clojure.spec.alpha :as s]
-    [clojure.string :as string]
-    [db]
-    [ring.util.response :as response]
-    [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration PCourseIterationService
-                                                                          validate-course-iteration]]
-    [util.ring-extensions :refer [construct-url extract-errors
-                                  html-response]]
-    [util.spec-functions :refer [map-spec]]
-    [views.course-iteration.create-course-iteration-view :as view]))
-
+  (:require [clojure.edn]
+            [clojure.spec.alpha :as s]
+            [clojure.string :as string]
+            [db]
+            [ring.util.response :as response]
+            [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration
+                                                                                  get-all-course-iterations
+                                                                                  PCourseIterationService
+                                                                                  validate-course-iteration]]
+            [services.user-service.p-user-service :refer [get-all-users]]
+            [util.ring-extensions :refer [construct-url extract-errors
+                                          html-response]]
+            [util.spec-functions :refer [map-spec]]
+            [views.course-iteration.assign-member-course-iteration-view :as assign-view]
+            [views.course-iteration.create-course-iteration-view :as create-view]))
+   
 
 (s/fdef create-course-iteration-get
         :args (s/cat :req coll?
@@ -45,18 +48,18 @@
   (let [courses (get-courses-fun)
         question-sets (get-question-sets-fun)]
     (if (empty? courses)
-      view/no-courses
+      create-view/no-courses
       (let [errors (extract-errors req)]
         (if errors
-          (view/course-iteration-form courses question-sets post-destination :errors errors)
-          (view/course-iteration-form courses question-sets post-destination))))))
+          (create-view/course-iteration-form courses question-sets post-destination :errors errors)
+          (create-view/course-iteration-form courses question-sets post-destination))))))
 
 
 (defn- add-to-db-and-get-succsess-msg
   [course-id year semester question-set-ids db-add-fun]
   (let [db-result (db-add-fun
                     course-id year semester question-set-ids)]
-    (view/submit-success-view
+    (create-view/submit-success-view
       (:course-iteration/semester db-result)
       (:course-iteration/year db-result))))
 
@@ -100,3 +103,19 @@
     (if (empty? validation-errors)
       (html-response (add-to-db-and-get-succsess-msg course-id year semester question-set-ids (partial create-course-iteration course-iteration-service)))
       (response/redirect (construct-url (str (get-in request [:headers :origin]) redirect-uri) validation-errors)))))
+
+(defn course-iteration-overview-get 
+  "Returns the overview of all available course iterations"
+  [course-iteration-service]
+  (html-response 
+   (assign-view/list-course-iteration-view 
+    (get-all-course-iterations course-iteration-service))))
+
+(defn course-iteration-user-overview
+  "Returns the overview of all users that, where the membership status can be changed"
+  [request user-service]
+  (let [course-id (-> request :params :course-id)]
+    (html-response
+     (assign-view/create-user-list-view
+      course-id
+      (get-all-users user-service)))))

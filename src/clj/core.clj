@@ -1,41 +1,45 @@
 (ns core
   (:gen-class)
-  (:require
-    [auth :refer [wrap-authentication]]
-    [compojure.core :refer [defroutes GET POST]]
-    [compojure.route :as route]
-    [controllers.answer.answer-controller :refer [submit-user-answer!]]
-    [controllers.correction.correction-controller :refer [correction-overview-get]]
-    [controllers.correction.new-correction-controller :refer [new-correction-get submit-new-correction!]]
-    [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
-    [controllers.course.course-controller :refer [create-course-get submit-create-course!]]
-    [controllers.question-set.question-set-controller :refer [question-set-get]]
-    [controllers.question.question-controller :refer [create-question-get
-                                                      question-get
-                                                      submit-create-question!]]
-    [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
-    [controllers.user.user-overview-controller :refer [create-user-overview-get]]
-    [db]
-    [domain]
-    [ring.adapter.jetty :refer [run-jetty]]
-    [ring.middleware.defaults :refer [secure-site-defaults
-                                      site-defaults wrap-defaults]]
-    [ring.middleware.reload :refer [wrap-reload]]
-    [ring.middleware.resource :refer [wrap-resource]]
-    [services.answer-service.answer-service :refer [->AnswerService]]
-    [services.correction-service.correction-service :refer [->CorrectionService]]
-    [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
-    [services.course-iteration-service.p-course-iteration-service :refer [get-all-course-iterations-for-user]]
-    [services.course-service.course-service :refer [->CourseService]]
-    [services.course-service.p-course-service :refer [get-all-courses]]
-    [services.question-service.p-question-service :refer [get-question-categories]]
-    [services.question-service.question-service :refer [->QuestionService]]
-    [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
-    [services.question-set-service.question-set-service :refer [->QuestionSetService]]
-    [services.user-service.user-service :refer [->UserService]]
-    [util.ring-extensions :refer [html-response]]
-    [views.template :refer [wrap-navbar-and-footer]]))
-
+  (:require [auth :refer [wrap-authentication]]
+            [compojure.core :refer [defroutes GET POST]]
+            [compojure.route :as route]
+            [controllers.answer.answer-controller :refer [submit-user-answer!]]
+            [controllers.correction.correction-controller :refer [correction-overview-get]]
+            [controllers.correction.new-correction-controller :refer [new-correction-get
+                                                                      submit-new-correction!]]
+            [controllers.course-iteration.course-iteration-controller :refer [course-iteration-overview-get
+                                                                              course-iteration-user-overview
+                                                                              create-course-iteration-get
+                                                                              submit-create-course-iteration!]]
+            [controllers.course.course-controller :refer [create-course-get
+                                                          submit-create-course!]]
+            [controllers.question-set.question-set-controller :refer [question-set-get]]
+            [controllers.question.question-controller :refer [create-question-get
+                                                              question-get
+                                                              submit-create-question!]]
+            [controllers.user.user-controller :refer [create-user-get login
+                                                      submit-create-user]]
+            [controllers.user.user-overview-controller :refer [create-user-overview-get]]
+            [db]
+            [domain]
+            [ring.adapter.jetty :refer [run-jetty]]
+            [ring.middleware.defaults :refer [secure-site-defaults
+                                              site-defaults wrap-defaults]]
+            [ring.middleware.reload :refer [wrap-reload]]
+            [ring.middleware.resource :refer [wrap-resource]]
+            [services.answer-service.answer-service :refer [->AnswerService]]
+            [services.correction-service.correction-service :refer [->CorrectionService]]
+            [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
+            [services.course-iteration-service.p-course-iteration-service :refer [get-all-course-iterations-for-user]]
+            [services.course-service.course-service :refer [->CourseService]]
+            [services.course-service.p-course-service :refer [get-all-courses]]
+            [services.question-service.p-question-service :refer [get-question-categories]]
+            [services.question-service.question-service :refer [->QuestionService]]
+            [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
+            [services.question-set-service.question-set-service :refer [->QuestionSetService]]
+            [services.user-service.user-service :refer [->UserService]]
+            [util.ring-extensions :refer [html-response]]
+            [views.template :refer [wrap-navbar-and-footer]]))
 
 (def db db/create-database)
 
@@ -107,6 +111,13 @@
   (GET "/new-correction" req (html-response (new-correction-get req "/new-correction" (partial db/get-answer-by-id db) (partial db/get-question-by-id db))))
   (POST "/new-correction" req (submit-new-correction! req "/new-correction" (partial db/add-correction! db) (partial db/get-user-by-id db)))
 
+  (GET "/assign-member-course" req 
+    (course-iteration-overview-get (:course-iteration-service services)))
+
+  (GET "/assign-member-course/:course-id" req 
+    (course-iteration-user-overview req (:user-service services)))
+
+
   (route/not-found "Not Found"))
 
 
@@ -123,7 +134,6 @@
 
 
 (def app-dev (wrap-reload (wrap-defaults app (-> site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax)))))
-
 
 ;; in production, the app will be running behind a reverse proxy that does TLS
 (def app-prod (wrap-defaults app (-> secure-site-defaults (assoc-in [:session :cookie-attrs :same-site] :lax) (assoc :proxy true))))
