@@ -21,14 +21,13 @@
       ["https://some.url"]))
   (testing "Testing that errors are displayed in the form, when errors are passed to the view."
     (let [post-destination "https://some.url"
-          name-error {:course/course-error "Some course-name error"}
-          doubling-error {:course/course-already-existed "Some doubling error"}]
+          name-error {:name "Some course-name error"}
+          doubling-error {:name "Some doubling error"}]
       (t/are [errors]
              (let [test-result (create-course-form post-destination :errors errors)]
                (every? #(string/includes? test-result %) (vals errors)))
         name-error
-        doubling-error
-        (merge name-error doubling-error)))))
+        doubling-error))))
 
 
 (deftest test-submit-success-view
@@ -37,7 +36,7 @@
 
 
 (def ^:private error-map-gen
-  (let [rand-error-map (->>  #{:course/course-error :course/course-already-existed}
+  (let [rand-error-map (->>  #{:name}
                              (map (fn [key] {key (str "Error for key " key)}))
                              (gen/elements))]
     (gen/fmap #(apply merge %)

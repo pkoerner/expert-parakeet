@@ -1,11 +1,11 @@
 (ns services.course-iteration-service.course-iteration-service
   (:require
+    [clojure.edn :as edn]
     [clojure.spec.alpha :as s]
-    [clojure.string :as string]
     [db]
     [domain]
     [services.course-iteration-service.p-course-iteration-service :refer [PCourseIterationService]]
-    [views.course-iteration.create-course-iteration-view :as view]))
+    [util.forms :refer [as-coll validate-form-data]]))
 
 
 ;; todo replace all direct db calls and inject repositories
@@ -13,61 +13,56 @@
   [db])
 
 
+;; TODO: the spec for the course-iteration argument is incorrect, must not include :course-iteration/id
 (s/fdef create-course-iteration-impl
         :args (s/cat :self #(satisfies? PCourseIterationService %)
-                     :course-id :course/id
-                     :year :course-iteration/year
-                     :semester :course-iteration/semester
-                     :question-set-ids (s/coll-of :question-set/id))
-        :ret (s/keys :req [:course-iteration/id
-                           :course/id
-                           :course-iteration/year
-                           :course-iteration/semester
-                           (s/coll-of :question-set/id)]))
+                     :course-iteration :course-iteration/course-iteration)
+        :ret :course-iteration/course-iteration)
 
 
 (defn- create-course-iteration-impl
-  [this course-id year semester question-set-ids]
-  (db/add-course-iteration-with-question-sets! (.db this) course-id year semester question-set-ids))
+  [this course-iteration]
+  (db/add-course-iteration! (.db this) course-iteration))
 
 
-(def ^:private validation-functions-with-error-msg
-  {:course-iteration/course [[#(s/valid? :course/id %) "The chosen course was incorrect!"]]
-   :course-iteration/year [[#(s/valid? :course-iteration/year %) "The chosen year was incorrect!"]]
-   :course-iteration/semester [[#(s/valid? :course-iteration/semester %) "The chosen semester was incorrect!"]]
-   :course-iteration/question-sets [[#(s/valid? (s/coll-of :question-set/id) %) "The chosen question-set was incorrect!"]]})
-
-
-(s/fdef validate-course-iteration-impl
-        :args (s/cat :self #(= PCourseIterationService (type %))
-                     :course-id :course/id
-                     :year :course-iteration/year
-                     :question-set-ids (s/coll-of :question-set/id))
-        :ret (s/map-of view/create-course-iteration-error-keys
-                       string?))
-
-
-(defn- validate-course-iteration-impl
-  [_ course-id year semester question-set-ids]
-  (reduce (fn [error-map [val error-key]]
-            (let [error-to-display (reduce (fn [error-str [validation-fun error-msg]]
-                                             (if (validation-fun val)
-                                               error-str
-                                               (string/join "\n" (filter seq [error-str error-msg]))))
-                                           ""
-                                           (validation-functions-with-error-msg error-key))]
-              (if (seq error-to-display)
-                (assoc error-map error-key error-to-display)
-                error-map)))
-          {}
-          [[course-id :course-iteration/course]
-           [year :course-iteration/year]
-           [semester :course-iteration/semester]
-           [question-set-ids :course-iteration/question-sets]]))
+(def ^:private course-iteration-validators
+  "List of validator/parsing functions for course iterations.
+   Each element is a tuple containing the form data key and
+   a function which takes the currently parsed course iteration result and the value that is saved in the form data (may be nil).
+   The validator function either returns an error of the form `{:error \"message\"}` or course iteration fields that get merged with the current result.
+   We are using a vector and not a map to preserve the iteration order!"
+  [[:course (fn [_ _ value]
+              (let [parsed-value (-> value
+                                     (str)
+                                     ((fn [id] {:course/id id})))]
+                (if (s/valid? (s/keys :req [:course/id]) parsed-value)
+                  {:course-iteration/course parsed-value}
+                  {:error "The given course was invalid"})))]
+   [:year (fn [_ _ value]
+            (let [parsed-value (-> value (str) (edn/read-string))]
+              (if (s/valid? :course-iteration/year parsed-value)
+                {:course-iteration/year parsed-value}
+                {:error "The course iteration year must be positive integer"})))]
+   [:semester (fn [_ _ value]
+                (let [parsed-value (keyword "semester" (if (keyword? value)
+                                                         (name value)
+                                                         (str value)))]
+                  (if (s/valid? :course-iteration/semester parsed-value)
+                    {:course-iteration/semester parsed-value}
+                    {:error "The given course iteration semester was invalid"})))]
+   [:question-sets (fn [_ _ value]
+                     (let [parsed-values (->> value
+                                              (as-coll)
+                                              (map str)
+                                              (mapv (fn [id] {:question-set/id id})))]
+                       (if (s/valid? (s/coll-of (s/keys :req [:question-set/id])) parsed-values)
+                         {:course-iteration/question-sets parsed-values}
+                         {:error "The given course iteration question sets were invalid"})))]])
 
 
 (s/fdef get-all-question-sets
-        :args (s/cat :self #(satisfies? PCourseIterationService %) :user-id :user/id)
+        :args (s/cat :self #(satisfies? PCourseIterationService %)
+                     :user-github-id :user/github-id)
         :ret (s/coll-of (s/keys :req [:question-set/id])))
 
 
@@ -82,5 +77,5 @@
 (extend CourseIterationService
   PCourseIterationService
   {:create-course-iteration create-course-iteration-impl
-   :validate-course-iteration validate-course-iteration-impl
+   :validate-course-iteration (partial validate-form-data course-iteration-validators)
    :get-all-course-iterations-for-user get-all-course-iterations-for-user})

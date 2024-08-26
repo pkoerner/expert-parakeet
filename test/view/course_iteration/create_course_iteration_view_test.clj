@@ -7,7 +7,7 @@
     [clojure.test.check.properties :as prop]
     [domain.spec]
     [test-extensions :refer [test-with-check]]
-    [views.course-iteration.create-course-iteration-view :refer [course-iteration-form create-course-iteration-error-keys submit-success-view]]))
+    [views.course-iteration.create-course-iteration-view :refer [course-iteration-form submit-success-view]]))
 
 
 (def ^:private opts {:clojure.spec.test.check/opts {:num-tests 200}})
@@ -15,44 +15,47 @@
 
 (deftest test-course-iteration-form
   (testing "Testing that the course-iteration-form contains every course and test that is sent to it."
-    (t/are [test-input]
-           (let [[courses question-sets post-destination] test-input
-                 test-result (str (course-iteration-form courses question-sets post-destination))]
+    (t/are [courses question-sets post-destination]
+           (let [test-result (str (course-iteration-form courses question-sets post-destination))]
              (and
                (every? #(string/includes? test-result (:course/name %)) courses)
                (every? #(string/includes? test-result (:question-set/name %)) question-sets)
                (string/includes? test-result post-destination)))
 
-      [[#:course{:id "2Jw0c5U", :name "0x0"}]
-       [#:question-set{:id "nA1", :name "T897OJj4U1"}]
-       "https://some.url"]
+      [#:course{:id "2Jw0c5U", :name "0x0"}]
+      [#:question-set{:id "nA1", :name "T897OJj4U1"}]
+      "https://some.url"
 
-      [[] [] "https://some.url"]
+      []
+      []
+      "https://some.url"
 
-      [[#:course{:id "4091undas", :name "HHello"}
-        #:course{:id "21408uisdh5U", :name "Hell"}
-        #:course{:id "dasdaU", :name "Bye"}
-        #:course{:id "2JwaadsU", :name "Tschau"}]
-       [#:question-set{:id "nA1", :name "T897OJj4U1"}
-        #:question-set{:id "2", :name "Test 2"}
-        #:question-set{:id "3", :name "Test 3"}
-        #:question-set{:id "4", :name "Test 4"}
-        #:question-set{:id "5", :name "Test 5"}
-        #:question-set{:id "6", :name "Test 6"}
-        #:question-set{:id "7", :name "Test 7"}
-        #:question-set{:id "8", :name "Test 8"}
-        #:question-set{:id "9", :name "Test 9"}
-        #:question-set{:id "10", :name "Test 10"}]
-       "https://some.url"]))
+      [#:course{:id "4091undas", :name "HHello"}
+       #:course{:id "21408uisdh5U", :name "Hell"}
+       #:course{:id "dasdaU", :name "Bye"}
+       #:course{:id "2JwaadsU", :name "Tschau"}]
+      [#:question-set{:id "nA1", :name "T897OJj4U1"}
+       #:question-set{:id "2", :name "Test 2"}
+       #:question-set{:id "3", :name "Test 3"}
+       #:question-set{:id "4", :name "Test 4"}
+       #:question-set{:id "5", :name "Test 5"}
+       #:question-set{:id "6", :name "Test 6"}
+       #:question-set{:id "7", :name "Test 7"}
+       #:question-set{:id "8", :name "Test 8"}
+       #:question-set{:id "9", :name "Test 9"}
+       #:question-set{:id "10", :name "Test 10"}]
+      "https://some.url"))
 
 
 
   (testing "Testing that errors are displayed in the form, when errors are passed to the view."
-    (let [[courses question-sets post-destination] [[] [] "https://some.url"]
-          course-error {:course-iteration/course "Some course error"}
-          year-error {:course-iteration/year "Some year error"}
-          semester-error {:course-iteration/semester "Some semester error"}
-          question-set-error {:course-iteration/question-sets "Some question-set error"}]
+    (let [courses []
+          question-sets []
+          post-destination "https://some.url"
+          course-error {:course "Some course error"}
+          year-error {:year "Some year error"}
+          semester-error {:semester "Some semester error"}
+          question-set-error {:question-sets "Some question-set error"}]
       (t/are [errors]
              (let [test-result (course-iteration-form courses question-sets post-destination :errors errors)]
                (every? #(string/includes? test-result %) (vals errors)))
@@ -73,8 +76,8 @@
     (test-with-check `submit-success-view opts)))
 
 
-(def ^:private error-map-gen
-  (let [rand-error-map (->> create-course-iteration-error-keys
+(def error-map-gen
+  (let [rand-error-map (->> #{:course :year :semester :question-sets}
                             (map (fn [key] {key (str "Error for key " key)}))
                             (gen/elements))]
     (gen/fmap #(apply merge %)
@@ -85,7 +88,9 @@
 
 
 (defspec test-generated-course-iteration-form-errors-are-displayed 100
-  (let [[courses question-sets post-destination] [[] [] "https://some.url"]]
+  (let [courses []
+        question-sets []
+        post-destination "https://some.url"]
     (prop/for-all [error-map error-map-gen]
                   (let [test-result (course-iteration-form courses question-sets post-destination :errors error-map)]
                     (every? #(string/includes? test-result %) (vals error-map))))))

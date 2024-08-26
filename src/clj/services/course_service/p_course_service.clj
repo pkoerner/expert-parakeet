@@ -13,4 +13,4 @@
 
   (validate-course
     [self course-form-data]
-    "Validates the values for the creation of a course. Returns a map of error keys."))
+    "Validates the values for the creation of a course. Returns a map of error keys or the validated course."))

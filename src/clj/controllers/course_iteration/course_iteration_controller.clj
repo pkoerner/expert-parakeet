@@ -2,14 +2,10 @@
   (:require
     [clojure.edn]
     [clojure.spec.alpha :as s]
-    [clojure.string :as string]
     [db]
-    [ring.util.response :as response]
     [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration PCourseIterationService
                                                                           validate-course-iteration]]
-    [util.ring-extensions :refer [construct-url extract-errors
-                                  html-response]]
-    [util.spec-functions :refer [map-spec]]
+    [util.ring-extensions :refer [html-response]]
     [views.course-iteration.create-course-iteration-view :as view]))
 
 
@@ -18,13 +14,7 @@
                      :post-destination :general/non-blank-string
                      :get-courses-fun (s/? (s/get-spec `db/get-all-courses))
                      :get-question-sets-fun (s/? (s/get-spec `db/get-all-question-sets)))
-        :ret #(instance? hiccup.util.RawString %)
-        :fn (s/or :no-courses-existant
-                  #(let [{:keys [ret]} %]
-                     (string/includes? ret "erst ein Fach erstellt"))
-                  :course-iteration-creation
-                  #(let [{{:keys [post-destination]} :args ret :ret} %]
-                     (string/includes? (str ret) post-destination))))
+        :ret #(instance? hiccup.util.RawString %))
 
 
 (defn create-course-iteration-get
@@ -41,62 +31,35 @@
    When the request passed to this function inside of `req` contains predefined error values in the `:query-params` of the `req` parameter, 
    they are displayed as errors within the form.
    The fields can be seen in `view/course-iteration-form`."
-  [req post-destination get-courses-fun get-question-sets-fun]
+  [_req post-destination get-courses-fun get-question-sets-fun]
   (let [courses (get-courses-fun)
         question-sets (get-question-sets-fun)]
     (if (empty? courses)
-      view/no-courses
-      (let [errors (extract-errors req)]
-        (if errors
-          (view/course-iteration-form courses question-sets post-destination :errors errors)
-          (view/course-iteration-form courses question-sets post-destination))))))
-
-
-(defn- add-to-db-and-get-succsess-msg
-  [course-id year semester question-set-ids db-add-fun]
-  (let [db-result (db-add-fun
-                    course-id year semester question-set-ids)]
-    (view/submit-success-view
-      (:course-iteration/semester db-result)
-      (:course-iteration/year db-result))))
-
-
-(s/def ::request-data
-  (map-spec {:__anti-forgery-token any?
-             :multipart-params (map-spec {"course-id" :course/id
-                                          "year" (s/and string? #(s/valid? :course-iteration/year (clojure.edn/read-string %)))
-                                          "semester" :course-iteration/semester
-                                          "question-set-ids" (s/coll-of :question-set/id)})}))
+      (html-response (view/no-courses))
+      (html-response (view/course-iteration-form courses question-sets post-destination)))))
 
 
 (s/fdef submit-create-course-iteration!
-        :args (s/cat :request ::request-data
-                     :redirect-uri string?
+        :args (s/cat :req coll?
+                     :post-destination string?
+                     :get-courses-fun (s/? (s/get-spec `db/get-all-courses))
+                     :get-question-sets-fun (s/? (s/get-spec `db/get-all-question-sets))
                      :course-iteration-service #(satisfies? PCourseIterationService %))
         :ret #(instance? hiccup.util.RawString %))
 
 
 (defn submit-create-course-iteration!
-  "This function takes a `request`, and a uri to be redirected to, when the data of the request was invalid.  
+  "This function takes a `request`, and `post-destination`, `get-courses-fun` and `get-question-sets-fun` that are used to re-render the form when the data was invalid.  
    It also takes an implementation of the `PCourseIterationService` protocol, 
    which is used for validation and persisting the final course-iteration in the database. 
-   If the data was invalid the request is redirected to the provided `redirect-uri` with the errors as query parameters."
-  [request redirect-uri course-iteration-service]
-  (let [form-data (-> request (:multipart-params) (dissoc :__anti-forgery-token))
-        course-id (form-data "course-id")
-        year (clojure.edn/read-string (form-data "year"))
-        semester (case (form-data "semester")
-                   "WiSe" :semester/winter
-                   "SuSe" :semester/summer
-                   nil)
-        ;; If there is only one id, it is send as a single value. If there are multiple, they are send in a col.
-        question-set-ids (let [ids-or-id (form-data "question-set-ids")]
-                           (cond (coll? ids-or-id) ids-or-id
-                                 (nil? ids-or-id) []
-                                 :else [ids-or-id]))
-
-        validation-errors (validate-course-iteration course-iteration-service course-id year semester question-set-ids)]
-
+   If the data was invalid the form is shown again with the validation errors."
+  [req post-destination get-courses-fun get-question-sets-fun course-iteration-service]
+  (let [form-data (-> req :params (dissoc :__anti-forgery-token))
+        course-iteration-or-errors (validate-course-iteration course-iteration-service form-data)
+        validation-errors (course-iteration-or-errors :errors)]
     (if (empty? validation-errors)
-      (html-response (add-to-db-and-get-succsess-msg course-id year semester question-set-ids (partial create-course-iteration course-iteration-service)))
-      (response/redirect (construct-url (str (get-in request [:headers :origin]) redirect-uri) validation-errors)))))
+      (let [added-course-iteration (create-course-iteration course-iteration-service course-iteration-or-errors)]
+        (html-response (view/submit-success-view added-course-iteration)))
+      (let [courses (get-courses-fun)
+            question-sets (get-question-sets-fun)]
+        (html-response (view/course-iteration-form courses question-sets post-destination :errors validation-errors :course-iteration-data form-data))))))

@@ -7,16 +7,8 @@
     [hiccup.page :as hpage]
     [hiccup2.core :as h]
     [ring.util.anti-forgery :refer [anti-forgery-field]]
+    [util.forms :refer [as-coll]]
     [util.hiccup-extensions :refer [optional-error-display script]]))
-
-
-(defn- as-coll
-  "Wraps the parameter in a vector if it is not already a collection."
-  [coll-or-single]
-  (cond
-    (nil? coll-or-single) []
-    (coll? coll-or-single) coll-or-single
-    :else [coll-or-single]))
 
 
 (defn- free-text-inputs

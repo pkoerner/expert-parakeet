@@ -1,20 +1,21 @@
 (ns views.course-iteration.create-course-iteration-view
   (:require
     [clojure.spec.alpha :as s]
-    [clojure.string :as string]
     [hiccup.form :as hform]
     [hiccup2.core :as h]
     [ring.util.anti-forgery :refer [anti-forgery-field]]
+    [util.forms :refer [as-coll]]
     [util.hiccup-extensions :refer [optional-error-display]]))
 
 
-(def create-course-iteration-error-keys
-  "Possible keys for which errors can be displayed in the `course-iteration-form`."
-  #{:course-iteration/course :course-iteration/year :course-iteration/semester :course-iteration/question-sets})
+(s/fdef no-courses
+        :args (s/cat)
+        :ret #(instance? hiccup.util.RawString %))
 
 
-(def no-courses
+(defn no-courses
   "Simple paragaraph to display when there are no courses in the database."
+  []
   [:p "There needs to be a module present, to be able to create a course."])
 
 
@@ -22,86 +23,87 @@
         :args (s/cat :courses (s/coll-of (s/keys :req [:course/id :course/name]) :distinct true)
                      :question-sets (s/coll-of (s/keys :req [:question-set/id :question-set/name]) :distinct true)
                      :post-destination :general/non-blank-string
-                     :kwargs (s/? (s/or :empty empty?
-                                        :map (s/map-of create-course-iteration-error-keys
-                                                       string?))))
-        :ret #(instance? hiccup.util.RawString %)
-        :fn (fn [spec-map]
-              (let [{{:keys [courses question-sets post-destination]} :args
-                     ret :ret} spec-map]
-                (s/and (every? #(string/includes? (str ret) (:course/name %)) courses)
-                       (every? #(string/includes? (str ret) (:question-set/name %)) question-sets)
-                       #(string/includes? ret post-destination)))))
+                     :kwargs (s/cat :errors (s/? #{:errors})
+                                    :error-map (s/? (s/map-of keyword? string?))
+                                    :course-iteration-data (s/? #{:course-iteration-data})
+                                    :course-iteration-data-map (s/? map?)))
+        :ret #(instance? hiccup.util.RawString %))
 
 
 (defn course-iteration-form
   "Returns an html-form for the creation of a course-iteration.
    The form data is sent to the provided `post-destination`.
    
-   Fields of the response are: [courses, year, semester, question-sets].
+   Fields of the response are: [course, year, semester, question-sets].
    
-   It can display error values if they are provided in a map behind the optional `:errors` param
-   (see specs)."
-  [courses question-sets post-destination & {:keys [errors] :or {errors {}}}]
+   It can display error values if they are provided in a map behind the optional `:errors` param and pre-populate the form with the optional `:course-iteration-data` param."
+  [courses question-sets post-destination & {:keys [errors course-iteration-data] :or {errors {} course-iteration-data {}}}]
   (letfn [(course-to-option
             [course]
             [(:course/name course) (:course/id course)])]
     (h/html
       (hform/form-to
-        {:enctype "multipart/form-data"}
         [:post post-destination]
 
         [:div
-         (optional-error-display :course-iteration/course errors)
-         [:label {:for "courses"} "Course choices"] [:br]
-         [:select#courses {:name "course-id"}
-          (hform/select-options (mapv course-to-option courses))]]
+         (hform/label {:class "form-label"} "course" "Course")
+         (optional-error-display :course errors)
+         (hform/drop-down {:class "form-select" :required true} "course" (mapv course-to-option courses) (get course-iteration-data :course))]
 
         [:div
-         (optional-error-display :course-iteration/year errors)
-         [:label {:for "year"} "Year"] [:br]
-         [:input#year {:name "year"
-                       :type "number"
-                       :min "1900"
-                       :max "2099"
-                       :step "1"
-                       :value "2024"}]]
+         (hform/label {:class "form-label"} "year" "Year")
+         (optional-error-display :year errors)
+         [:input {:id "year"
+                  :class "form-control"
+                  :name "year"
+                  :type "number"
+                  :min "2000"
+                  :max "2100"
+                  :step "1"
+                  :required true
+                  :value (get course-iteration-data :year "2024")}]]
 
         [:div
-         (optional-error-display :course-iteration/semester errors)
-         [:label {:for "semester"} "Semester"] [:br]
-         [:select#semester {:name "semester"}
-          (hform/select-options [["Summer" "SuSe"]
-                                 ["Winter" "WiSe"]])]]
+         (hform/label {:class "form-label"} "semester" "Semester")
+         (optional-error-display :semester errors)
+         (hform/drop-down {:class "form-select" :required true} "semester" [["Summer" "summer"] ["Winter" "winter"]] (get course-iteration-data :semester))]
 
-        [:div
-         (optional-error-display :course-iteration/question-sets errors)
-         [:label {:for "question-sets"} "Tests"] [:br]
-         [:ul
-          (for [question-set question-sets]
-            [:li [:input {:name "question-set-ids"
-                          :type "checkbox"
-                          :value (:question-set/id question-set)}
-                  (:question-set/name question-set)]])]]
-
+        [:fieldset
+         [:legend {:class "form-label"} "Question sets"]
+         (optional-error-display :question-sets errors)
+         (let
+           [selected-question-sets (set (as-coll (get course-iteration-data :question-sets)))]
+           [:div {:class "list-group"}
+            (map-indexed (fn [idx question-set]
+                           (let [input-id (str "question-set-input-" idx)
+                                 value (get question-set :question-set/id)
+                                 text (get question-set :question-set/name)]
+                             [:div {:class "list-group-item p-2 d-flex align-items-center"}
+                              [:div {:class "form-check"}
+                               [:input {:class "form-check-input me-2"
+                                        :id input-id
+                                        :type "checkbox"
+                                        :name "question-sets"
+                                        :value value
+                                        :checked (contains? selected-question-sets value)}]
+                               [:label {:class "form-check-label" :for input-id} text]]]))
+                         question-sets)])]
 
         (h/raw (anti-forgery-field))
-        (hform/submit-button "submit")))))
+        (hform/submit-button {:class "btn btn-primary"} "Submit")))))
 
 
 (s/fdef submit-success-view
-        ;; todo rewrite this to not test the html
-        :args (s/cat :semester :course-iteration/semester
-                     :year :course-iteration/semester)
-        :ret (s/and #(string/includes? % "successfully")
-                    #(instance? hiccup.util.RawString %)))
+        :args (s/cat :course-iteration (s/keys :req [:course-iteration/year
+                                                     :course-iteration/semester]))
+        :ret #(instance? hiccup.util.RawString %))
 
 
 (defn submit-success-view
-  "Returns a div with a success messag displaying the `semester` and the `year` of the created course-iteration."
-  [semester year]
+  "Returns a div with a success message displaying the `semester` and the `year` of the created course-iteration."
+  [{:course-iteration/keys [semester year]}]
   (h/html
     [:div
-     [:p "The course for the " semester
-      " in the year " year
+     [:p "The course iteration for the " (name semester)
+      " semester in the year " year
       " was successfully created!\n"]]))

@@ -68,7 +68,7 @@
             course-service))))
 
     (testing "Test that the db-add-function is not called when the parameters are invalid.
-            And that the correct error message is send with the redirect."
+              And that the correct error message is sent."
       (let [test-request {:__anti-forgery-token ""
                           :params {}}
             db-add-fun-stub (fn [_name]

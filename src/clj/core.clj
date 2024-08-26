@@ -95,11 +95,14 @@
         (submit-create-course! req "/create-course" (:course-service services)))
 
   (GET "/create-course-iteration" req
-       (html-response (create-course-iteration-get req "/create-course-iteration"
-                                                   (partial get-all-courses (:course-service services))
-                                                   (partial get-all-question-sets (:question-set-service services)))))
+       (create-course-iteration-get req "/create-course-iteration"
+                                    (partial get-all-courses (:course-service services))
+                                    (partial get-all-question-sets (:question-set-service services))))
   (POST "/create-course-iteration" req
-        (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
+        (submit-create-course-iteration! req "/create-course-iteration"
+                                         (partial get-all-courses (:course-service services))
+                                         (partial get-all-question-sets (:question-set-service services))
+                                         (:course-iteration-service services)))
 
   (GET "/correction-overview" req
        (html-response (correction-overview-get req (services :correction-service))))
