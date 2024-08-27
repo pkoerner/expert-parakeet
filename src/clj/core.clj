@@ -72,7 +72,7 @@
 
   (GET "/question-set/:id"
        req
-       (html-response (question-set-get req (:question-set-service services))))
+       (question-set-get req (:question-set-service services)))
 
   (GET "/question/:id"
        req
