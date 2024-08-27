@@ -1,7 +1,6 @@
 (ns controllers.course.course-controller
   (:require
     [clojure.spec.alpha :as s]
-    [db]
     [services.course-service.p-course-service :refer [create-course
                                                       PCourseService
                                                       validate-course]]

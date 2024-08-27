@@ -37,9 +37,6 @@
     [views.template :refer [wrap-navbar-and-footer]]))
 
 
-(def db db/create-database)
-
-
 (def ^:private services
   {:course-service (->CourseService db)
    :course-iteration-service (->CourseIterationService db)

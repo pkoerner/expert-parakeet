@@ -1,7 +1,6 @@
 (ns controllers.correction.correction-controller
   (:require
     [clojure.spec.alpha :as s]
-    [db]
     [services.correction-service.p-correction-service :refer [PCorrectionService get-corrections-from-user-as]]
     [views.correction.correction-overview-view :as view]))
 
