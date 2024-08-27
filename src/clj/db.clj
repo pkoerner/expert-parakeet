@@ -244,8 +244,9 @@
                  :in $ pattern ?user-id
                  :where 
                  [?m :membership/user ?u]
-                 [?c :course/members ?m]]
-           @(.conn this) db.schema/course-slim-pull)
+                 [?ci :course-iteration/members ?m]
+                 [?ci :course-iteration/course ?c]]
+           @(.conn this) db.schema/course-slim-pull user-id)
          (mapv first)
          (resolve-enums)))
 
