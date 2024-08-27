@@ -6,11 +6,14 @@
     [ring.util.response :as response]
     [services.course-service.p-course-service :refer [create-course
                                                       PCourseService
-                                                      validate-course]]
+                                                      validate-course
+                                                      get-courses-of-user]]
     [util.ring-extensions :refer [construct-url extract-errors
                                   html-response]]
     [util.spec-functions :refer [map-spec]]
-    [views.course.create-course-view :as view]))
+    [views.course.create-course-view :as createview]
+    [views.course.courses-overview-view :as overview]
+   ))
 
 
 (s/fdef create-course-get
@@ -31,14 +34,14 @@
   [req post-destination]
   (let [errors (extract-errors req)]
     (if errors
-      (view/course-form post-destination :errors errors)
-      (view/course-form post-destination))))
+      (createview/course-form post-destination :errors errors)
+      (createview/course-form post-destination))))
 
 
 (defn- add-to-db-and-get-success-msg
   [course db-add-fun]
   (let [db-result (db-add-fun course)]
-    (view/submit-success-view (:course/name db-result))))
+    (createview/submit-success-view (:course/name db-result))))
 
 
 (s/def ::req-data
@@ -63,3 +66,10 @@
     (if (empty? validation-errors)
       (html-response (add-to-db-and-get-success-msg course-name (partial create-course course-service)))
       (response/redirect (construct-url (str (get-in req [:header :origin]) redirect-uri) validation-errors)))))
+
+(defn courses-overview
+  "Returns an html-form containing the users courses"
+  [req course-service]
+  (let [user-id (-> req :session :user :id)
+        courses (get-courses-of-user course-service user-id)]
+   (overview/courses-overview-form courses)))

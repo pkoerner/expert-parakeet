@@ -8,7 +8,7 @@
     [controllers.correction.correction-controller :refer [correction-overview-get]]
     [controllers.correction.new-correction-controller :refer [new-correction-get submit-new-correction!]]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
-    [controllers.course.course-controller :refer [create-course-get submit-create-course!]]
+    [controllers.course.course-controller :refer [create-course-get submit-create-course! courses-overview]]
     [controllers.question-set.question-set-controller :refer [question-set-get]]
     [controllers.question.question-controller :refer [create-question-get
                                                       question-get
@@ -106,6 +106,9 @@
 
   (GET "/new-correction" req (html-response (new-correction-get req "/new-correction" (partial db/get-answer-by-id db) (partial db/get-question-by-id db))))
   (POST "/new-correction" req (submit-new-correction! req "/new-correction" (partial db/add-correction! db) (partial db/get-user-by-id db)))
+
+  (GET "/courses-user" req
+    (html-response (courses-overview req (:course-service services))))
 
   (route/not-found "Not Found"))
 

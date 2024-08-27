@@ -33,6 +33,9 @@
 
   (get-all-courses
     [this])
+  
+  (get-courses-of-user
+   [this user-id])
 
   ;; only used for testing
   (get-course-iterations-of-course
@@ -148,7 +151,7 @@
 
 
 (deftype Database
-  [conn]
+         [conn]
 
   Database-Protocol
 
@@ -167,12 +170,12 @@
   (get-all-course-iterations
     [this]
     (->>
-      (d/q '[:find (pull ?e pattern)
-             :in $ pattern
-             :where [?e :course-iteration/id]]
-           @(.conn this) db.schema/course-iteration-very-slim-pull)
-      (mapv first)
-      (resolve-enums)))
+     (d/q '[:find (pull ?e pattern)
+            :in $ pattern
+            :where [?e :course-iteration/id]]
+          @(.conn this) db.schema/course-iteration-very-slim-pull)
+     (mapv first)
+     (resolve-enums)))
 
 
   (get-graded-answers-of-question-set
@@ -182,14 +185,14 @@
          (mapv first)
          (resolve-enums))
     #_(d/q '[:find (pull ?a [:answer/points
-                                   {:answer/question [:question/id :question/type]}])
-                   :in $ ?u ?t
-                   :where
-                   [?a :answer/creator ?u]
-                   [?a :answer/question ?f]
-                   [?t :question-set/questions ?f]
-                   [?a :answer/points]]
-                 @(.conn this) [:user/id user-id] [:question-set/id question-set-id]))
+                             {:answer/question [:question/id :question/type]}])
+             :in $ ?u ?t
+             :where
+             [?a :answer/creator ?u]
+             [?a :answer/question ?f]
+             [?t :question-set/questions ?f]
+             [?a :answer/points]]
+           @(.conn this) [:user/id user-id] [:question-set/id question-set-id]))
 
 
   (get-question-ids-for-user
@@ -232,6 +235,17 @@
                 :where
                 [?e :course/id]]
               @(.conn this) db.schema/course-slim-pull)
+         (mapv first)
+         (resolve-enums)))
+  
+  (get-courses-of-user
+    [this user-id]
+    (->> ( d/q '[:find (pull ?c pattern)
+                 :in $ pattern ?user-id
+                 :where 
+                 [?m :membership/user ?u]
+                 [?c :course/members ?m]]
+           @(.conn this) db.schema/course-slim-pull)
          (mapv first)
          (resolve-enums)))
 

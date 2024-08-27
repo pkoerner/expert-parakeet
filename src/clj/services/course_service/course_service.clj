@@ -52,9 +52,13 @@
             %
             (assoc % :course/course-already-existed "Der angegebene Fachname wird bereits verwendet!"))))))
 
+(defn- get-courses-by-user-impl
+  [this user-id]
+  (db/get-courses-of-user (.db this) user-id))
 
 (extend CourseService
   PCourseService
   {:get-all-courses get-all-courses
    :create-course create-course-impl
-   :validate-course validate-course-impl})
+   :validate-course validate-course-impl
+   :get-courses-of-user get-courses-by-user-impl})

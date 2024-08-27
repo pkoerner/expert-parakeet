@@ -13,4 +13,8 @@
 
   (validate-course
     [self course-name]
-    "Validates the values for the creation of a course. Returns a map of error keys."))
+    "Validates the values for the creation of a course. Returns a map of error keys.")
+  
+  (get-courses-of-user 
+    [self user-id]
+    "Get all courses that the logged in user is member of"))
