@@ -1,22 +1,13 @@
 (ns views.question-set.question-set-view
   (:require
-    [hiccup2.core :as h]))
+    [hiccup2.core :as h]
+    [util.strings :refer [shorten]]))
 
 
 (def question-set-errors
   "Possible errors that can occur when trying
    to access a question-set."
   #{:not-assigned-to-question-set})
-
-
-(defn shorten
-  [s max-len]
-  (let [len (count s)
-        ellipsis "..."
-        ellipsis-len (count ellipsis)]
-    (if (> len max-len)
-      (str (subs s 0 (max 0 (- max-len ellipsis-len))) ellipsis)
-      s)))
 
 
 (defn question-set-form
