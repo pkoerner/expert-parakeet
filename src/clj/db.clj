@@ -85,6 +85,23 @@
   (get-corrections-of-answer
     [this answer-id])
 
+  (create-membership-for-user 
+   [this user-id role] "Creates a new membership given a user-id and the role the user should have")
+
+  (add-membership-to-course-iteration 
+   [this course-iteration-id membership-id] 
+   [this course-iteration membership-id old-membership-id] 
+   "Functions to add an existing membership to a course.
+
+    Warning!: Only use the function without the old-membership-id if you have 
+    verified that there is no previous membership present. 
+    These membership function are doing no validation if a membership is already present or not")
+
+  (get-membership-for-course-of-user 
+   [this course-id user-id]
+   "This function returns a membership for a given course-iteration and user-id") 
+                                     
+
   (add-correction!
     [this answer-id correction])
 
@@ -148,7 +165,7 @@
 
 
 (deftype Database
-  [conn]
+         [conn]
 
   Database-Protocol
 
@@ -167,13 +184,56 @@
   (get-all-course-iterations
     [this]
     (->>
-      (d/q '[:find (pull ?e pattern)
-             :in $ pattern
-             :where [?e :course-iteration/id]]
-           @(.conn this) db.schema/course-iteration-very-slim-pull)
-      (mapv first)
-      (resolve-enums)))
+     (d/q '[:find (pull ?e pattern)
+            :in $ pattern
+            :where [?e :course-iteration/id]]
+          @(.conn this) db.schema/course-iteration-very-slim-pull)
+     (mapv first)
+     (resolve-enums)))
 
+  (get-membership-for-course-of-user
+    [this course-id user-id]
+    (->>
+     (d/q '[:find [(pull ?m mpattern)]
+            :in $ [?cid ?uid] mpattern
+            :where
+            [?c :course-iteration/id ?cid]
+            [?u :user/id ?uid]
+            [?m :membership/user ?u]
+            [?c :course-iteration/members ?m]]
+          @(.conn this)
+          [course-id user-id]
+          db.schema/membership-pull)
+     (first)
+     (resolve-enums)))
+
+  (create-membership-for-user
+    [this user-id role]
+    (let [user (get-user-by-id this user-id)
+          id (generate-id @(.conn this) :membership/id)
+          tx-result (d/transact 
+                     (.conn this) 
+                     [{:membership/id id
+                       :membership/user user
+                       :membership/role role}])] tx-result))
+
+  (add-membership-to-course-iteration 
+   [this course-iteration-id membership-id] 
+   (add-membership-to-course-iteration this course-iteration-id membership-id nil))
+
+  (add-membership-to-course-iteration
+    [this course-iteration-id membership-id old-membership-id]
+    (d/transact
+     (.conn this)
+     (if (nil? old-membership-id)
+       [[:db/add [:course-iteration/id course-iteration-id]
+         :course-iteration/members [:membership/id membership-id]]]
+
+       [[:db/retract [:course-iteration/id course-iteration-id]
+                     :course-iteration/members [:membership/id old-membership-id]]
+        [:db/add [:course-iteration/id course-iteration-id]
+         :course-iteration/members [:membership/id membership-id]]]
+       )))
 
   (get-graded-answers-of-question-set
     [_this _user-id _question-set-id]
@@ -182,14 +242,14 @@
          (mapv first)
          (resolve-enums))
     #_(d/q '[:find (pull ?a [:answer/points
-                                   {:answer/question [:question/id :question/type]}])
-                   :in $ ?u ?t
-                   :where
-                   [?a :answer/creator ?u]
-                   [?a :answer/question ?f]
-                   [?t :question-set/questions ?f]
-                   [?a :answer/points]]
-                 @(.conn this) [:user/id user-id] [:question-set/id question-set-id]))
+                             {:answer/question [:question/id :question/type]}])
+             :in $ ?u ?t
+             :where
+             [?a :answer/creator ?u]
+             [?a :answer/question ?f]
+             [?t :question-set/questions ?f]
+             [?a :answer/points]]
+           @(.conn this) [:user/id user-id] [:question-set/id question-set-id]))
 
 
   (get-question-ids-for-user
@@ -251,13 +311,13 @@
   (get-all-question-ids
     [this]
     (->>
-      (d/q '[:find (pull ?e pattern)
-             :in $ pattern
-             :where
-             [?e :question/id]]
-           @(.conn this) db.schema/question-slim-pull)
-      (mapv first)
-      (resolve-enums)))
+     (d/q '[:find (pull ?e pattern)
+            :in $ pattern
+            :where
+            [?e :question/id]]
+          @(.conn this) db.schema/question-slim-pull)
+     (mapv first)
+     (resolve-enums)))
 
 
   (get-all-question-categories
@@ -511,14 +571,14 @@
   (get-all-corrections-from-corrector
     [this corrector-id]
     (->>
-      (d/q '[:find (pull ?correction pattern) ?timestamp
-             :in $ pattern ?corrector-id
-             :where
-             [?correction :correction/corrector ?corrector-id ?tx]
-             [?tx :db/txInstant ?timestamp]]
-           @(.conn this) db.schema/correction-pull [:user/id corrector-id])
-      (mapv (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp})))
-      (resolve-enums)))
+     (d/q '[:find (pull ?correction pattern) ?timestamp
+            :in $ pattern ?corrector-id
+            :where
+            [?correction :correction/corrector ?corrector-id ?tx]
+            [?tx :db/txInstant ?timestamp]]
+          @(.conn this) db.schema/correction-pull [:user/id corrector-id])
+     (mapv (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp})))
+     (resolve-enums)))
 
 
   (get-answer-by-id
