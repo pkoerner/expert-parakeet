@@ -13,4 +13,8 @@
 
   (get-user-id-by-github-id
     [self oauth-github-id]
-    "Gets the user id associated with the given github-id, returns nil if there is none."))
+    "Gets the user id associated with the given github-id, returns nil if there is none.")
+
+  (get-all-users 
+  [self] 
+  "Return a list of all users"))

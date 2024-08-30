@@ -135,7 +135,11 @@
 
   (get-answer-by-id
     [this answer-id]
-    "get an answer given its id"))
+    "get an answer given its id") 
+
+  (remove-membership 
+  [this course-iteration-id user-id] 
+  "Given a course-iteration-id and an user-id, remove a memberhsip"))
 
 
 (def id-len 10)
@@ -210,30 +214,45 @@
   (create-membership-for-user
     [this user-id role]
     (let [user (get-user-by-id this user-id)
-          id (generate-id @(.conn this) :membership/id)
-          tx-result (d/transact 
-                     (.conn this) 
-                     [{:membership/id id
-                       :membership/user user
-                       :membership/role role}])] tx-result))
+          membership-id (generate-id @(.conn this) :membership/id)
+          _ (d/transact (.conn this)
+                        [{:membership/id membership-id
+                          :membership/user user
+                          :membership/role role}])]
+      (->> (d/q '[:find (pull ?m pattern)
+                  :in $ ?mid pattern
+                  :where
+                  [?m :membership/id ?mid]]
+                @(.conn this) membership-id db.schema/membership-pull)
+           (first)
+           (resolve-enums))))
+      ;;    db-after (:db-after tx-result) _ (println tx-result)]
+      ;;(->> (d/pull db-after db.schema/membership-pull [:membership/id membership-id])
+      ;;     (resolve-enums))))
 
-  (add-membership-to-course-iteration 
-   [this course-iteration-id membership-id] 
-   (add-membership-to-course-iteration this course-iteration-id membership-id nil))
+  (add-membership-to-course-iteration
+    [this course-iteration-id membership-id]
+    (add-membership-to-course-iteration this course-iteration-id membership-id nil))
 
   (add-membership-to-course-iteration
     [this course-iteration-id membership-id old-membership-id]
-    (d/transact
-     (.conn this)
-     (if (nil? old-membership-id)
-       [[:db/add [:course-iteration/id course-iteration-id]
-         :course-iteration/members [:membership/id membership-id]]]
+    (let [transaction-result (d/transact
+                              (.conn this)
+                              (if (nil? old-membership-id)
+                                [[:db/add [:course-iteration/id course-iteration-id]
+                                  :course-iteration/members [:membership/id membership-id]]]
 
-       [[:db/retract [:course-iteration/id course-iteration-id]
-                     :course-iteration/members [:membership/id old-membership-id]]
-        [:db/add [:course-iteration/id course-iteration-id]
-         :course-iteration/members [:membership/id membership-id]]]
-       )))
+                                [[:db/retract [:course-iteration/id course-iteration-id]
+                                  :course-iteration/members [:membership/id old-membership-id]]
+                                 [:db/add [:course-iteration/id course-iteration-id]
+                                  :course-iteration/members [:membership/id membership-id]]]))
+          db-after (:db-after transaction-result)]
+      (->> (d/pull db-after db.schema/membership-pull [:membership/id membership-id]))))
+
+  (remove-membership
+    [this course-iteration-id user-id]
+    "TODO: finish me"
+    (()))
 
   (get-graded-answers-of-question-set
     [_this _user-id _question-set-id]

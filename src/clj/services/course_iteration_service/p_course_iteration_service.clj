@@ -19,7 +19,17 @@
     [self]
     "Return a list of all course iterations")
 
-  (get-all-users
-    [self]
-    "Return a list of all users for the")) 
+  (get-role-of-user 
+   [self course-id user-id] 
+   "Return the roles of a user in a course")
+   
+  (add-user-to-course-iteration 
+   [self course-id user-id role]
+   "Creates a membership and adds it to the course-iteration
+    Returns the newly created membership")
+
+  (remove-user-from-course-iteration 
+   [self course-iteration-id user-id]
+   "Removes the given user from the course-iteration and returns a :role/none back"))
+
 

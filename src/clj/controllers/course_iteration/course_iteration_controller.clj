@@ -4,9 +4,12 @@
             [clojure.string :as string]
             [db]
             [ring.util.response :as response]
-            [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration
+            [services.course-iteration-service.p-course-iteration-service :refer [add-user-to-course-iteration
+                                                                                  create-course-iteration
                                                                                   get-all-course-iterations
+                                                                                  get-role-of-user
                                                                                   PCourseIterationService
+                                                                                  remove-user-from-course-iteration
                                                                                   validate-course-iteration]]
             [services.user-service.p-user-service :refer [get-all-users]]
             [util.ring-extensions :refer [construct-url extract-errors
@@ -119,3 +122,30 @@
      (assign-view/create-user-list-view
       course-id
       (get-all-users user-service)))))
+
+(defn course-iteration-assign-user-get
+  "Returns the form for updating the membership for a user in a course-iteration" 
+  [request course-iteration-service] 
+  (let [course-id (-> request :params :course-id)
+        user-id (-> request :params :user-id)
+        membership (get-role-of-user 
+                         course-iteration-service 
+                         course-id 
+                         user-id)] 
+    (html-response 
+     (assign-view/show-user-roles-for-course-iteration-view course-id user-id membership))))
+
+(defn course-iteration-assign-user-post
+  "Handles the post requeset for the role form. Delets previous membership if role is :role/none 
+   Returns an html respsone from the overview of the current membership status in the course for the user"
+  [request course-iteration-service]
+  (let [form-data (-> request (:multipart-params) (dissoc :__anti-forgery-token))
+        course-iteration-id (-> request :params :course-id)
+        user-id (-> request :params :user-id)
+        role (form-data "role")
+        new-role (if 
+                  (= role :role/none ) 
+                   (remove-user-from-course-iteration course-iteration-service course-iteration-id user-id) 
+                   (add-user-to-course-iteration course-iteration-service course-iteration-id user-id role))]
+    (html-response
+     (assign-view/show-user-roles-for-course-iteration-view course-iteration-id user-id new-role))))

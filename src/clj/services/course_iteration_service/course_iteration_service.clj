@@ -83,10 +83,42 @@
   [this]
   (db/get-all-course-iterations (.db this)))
 
+(defn get-role-of-user 
+  "Returns membership for user and the course"
+  [this course-id user-id] 
+  (let [membership (db/get-membership-for-course-of-user 
+                    (.db this) 
+                    course-id 
+                    user-id)]
+    (if (empty? membership)
+      {:role :role/none}
+      membership)))
+
+(defn add-user-to-course-iteration 
+  "Adds a user to a given course iteratioin"
+  [this course-id user-id role]
+  (let [old-membership (db/get-membership-for-course-of-user (.db this) course-id user-id) ;;possible older membership that needs to be checked
+        new-membership (db/create-membership-for-user (.db this) user-id role)
+        old-id (:membership/id old-membership)
+        new-id (:membership/id new-membership)]
+    (db/add-membership-to-course-iteration (.db this) course-id new-id old-id)))
+
+
+(defn remove-user-from-course-iteration 
+  "Removes membership row from the database"
+  [this course-iteration-id user-id] 
+  (do
+    (db/remove-membership (.db this) course-iteration-id user-id)
+    :role/none))
+
   
 (extend CourseIterationService
   PCourseIterationService
   {:create-course-iteration create-course-iteration-impl
    :validate-course-iteration validate-course-iteration-impl
    :get-all-course-iterations-for-user get-all-course-iterations-for-user
-   :get-all-course-iterations get-all-course-iterations})
+   :get-all-course-iterations get-all-course-iterations
+   :get-role-of-user get-role-of-user
+   :add-user-to-course-iteration add-user-to-course-iteration 
+   :remove-user-from-course-iteration remove-user-from-course-iteration})
+

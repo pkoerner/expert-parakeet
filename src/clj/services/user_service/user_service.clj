@@ -43,5 +43,14 @@
   (-> (db/get-user-by-github-id (.db this) oauth-github-id)
       (:user/id)))
 
+(defn- get-all-users
+  "Get a list of all users"
+  [this]
+  (db/get-all-users (.db this)))
 
-(extend UserService PUserService {:create-user! create-user-impl :github-id-in-use? github-id-in-use?-impl :get-user-id-by-github-id get-user-id-by-github-id-impl})
+
+(extend UserService PUserService 
+        {:create-user! create-user-impl 
+         :github-id-in-use? github-id-in-use?-impl 
+         :get-user-id-by-github-id get-user-id-by-github-id-impl 
+         :get-all-users get-all-users})

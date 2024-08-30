@@ -7,7 +7,9 @@
             [controllers.correction.correction-controller :refer [correction-overview-get]]
             [controllers.correction.new-correction-controller :refer [new-correction-get
                                                                       submit-new-correction!]]
-            [controllers.course-iteration.course-iteration-controller :refer [course-iteration-overview-get
+            [controllers.course-iteration.course-iteration-controller :refer [course-iteration-assign-user-get
+                                                                              course-iteration-assign-user-post
+                                                                              course-iteration-overview-get
                                                                               course-iteration-user-overview
                                                                               create-course-iteration-get
                                                                               submit-create-course-iteration!]]
@@ -75,48 +77,53 @@
                               (html-response (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) user-github-id)))))
 
   (GET "/question-set/:id"
-       req
-       (html-response (question-set-get req (:question-set-service services))))
+    req
+    (html-response (question-set-get req (:question-set-service services))))
 
   (GET "/question/:id"
-       req
-       (question-get req "/question/:id/answer" (:question-service services)))
+    req
+    (question-get req "/question/:id/answer" (:question-service services)))
 
   (POST "/question/:id/answer"
-        req
-        (submit-user-answer! req (:answer-service services)))
+    req
+    (submit-user-answer! req (:answer-service services)))
 
   (GET "/create-question" req
-       (create-question-get req (partial get-question-categories (:question-service services)) "/create-question"))
+    (create-question-get req (partial get-question-categories (:question-service services)) "/create-question"))
 
   (POST "/create-question" req
-        (submit-create-question! req "/create-question" (:question-service services)))
+    (submit-create-question! req "/create-question" (:question-service services)))
 
   (GET "/create-course" req
-       (create-course-get req "/create-course"))
+    (create-course-get req "/create-course"))
 
   (POST "/create-course" req
-        (submit-create-course! req "/create-course" (:course-service services)))
+    (submit-create-course! req "/create-course" (:course-service services)))
 
   (GET "/create-course-iteration" req
-       (html-response (create-course-iteration-get req "/create-course-iteration"
-                                                   (partial get-all-courses (:course-service services))
-                                                   (partial get-all-question-sets (:question-set-service services)))))
+    (html-response (create-course-iteration-get req "/create-course-iteration"
+                                                (partial get-all-courses (:course-service services))
+                                                (partial get-all-question-sets (:question-set-service services)))))
   (POST "/create-course-iteration" req
-        (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
+    (submit-create-course-iteration! req "/create-course-iteration" (:course-iteration-service services)))
 
   (GET "/correction-overview" req
-       (html-response (correction-overview-get req (services :correction-service))))
+    (html-response (correction-overview-get req (services :correction-service))))
 
   (GET "/new-correction" req (html-response (new-correction-get req "/new-correction" (partial db/get-answer-by-id db) (partial db/get-question-by-id db))))
   (POST "/new-correction" req (submit-new-correction! req "/new-correction" (partial db/add-correction! db) (partial db/get-user-by-id db)))
 
-  (GET "/assign-member-course" req 
+  (GET "/assign-member-course" _
     (course-iteration-overview-get (:course-iteration-service services)))
 
-  (GET "/assign-member-course/:course-id" req 
+  (GET "/assign-member-course/:course-id" req
     (course-iteration-user-overview req (:user-service services)))
 
+  (GET "/assign-member-course/:course-id/:user-id" req
+    (course-iteration-assign-user-get req (:course-iteration-service services)))
+
+  (POST "/assign-member-course/:course-id/:user-id" req
+    (course-iteration-assign-user-post req (:course-iteration-service services)))
 
   (route/not-found "Not Found"))
 
