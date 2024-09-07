@@ -2,7 +2,6 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.string]
-    [db]
     [services.question-service.p-question-service :refer [create-question!
                                                           get-question-categories
                                                           PQuestionService

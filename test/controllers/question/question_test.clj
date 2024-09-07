@@ -3,7 +3,6 @@
     [clojure.string :as string]
     [clojure.test :as t :refer [deftest testing]]
     [controllers.question.question-controller :refer [question-get]]
-    [db]
     [services.question-service.p-question-service :refer [PQuestionService]]))
 
 

@@ -2,8 +2,7 @@
   (:require
     [clojure.string :as string]
     [clojure.test :as t :refer [deftest testing]]
-    [controllers.user.user-overview-controller :refer [create-user-overview-get]]
-    [db]))
+    [controllers.user.user-overview-controller :refer [create-user-overview-get]]))
 
 
 (deftest create-user-overview-get-test
