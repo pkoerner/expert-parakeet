@@ -109,6 +109,9 @@
 
   (GET "/courses-user" req
     (html-response (courses-overview req (:course-service services))))
+  
+  (GET "/course/:id" req
+    (html-response ()))
 
   (route/not-found "Not Found"))
 
