@@ -14,7 +14,9 @@
 
 (def user-pull
   [:user/id
-   :user/github-id])
+   :user/github-id
+   :user/name
+   :user/matriculation-id])
 
 
 (def user-schema
@@ -29,7 +31,19 @@
         :cardinality :db.cardinality/one
         :unique :db.unique/identity
         :index true
-        :doc "GitHub user id, used for authentication"}])
+        :doc "GitHub user id, used for authentication"}
+   #:db{:ident :user/name
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true
+        :doc "Human-readable Name"}
+   #:db{:ident :user/matriculation-id
+        :valueType :db.type/string
+        :cardinality :db.cardinality/one
+        :unique :db.unique/identity
+        :index true
+        :doc "Maps to other Identity Providers of the university"}])
 
 
 (def user-role-pull ident-pull)

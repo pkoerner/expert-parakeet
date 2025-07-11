@@ -18,7 +18,7 @@
 
 (defn- create-user-impl
   [this oauth-github-id]
-  (db/add-user! (.db this) oauth-github-id))
+  (db/add-user! (.db this) oauth-github-id "a" "a"))
 
 
 (s/fdef github-id-in-use?-impl

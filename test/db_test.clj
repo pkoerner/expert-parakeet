@@ -444,18 +444,28 @@
     (testing "get-all-users of dummy-data"
       (let [res (db/get-all-users test-db)
             reference-user [#:user{:id "1"
-                                   :github-id "12345"}
+                                   :github-id "12345"
+                                   :matriculation-id "23456"
+                                   :name "tick"}
                             #:user{:id "2"
-                                   :github-id "45678"}
+                                   :github-id "45678"
+                                   :matriculation-id "56789"
+                                   :name "trick"}
                             #:user{:id "3"
-                                   :github-id "13579"}]]
+                                   :github-id "13579"
+                                   :matriculation-id "24690"
+                                   :name "track"}]]
         (t/is (every? (fn [act] (some #(= act %) reference-user)) res))))
     (testing "get-user-by-id with id = 1"
       (t/is (= (db/get-user-by-id test-db "1") {:user/id "1"
-                                                :user/github-id "12345"})))
+                                                :user/github-id "12345"
+                                                :user/matriculation-id "23456"
+                                                :user/name "tick"})))
     (testing "get-user-by-id with id = 2"
       (t/is (= (db/get-user-by-id test-db "2") {:user/id "2"
-                                                :user/github-id "45678"})))
+                                                :user/github-id "45678"
+                                                :user/matriculation-id "56789"
+                                                :user/name "trick"})))
     (testing "get-user-by-id with invalid id = 42"
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
@@ -463,16 +473,20 @@
               (db/get-user-by-id test-db "42"))))
     (testing "get-user-by-github-id with id = 12345"
       (t/is (= (db/get-user-by-github-id test-db "12345") {:user/id "1"
-                                                           :user/github-id "12345"})))
+                                                           :user/github-id "12345"
+                                                           :user/matriculation-id "23456"
+                                                           :user/name "tick"})))
     (testing "get-user-by-id with id = 45678"
       (t/is (= (db/get-user-by-github-id test-db "45678") {:user/id "2"
-                                                           :user/github-id "45678"})))
+                                                           :user/github-id "45678"
+                                                           :user/matriculation-id "56789"
+                                                           :user/name "trick"})))
     (testing "get-user-by-id with invalid id = 42"
       (t/is (nil? (db/get-user-by-github-id test-db "42"))))
     (testing "add-user! with generated github-ids"
       (let [github-ids (distinct (gen/sample (s/gen :user/github-id) generator-sample-size))]
         (t/is (every? (fn [act]
-                        (let [_ (db/add-user! test-db act)
+                        (let [_ (db/add-user! test-db act "satan" "666")
                               excisting-github-ids (map #(:user/github-id %) (db/get-all-users test-db))]
                           (some #(= act %) excisting-github-ids)))
                       github-ids))))
@@ -480,7 +494,7 @@
       (t/is (thrown-with-msg?
               java.lang.AssertionError
               #"There is already a user with the same github-id in the database."
-              (db/add-user! test-db "12345"))))))
+              (db/add-user! test-db "12345" "hans-peter" "1337"))))))
 
 
 (deftest answer-test
@@ -489,58 +503,58 @@
       (let [ref-answers #{#:answer{:id "1",
                                    :answer "transients are a non persistent data structures in clojure. They are used to increase performance.",
                                    :question #:question{:id "1", :statement "Describe a use case for transient data structures", :max-points 3, :type :question.type/free-text},
-                                   :creator #:user{:id "1", :github-id "12345"}}
+                                   :creator #:user{:id "1", :github-id "12345", :matriculation-id "23456", :name "tick"}}
                           #:answer{:id "2",
                                    :answer "generative Tests are only a good choice, if you have an oracle or you can write an inverse function. But they have very high costs compared to example based testing",
                                    :question #:question{:id "2", :statement "What are some advantages and disadvantages of example-based and generative testing?", :max-points 2, :type :question.type/free-text},
-                                   :creator #:user{:id "1", :github-id "12345"}}
+                                   :creator #:user{:id "1", :github-id "12345", :matriculation-id "23456", :name "tick"}}
                           #:answer{:id "3",
                                    :question #:question{:id "3", :statement "Transient data structures are:", :max-points 1, :type :question.type/single-choice},
-                                   :creator #:user{:id "1", :github-id "12345"},
+                                   :creator #:user{:id "1", :github-id "12345", :matriculation-id "23456", :name "tick"},
                                    :selected-solutions [#:solution{:id "1", :statement "mutable"}]}
                           #:answer{:id "4",
                                    :question #:question{:id "4", :statement "Which keywords are suitable for generative testing?", :max-points 1, :type :question.type/multiple-choice},
-                                   :creator #:user{:id "1", :github-id "12345"},
+                                   :creator #:user{:id "1", :github-id "12345", :matriculation-id "23456", :name "tick"},
                                    :selected-solutions [#:solution{:id "3", :statement "Oracle"} #:solution{:id "4", :statement "inverse function"} #:solution{:id "5", :statement "specs"}]}
                           #:answer{:id "5",
                                    :answer "I like transients",
                                    :question #:question{:id "1", :statement "Describe a use case for transient data structures", :max-points 3, :type :question.type/free-text},
-                                   :creator #:user{:id "2", :github-id "45678"}}
+                                   :creator #:user{:id "2", :github-id "45678", :matriculation-id "56789", :name "trick"}}
                           #:answer{:id "6",
                                    :answer "example based testing is good for documentation",
                                    :question #:question{:id "2", :statement "What are some advantages and disadvantages of example-based and generative testing?", :max-points 2, :type :question.type/free-text},
-                                   :creator #:user{:id "2", :github-id "45678"}}
+                                   :creator #:user{:id "2", :github-id "45678", :matriculation-id "56789", :name "trick"}}
                           #:answer{:id "7",
                                    :question #:question{:id "3", :statement "Transient data structures are:", :max-points 1, :type :question.type/single-choice},
-                                   :creator #:user{:id "2", :github-id "45678"},
+                                   :creator #:user{:id "2", :github-id "45678", :matriculation-id "56789", :name "trick"},
                                    :selected-solutions [#:solution{:id "2", :statement "immutable"}]}
                           #:answer{:id "8",
                                    :question #:question{:id "4", :statement "Which keywords are suitable for generative testing?", :max-points 1, :type :question.type/multiple-choice},
-                                   :creator #:user{:id "2", :github-id "45678"},
+                                   :creator #:user{:id "2", :github-id "45678", :matriculation-id "56789", :name "trick"},
                                    :selected-solutions [#:solution{:id "3", :statement "Oracle"} #:solution{:id "5", :statement "specs"}]}
                           #:answer{:id "9",
                                    :question #:question{:id "5", :statement "When was the movie Alien by ridley scott released?", :max-points 1, :type :question.type/single-choice},
-                                   :creator #:user{:id "1", :github-id "12345"},
+                                   :creator #:user{:id "1", :github-id "12345", :matriculation-id "23456", :name "tick"},
                                    :selected-solutions [#:solution{:id "7", :statement "1979"}]}
                           #:answer{:id "10",
                                    :answer "Alien is the best movie of all time <3",
                                    :question #:question{:id "6", :statement "Which one is the greates movie of all time? ;D", :max-points 1, :type :question.type/free-text},
-                                   :creator #:user{:id "1", :github-id "12345"}}
+                                   :creator #:user{:id "1", :github-id "12345", :matriculation-id "23456", :name "tick"}}
                           #:answer{:id "11",
                                    :answer "JVM, i.e., Java Virtual Machine. JVM is the engine that drives the Java code. Mostly in other Programming Languages, compiler produce code for a particular system but Java compiler produce Bytecode for a Java Virtual Machine. When we compile a Java program, then bytecode is generated. Bytecode is the source code that can be used to run on any platform. Bytecode is an intermediary language between Java source and the host system. It is the medium which compiles Java code to bytecode which gets interpreted on a different machine and hence it makes it Platform/Operating system independent.",
                                    :question #:question{:id "7", :statement "What is the JVM?", :max-points 3, :type :question.type/free-text},
-                                   :creator #:user{:id "1", :github-id "12345"}}
+                                   :creator #:user{:id "1", :github-id "12345", :matriculation-id "23456", :name "tick"}}
                           #:answer{:id "12",
                                    :question #:question{:id "8", :statement "What type of programming lanuage is java?", :max-points 1, :type :question.type/single-choice},
-                                   :creator #:user{:id "1", :github-id "12345"},
+                                   :creator #:user{:id "1", :github-id "12345", :matriculation-id "23456", :name "tick"},
                                    :selected-solutions [#:solution{:id "11", :statement "object oriented"}]}
                           #:answer{:id "13",
                                    :answer "I don't know, pls give me points :D",
                                    :question #:question{:id "7", :statement "What is the JVM?", :max-points 3, :type :question.type/free-text},
-                                   :creator #:user{:id "3", :github-id "13579"}}
+                                   :creator #:user{:id "3", :github-id "13579", :matriculation-id "24690", :name "track"}}
                           #:answer{:id "14",
                                    :question #:question{:id "8", :statement "What type of programming lanuage is java?", :max-points 1, :type :question.type/single-choice},
-                                   :creator #:user{:id "3", :github-id "13579"},
+                                   :creator #:user{:id "3", :github-id "13579", :matriculation-id "24690", :name "track"},
                                    :selected-solutions [#:solution{:id "13", :statement "logic"}]}}
             res (db/get-all-answers test-db)]
         (t/is (= ref-answers (set res)))))))

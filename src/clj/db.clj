@@ -85,8 +85,8 @@
     [this answer-id correction])
 
   (add-user!
-    [this github-id]
-    "add a new user to the db with a new id, the given github-id.")
+    [this github-id name matriculation-id]
+    "add a new user to the db with a new id, the given github-id, name and matriculation-id.")
 
   (get-user-by-id
     [this id]
@@ -437,13 +437,15 @@
 
 
   (add-user!
-    [this github-id]
+    [this github-id name matriculation-id]
     (if (some? (get-user-by-github-id this github-id))
       (throw (AssertionError. (str "There is already a user with the same github-id in the database.")))
       (let [user-id (generate-id @(.conn this) :user/id)
             tx-result (d/transact (.conn this)
                                   [{:user/id user-id
-                                    :user/github-id github-id}])
+                                    :user/github-id github-id
+                                    :user/name name
+                                    :user/matriculation-id matriculation-id}])
             db-after (:db-after tx-result)]
         (->> (d/pull db-after db.schema/user-pull [:user/id user-id])
              (resolve-enums)))))

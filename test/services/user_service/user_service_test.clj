@@ -40,7 +40,7 @@
     (let [was-called (atom false)
           db-stub (reify Database-Protocol
                     (add-user!
-                      [_this _github-id]
+                      [_this _github-id _name _matriculation-id]
                       (swap! was-called (fn [_] true))
                       {}))
           user-service (->UserService db-stub)]
