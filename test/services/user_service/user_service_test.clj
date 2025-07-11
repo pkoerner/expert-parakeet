@@ -44,7 +44,7 @@
                       (swap! was-called (fn [_] true))
                       {}))
           user-service (->UserService db-stub)]
-      (create-user! user-service "some-github-id"))))
+      (create-user! user-service "some-github-id" "some-name" "12345"))))
 
 
 (deftest test-get-user-id-by-github-id
