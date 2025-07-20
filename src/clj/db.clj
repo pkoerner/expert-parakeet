@@ -315,43 +315,35 @@
   (add-question!
     [this question]
     ;; TODO: this needs to take a course as an argument so we can add the question to the owning course
-    (let [question-ids (map :question/id (get-all-question-ids this))
-          question-list (map #(select-keys (db/get-question-by-id this %)
-                                           [:question/type
-                                            :question/statement
-                                            :question/max-points])
-                             question-ids)]
-      (if (some #(= % (select-keys question [:question/type :question/statement :question/max-points])) question-list)
-        (throw (AssertionError. (str "There is a similar question already in the data base. Please check the existing question and wether you need to create a new one. " (select-keys question [:question/type :question/statement :question/max-points]))))
-        (let [possible-solutions (->> (question :question/possible-solutions)
-                                      (mapv (fn [sol]
-                                              {:solution/id (generate-id @(.conn this) :solution/id)
-                                               :solution/statement sol})))
-              possible-solutions-lookup (->> possible-solutions
-                                             (map (fn [sol]
-                                                    [(sol :solution/statement) (sol :solution/id)]))
-                                             (into {}))
-              correct-solutions (->> (question :question/correct-solutions)
-                                     (mapv (fn [sol]
-                                             [:solution/id (possible-solutions-lookup sol)])))
-              id (generate-id @(.conn this) :question/id)
-              type (:question/type question)
-              trans-map (apply assoc {:question/id id
-                                      :question/type type
-                                      :question/max-points (:question/max-points question)
-                                      :question/statement (:question/statement question)
-                                      :question/categories (:question/categories question)}
-                               (case type
-                                 :question.type/free-text
-                                 [:question/evaluation-criteria (:question/evaluation-criteria question)]
+    (let [possible-solutions (->> (question :question/possible-solutions)
+                                  (mapv (fn [sol]
+                                          {:solution/id (generate-id @(.conn this) :solution/id)
+                                           :solution/statement sol})))
+          possible-solutions-lookup (->> possible-solutions
+                                         (map (fn [sol]
+                                                [(sol :solution/statement) (sol :solution/id)]))
+                                         (into {}))
+          correct-solutions (->> (question :question/correct-solutions)
+                                 (mapv (fn [sol]
+                                         [:solution/id (possible-solutions-lookup sol)])))
+          id (generate-id @(.conn this) :question/id)
+          type (:question/type question)
+          trans-map (apply assoc {:question/id id
+                                  :question/type type
+                                  :question/max-points (:question/max-points question)
+                                  :question/statement (:question/statement question)
+                                  :question/categories (:question/categories question)}
+                           (case type
+                             :question.type/free-text
+                             [:question/evaluation-criteria (:question/evaluation-criteria question)]
 
-                                 (:question.type/single-choice :question.type/multiple-choice)
-                                 [:question/possible-solutions possible-solutions
-                                  :question/correct-solutions correct-solutions]))
-              tx-result (d/transact (.conn this) [trans-map])
-              db-after (:db-after tx-result)]
-          (->> (d/pull db-after db.schema/question-pull [:question/id id])
-               (resolve-enums))))))
+                             (:question.type/single-choice :question.type/multiple-choice)
+                             [:question/possible-solutions possible-solutions
+                              :question/correct-solutions correct-solutions]))
+          tx-result (d/transact (.conn this) [trans-map])
+          db-after (:db-after tx-result)]
+      (->> (d/pull db-after db.schema/question-pull [:question/id id])
+           (resolve-enums))))
 
 
   (add-question-set!

@@ -86,16 +86,18 @@
                             :question/max-points 1
                             :question/categories ["Cat1"]}]
         (t/is (thrown? java.lang.IllegalArgumentException (db/add-question! test-db input-question)))))
-    (testing "add-question! with already existing free-text-choice question as input and check wether it contains in the db"
+    (testing "add-question! with already existing free-text-choice question as input: duplicate questions are now allowed"
       (let [input-question {:question/type :question.type/free-text
                             :question/statement "What are some advantages and disadvantages of example-based and generative testing?"
                             :question/evaluation-criteria "The following aspects are explained: Oracle, performance, test-coverage"
                             :question/max-points 2
-                            :question/categories #{"Cat1" "Cat3"}}]
-        (t/is (thrown-with-msg?
-                java.lang.AssertionError
-                #"There is a similar question already in the data base. Please check the existing question and wether you need to create a new one."
-                (db/add-question! test-db input-question)))))
+                            :question/categories #{"Cat1" "Cat3"}}
+            _ (db/add-question! test-db input-question)
+            _ (db/add-question! test-db input-question)
+            question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
+            question-list (map #(db/get-question-by-id test-db %) question-ids)
+            matching-questions (filter #(= (:question/statement %) (:question/statement input-question)) question-list)]
+        (t/is (>= (count matching-questions) 2))))
 
     ;; in the following you see an idea of testing add-question! with sampled question - this does not work because the generator implemented like this can create duplicates and the add-question! denies duplicate wuestions. Idea for fixing: create each parameter seperate in a sample and the question then by hand.
 
