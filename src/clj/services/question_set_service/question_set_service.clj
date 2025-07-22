@@ -21,6 +21,14 @@
   [this]
   (db/get-all-question-sets (.db this)))
 
+(s/fdef get-all-question-sets-with-questions
+  :args (s/cat :self #(satisfies? PQuestionSetService %))
+  :ret (s/coll-of (s/keys :req [:question-set/id])))
+
+(defn- get-all-question-sets-with-questions
+  [this]
+  (db/get-all-question-sets-with-questions (.db this)))
+
 
 (s/fdef get-question-set-by-id
         :args (s/cat :self #(satisfies? PQuestionSetService %) :question-set-id string?)
@@ -69,5 +77,6 @@
 (extend QuestionSetService
   PQuestionSetService
   {:get-all-question-sets get-all-question-sets
+   :get-all-question-sets-with-questions get-all-question-sets-with-questions
    :get-question-set-by-id get-question-set-by-id
    :validate-user-for-question-set validate-user-for-question-set})

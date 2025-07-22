@@ -15,6 +15,7 @@
                                                       submit-create-question!]]
     [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
     [controllers.user.user-overview-controller :refer [create-user-overview-get]]
+    [controllers.correction-queue.correction-queue-controller :refer [correction-queue-overview-get correction-queue-get]]
     [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
@@ -23,6 +24,7 @@
     [ring.middleware.reload :refer [wrap-reload]]
     [ring.middleware.resource :refer [wrap-resource]]
     [services.answer-service.answer-service :refer [->AnswerService]]
+    [services.answer-service.p-answer-service :refer [get-assigned-answer-for-question get-unassigned-answer-for-question]]
     [services.correction-service.correction-service :refer [->CorrectionService]]
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-iteration-service.p-course-iteration-service :refer [get-all-course-iterations-for-user]]
@@ -30,7 +32,7 @@
     [services.course-service.p-course-service :refer [get-all-courses]]
     [services.question-service.p-question-service :refer [get-question-categories]]
     [services.question-service.question-service :refer [->QuestionService]]
-    [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
+    [services.question-set-service.p-question-set-service :refer [get-all-question-sets get-all-question-sets-with-questions]]
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
     [services.user-service.user-service :refer [->UserService]]
     [util.ring-extensions :refer [html-response]]
@@ -109,6 +111,10 @@
 
   (GET "/new-correction" req (html-response (new-correction-get req "/new-correction" (partial db/get-answer-by-id db) (partial db/get-question-by-id db))))
   (POST "/new-correction" req (submit-new-correction! req "/new-correction" (partial db/add-correction! db) (partial db/get-user-by-id db)))
+
+  (GET "/correction-queue" req (correction-queue-overview-get req "/correction-queue" (partial get-all-question-sets-with-questions (:question-set-service services))))
+  (GET "/correction-queue/unassigned/:question-id" req (correction-queue-get req "/correction-queue/unassigned" (partial get-unassigned-answer-for-question (:answer-service services))))
+  (GET "/correction-queue/assigned/:question-id" req (correction-queue-get req "/correction-queue/assigned" (partial get-assigned-answer-for-question (:answer-service services))))
 
   (route/not-found "Not Found"))
 

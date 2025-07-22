@@ -30,6 +30,9 @@
   ;; this should be get-all-question-sets-in-course
   (get-all-question-sets
     [this])
+  
+  (get-all-question-sets-with-questions
+   [this])
 
   (get-all-courses
     [this])
@@ -144,7 +147,7 @@
 
 
 (deftype Database
-  [conn]
+         [conn]
 
   Database-Protocol
 
@@ -163,12 +166,12 @@
   (get-all-course-iterations
     [this]
     (->>
-      (d/q '[:find (pull ?e pattern)
-             :in $ pattern
-             :where [?e :course-iteration/id]]
-           @(.conn this) db.schema/course-iteration-very-slim-pull)
-      (mapv first)
-      (resolve-enums)))
+     (d/q '[:find (pull ?e pattern)
+            :in $ pattern
+            :where [?e :course-iteration/id]]
+          @(.conn this) db.schema/course-iteration-very-slim-pull)
+     (mapv first)
+     (resolve-enums)))
 
 
   (get-graded-answers-of-question-set
@@ -178,14 +181,14 @@
          (mapv first)
          (resolve-enums))
     #_(d/q '[:find (pull ?a [:answer/points
-                                   {:answer/question [:question/id :question/type]}])
-                   :in $ ?u ?t
-                   :where
-                   [?a :answer/creator ?u]
-                   [?a :answer/question ?f]
-                   [?t :question-set/questions ?f]
-                   [?a :answer/points]]
-                 @(.conn this) [:user/id user-id] [:question-set/id question-set-id]))
+                             {:answer/question [:question/id :question/type]}])
+             :in $ ?u ?t
+             :where
+             [?a :answer/creator ?u]
+             [?a :answer/question ?f]
+             [?t :question-set/questions ?f]
+             [?a :answer/points]]
+           @(.conn this) [:user/id user-id] [:question-set/id question-set-id]))
 
 
   (get-question-ids-for-user
@@ -220,6 +223,16 @@
          (mapv first)
          (resolve-enums)))
 
+  (get-all-question-sets-with-questions
+    [this]
+    (->> (d/q '[:find (pull ?e pattern)
+                :in $ pattern
+                :where
+                [?e :question-set/id]]
+              @(.conn this) db.schema/question-set-pull)
+         (mapv first)
+         (resolve-enums)))
+
 
   (get-all-courses
     [this]
@@ -247,13 +260,13 @@
   (get-all-question-ids
     [this]
     (->>
-      (d/q '[:find (pull ?e pattern)
-             :in $ pattern
-             :where
-             [?e :question/id]]
-           @(.conn this) db.schema/question-slim-pull)
-      (mapv first)
-      (resolve-enums)))
+     (d/q '[:find (pull ?e pattern)
+            :in $ pattern
+            :where
+            [?e :question/id]]
+          @(.conn this) db.schema/question-slim-pull)
+     (mapv first)
+     (resolve-enums)))
 
 
   (get-all-question-categories
@@ -495,14 +508,14 @@
   (get-all-corrections-from-corrector
     [this corrector-id]
     (->>
-      (d/q '[:find (pull ?correction pattern) ?timestamp
-             :in $ pattern ?corrector-id
-             :where
-             [?correction :correction/corrector ?corrector-id ?tx]
-             [?tx :db/txInstant ?timestamp]]
-           @(.conn this) db.schema/correction-pull [:user/id corrector-id])
-      (mapv (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp})))
-      (resolve-enums)))
+     (d/q '[:find (pull ?correction pattern) ?timestamp
+            :in $ pattern ?corrector-id
+            :where
+            [?correction :correction/corrector ?corrector-id ?tx]
+            [?tx :db/txInstant ?timestamp]]
+          @(.conn this) db.schema/correction-pull [:user/id corrector-id])
+     (mapv (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp})))
+     (resolve-enums)))
 
 
   (get-answer-by-id
