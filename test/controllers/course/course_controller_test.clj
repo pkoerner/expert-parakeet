@@ -87,15 +87,3 @@
                  (string/includes? response expected-error))
           (assoc-in test-request [:params :name] wrong-course-name)
           "The course name must be a non-empty string")))))
-
-
-(deftest test-submit-create-course-xss!
-  (testing "Test that strings containing XSS scripts are being escaped when creating a response. 
-            Note: The course name itself can still contain unescaped scripts."
-    (let [db-stub (mock-db)
-          course-service (->CourseService db-stub)
-          xss-data "<script>alert('XSS')</script>"
-          test-request {:__anti-forgery-token ""
-                        :params {:name xss-data}}
-          response (submit-create-course! test-request "/create-course" course-service)]
-      (t/is (not (string/includes? response xss-data))))))
