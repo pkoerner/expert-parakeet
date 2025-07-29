@@ -4,7 +4,7 @@
 (defprotocol PUserService
 
   (create-user!
-    [self oauth-github-id]
+    [self oauth-github-id name matriculation-id]
     "Creates a new user entry in the database and returns it.")
 
   (github-id-in-use?
