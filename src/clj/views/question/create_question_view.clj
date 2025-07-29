@@ -101,7 +101,7 @@
    `:question-data`: Takes a map with form data keys mapped to values.
    When present, the values are put into the input fields corresponding to the name.
    This way the form can be re-/prepopulated."
-  [categories post-destination & {:keys [errors question-data] :or {errors {} question-data {}}}]
+  [categories post-destination & {:keys [errors question-data course-id courses]:or {errors {} question-data {} courses []}}]
   (let [question-types (->> question-types
                             (map name)
                             (sort))
@@ -118,71 +118,87 @@
       [:div.container
        [:h2 "Create question"]
        (hform/form-to
-         [:post post-destination]
+        [:post post-destination]
 
-         [:div
-          (hform/label {:class "form-label"} "statement" "Question statement")
-          (optional-error-display :statement errors)
-          (hform/text-area {:class "form-control" :required true} "statement" (get question-data :statement))]
+        (when course-id
+          (hform/hidden-field "course-id" course-id))
 
-         [:div
-          (hform/label {:class "form-label"} "max-points" "Maximum number of points")
-          (optional-error-display :max-points errors)
-          [:input {:id "max-points"
-                   :class "form-control"
-                   :name "max-points"
-                   :type "number"
-                   :min "0"
-                   :step "1"
-                   :required true
-                   :value (get question-data :max-points 1)}]]
+        [:div
+         (hform/label {:class "form-label"} "course-id" "Course")
+         (optional-error-display :course-id errors)
+         (if (seq courses)
+           (hform/drop-down {:class "form-select" :required true}
+                            "course-id"
+                            (map (juxt :course/name :course/id) courses)
+                            course-id)
+           [:p "No courses available. Please create a course first."])]
+        
+        [:div
+         (hform/label {:class "form-label"} "statement" "Question statement")
+         (optional-error-display :statement errors)
+         (hform/text-area {:class "form-control" :required true} "statement" (get question-data :statement))]
+        
+        [:div
+         (hform/label {:class "form-label"} "max-points" "Maximum number of points")
+         (optional-error-display :max-points errors)
+         [:input {:id "max-points"
+                  :class "form-control"
+                  :name "max-points"
+                  :type "number"
+                  :min "0"
+                  :step "1"
+                  :required true
+                  :value (get question-data :max-points 1)}]]
 
-         [:div
-          (hform/label {:class "form-label"} "type" "Question type")
-          (optional-error-display :type errors)
-          (let [selected-type (get question-data :type (first question-types))
-                type-names {"free-text" "Free text"
-                            "single-choice" "Single choice"
-                            "multiple-choice" "Multiple choice"}
-                options (->> question-types (map (juxt type-names identity)))]
-            (hform/drop-down {:class "form-select" :required true} "type" options selected-type))]
+        [:div
+         (hform/label {:class "form-label"} "type" "Question type")
+         (optional-error-display :type errors)
+         (let [selected-type (get question-data :type (first question-types))
+               type-names {"free-text" "Free text"
+                           "single-choice" "Single choice"
+                           "multiple-choice" "Multiple choice"}
+               options (->> question-types (map (juxt type-names identity)))]
+           (hform/drop-down {:class "form-select" :required true} "type" options selected-type))]
 
-         (single-choice-inputs errors question-data)
-         (multiple-choice-inputs errors question-data)
-         (free-text-inputs errors question-data)
-         (script "expert_parakeet.question.create_question_view.register_question_type_switch('type', " question-types-js-arr ");")
+        (single-choice-inputs errors question-data)
+        (multiple-choice-inputs errors question-data)
+        (free-text-inputs errors question-data)
+        (script "expert_parakeet.question.create_question_view.register_question_type_switch('type', " question-types-js-arr ");")
 
-         [:div
-          [:fieldset
-           [:legend {:class "form-label"} "Categories"]
-           (optional-error-display :categories errors)
-           (let [prev-categories (set (as-coll (get question-data :categories)))
-                 all-categories (set (concat categories prev-categories))]
-             [:div#category-container.ps-1 {:style "max-height: 150px; overflow-y: scroll"}
-              ;; keep this in sync with the cljs function!
-              (->> all-categories
-                   (sort)
-                   (map-indexed (fn [idx cat]
-                                  (let [id (str "category-" idx)]
-                                    [:div.form-check
-                                     (hform/check-box {:class "form-check-input"
-                                                       :name "categories"}
-                                                      id
-                                                      (contains? prev-categories cat)
-                                                      cat)
-                                     [:input {:class "form-check-input"
-                                              :id id
-                                              :type "checkbox"
-                                              :name "categories"
-                                              :value cat
-                                              :checked (contains? prev-categories cat)}]
-                                     [:label {:class "form-check-label" :for id} cat]]))))])
-           [:div.input-group
-            (hform/text-field {:class "form-control" :form "new-category-form" :required true :placeholder "Create new category"} "new-category")
-            (hform/submit-button {:class "btn btn-outline-secondary" :form "new-category-form"} "+")]]]
 
-         (h/raw (anti-forgery-field))
-         (hform/submit-button {:class "btn btn-primary"} "Submit"))])))
+
+
+        [:div
+         [:fieldset
+          [:legend {:class "form-label"} "Categories"]
+          (optional-error-display :categories errors)
+          (let [prev-categories (set (as-coll (get question-data :categories)))
+                all-categories (set (concat categories prev-categories))]
+            [:div#category-container.ps-1 {:style "max-height: 150px; overflow-y: scroll"}
+             ;; keep this in sync with the cljs function!
+             (->> all-categories
+                  (sort)
+                  (map-indexed (fn [idx cat]
+                                 (let [id (str "category-" idx)]
+                                   [:div.form-check
+                                    (hform/check-box {:class "form-check-input"
+                                                      :name "categories"}
+                                                     id
+                                                     (contains? prev-categories cat)
+                                                     cat)
+                                    [:input {:class "form-check-input"
+                                             :id id
+                                             :type "checkbox"
+                                             :name "categories"
+                                             :value cat
+                                             :checked (contains? prev-categories cat)}]
+                                    [:label {:class "form-check-label" :for id} cat]]))))])
+          [:div.input-group
+           (hform/text-field {:class "form-control" :form "new-category-form" :required true :placeholder "Create new category"} "new-category")
+           (hform/submit-button {:class "btn btn-outline-secondary" :form "new-category-form"} "+")]]]
+
+        (h/raw (anti-forgery-field))
+        (hform/submit-button {:class "btn btn-primary"} "Submit"))])))
 
 
 (defn- possible-solutions-view

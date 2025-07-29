@@ -91,7 +91,9 @@
   [:question/id
    {:question/type question-type-pull}
    :question/statement
-   :question/max-points])
+   :question/max-points
+   {:question/course [:course/id]}])
+
 
 
 (def question-pull
@@ -136,7 +138,11 @@
    #:db{:ident :question/categories
         :valueType :db.type/string
         :cardinality :db.cardinality/many
-        :doc "Categories/Tags for this question"}])
+        :doc "Categories/Tags for this question"}
+   #:db{:ident :question/course
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/one
+        :doc "The course that owns this question"}])
 
 
 (def answer-slim-pull
@@ -271,11 +277,19 @@
    ])
 
 
+;(def course-pull
+;  [:course/id
+;   :course/name
+;   {:course/questions question-pull}
+;   {:course/question-sets question-set-pull}])
+
+
 (def course-pull
   [:course/id
    :course/name
-   {:course/questions question-pull}
+   {:course/questions question-slim-pull} 
    {:course/question-sets question-set-pull}])
+
 
 
 (def course-schema
@@ -292,11 +306,18 @@
    #:db{:ident :course/questions
         :valueType :db.type/ref
         :cardinality :db.cardinality/many
-        :doc "All questions owned by this course"}
+        :isComponent true  
+        :doc "All questions owned by this course"} 
    #:db{:ident :course/question-sets
         :valueType :db.type/ref
         :cardinality :db.cardinality/many
         :doc "All question sets owned by this course, consisting out of questions owned by this course"}])
+
+;#:db{:ident :course/questions
+;     :valueType :db.type/ref
+;     :cardinality :db.cardinality/many
+;     :doc "All questions owned by this course"}
+
 
 
 (def semester-pull ident-pull)

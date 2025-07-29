@@ -1,7 +1,7 @@
 (ns views.question.question-view
   (:require
     [hiccup.form :as form]
-    [hiccup2.core :as h]
+    [hiccup2.core :as h] 
     [ring.util.anti-forgery :refer [anti-forgery-field]]))
 
 
@@ -45,12 +45,14 @@
 (defn question-form
   [question post-destination]
   (h/html
-    (form/form-to
-      [:post post-destination]
-      [:p (:question/statement question)]
-      (dispatch-question-type question)
-      (h/raw (anti-forgery-field))
-      (form/submit-button {:class "btn btn-primary"} "Submit"))))
+   (form/form-to
+    [:post post-destination]
+    ;(when-let [course-id (:question/course question)]
+    ;  (form/hidden-field "course-id" course-id))
+    [:p (:question/statement question)]
+    (dispatch-question-type question)
+    (h/raw (anti-forgery-field))
+    (form/submit-button {:class "btn btn-primary"} "Submit"))))
 
 
 (defn no-question-assignment

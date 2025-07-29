@@ -34,8 +34,13 @@
 (defn create-question-get
   "Takes a ring request, a function to get question categories, and a post-destination as arguments.
    It returns a form for question creation, the result of which will be sent to the provided `post-destination`."
-  [_req get-question-categories-fun post-destination]
-  (html-response (creation-view/create-question-form (get-question-categories-fun) post-destination)))
+  [req get-question-categories-fun get-courses-fun post-destination]
+  (html-response
+   (creation-view/create-question-form
+    (get-question-categories-fun)
+    post-destination
+    :course-id (-> req :session :course-id)
+    :courses (get-courses-fun))))
 
 
 (s/fdef submit-create-question!
@@ -63,14 +68,18 @@
     \"evaluation-criteria\" String,
     \"categories\" String or array of strings}
    ```"
-  [req post-destination question-service]
-  (let [form-data (-> req :params (dissoc :__anti-forgery-token))
-        question-or-errors (validate-question question-service form-data)
-        validation-errors (question-or-errors :errors)]
-    (if (empty? validation-errors)
-      (let [added-question (create-question! question-service question-or-errors)]
-        (html-response (creation-view/question-success-view added-question)))
-      (html-response (creation-view/create-question-form (get-question-categories question-service)
-                                                         post-destination
-                                                         :errors validation-errors
-                                                         :question-data form-data)))))
+   [req post-destination question-service]
+   (let [course-id (or (-> req :params :course-id) ; Aus Formular
+                       (-> req :route-params :course-id) ; Aus URL
+                       (-> req :session :course-id)) ; Aus Session
+         form-data (-> req :params (dissoc :__anti-forgery-token))
+         question-or-errors (validate-question question-service form-data)
+         validation-errors (question-or-errors :errors)]
+     (if (empty? validation-errors)
+       (let [added-question (create-question! question-service course-id question-or-errors)] ; NEU: course-id übergeben
+         (html-response (creation-view/question-success-view added-question)))
+       (html-response (creation-view/create-question-form (get-question-categories question-service)
+                                                          post-destination
+                                                          :errors validation-errors
+                                                          :question-data form-data
+                                                          :course-id course-id)))))

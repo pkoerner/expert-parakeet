@@ -1,11 +1,12 @@
 (ns db
   (:require
-    [clojure.string :as string]
-    [clojure.walk]
-    [datahike.api :as d]
-    [db.dummy-data :as dummy-data]
-    [db.schema]
-    [nano-id.core :refer [nano-id]]))
+   [clojure.string :as string]
+   [clojure.walk]
+   [datahike.api :as d]
+   [db.dummy-data :as dummy-data]
+   [db.schema]
+   [nano-id.core :refer [nano-id]]))
+
 
 
 (defprotocol Database-Protocol
@@ -58,7 +59,7 @@
     [this id])
 
   (add-question!
-    [this question])
+    [this course-id question])
 
   (add-question-set!
     [this question-set-name course-iteration-id required-points questions])
@@ -144,7 +145,7 @@
 
 
 (deftype Database
-  [conn]
+         [conn]
 
   Database-Protocol
 
@@ -163,12 +164,12 @@
   (get-all-course-iterations
     [this]
     (->>
-      (d/q '[:find (pull ?e pattern)
-             :in $ pattern
-             :where [?e :course-iteration/id]]
-           @(.conn this) db.schema/course-iteration-very-slim-pull)
-      (mapv first)
-      (resolve-enums)))
+     (d/q '[:find (pull ?e pattern)
+            :in $ pattern
+            :where [?e :course-iteration/id]]
+          @(.conn this) db.schema/course-iteration-very-slim-pull)
+     (mapv first)
+     (resolve-enums)))
 
 
   (get-graded-answers-of-question-set
@@ -178,14 +179,14 @@
          (mapv first)
          (resolve-enums))
     #_(d/q '[:find (pull ?a [:answer/points
-                                   {:answer/question [:question/id :question/type]}])
-                   :in $ ?u ?t
-                   :where
-                   [?a :answer/creator ?u]
-                   [?a :answer/question ?f]
-                   [?t :question-set/questions ?f]
-                   [?a :answer/points]]
-                 @(.conn this) [:user/id user-id] [:question-set/id question-set-id]))
+                             {:answer/question [:question/id :question/type]}])
+             :in $ ?u ?t
+             :where
+             [?a :answer/creator ?u]
+             [?a :answer/question ?f]
+             [?t :question-set/questions ?f]
+             [?a :answer/points]]
+           @(.conn this) [:user/id user-id] [:question-set/id question-set-id]))
 
 
   (get-question-ids-for-user
@@ -247,13 +248,13 @@
   (get-all-question-ids
     [this]
     (->>
-      (d/q '[:find (pull ?e pattern)
-             :in $ pattern
-             :where
-             [?e :question/id]]
-           @(.conn this) db.schema/question-slim-pull)
-      (mapv first)
-      (resolve-enums)))
+     (d/q '[:find (pull ?e pattern)
+            :in $ pattern
+            :where
+            [?e :question/id]]
+          @(.conn this) db.schema/question-slim-pull)
+     (mapv first)
+     (resolve-enums)))
 
 
   (get-all-question-categories
@@ -313,9 +314,17 @@
 
 
   (add-question!
-    [this question]
+    [this course-id question]
     ;; TODO: this needs to take a course as an argument so we can add the question to the owning course
-    (let [possible-solutions (->> (question :question/possible-solutions)
+    (let [course-questions (d/q '[:find (pull ?q [:question/type :question/statement :question/max-points])
+                                  :in $ ?course-ref
+                                  :where [?q :question/course ?course-ref]]
+                                @(.conn this) [:course/id course-id])
+
+          existing-questions (map #(select-keys (first %) [:question/type :question/statement :question/max-points])
+                                  course-questions)
+
+          possible-solutions (->> (question :question/possible-solutions)
                                   (mapv (fn [sol]
                                           {:solution/id (generate-id @(.conn this) :solution/id)
                                            :solution/statement sol})))
@@ -332,7 +341,8 @@
                                   :question/type type
                                   :question/max-points (:question/max-points question)
                                   :question/statement (:question/statement question)
-                                  :question/categories (:question/categories question)}
+                                  :question/categories (:question/categories question)
+                                  :question/course [:course/id course-id]}  ;; NEU
                            (case type
                              :question.type/free-text
                              [:question/evaluation-criteria (:question/evaluation-criteria question)]
@@ -348,11 +358,17 @@
 
   (add-question-set!
     [this question-set-name course-iteration-id required-points questions]
-    (let [id (generate-id @(.conn this) :question-set/id)
+    (let [course-ref (d/pull @(.conn this)
+                             '[:course-iteration/course]
+                             [:course-iteration/id course-iteration-id])
+          course-id (-> course-ref
+                        :course-iteration/course
+                        second)
+          id (generate-id @(.conn this) :question-set/id)
           question-ids (mapv (fn [question]
                                (if (contains? question :question/id)
                                  (:question/id question)
-                                 (:question/id (add-question! this question)))) ; frage war noch nicht in db
+                                 (:question/id (add-question! this course-id question))))
                              questions)
           tx-result (d/transact (.conn this)
                                 [{:question-set/id id
@@ -365,6 +381,18 @@
            (resolve-enums))))
 
 
+;(get-question-ids-for-course
+;  [this course-id]
+;  (->> (d/q '[:find (pull ?q [:question/id])
+;            :in $ ?course-id
+;            :where
+;            [?q :question/course ?c]
+;            [?c :course/id ?course-id]]
+;          @(.conn this) course-id)
+;       (mapv first)
+;       (resolve-enums)))
+
+  
   (add-user-answer!
     [this user-id question-id answer-or-solution-ids]
     (let [id (generate-id @(.conn this) :answer/id)
@@ -495,14 +523,14 @@
   (get-all-corrections-from-corrector
     [this corrector-id]
     (->>
-      (d/q '[:find (pull ?correction pattern) ?timestamp
-             :in $ pattern ?corrector-id
-             :where
-             [?correction :correction/corrector ?corrector-id ?tx]
-             [?tx :db/txInstant ?timestamp]]
-           @(.conn this) db.schema/correction-pull [:user/id corrector-id])
-      (mapv (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp})))
-      (resolve-enums)))
+     (d/q '[:find (pull ?correction pattern) ?timestamp
+            :in $ pattern ?corrector-id
+            :where
+            [?correction :correction/corrector ?corrector-id ?tx]
+            [?tx :db/txInstant ?timestamp]]
+          @(.conn this) db.schema/correction-pull [:user/id corrector-id])
+     (mapv (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp})))
+     (resolve-enums)))
 
 
   (get-answer-by-id
