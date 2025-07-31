@@ -20,5 +20,5 @@
            [:tr
             [:td
              (:question/statement question)]
-            [:td {:style "text-align: right;"} [:a {:href (str post-destination "/unassigned/" (:question/id question))} "Open Queue"]]
+            [:td {:style "text-align: right;"} [:a {:href (str post-destination "/unassigned/" (:question/id question))} "Start Correcting"]]
             [:td {:style "text-align: right;"} [:a {:href (str post-destination "/assigned/" (:question/id question))} "My Assignments"]]])]]])]))

@@ -361,6 +361,28 @@
         :valueType :db.type/ref
         :doc "The question sets available in this course iteration for students to answer"}])
 
+(def assignment-schema
+  [#:db{:ident :assignment/id
+       :valueType :db.type/string
+       :cardinality :db.cardinality/one
+       :unique :db.unique/identity
+       :index true
+       :doc "The assignment id."}
+   #:db{:ident :assignment/corrector
+       :valueType :db.type/ref
+       :cardinality :db.cardinality/one
+       :doc "The corrector who is assigned to the answer."}
+   #:db{:ident :assignment/answer
+       :valueType :db.type/ref
+       :cardinality :db.cardinality/one
+       :doc "The answer that is assigned to the corrector."}])
+
+(def assignment-pull
+  [:assignment/id
+   :assignment/corrector
+   {:assignment/answer answer-pull}])
+
+
 
 (def db-schema
   (concat question-type-schema
@@ -374,4 +396,5 @@
           user-schema
           course-schema
           semester-schema
-          course-iteration-schema))
+          course-iteration-schema
+          assignment-schema))

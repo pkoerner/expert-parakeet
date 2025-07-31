@@ -1,11 +1,11 @@
 (ns db
   (:require
-    [clojure.string :as string]
-    [clojure.walk]
-    [datahike.api :as d]
-    [db.dummy-data :as dummy-data]
-    [db.schema]
-    [nano-id.core :refer [nano-id]]))
+   [clojure.string :as string]
+   [clojure.walk]
+   [datahike.api :as d]
+   [db.dummy-data :as dummy-data]
+   [db.schema]
+   [nano-id.core :refer [nano-id]]))
 
 
 (defprotocol Database-Protocol
@@ -30,9 +30,9 @@
   ;; this should be get-all-question-sets-in-course
   (get-all-question-sets
     [this])
-  
+
   (get-all-question-sets-with-questions
-   [this])
+    [this])
 
   (get-all-courses
     [this])
@@ -117,7 +117,23 @@
 
   (get-answer-by-id
     [this answer-id]
-    "get an answer given its id"))
+    "get an answer given its id")
+
+  (get-unassigned-answer-for-question
+    [this question-id]
+    "get some answer to the question that is not assigned to any corrector")
+
+  (get-assigned-answer-for-question
+   [this user-id question-id]
+   "get some answer to the question that is assigned to the user")
+
+  (add-assignment!
+    [this corrector-id answer-id]
+    "adds a new corrector-answer-assignment")
+
+  (get-all-assignments
+    [this]
+    "returns all assignments in database"))
 
 
 (def id-len 10)
@@ -138,12 +154,12 @@
 (defn- resolve-enums
   [entity]
   (clojure.walk/postwalk
-    (fn [x]
-      (if (and (map? x)
-               (= (keys x) [:db/ident]))
-        (x :db/ident)
-        x))
-    entity))
+   (fn [x]
+     (if (and (map? x)
+              (= (keys x) [:db/ident]))
+       (x :db/ident)
+       x))
+   entity))
 
 
 (deftype Database
@@ -523,36 +539,87 @@
     (->> (d/pull @(.conn this)
                  db.schema/answer-pull
                  [:answer/id answer-id])
+         (resolve-enums)))
+
+  (get-unassigned-answer-for-question
+    [this question-id]
+    (->> (d/q '[:find (pull ?e pattern)
+                :in $ pattern ?question-id
+                :where
+                [?q :question/id ?question-id]
+                [?e :answer/question ?q]
+                (not [_ :assignment/answer ?e])]
+              @(.conn this)
+              db.schema/answer-pull
+              question-id)
+         (mapv first)
+         (resolve-enums)
+         last))
+
+  (get-assigned-answer-for-question
+   [this user-id question-id]
+   (->> (d/q '[:find (pull ?e pattern)
+               :in $ pattern ?question-id
+               :where
+               [?q :question/id ?question-id]
+               [?e :answer/question ?q]
+               [_ :assignment/answer ?e]]
+             @(.conn this)
+             db.schema/answer-pull
+             question-id)
+        (mapv first)
+        (resolve-enums)
+        last))
+  
+  (add-assignment!
+    [this user-id answer-id]
+    (let [id (generate-id @(.conn this) :assignment/id)
+          tx-result (d/transact (.conn this)
+                                [{:assignment/id id
+                                  :assignment/corrector [:user/id user-id]
+                                  :assignment/answer [:answer/id answer-id]}])
+          db-after (:db-after tx-result)]
+      (->> (d/pull db-after db.schema/assignment-pull [:assignment/id id])
+           (resolve-enums))))
+
+  (get-all-assignments
+    [this]
+    (->> (d/q '[:find (pull ?e pattern)
+                :in $ pattern
+                :where
+                [?e :assignment/id]]
+              @(.conn this) db.schema/assignment-pull)
+         (mapv first)
          (resolve-enums))))
 
 
-;; use mem db
+  ;; use mem db
 
-(def mem-cfg
-  {:store {:backend :mem
-           :id "expert-db"}
-   :initial-tx db.schema/db-schema})
-
-
-;; use file db
+  (def mem-cfg
+    {:store {:backend :mem
+             :id "expert-db"}
+     :initial-tx db.schema/db-schema})
 
 
-#_(def file-cfg
-    {:store {:backend :file
-             :path "/tmp/expert-db"}
-     :initial-tx schema})
+  ;; use file db
 
 
-(defn create-conn
-  [cfg]
-  (if (d/database-exists? cfg)
-    (println "Found existing DB at:" (get-in cfg [:store :path]))
-    (d/create-database cfg))
-
-  (d/connect cfg))
+  #_(def file-cfg
+      {:store {:backend :file
+               :path "/tmp/expert-db"}
+       :initial-tx schema})
 
 
-(def create-database
-  (let [conn (create-conn mem-cfg)]
-    (d/transact conn dummy-data/dummy-data)
-    (Database. conn)))
+  (defn create-conn
+    [cfg]
+    (if (d/database-exists? cfg)
+      (println "Found existing DB at:" (get-in cfg [:store :path]))
+      (d/create-database cfg))
+
+    (d/connect cfg))
+
+
+  (def create-database
+    (let [conn (create-conn mem-cfg)]
+      (d/transact conn dummy-data/dummy-data)
+      (Database. conn)))

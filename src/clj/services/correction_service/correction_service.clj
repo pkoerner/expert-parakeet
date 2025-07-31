@@ -22,5 +22,10 @@
     :corrector (db/get-all-corrections-from-corrector (.db this) user-id)
     []))
 
+(defn- add-correction!
+  [this answer-id correction]
+  (db/add-correction! (.db this) answer-id correction))
 
-(extend CorrectionService PCorrectionService {:get-corrections-from-user-as get-corrections-from-user-as-impl})
+(extend CorrectionService PCorrectionService
+        {:get-corrections-from-user-as get-corrections-from-user-as-impl
+         :add-correction! add-correction!})

@@ -15,7 +15,7 @@
                                                       submit-create-question!]]
     [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
     [controllers.user.user-overview-controller :refer [create-user-overview-get]]
-    [controllers.correction-queue.correction-queue-controller :refer [correction-queue-overview-get correction-queue-get]]
+    [controllers.correction-queue.correction-queue-controller :refer [correction-queue-overview-get correction-queue-get submit-correction-queue!]]
     [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
@@ -24,8 +24,8 @@
     [ring.middleware.reload :refer [wrap-reload]]
     [ring.middleware.resource :refer [wrap-resource]]
     [services.answer-service.answer-service :refer [->AnswerService]]
-    [services.answer-service.p-answer-service :refer [get-assigned-answer-for-question get-unassigned-answer-for-question]]
     [services.correction-service.correction-service :refer [->CorrectionService]]
+    [services.correction-service.p-correction-service :refer [add-correction!]]
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
     [services.course-iteration-service.p-course-iteration-service :refer [get-all-course-iterations-for-user]]
     [services.course-service.course-service :refer [->CourseService]]
@@ -35,6 +35,8 @@
     [services.question-set-service.p-question-set-service :refer [get-all-question-sets get-all-question-sets-with-questions]]
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
     [services.user-service.user-service :refer [->UserService]]
+    [services.correction-queue-service.correction-queue-service :refer [->CorrectionQueueService]]
+    [services.correction-queue-service.p-correction-queue-service :refer [get-assigned-answer-for-question get-correction-statistics get-unassigned-answer-for-question assign-answer-to-user get-all-assignments]]
     [util.ring-extensions :refer [html-response]]
     [views.template :refer [wrap-navbar-and-footer]]))
 
@@ -49,7 +51,8 @@
    :question-service (->QuestionService db)
    :answer-service (->AnswerService db)
    :user-service (->UserService db)
-   :correction-service (->CorrectionService db)})
+   :correction-service (->CorrectionService db)
+   :correction-queue-service (->CorrectionQueueService db)})
 
 
 ;; all routes that dont need authentication go here
@@ -113,8 +116,15 @@
   (POST "/new-correction" req (submit-new-correction! req "/new-correction" (partial db/add-correction! db) (partial db/get-user-by-id db)))
 
   (GET "/correction-queue" req (correction-queue-overview-get req "/correction-queue" (partial get-all-question-sets-with-questions (:question-set-service services))))
-  (GET "/correction-queue/unassigned/:question-id" req (correction-queue-get req "/correction-queue/unassigned" (partial get-unassigned-answer-for-question (:answer-service services))))
-  (GET "/correction-queue/assigned/:question-id" req (correction-queue-get req "/correction-queue/assigned" (partial get-assigned-answer-for-question (:answer-service services))))
+
+  (GET "/correction-queue/unassigned/:question-id" req (correction-queue-get req "/correction-queue/unassigned" (partial get-unassigned-answer-for-question (:correction-queue-service services))))
+  (GET 
+    "/correction-queue/assigned/:question-id" 
+    req 
+    (correction-queue-get req "/correction-queue/assigned" 
+                          (partial get-assigned-answer-for-question (:correction-queue-service services) (get-in req [:session :user :id]))))
+  
+  (POST "/correction-queue/unassigned/:question-id/:answer-id" req (submit-correction-queue! req "/correction-queue/unassigned" (partial assign-answer-to-user (:correction-queue-service services)) (partial add-correction! (:correction-service services))))
 
   (route/not-found "Not Found"))
 
