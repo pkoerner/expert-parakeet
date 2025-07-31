@@ -564,6 +564,8 @@
                [?q :question/id ?question-id]
                [?e :answer/question ?q]
                [?a :assignment/answer ?e]
+               [?u :user/id ?user-id]
+               [?a :assignment/corrector ?u]
                (not [_ :correction/answer ?e])]
              @(.conn this)
              db.schema/answer-pull
