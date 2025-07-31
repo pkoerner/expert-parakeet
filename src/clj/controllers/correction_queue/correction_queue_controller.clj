@@ -9,7 +9,6 @@
 (defn correction-queue-overview-get [req post-destination get-all-question-set-fn]
   (let [question-sets (get-all-question-set-fn)
         question-sets-free-text-questions (mapv (fn [x] (update x :question-set/questions (partial filter #(= :question.type/free-text (:question/type %))))) question-sets)]
-    (prn (get-in req [:session :user :id]))
     (html-response (overview-view/create-correction-queue-overview-view post-destination question-sets-free-text-questions))))
 
 (defn correction-queue-get [req post-destination get-unassigned-answer-fn]

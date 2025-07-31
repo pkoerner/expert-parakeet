@@ -559,13 +559,15 @@
   (get-assigned-answer-for-question
    [this user-id question-id]
    (->> (d/q '[:find (pull ?e pattern)
-               :in $ pattern ?question-id
+               :in $ pattern ?user-id ?question-id
                :where
                [?q :question/id ?question-id]
                [?e :answer/question ?q]
-               [_ :assignment/answer ?e]]
+               [?a :assignment/answer ?e]
+               (not [_ :correction/answer ?e])]
              @(.conn this)
              db.schema/answer-pull
+             user-id
              question-id)
         (mapv first)
         (resolve-enums)
