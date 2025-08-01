@@ -37,9 +37,7 @@
                    :value 0}]]
          (h/raw (anti-forgery-field))
          [:div {:class "button-group"}
-          [:button {:type "submit" :name "action" :value "save" :class "btn btn-primary"} "Save"]
-          [:button {:type "submit" :name "action" :value "next" :class "btn btn-secondary"} "Next"]
-          [:button {:type "submit" :name "action" :value "save-next" :class "btn btn-danger"} "Save & Next"]])
+          [:button {:type "submit" :name "action" :value "submit" :class "btn btn-primary"} "Submit correction"]])
         [:p "Question-Statistics: <all-answers> / <corrected-answers> / <corrected-by-you>"]
         [:hr]])]))
   
