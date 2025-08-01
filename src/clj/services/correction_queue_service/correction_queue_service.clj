@@ -23,10 +23,14 @@
 (defn get-all-assignments [this]
   (db/get-all-assignments (.db this)))
 
+(defn get-all-uncorrected-assignments-for-user-and-question [this user-id question-id]
+  (db/get-all-uncorrected-assignments-for-user-and-question (.db this) user-id question-id))
+
 (extend CorrectionQueueService
   PCorrectionQueueService
   {:get-unassigned-answer-for-question get-unassigned-answer-for-question
    :get-assigned-answer-for-question get-assigned-answer-for-question
    :assign-answer-to-user assign-answer-to-user
    :get-correction-statistics get-correction-statistics
-   :get-all-assignments get-all-assignments})
+   :get-all-assignments get-all-assignments
+   :get-all-uncorrected-assignments-for-user-and-question get-all-uncorrected-assignments-for-user-and-question})

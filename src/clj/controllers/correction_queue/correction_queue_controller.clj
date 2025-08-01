@@ -3,6 +3,7 @@
    [util.ring-extensions :refer [html-response]]
    [views.correction-queue.correction-queue-overview-view :as overview-view]
    [views.correction-queue.correction-queue-view :as view]
+   [views.correction-queue.assignments-view :as assignments-view]
    [hiccup2.core :as h]
    [ring.util.response :refer [redirect]]))
 
@@ -17,11 +18,13 @@
         pd (str post-destination "/" question-id)]
     (html-response (view/create-correction-queue-view pd answer))))
 
-(defn correction-queue-post
-  [req post-destination correction-queue-service]
-  (let [form-data (-> req :params (dissoc :__anti-forgery-token))]
-    (prn "SUPER")
-    (h/html [:div [:p "Super"]])))
+(defn correction-queue-assignments-get [req post-destination get-assignments-fn]
+  (let [user-github-id (get-in req [:session :user :id])
+        question-id (get-in req [:params :question-id])
+        answers (get-assignments-fn user-github-id question-id)
+        pd (str post-destination "/" question-id)]
+    (html-response (assignments-view/create-correction-queue-view pd answers))))
+
 
 (defn submit-next! [add-assignment-fn user-id answer-id pd]
   (add-assignment-fn user-id answer-id)
@@ -32,7 +35,6 @@
   (add-correction-fn answer-id correction)
   (redirect pd)
   )
-
 
 (defn submit-correction-queue!
   [req post-destination add-assignment-fn save-correction-fn]

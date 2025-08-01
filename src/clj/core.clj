@@ -15,7 +15,7 @@
                                                       submit-create-question!]]
     [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
     [controllers.user.user-overview-controller :refer [create-user-overview-get]]
-    [controllers.correction-queue.correction-queue-controller :refer [correction-queue-overview-get correction-queue-get submit-correction-queue!]]
+    [controllers.correction-queue.correction-queue-controller :refer [correction-queue-overview-get correction-queue-get correction-queue-assignments-get submit-correction-queue!]]
     [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
@@ -36,7 +36,7 @@
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
     [services.user-service.user-service :refer [->UserService]]
     [services.correction-queue-service.correction-queue-service :refer [->CorrectionQueueService]]
-    [services.correction-queue-service.p-correction-queue-service :refer [get-assigned-answer-for-question get-correction-statistics get-unassigned-answer-for-question assign-answer-to-user get-all-assignments]]
+    [services.correction-queue-service.p-correction-queue-service :refer [get-assigned-answer-for-question get-correction-statistics get-unassigned-answer-for-question get-all-uncorrected-assignments-for-user-and-question assign-answer-to-user get-all-assignments]]
     [util.ring-extensions :refer [html-response]]
     [views.template :refer [wrap-navbar-and-footer]]))
 
@@ -121,8 +121,8 @@
   (GET 
     "/correction-queue/assigned/:question-id" 
     req 
-    (correction-queue-get req "/correction-queue/assigned" 
-                          (partial get-assigned-answer-for-question (:correction-queue-service services) (get-in req [:session :user :id]))))
+    (correction-queue-assignments-get req "/correction-queue/assigned" 
+                          (partial get-all-uncorrected-assignments-for-user-and-question (:correction-queue-service services))))
   
   (POST "/correction-queue/unassigned/:question-id/:answer-id" req (submit-correction-queue! req "/correction-queue/unassigned" (partial assign-answer-to-user (:correction-queue-service services)) (partial add-correction! (:correction-service services))))
 

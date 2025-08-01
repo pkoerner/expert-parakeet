@@ -10,16 +10,19 @@
   (get-assigned-answer-for-question
     [self user-id question-id]
     "Returns an answer that is assigned to the user and not corrected.")
-  
+
   (assign-answer-to-user
     [self user-id answer-id]
     "Adds an assignment of the user to the question into the database.")
-  
+
   (get-correction-statistics
     [self question-id]
     "Returns 3-tuple with stats.")
-  
+
   (get-all-assignments
     [self]
     "Returns all assignments currently in database.")
-  )
+
+  (get-all-uncorrected-assignments-for-user-and-question
+    [this user-id question-id]
+    "Returns all uncorrected assignemts for this user and question."))

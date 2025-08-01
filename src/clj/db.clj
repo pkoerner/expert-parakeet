@@ -83,6 +83,9 @@
   ;; only used for testing?
   (get-corrections-of-answer
     [this answer-id])
+  
+  (get-all-corrections
+   [this])
 
   (add-correction!
     [this answer-id correction])
@@ -124,8 +127,8 @@
     "get some answer to the question that is not assigned to any corrector")
 
   (get-assigned-answer-for-question
-   [this user-id question-id]
-   "get some answer to the question that is assigned to the user")
+    [this user-id question-id]
+    "get some answer to the question that is assigned to the user")
 
   (add-assignment!
     [this corrector-id answer-id]
@@ -133,7 +136,11 @@
 
   (get-all-assignments
     [this]
-    "returns all assignments in database"))
+    "returns all assignments in database")
+
+  (get-all-uncorrected-assignments-for-user-and-question 
+   [this user-id question-id]
+   "returns all assignments in database from this question assigned to the user that are not corrected"))
 
 
 (def id-len 10)
@@ -506,6 +513,16 @@
               @(.conn this) db.schema/user-pull)
          (mapv first)
          (resolve-enums)))
+  
+  (get-all-corrections
+   [this]
+   (->> (d/q '[:find (pull ?e pattern)
+               :in $ pattern
+               :where
+               [?e :correction/id]]
+             @(.conn this) db.schema/correction-pull)
+        (mapv first)
+        (resolve-enums)))
 
 
   (get-all-corrections-from-user
@@ -548,7 +565,8 @@
                 :where
                 [?q :question/id ?question-id]
                 [?e :answer/question ?q]
-                (not [_ :assignment/answer ?e])]
+                (not [_ :assignment/answer ?e])
+                (not [_ :correction/answer ?e])] ; this line can be deleted if we ensure no unassigned answer can be corrected
               @(.conn this)
               db.schema/answer-pull
               question-id)
@@ -556,25 +574,7 @@
          (resolve-enums)
          last))
 
-  (get-assigned-answer-for-question
-   [this user-id question-id]
-   (->> (d/q '[:find (pull ?e pattern)
-               :in $ pattern ?user-id ?question-id
-               :where
-               [?q :question/id ?question-id]
-               [?e :answer/question ?q]
-               [?a :assignment/answer ?e]
-               [?u :user/id ?user-id]
-               [?a :assignment/corrector ?u]
-               (not [_ :correction/answer ?e])]
-             @(.conn this)
-             db.schema/answer-pull
-             user-id
-             question-id)
-        (mapv first)
-        (resolve-enums)
-        last))
-  
+
   (add-assignment!
     [this user-id answer-id]
     (let [id (generate-id @(.conn this) :assignment/id)
@@ -593,6 +593,24 @@
                 :where
                 [?e :assignment/id]]
               @(.conn this) db.schema/assignment-pull)
+         (mapv first)
+         (resolve-enums)))
+
+  (get-all-uncorrected-assignments-for-user-and-question
+    [this user-id question-id]
+    (->> (d/q '[:find (pull ?e pattern)
+                :in $ pattern ?user-id ?question-id
+                :where
+                [?q :question/id ?question-id]
+                [?e :answer/question ?q]
+                [?a :assignment/answer ?e]
+                [?u :user/id ?user-id]
+                [?a :assignment/corrector ?u]
+                (not [_ :correction/answer ?e])]
+              @(.conn this)
+              db.schema/answer-pull
+              user-id
+              question-id)
          (mapv first)
          (resolve-enums))))
 
