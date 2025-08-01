@@ -49,6 +49,5 @@
                        (assoc :corrector/id user-id))
         action (:action form-data)]
     (case action
-      "save" (submit-save! add-assignment-fn save-correction-fn user-id answer-id correction pd)
-      "save-next" (submit-next! add-assignment-fn user-id answer-id pd) ; TODO: Was soll das machen?
+      "submit" (submit-save! add-assignment-fn save-correction-fn user-id answer-id correction pd)
       "next" (submit-next! add-assignment-fn user-id answer-id pd))))
