@@ -6,7 +6,7 @@
    [ring.util.anti-forgery :refer [anti-forgery-field]]
    [ring.util.response :as response]))
 
-(defn- answer-correction-view [post-destination answer]
+(defn- answer-correction-view [post-destination answer [statistic1 statistic2 statistic3]]
   (let [question-statement (:question/statement (:answer/question answer))
         answer-statement (:answer/answer answer)
         max-points (:question/max-points (:answer/question answer))
@@ -38,9 +38,9 @@
        [:div {:class "button-group"}
         [:button {:type "submit" :name "action" :value "submit" :class "btn btn-primary"} "Submit correction"]
         [:button {:type "submit" :name "action" :value "next" :class "btn btn-secondary"} "Next"]])
-      [:p "Question-Statistics: <all-answers> / <corrected-answers> / <corrected-by-you>"]])))
+      [:p "Question-Statistics:" statistic1 "/" statistic2 "/" statistic3]])))
 
-(defn create-correction-queue-view [post-destination answer]
+(defn create-correction-queue-view [post-destination answer statistic]
   (if (nil? answer)
     (response/redirect "/correction-queue")
-    (html-response (answer-correction-view post-destination answer))))
+    (html-response (answer-correction-view post-destination answer statistic))))

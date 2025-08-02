@@ -12,16 +12,18 @@
         question-sets-free-text-questions (mapv (fn [x] (update x :question-set/questions (partial filter #(= :question.type/free-text (:question/type %))))) question-sets)]
     (html-response (overview-view/create-correction-queue-overview-view post-destination question-sets-free-text-questions))))
 
-(defn correction-queue-get [req post-destination get-unassigned-answer-fn]
-  (let [question-id (get-in req [:params :question-id])
+(defn correction-queue-get [req post-destination get-unassigned-answer-fn get-statistics-fn]
+  (let [user-id (get-in req [:session :user :id])
+        question-id (get-in req [:params :question-id])
         answer (get-unassigned-answer-fn question-id)
-        pd (str post-destination "/" question-id)]
-    (view/create-correction-queue-view pd answer)))
+        pd (str post-destination "/" question-id)
+        correction-statistics (get-statistics-fn user-id question-id)]
+    (view/create-correction-queue-view pd answer correction-statistics)))
 
 (defn correction-queue-assignments-get [req post-destination get-assignments-fn]
-  (let [user-github-id (get-in req [:session :user :id])
+  (let [user-id (get-in req [:session :user :id])
         question-id (get-in req [:params :question-id])
-        answers (get-assignments-fn user-github-id question-id)
+        answers (get-assignments-fn user-id question-id)
         pd (str post-destination "/" question-id)]
     (assignments-view/create-correction-queue-view pd answers)))
 

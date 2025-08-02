@@ -25,4 +25,8 @@
 
   (get-all-uncorrected-assignments-for-user-and-question
     [this user-id question-id]
-    "Returns all uncorrected assignemts for this user and question."))
+    "Returns all uncorrected assignemts for this user and question.")
+
+  (get-correction-queue-statistics
+    [this user-id question-id]
+    "returns a 3-tuple consisting of the total number of answers, corrections and corrections by the user for this question"))

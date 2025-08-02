@@ -36,7 +36,7 @@
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
     [services.user-service.user-service :refer [->UserService]]
     [services.correction-queue-service.correction-queue-service :refer [->CorrectionQueueService]]
-    [services.correction-queue-service.p-correction-queue-service :refer [get-assigned-answer-for-question get-correction-statistics get-unassigned-answer-for-question get-all-uncorrected-assignments-for-user-and-question assign-answer-to-user get-all-assignments]]
+    [services.correction-queue-service.p-correction-queue-service :refer [get-assigned-answer-for-question get-correction-queue-statistics get-unassigned-answer-for-question get-all-uncorrected-assignments-for-user-and-question assign-answer-to-user get-all-assignments]]
     [util.ring-extensions :refer [html-response]]
     [views.template :refer [wrap-navbar-and-footer]]))
 
@@ -117,7 +117,7 @@
 
   (GET "/correction-queue" req (correction-queue-overview-get req "/correction-queue" (partial get-all-question-sets-with-questions (:question-set-service services))))
 
-  (GET "/correction-queue/unassigned/:question-id" req (correction-queue-get req "/correction-queue/unassigned" (partial get-unassigned-answer-for-question (:correction-queue-service services))))
+  (GET "/correction-queue/unassigned/:question-id" req (correction-queue-get req "/correction-queue/unassigned" (partial get-unassigned-answer-for-question (:correction-queue-service services)) (partial get-correction-queue-statistics (:correction-queue-service services))))
   (GET 
     "/correction-queue/assigned/:question-id" 
     req 

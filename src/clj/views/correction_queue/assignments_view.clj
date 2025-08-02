@@ -40,7 +40,6 @@
          (h/raw (anti-forgery-field))
          [:div {:class "button-group"}
           [:button {:type "submit" :name "action" :value "submit" :class "btn btn-primary"} "Submit correction"]])
-        [:p "Question-Statistics: <all-answers> / <corrected-answers> / <corrected-by-you>"]
         [:hr]])]))
   
   (defn create-correction-queue-view [post-destination answers]

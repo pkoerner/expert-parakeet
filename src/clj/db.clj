@@ -83,9 +83,9 @@
   ;; only used for testing?
   (get-corrections-of-answer
     [this answer-id])
-  
+
   (get-all-corrections
-   [this])
+    [this])
 
   (add-correction!
     [this answer-id correction])
@@ -138,9 +138,21 @@
     [this]
     "returns all assignments in database")
 
-  (get-all-uncorrected-assignments-for-user-and-question 
-   [this user-id question-id]
-   "returns all assignments in database from this question assigned to the user that are not corrected"))
+  (get-all-uncorrected-assignments-for-user-and-question
+    [this user-id question-id]
+    "returns all assignments in database from this question assigned to the user that are not corrected")
+
+  (get-answer-count
+    [this question-id]
+    "returns total number of answers belonging to this question")
+
+  (get-correction-count
+    [this question-id]
+    "returns total number of corrections belonging to this question")
+
+  (get-correction-by-user-count
+    [this question-id user-id]
+    "returns total number of corrections by the user belonging to this question"))
 
 
 (def id-len 10)
@@ -513,16 +525,16 @@
               @(.conn this) db.schema/user-pull)
          (mapv first)
          (resolve-enums)))
-  
+
   (get-all-corrections
-   [this]
-   (->> (d/q '[:find (pull ?e pattern)
-               :in $ pattern
-               :where
-               [?e :correction/id]]
-             @(.conn this) db.schema/correction-pull)
-        (mapv first)
-        (resolve-enums)))
+    [this]
+    (->> (d/q '[:find (pull ?e pattern)
+                :in $ pattern
+                :where
+                [?e :correction/id]]
+              @(.conn this) db.schema/correction-pull)
+         (mapv first)
+         (resolve-enums)))
 
 
   (get-all-corrections-from-user
@@ -612,7 +624,57 @@
               user-id
               question-id)
          (mapv first)
-         (resolve-enums))))
+         (resolve-enums)))
+
+
+  (get-answer-count
+    [this question-id]
+    (->> (d/q '[:find (pull ?e pattern)
+                :in $ pattern ?question-id
+                :where
+                [?q :question/id ?question-id]
+                [?e :answer/question ?q]]
+              @(.conn this)
+              db.schema/answer-pull
+              question-id)
+         (mapv first)
+         (resolve-enums)
+         (count)))
+
+  (get-correction-by-user-count
+    [this user-id question-id]
+    (->> (d/q '[:find (pull ?i pattern)
+                :in $ pattern ?user-id ?question-id
+                :where
+                [?i :correction/id]
+                [?i :correction/answer ?e]
+                [?i :correction/corrector ?u]
+                [?u :user/id ?user-id]
+                [?q :question/id ?question-id]
+                [?e :answer/question ?q]]
+              @(.conn this)
+              db.schema/correction-pull
+              user-id
+              question-id)
+         (mapv first)
+         (resolve-enums)
+         (count)))
+
+  (get-correction-count
+    [this question-id]
+    (->> (d/q '[:find (pull ?i pattern)
+                :in $ pattern ?question-id
+                :where
+                [?i :correction/id]
+                [?i :correction/answer ?e]
+                [?q :question/id ?question-id]
+                [?e :answer/question ?q]]
+              @(.conn this)
+              db.schema/correction-pull
+              question-id)
+         (mapv first)
+         (resolve-enums)
+         (count))))
 
 
   ;; use mem db
