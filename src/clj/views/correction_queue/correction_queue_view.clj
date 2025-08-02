@@ -1,8 +1,10 @@
 (ns views.correction-queue.correction-queue-view
   (:require
    [hiccup2.core :as h]
+   [util.ring-extensions :refer [html-response]]
    [hiccup.form :as hform]
-   [ring.util.anti-forgery :refer [anti-forgery-field]]))
+   [ring.util.anti-forgery :refer [anti-forgery-field]]
+   [ring.util.response :as response]))
 
 (defn- answer-correction-view [post-destination answer]
   (let [question-statement (:question/statement (:answer/question answer))
@@ -40,5 +42,5 @@
 
 (defn create-correction-queue-view [post-destination answer]
   (if (nil? answer)
-    (h/html [:div [:p "Nothing to do!"]])
-    (answer-correction-view post-destination answer)))
+    (response/redirect "/correction-queue")
+    (html-response (answer-correction-view post-destination answer))))

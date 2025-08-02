@@ -16,14 +16,14 @@
   (let [question-id (get-in req [:params :question-id])
         answer (get-unassigned-answer-fn question-id)
         pd (str post-destination "/" question-id)]
-    (html-response (view/create-correction-queue-view pd answer))))
+    (view/create-correction-queue-view pd answer)))
 
 (defn correction-queue-assignments-get [req post-destination get-assignments-fn]
   (let [user-github-id (get-in req [:session :user :id])
         question-id (get-in req [:params :question-id])
         answers (get-assignments-fn user-github-id question-id)
         pd (str post-destination "/" question-id)]
-    (html-response (assignments-view/create-correction-queue-view pd answers))))
+    (assignments-view/create-correction-queue-view pd answers)))
 
 
 (defn submit-next! [add-assignment-fn user-id answer-id pd]
