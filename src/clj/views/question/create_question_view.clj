@@ -178,11 +178,32 @@
                                               :checked (contains? prev-categories cat)}]
                                      [:label {:class "form-check-label" :for id} cat]]))))])
            [:div.input-group
-            (hform/text-field {:class "form-control" :form "new-category-form" :required true :placeholder "Create new category"} "new-category")
+            (hform/text-field {:class "form-control" :form "new-category-form" :required true :placeholder "Create new category" :id "new-category"} "new-category")
             (hform/submit-button {:class "btn btn-outline-secondary" :form "new-category-form"} "+")]]]
 
          (h/raw (anti-forgery-field))
-         (hform/submit-button {:class "btn btn-primary"} "Submit"))])))
+         (script "
+          document.addEventListener('DOMContentLoaded', function() {
+            const categoryInput = document.getElementById('new-category');
+            const submitBtn = document.getElementById('main-submit-btn');
+            const categoryForm = document.getElementById('new-category-form');
+
+            if (categoryInput && submitBtn && categoryForm) {
+              const checkSubmit = () => {
+                submitBtn.disabled = categoryInput.value.trim() !== '';
+              };
+
+              categoryInput.addEventListener('input', checkSubmit);
+
+              categoryForm.addEventListener('submit', function() {
+                setTimeout(checkSubmit, 10);
+              });
+
+              checkSubmit();
+            }
+          });
+          ")
+         (hform/submit-button {:class "btn btn-primary" :id "main-submit-btn"} "Submit"))])))
 
 
 (defn- possible-solutions-view
