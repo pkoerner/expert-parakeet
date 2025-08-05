@@ -1,7 +1,6 @@
 (ns views.question.questions-overview-view
   (:require
-    [hiccup2.core :as h]
-    [util.hiccup-extensions :refer [optional-error-display]]))
+    [hiccup2.core :as h]))
 
 
 (defn questions-overview

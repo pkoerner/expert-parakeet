@@ -105,7 +105,8 @@
     (let [was-called (atom false)
           db-stub (reify Database-Protocol
                     (add-question!
-                      [_this course-id _question]
+                      [_this _question]
+                      ;; course-id
                       (swap! was-called (fn [_] true))
                       {}))
           question-service (->QuestionService db-stub)]

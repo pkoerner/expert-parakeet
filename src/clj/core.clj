@@ -105,7 +105,7 @@
 
 
   ;; show all quetions on "http://localhost:8081/questions"
-  (GET "/questions" req
+  (GET "/questions" [_req]  ; req
        (let [db db/create-database
              questions (db/get-all-question-ids db)
              courses (db/get-all-courses db)

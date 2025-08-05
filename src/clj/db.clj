@@ -320,8 +320,8 @@
                                   :where [?q :question/course ?course-ref]]
                                 @(.conn this) [:course/id course-id])
 
-          existing-questions (map #(select-keys (first %) [:question/type :question/statement :question/max-points])
-                                  course-questions)
+          _existing-questions (map #(select-keys (first %) [:question/type :question/statement :question/max-points])
+                                   course-questions)
 
           possible-solutions (->> (question :question/possible-solutions)
                                   (mapv (fn [sol]

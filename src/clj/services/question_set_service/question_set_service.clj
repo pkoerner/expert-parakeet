@@ -12,11 +12,11 @@
   [db])
 
 
-(defn- get-course-id-from-iteration
-  [db course-iteration-id]
-  (-> (db/get-course-iteration-by-id db course-iteration-id)
-      :course-iteration/course
-      :course/id))
+;; (defn- get-course-id-from-iteration
+;;  [db course-iteration-id]
+;;  (-> (db/get-course-iteration-by-id db course-iteration-id)
+;;      :course-iteration/course
+;;      :course/id))
 
 
 (s/fdef get-all-question-sets
