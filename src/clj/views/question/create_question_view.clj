@@ -123,6 +123,14 @@
         (when course-id
           (hform/hidden-field "course-id" course-id))
 
+        
+
+        [:div
+         (hform/label {:class "form-label"} "statement" "Question statement")
+         (optional-error-display :statement errors)
+         (hform/text-area {:class "form-control" :required true} "statement" (get question-data :statement))]
+        
+
         [:div
          (hform/label {:class "form-label"} "course-id" "Course")
          (optional-error-display :course-id errors)
@@ -132,12 +140,7 @@
                             (map (juxt :course/name :course/id) courses)
                             course-id)
            [:p "No courses available. Please create a course first."])]
-        
-        [:div
-         (hform/label {:class "form-label"} "statement" "Question statement")
-         (optional-error-display :statement errors)
-         (hform/text-area {:class "form-control" :required true} "statement" (get question-data :statement))]
-        
+
         [:div
          (hform/label {:class "form-label"} "max-points" "Maximum number of points")
          (optional-error-display :max-points errors)
@@ -164,9 +167,7 @@
         (multiple-choice-inputs errors question-data)
         (free-text-inputs errors question-data)
         (script "expert_parakeet.question.create_question_view.register_question_type_switch('type', " question-types-js-arr ");")
-
-
-
+        
 
         [:div
          [:fieldset
@@ -197,8 +198,19 @@
            (hform/text-field {:class "form-control" :form "new-category-form" :required true :placeholder "Create new category"} "new-category")
            (hform/submit-button {:class "btn btn-outline-secondary" :form "new-category-form"} "+")]]]
 
-        (h/raw (anti-forgery-field))
-        (hform/submit-button {:class "btn btn-primary"} "Submit"))])))
+        
+        
+
+
+        [:div.d-flex.align-items-center.gap-2.mt-4
+         (h/raw (anti-forgery-field))
+         (hform/submit-button {:class "btn btn-primary"} "Submit")
+         [:a.btn.btn-secondary {:href "/questions"} "show questions"]]
+        
+        
+        
+        
+        )])))
 
 
 (defn- possible-solutions-view

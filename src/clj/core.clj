@@ -34,7 +34,8 @@
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
     [services.user-service.user-service :refer [->UserService]]
     [util.ring-extensions :refer [html-response]]
-    [views.template :refer [wrap-navbar-and-footer]]))
+    [views.template :refer [wrap-navbar-and-footer]]
+    [views.question.questions-overview-view :as questions-overview]))
 
 
 (def db db/create-database)
@@ -111,27 +112,7 @@
           course-map (reduce (fn [m course]
                                (assoc m (:course/id course) (:course/name course)))
                              {} courses)]
-      (html-response
-       [:div.container
-        [:h1 "Fragenübersicht"]
-        [:table.table
-         [:thead
-          [:tr
-           [:th "ID"]
-           [:th "Statement"]
-           [:th "Kurs"]
-           [:th "Aktionen"]]]
-         [:tbody
-          (for [q questions]
-            (let [course-id (-> q :question/course :course/id)
-                  course-name (get course-map course-id "Unbekannter Kurs")]
-              [:tr
-               [:td (:question/id q)]
-               [:td (:question/statement q)]
-               [:td course-name]
-               [:td
-                [:a {:href (str "/question/" (:question/id q))} "Anzeigen"]]]))]]])))
-
+      (html-response (questions-overview/questions-overview questions course-map)))) 
 
 
   (GET "/create-course" req
