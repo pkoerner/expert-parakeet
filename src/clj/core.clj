@@ -34,8 +34,8 @@
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
     [services.user-service.user-service :refer [->UserService]]
     [util.ring-extensions :refer [html-response]]
-    [views.template :refer [wrap-navbar-and-footer]]
-    [views.question.questions-overview-view :as questions-overview]))
+    [views.question.questions-overview-view :as questions-overview]
+    [views.template :refer [wrap-navbar-and-footer]]))
 
 
 (def db db/create-database)
@@ -72,67 +72,67 @@
                               (html-response (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) user-github-id)))))
 
   (GET "/question-set/:id"
-    req
-    (question-set-get req (:question-set-service services)))
+       req
+       (question-set-get req (:question-set-service services)))
 
   (GET "/question/:id"
-    req
-    (question-get req "/question/:id/answer" (:question-service services)))
+       req
+       (question-get req "/question/:id/answer" (:question-service services)))
 
   (POST "/question/:id/answer"
-    req
-    (submit-user-answer! req (:answer-service services)))
+        req
+        (submit-user-answer! req (:answer-service services)))
 
-  ;(GET "/create-question" req
-  ;     (create-question-get req (partial get-question-categories (:question-service services)) "/create-question"))
+  ;; (GET "/create-question" req
+  ;;     (create-question-get req (partial get-question-categories (:question-service services)) "/create-question"))
 
-  ;(POST "/create-question" req
-  ;      (submit-create-question! req "/create-question" (:question-service services)))
+  ;; (POST "/create-question" req
+  ;;      (submit-create-question! req "/create-question" (:question-service services)))
 
   (GET "/create-question" req
-    (create-question-get
-     req
-     (partial get-question-categories (:question-service services))
-     (partial get-all-courses (:course-service services))  ;; NEU: Kurse holen
-     "/create-question"))
+       (create-question-get
+         req
+         (partial get-question-categories (:question-service services))
+         (partial get-all-courses (:course-service services))  ; NEU: Kurse holen
+         "/create-question"))
 
   (POST "/create-question" req
-    (submit-create-question!
-     req
-     "/create-question"
-     (:question-service services)))
+        (submit-create-question!
+          req
+          "/create-question"
+          (:question-service services)))
 
 
 
   ;; show all quetions on "http://localhost:8081/questions"
   (GET "/questions" req
-    (let [db db/create-database
-          questions (db/get-all-question-ids db)
-          courses (db/get-all-courses db)
-          course-map (reduce (fn [m course]
-                               (assoc m (:course/id course) (:course/name course)))
-                             {} courses)]
-      (html-response (questions-overview/questions-overview questions course-map)))) 
+       (let [db db/create-database
+             questions (db/get-all-question-ids db)
+             courses (db/get-all-courses db)
+             course-map (reduce (fn [m course]
+                                  (assoc m (:course/id course) (:course/name course)))
+                                {} courses)]
+         (html-response (questions-overview/questions-overview questions course-map))))
 
 
   (GET "/create-course" req
-    (create-course-get req "/create-course"))
+       (create-course-get req "/create-course"))
 
   (POST "/create-course" req
-    (submit-create-course! req "/create-course" (:course-service services)))
+        (submit-create-course! req "/create-course" (:course-service services)))
 
   (GET "/create-course-iteration" req
-    (create-course-iteration-get req "/create-course-iteration"
-                                 (partial get-all-courses (:course-service services))
-                                 (partial get-all-question-sets (:question-set-service services))))
+       (create-course-iteration-get req "/create-course-iteration"
+                                    (partial get-all-courses (:course-service services))
+                                    (partial get-all-question-sets (:question-set-service services))))
   (POST "/create-course-iteration" req
-    (submit-create-course-iteration! req "/create-course-iteration"
-                                     (partial get-all-courses (:course-service services))
-                                     (partial get-all-question-sets (:question-set-service services))
-                                     (:course-iteration-service services)))
+        (submit-create-course-iteration! req "/create-course-iteration"
+                                         (partial get-all-courses (:course-service services))
+                                         (partial get-all-question-sets (:question-set-service services))
+                                         (:course-iteration-service services)))
 
   (GET "/correction-overview" req
-    (html-response (correction-overview-get req (services :correction-service))))
+       (html-response (correction-overview-get req (services :correction-service))))
 
   (GET "/new-correction" req (html-response (new-correction-get req "/new-correction" (partial db/get-answer-by-id db) (partial db/get-question-by-id db))))
   (POST "/new-correction" req (submit-new-correction! req "/new-correction" (partial db/add-correction! db) (partial db/get-user-by-id db)))

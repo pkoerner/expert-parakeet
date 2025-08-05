@@ -1,12 +1,11 @@
 (ns db
   (:require
-   [clojure.string :as string]
-   [clojure.walk]
-   [datahike.api :as d]
-   [db.dummy-data :as dummy-data]
-   [db.schema]
-   [nano-id.core :refer [nano-id]]))
-
+    [clojure.string :as string]
+    [clojure.walk]
+    [datahike.api :as d]
+    [db.dummy-data :as dummy-data]
+    [db.schema]
+    [nano-id.core :refer [nano-id]]))
 
 
 (defprotocol Database-Protocol
@@ -145,7 +144,7 @@
 
 
 (deftype Database
-         [conn]
+  [conn]
 
   Database-Protocol
 
@@ -164,12 +163,12 @@
   (get-all-course-iterations
     [this]
     (->>
-     (d/q '[:find (pull ?e pattern)
-            :in $ pattern
-            :where [?e :course-iteration/id]]
-          @(.conn this) db.schema/course-iteration-very-slim-pull)
-     (mapv first)
-     (resolve-enums)))
+      (d/q '[:find (pull ?e pattern)
+             :in $ pattern
+             :where [?e :course-iteration/id]]
+           @(.conn this) db.schema/course-iteration-very-slim-pull)
+      (mapv first)
+      (resolve-enums)))
 
 
   (get-graded-answers-of-question-set
@@ -248,13 +247,13 @@
   (get-all-question-ids
     [this]
     (->>
-     (d/q '[:find (pull ?e pattern)
-            :in $ pattern
-            :where
-            [?e :question/id]]
-          @(.conn this) db.schema/question-slim-pull)
-     (mapv first)
-     (resolve-enums)))
+      (d/q '[:find (pull ?e pattern)
+             :in $ pattern
+             :where
+             [?e :question/id]]
+           @(.conn this) db.schema/question-slim-pull)
+      (mapv first)
+      (resolve-enums)))
 
 
   (get-all-question-categories
@@ -342,7 +341,7 @@
                                   :question/max-points (:question/max-points question)
                                   :question/statement (:question/statement question)
                                   :question/categories (:question/categories question)
-                                  :question/course [:course/id course-id]}  ;; NEU
+                                  :question/course [:course/id course-id]}  ; NEU
                            (case type
                              :question.type/free-text
                              [:question/evaluation-criteria (:question/evaluation-criteria question)]
@@ -381,18 +380,18 @@
            (resolve-enums))))
 
 
-;(get-question-ids-for-course
-;  [this course-id]
-;  (->> (d/q '[:find (pull ?q [:question/id])
-;            :in $ ?course-id
-;            :where
-;            [?q :question/course ?c]
-;            [?c :course/id ?course-id]]
-;          @(.conn this) course-id)
-;       (mapv first)
-;       (resolve-enums)))
+  ;; (get-question-ids-for-course
+  ;;  [this course-id]
+  ;;  (->> (d/q '[:find (pull ?q [:question/id])
+  ;;            :in $ ?course-id
+  ;;            :where
+  ;;            [?q :question/course ?c]
+  ;;            [?c :course/id ?course-id]]
+  ;;          @(.conn this) course-id)
+  ;;       (mapv first)
+  ;;       (resolve-enums)))
 
-  
+
   (add-user-answer!
     [this user-id question-id answer-or-solution-ids]
     (let [id (generate-id @(.conn this) :answer/id)
@@ -523,14 +522,14 @@
   (get-all-corrections-from-corrector
     [this corrector-id]
     (->>
-     (d/q '[:find (pull ?correction pattern) ?timestamp
-            :in $ pattern ?corrector-id
-            :where
-            [?correction :correction/corrector ?corrector-id ?tx]
-            [?tx :db/txInstant ?timestamp]]
-          @(.conn this) db.schema/correction-pull [:user/id corrector-id])
-     (mapv (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp})))
-     (resolve-enums)))
+      (d/q '[:find (pull ?correction pattern) ?timestamp
+             :in $ pattern ?corrector-id
+             :where
+             [?correction :correction/corrector ?corrector-id ?tx]
+             [?tx :db/txInstant ?timestamp]]
+           @(.conn this) db.schema/correction-pull [:user/id corrector-id])
+      (mapv (fn [[correction timestamp]] (merge correction {:correction/timestamp timestamp})))
+      (resolve-enums)))
 
 
   (get-answer-by-id

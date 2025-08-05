@@ -1,6 +1,8 @@
 (ns views.question.questions-overview-view
-  (:require [hiccup2.core :as h]
-            [util.hiccup-extensions :refer [optional-error-display]]))
+  (:require
+    [hiccup2.core :as h]
+    [util.hiccup-extensions :refer [optional-error-display]]))
+
 
 (defn questions-overview
   [questions course-map]
@@ -23,6 +25,6 @@
             [:td (:question/statement q)]
             [:td course-name]
             [:td
-             [:a.btn.btn-sm.btn-outline-primary 
-               {:href (str "/question/" (:question/id q))} 
-               "show"]]]))]]]))
+             [:a.btn.btn-sm.btn-outline-primary
+              {:href (str "/question/" (:question/id q))}
+              "show"]]]))]]]))

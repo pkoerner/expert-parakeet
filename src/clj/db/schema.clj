@@ -95,7 +95,6 @@
    {:question/course [:course/id]}])
 
 
-
 (def question-pull
   (conj question-slim-pull
         :question/evaluation-criteria
@@ -277,19 +276,18 @@
    ])
 
 
-;(def course-pull
-;  [:course/id
-;   :course/name
-;   {:course/questions question-pull}
-;   {:course/question-sets question-set-pull}])
+;; (def course-pull
+;;  [:course/id
+;;   :course/name
+;;   {:course/questions question-pull}
+;;   {:course/question-sets question-set-pull}])
 
 
 (def course-pull
   [:course/id
    :course/name
-   {:course/questions question-slim-pull} 
+   {:course/questions question-slim-pull}
    {:course/question-sets question-set-pull}])
-
 
 
 (def course-schema
@@ -306,17 +304,18 @@
    #:db{:ident :course/questions
         :valueType :db.type/ref
         :cardinality :db.cardinality/many
-        :isComponent true  
-        :doc "All questions owned by this course"} 
+        :isComponent true
+        :doc "All questions owned by this course"}
    #:db{:ident :course/question-sets
         :valueType :db.type/ref
         :cardinality :db.cardinality/many
         :doc "All question sets owned by this course, consisting out of questions owned by this course"}])
 
-;#:db{:ident :course/questions
-;     :valueType :db.type/ref
-;     :cardinality :db.cardinality/many
-;     :doc "All questions owned by this course"}
+
+;; #:db{:ident :course/questions
+;;     :valueType :db.type/ref
+;;     :cardinality :db.cardinality/many
+;;     :doc "All questions owned by this course"}
 
 
 
