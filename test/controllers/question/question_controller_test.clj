@@ -12,11 +12,13 @@
 
 (deftest test-create-question-get
   (let [empty-request {}
-        get-categories-fun (fn [] [])]
+        get-categories-fun (fn [] [])
+        get-courses-fun (fn [])]
     (testing "Returns a form object on normal invocation."
       (let [post-destination "post-destination"
             res (create-question-get empty-request
                                      get-categories-fun
+                                     get-courses-fun
                                      post-destination)]
         (t/is (and (string/includes? res "form")
                    (string/includes? res post-destination)))))
@@ -25,6 +27,7 @@
       (let [categories ["Cat1" "Cat2" "Hello World ok!"]
             res (create-question-get empty-request
                                      (fn [] categories)
+                                     get-courses-fun
                                      "post-destination")]
         (t/is (every? #(string/includes? res %) categories))))))
 
