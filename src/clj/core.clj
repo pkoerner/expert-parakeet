@@ -125,7 +125,7 @@
                           (partial get-all-uncorrected-assignments-for-user-and-question (:correction-queue-service services))))
   
   (POST "/correction-queue/unassigned/:question-id/:answer-id" req (submit-correction-queue! req "/correction-queue/unassigned" (partial assign-answer-to-user (:correction-queue-service services)) (partial add-correction! (:correction-service services))))
-  (POST "/correction-queue/assigned/:question-id/:answer-id" req (submit-correction-queue! req "/correction-queue/unassigned" (partial assign-answer-to-user (:correction-queue-service services)) (partial add-correction! (:correction-service services))))
+  (POST "/correction-queue/assigned/:question-id/:answer-id" req (submit-correction-queue! req "/correction-queue/assigned" (partial assign-answer-to-user (:correction-queue-service services)) (partial add-correction! (:correction-service services))))
 
   (route/not-found "Not Found"))
 
