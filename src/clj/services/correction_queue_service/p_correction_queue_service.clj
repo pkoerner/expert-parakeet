@@ -29,4 +29,8 @@
 
   (get-correction-queue-statistics
     [this user-id question-id]
-    "returns a 3-tuple consisting of the total number of answers, corrections and corrections by the user for this question"))
+    "Returns a 3-tuple consisting of the total number of answers, corrections and corrections by the user for this question")
+
+  (get-number-of-assigned-and-unassigned-answers
+    [this user-id question-id]
+    "Returns tupel of two numerical values, the first representing the number of uncorrected answers assigned to this user, the second the number of uncorrected and unassigned answers to this question."))

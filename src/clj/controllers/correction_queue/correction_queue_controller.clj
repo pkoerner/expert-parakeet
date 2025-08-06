@@ -7,10 +7,25 @@
    [hiccup2.core :as h]
    [ring.util.response :refer [redirect]]))
 
-(defn correction-queue-overview-get [req post-destination get-all-question-set-fn]
-  (let [question-sets (get-all-question-set-fn)
-        question-sets-free-text-questions (mapv (fn [x] (update x :question-set/questions (partial filter #(= :question.type/free-text (:question/type %))))) question-sets)]
-    (html-response (overview-view/create-correction-queue-overview-view post-destination question-sets-free-text-questions))))
+(defn correction-queue-overview-get [req post-destination get-all-question-set-fn get-answer-counts]
+  (let [user-id (get-in req [:session :user :id])
+        question-sets (get-all-question-set-fn)
+        question-sets-free-text-questions (mapv (fn [x] (update x :question-set/questions (partial filter #(= :question.type/free-text (:question/type %))))) question-sets)
+        unassigned-answer-count (into {}
+                                      (mapcat (fn [question-set]
+                                                (let [question-ids (map :question/id (:question-set/questions question-set))]
+                                                  (map (fn [question-id] [question-id (get-answer-counts user-id question-id)])
+                                                       question-ids)))
+                                              question-sets-free-text-questions))
+        question-sets-no-finished-sets (filter
+                                        (fn [question-set]
+                                          (some
+                                           (fn [question]
+                                             (let [[assigned unassigned] (get-answer-counts user-id (:question/id question))]
+                                               (not= 0 (+ assigned unassigned))))
+                                           (:question-set/questions question-set)))
+                                        question-sets-free-text-questions)]
+    (html-response (overview-view/create-correction-queue-overview-view post-destination question-sets-no-finished-sets unassigned-answer-count))))
 
 (defn correction-queue-get [req post-destination get-unassigned-answer-fn get-statistics-fn]
   (let [user-id (get-in req [:session :user :id])

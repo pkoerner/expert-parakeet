@@ -152,7 +152,15 @@
 
   (get-correction-by-user-count
     [this question-id user-id]
-    "returns total number of corrections by the user belonging to this question"))
+    "returns total number of corrections by the user belonging to this question")
+
+  (get-unassigned-answer-count
+    [this question-id]
+    "returns the number of answers that are not assigned to anyone belonging to this question")
+  
+  (get-assigned-answer-count
+   [this user-id question-id]
+   "returns the number of answers that are assigned to the user and belonging to this question that are not corrected yet"))
 
 
 (def id-len 10)
@@ -671,6 +679,41 @@
                 [?e :answer/question ?q]]
               @(.conn this)
               db.schema/correction-pull
+              question-id)
+         (mapv first)
+         (resolve-enums)
+         (count)))
+
+  (get-unassigned-answer-count
+    [this question-id]
+    (->> (d/q '[:find (pull ?e pattern)
+                :in $ pattern ?question-id
+                :where
+                [?q :question/id ?question-id]
+                [?e :answer/question ?q]
+                (not [_ :assignment/answer ?e])
+                (not [_ :correction/answer ?e])]
+              @(.conn this)
+              db.schema/answer-pull
+              question-id)
+         (mapv first)
+         (resolve-enums)
+         (count)))
+
+  (get-assigned-answer-count
+    [this user-id question-id]
+    (->> (d/q '[:find (pull ?e pattern)
+                :in $ pattern ?user-id ?question-id
+                :where
+                [?q :question/id ?question-id]
+                [?e :answer/question ?q]
+                [?a :assignment/answer ?e]
+                [?u :user/id ?user-id]
+                [?a :assignment/corrector ?u]
+                (not [_ :correction/answer ?e])]
+              @(.conn this)
+              db.schema/answer-pull
+              user-id
               question-id)
          (mapv first)
          (resolve-enums)

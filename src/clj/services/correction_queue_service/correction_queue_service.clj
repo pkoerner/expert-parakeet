@@ -31,6 +31,10 @@
    (db/get-correction-count (.db this) question-id)
    (db/get-correction-by-user-count (.db this) user-id question-id)])
 
+(defn get-number-of-assigned-and-unassigned-answers [this user-id question-id]
+  [(db/get-assigned-answer-count (.db this) user-id question-id)
+  (db/get-unassigned-answer-count (.db this) question-id)])
+
 (extend CorrectionQueueService
   PCorrectionQueueService
   {:get-unassigned-answer-for-question get-unassigned-answer-for-question
@@ -38,4 +42,5 @@
    :assign-answer-to-user assign-answer-to-user
    :get-all-assignments get-all-assignments
    :get-all-uncorrected-assignments-for-user-and-question get-all-uncorrected-assignments-for-user-and-question
-   :get-correction-queue-statistics get-correction-queue-statistics})
+   :get-correction-queue-statistics get-correction-queue-statistics
+   :get-number-of-assigned-and-unassigned-answers get-number-of-assigned-and-unassigned-answers})
