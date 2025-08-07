@@ -15,7 +15,7 @@
                                                       submit-create-question!]]
     [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
     [controllers.user.user-overview-controller :refer [create-user-overview-get]]
-    [controllers.correction-queue.correction-queue-controller :refer [correction-queue-overview-get correction-queue-get correction-queue-assignments-get submit-correction-queue!]]
+    [controllers.correction-queue.correction-queue-controller :refer [correction-queue-overview-get correction-queue-unassiged-get correction-queue-assignments-get submit-correction-queue!]]
     [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
@@ -117,7 +117,7 @@
 
   (GET "/correction-queue" req (correction-queue-overview-get req "/correction-queue" (partial get-all-question-sets-with-questions (:question-set-service services)) (partial get-number-of-assigned-and-unassigned-answers (:correction-queue-service services))))
 
-  (GET "/correction-queue/unassigned/:question-id" req (correction-queue-get req "/correction-queue/unassigned" (partial get-unassigned-answer-for-question (:correction-queue-service services)) (partial get-correction-queue-statistics (:correction-queue-service services))))
+  (GET "/correction-queue/unassigned/:question-id" req (correction-queue-unassiged-get req "/correction-queue/unassigned" (partial get-unassigned-answer-for-question (:correction-queue-service services)) (partial get-correction-queue-statistics (:correction-queue-service services))))
   (GET 
     "/correction-queue/assigned/:question-id" 
     req 
