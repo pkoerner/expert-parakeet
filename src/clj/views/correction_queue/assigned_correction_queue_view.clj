@@ -1,4 +1,4 @@
-(ns views.correction-queue.assignments-view
+(ns views.correction-queue.assigned-correction-queue-view
   (:require
    [hiccup2.core :as h]
    [util.ring-extensions :refer [html-response]]

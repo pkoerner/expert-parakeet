@@ -2,8 +2,8 @@
   (:require
    [util.ring-extensions :refer [html-response]]
    [views.correction-queue.correction-queue-overview-view :as overview-view]
-   [views.correction-queue.correction-queue-view :as unassigned-view]
-   [views.correction-queue.assignments-view :as assignments-view]
+   [views.correction-queue.unassigned-correction-queue-view :as unassigned-view]
+   [views.correction-queue.assigned-correction-queue-view :as assignments-view]
    [ring.util.response :refer [redirect]]))
 
 ; TODO: Filtering should happen in db query
