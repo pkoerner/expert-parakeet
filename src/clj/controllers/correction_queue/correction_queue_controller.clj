@@ -63,7 +63,7 @@
   (add-correction-fn answer-id correction)
   (redirect pd))
 
-(defn submit-correction-queue!
+(defn submit-unassigned-correction-queue!
   [req post-destination add-assignment-fn save-correction-fn]
   (let [question-id (get-in req [:params :question-id])
         answer-id (get-in req [:params :answer-id])
@@ -78,3 +78,18 @@
     (case action
       "submit" (submit-save! add-assignment-fn save-correction-fn user-id answer-id correction pd)
       "next" (submit-next! add-assignment-fn user-id answer-id pd))))
+
+(defn submit-assigned-correction-queue!
+  [req post-destination add-assignment-fn save-correction-fn]
+  (let [question-id (get-in req [:params :question-id])
+        answer-id (get-in req [:params :answer-id])
+        user-id (get-in req [:session :user :id])
+        pd (format "%s/%s" post-destination question-id)
+        form-data (-> req :params (dissoc :__anti-forgery-token))
+        correction (-> {}
+                       (assoc :correction/feedback (:feedback form-data))
+                       (assoc :correction/points (Long/parseLong (:points form-data)))
+                       (assoc :corrector/id user-id))
+        action (:action form-data)]
+    (case action
+      "submit" (submit-save! add-assignment-fn save-correction-fn user-id answer-id correction pd))))

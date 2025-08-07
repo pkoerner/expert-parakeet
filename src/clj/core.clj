@@ -15,7 +15,11 @@
                                                       submit-create-question!]]
     [controllers.user.user-controller :refer [login create-user-get submit-create-user]]
     [controllers.user.user-overview-controller :refer [create-user-overview-get]]
-    [controllers.correction-queue.correction-queue-controller :refer [correction-queue-overview-get correction-queue-unassiged-get correction-queue-assignments-get submit-correction-queue!]]
+    [controllers.correction-queue.correction-queue-controller :refer [correction-queue-overview-get
+                                                                      correction-queue-unassiged-get
+                                                                      correction-queue-assignments-get
+                                                                      submit-unassigned-correction-queue!
+                                                                      submit-assigned-correction-queue!]]
     [db]
     [domain]
     [ring.adapter.jetty :refer [run-jetty]]
@@ -36,7 +40,7 @@
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
     [services.user-service.user-service :refer [->UserService]]
     [services.correction-queue-service.correction-queue-service :refer [->CorrectionQueueService]]
-    [services.correction-queue-service.p-correction-queue-service :refer [get-number-of-assigned-and-unassigned-answers get-assigned-answer-for-question get-correction-queue-statistics get-unassigned-answer-for-question get-all-uncorrected-assignments-for-user-and-question assign-answer-to-user get-all-assignments]]
+    [services.correction-queue-service.p-correction-queue-service :refer [get-number-of-assigned-and-unassigned-answers get-correction-queue-statistics get-unassigned-answer-for-question get-all-uncorrected-assignments-for-user-and-question assign-answer-to-user]]
     [util.ring-extensions :refer [html-response]]
     [views.template :refer [wrap-navbar-and-footer]]))
 
@@ -115,17 +119,29 @@
   (GET "/new-correction" req (html-response (new-correction-get req "/new-correction" (partial db/get-answer-by-id db) (partial db/get-question-by-id db))))
   (POST "/new-correction" req (submit-new-correction! req "/new-correction" (partial db/add-correction! db) (partial db/get-user-by-id db)))
 
-  (GET "/correction-queue" req (correction-queue-overview-get req "/correction-queue" (partial get-all-question-sets-with-questions (:question-set-service services)) (partial get-number-of-assigned-and-unassigned-answers (:correction-queue-service services))))
+  (GET "/correction-queue" req 
+    (correction-queue-overview-get req "/correction-queue" 
+                                   (partial get-all-question-sets-with-questions (:question-set-service services)) 
+                                   (partial get-number-of-assigned-and-unassigned-answers (:correction-queue-service services))))
 
-  (GET "/correction-queue/unassigned/:question-id" req (correction-queue-unassiged-get req "/correction-queue/unassigned" (partial get-unassigned-answer-for-question (:correction-queue-service services)) (partial get-correction-queue-statistics (:correction-queue-service services))))
-  (GET 
-    "/correction-queue/assigned/:question-id" 
-    req 
+  (GET "/correction-queue/unassigned/:question-id" req 
+    (correction-queue-unassiged-get req "/correction-queue/unassigned" 
+                                    (partial get-unassigned-answer-for-question (:correction-queue-service services)) 
+                                    (partial get-correction-queue-statistics (:correction-queue-service services))))
+  
+  (GET "/correction-queue/assigned/:question-id" req 
     (correction-queue-assignments-get req "/correction-queue/assigned" 
                           (partial get-all-uncorrected-assignments-for-user-and-question (:correction-queue-service services))))
   
-  (POST "/correction-queue/unassigned/:question-id/:answer-id" req (submit-correction-queue! req "/correction-queue/unassigned" (partial assign-answer-to-user (:correction-queue-service services)) (partial add-correction! (:correction-service services))))
-  (POST "/correction-queue/assigned/:question-id/:answer-id" req (submit-correction-queue! req "/correction-queue/assigned" (partial assign-answer-to-user (:correction-queue-service services)) (partial add-correction! (:correction-service services))))
+  (POST "/correction-queue/unassigned/:question-id/:answer-id" req 
+    (submit-unassigned-correction-queue! req "/correction-queue/unassigned" 
+                              (partial assign-answer-to-user (:correction-queue-service services)) 
+                              (partial add-correction! (:correction-service services))))
+  
+  (POST "/correction-queue/assigned/:question-id/:answer-id" req 
+    (submit-assigned-correction-queue! req "/correction-queue/assigned" 
+                              (partial assign-answer-to-user (:correction-queue-service services)) 
+                              (partial add-correction! (:correction-service services))))
 
   (route/not-found "Not Found"))
 
