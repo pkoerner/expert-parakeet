@@ -19,14 +19,16 @@
                 question-sets)))
 
 (defn filter-questions-where-no-correction-left [question-sets answer-counts]
-  (filter
-   (fn [question-set]
-     (some
-      (fn [question]
-        (let [[assigned unassigned] (answer-counts (:question/id question))]
-          (not= 0 (+ assigned unassigned))))
-      (:question-set/questions question-set)))
-   question-sets))
+  (->> question-sets
+       (filter
+        (fn [question-set]
+          (some
+           (fn [question]
+             (let [[assigned unassigned] (answer-counts (:question/id question))]
+               (not= 0 (+ assigned unassigned))))
+           (:question-set/questions question-set))))
+       (mapv (fn [x] (update x :question-set/questions (partial filter (fn [question] (let [question-stats (answer-counts (:question/id question))] (not= 0 (apply + question-stats))))))))
+       ))
 
 (defn correction-queue-overview-get [req post-destination get-all-question-set-fn get-answer-counts-fn]
   (let [user-id (get-in req [:session :user :id])
