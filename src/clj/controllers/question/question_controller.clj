@@ -69,14 +69,14 @@
     \"categories\" String or array of strings}
    ```"
   [req post-destination question-service]
-  (let [course-id (or (-> req :params :course-id) 
-                      (-> req :route-params :course-id) 
-                      (-> req :session :course-id)) 
+  (let [course-id (or (-> req :params :course-id)
+                      (-> req :route-params :course-id)
+                      (-> req :session :course-id))
         form-data (-> req :params (dissoc :__anti-forgery-token))
         question-or-errors (validate-question question-service form-data)
         validation-errors (question-or-errors :errors)]
     (if (empty? validation-errors)
-      (let [added-question (create-question! question-service course-id question-or-errors)] 
+      (let [added-question (create-question! question-service course-id question-or-errors)]
         (html-response (creation-view/question-success-view added-question)))
       (html-response (creation-view/create-question-form (get-question-categories question-service)
                                                          post-destination
