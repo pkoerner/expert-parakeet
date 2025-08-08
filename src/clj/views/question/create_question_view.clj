@@ -85,6 +85,7 @@
 
 (s/fdef create-question-form
         :args (s/cat :categories :question/categories
+                     :courses :course/courses
                      :post-destination :general/non-blank-string
                      :kwargs (s/cat :errors (s/? #{:errors})
                                     :error-map (s/? (s/map-of keyword? string?))
@@ -94,14 +95,15 @@
 
 
 (defn create-question-form
-  "Takes as arguments a collection of categories and a destination to which the form's post request should be sent.
+  "Takes as arguments a collection of categories, a collection of courses, 
+   and a destination to which the form's post request should be sent.
    Optional keyword arguemnts:
    `:errors`: Takes a map with form data keys mapped to error messages.
    These are displayed as errors in the form with their corresponding input field.
    `:question-data`: Takes a map with form data keys mapped to values.
    When present, the values are put into the input fields corresponding to the name.
    This way the form can be re-/prepopulated."
-  [categories post-destination & {:keys [errors question-data] :or {errors {} question-data {}}}]
+  [categories courses post-destination & {:keys [errors question-data] :or {errors {} question-data {}}}]
   (let [question-types (->> question-types
                             (map name)
                             (sort))
@@ -119,6 +121,19 @@
        [:h2 "Create question"]
        (hform/form-to
          [:post post-destination]
+
+
+         ;; NEU: Kursauswahl hinzufügen
+         [:div
+          (hform/label {:class "form-label"} "course-id" "Course")
+          (optional-error-display :course errors) ; Kurs-Fehler anzeigen
+          (hform/drop-down {:class "form-select" :required true} "course-id"
+                           (cons ["-- Select a course --" ""]
+                                 (map (fn [course]
+                                        [(:course/name course) (:course/id course)])
+                                      courses))
+                           (get question-data :course-id))]
+
 
          [:div
           (hform/label {:class "form-label"} "statement" "Question statement")

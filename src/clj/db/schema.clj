@@ -136,7 +136,13 @@
    #:db{:ident :question/categories
         :valueType :db.type/string
         :cardinality :db.cardinality/many
-        :doc "Categories/Tags for this question"}])
+        :doc "Categories/Tags for this question"}
+
+   ;; :question/course 
+   #:db{:ident :question/course
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/one
+        :doc "The course this question belongs to"}])
 
 
 (def answer-slim-pull
@@ -266,7 +272,7 @@
 (def course-slim-pull
   [:course/id
    :course/name
-   {:course/question-sets question-set-no-questions-pull}
+   ;; {:course/question-sets question-set-no-questions-pull}
    ;; no questions for slim pull
    ])
 
@@ -289,10 +295,12 @@
         :valueType :db.type/string
         :cardinality :db.cardinality/one
         :doc "Name of this course"}
-   #:db{:ident :course/questions
-        :valueType :db.type/ref
-        :cardinality :db.cardinality/many
-        :doc "All questions owned by this course"}
+   ;; entfernen da N:M , und nicht 1:n wie im db schema, also Redundanz vermieden(keine doppelt gespeicherten Informationen) ?
+   ;; #:db{:ident :course/questions
+   ;;     :valueType :db.type/ref
+   ;;     :cardinality :db.cardinality/many
+   ;;    :doc "All questions owned by this course"}
+   ;; hier auch entfernen
    #:db{:ident :course/question-sets
         :valueType :db.type/ref
         :cardinality :db.cardinality/many

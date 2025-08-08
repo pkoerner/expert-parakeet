@@ -16,6 +16,10 @@
             key)))
 
 
+(def course-fp-id (gen-id! :course))
+(def course-prog-id (gen-id! :course))
+
+
 (defn- db-ref
   [attr m]
   [attr (get m attr)])
@@ -36,13 +40,14 @@
 
 
 (defn- text-question
-  [question-statement max-points categories evaluation-criteria]
+  [question-statement max-points categories evaluation-criteria course-id]
   {:question/id (gen-id! :question)
    :question/type :question.type/free-text
    :question/statement question-statement
    :question/evaluation-criteria evaluation-criteria
    :question/max-points max-points
-   :question/categories (vec categories)})
+   :question/categories (vec categories)
+   :question/course [:course/id course-id]})
 
 
 (defn- solution
@@ -52,11 +57,12 @@
 
 
 (defn- choice-question
-  [question-statement max-points categories correct-solutions & other-solutions]
+  [question-statement max-points categories correct-solutions course-id & other-solutions]
   (let [base {:question/id (gen-id! :question)
               :question/statement question-statement
               :question/max-points max-points
-              :question/categories (vec categories)}]
+              :question/categories (vec categories)
+              :question/course [:course/id course-id]}]
     (if (string? correct-solutions)
       (let [correct-solution (solution correct-solutions)
             other-solutions (map solution other-solutions)
@@ -101,25 +107,31 @@
 (def q-transient-use-case
   (text-question "Describe a use case for transient data structures"
                  3 []
-                 "The following aspects are explained: performance improvement, mutable variant of persistent data structures, must be made persistent before function return"))
+                 "The following aspects are explained: performance improvement, mutable variant of persistent data structures, must be made persistent before function return"
+                 course-fp-id))
 
 
 (def q-compare-testing
   (text-question "What are some advantages and disadvantages of example-based and generative testing?"
                  2 []
-                 "The following aspects are explained: Oracle, performance, test-coverage"))
+                 "The following aspects are explained: Oracle, performance, test-coverage" course-fp-id))
 
 
 (def q-transient-mutable
   (choice-question "Transient data structures are:"
-                   1 []
-                   "mutable" "immutable"))
+                   1
+                   []
+                   "mutable"
+                   course-fp-id
+                   "immutable"))
 
 
 (def q-generative-testing
   (choice-question "Which keywords are suitable for generative testing?"
                    1 ["Cat2" "Cat1" "Cat3"]
-                   ["Oracle" "inverse function" "specs"] "fast and low memory usage"))
+                   ["Oracle" "inverse function" "specs"]
+                   course-fp-id
+                   "fast and low memory usage"))
 
 
 (def questions-fp
@@ -132,13 +144,15 @@
 (def q-alien-release
   (choice-question "When was the movie Alien by ridley scott released?"
                    1 []
-                   "1979" "1976" "2000" "1966"))
+                   "1979"
+                   course-fp-id
+                   "1976" "2000" "1966"))
 
 
 (def q-best-film
   (text-question "Which one is the greates movie of all time? ;D"
                  1 []
-                 "Alien !!!"))
+                 "Alien !!!" course-fp-id))
 
 
 (def questions-alien
@@ -149,13 +163,18 @@
 (def q-jvm
   (text-question "What is the JVM?"
                  3 []
-                 "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine"))
+                 "Something like this (from Wikipedia): https://en.wikipedia.org/wiki/Java_virtual_machine" course-prog-id))
 
 
 (def q-java
   (choice-question "What type of programming lanuage is java?"
-                   1 []
-                   "object oriented" "functional" "logic"))
+                   1
+                   []
+                   "object oriented"
+                   course-prog-id
+                   ;; "functional"
+                   ;; "logic"
+                   ))
 
 
 (def questions-prog
@@ -192,17 +211,19 @@
 
 
 (def course-fp
-  {:course/id (gen-id! :course)
+  {:course/id course-fp-id
    :course/name "Functional Programming: Clojure"
-   :course/questions (db-refs :question/id questions-fp)
-   :course/question-sets (db-refs :question-set/id [question-set-fp question-set-alien])})
+   ;; :course/questions (db-refs :question/id questions-fp)
+   ;; :course/question-sets (db-refs :question-set/id [question-set-fp question-set-alien])
+   })
 
 
 (def course-prog
-  {:course/id (gen-id! :course)
+  {:course/id course-prog-id
    :course/name "Programming"
-   :course/questions (db-refs :question/id questions-prog)
-   :course/question-sets (db-refs :question-set/id [question-set-prog])})
+   ;; :course/questions (db-refs :question/id questions-prog)
+   ;; :course/question-sets (db-refs :question-set/id [question-set-prog])
+   })
 
 
 (def courses
@@ -239,11 +260,11 @@
 
 (def course-it-fp
   {:course-iteration/id (gen-id! :course-iteration)
-   :course-iteration/course (db-ref :course/id course-fp)
+   :course-iteration/course [:course/id course-fp-id]
    :course-iteration/year 2022
    :course-iteration/semester :semester/winter
    :course-iteration/members (db-refs :membership/id course-it-fp-members)
-   :course-iteration/question-sets (course-fp :course/question-sets)})
+   :course-iteration/question-sets (db-refs :question-set/id [question-set-fp question-set-alien])})
 
 
 (def course-it-prog-members
@@ -254,11 +275,11 @@
 
 (def course-it-prog
   {:course-iteration/id (gen-id! :course-iteration)
-   :course-iteration/course (db-ref :course/id course-prog)
+   :course-iteration/course [:course/id course-prog-id]
    :course-iteration/year 2020
    :course-iteration/semester :semester/summer
    :course-iteration/members (db-refs :membership/id course-it-prog-members)
-   :course-iteration/question-sets (course-prog :course/question-sets)})
+   :course-iteration/question-sets (db-refs :question-set/id [question-set-prog])})
 
 
 (def course-iterations
@@ -335,9 +356,9 @@
   (vec (concat
          users
          memberships
-         questions
-         question-sets
-         courses
-         course-iterations
+         [course-fp course-prog] ; Kurse zuerst
+         questions              ; Dann Fragen
+         question-sets          ; Dann Question-Sets
+         course-iterations      ; Dann Kurs-Iterationen (verweisen auf Question-Sets)
          answers
          corrections)))

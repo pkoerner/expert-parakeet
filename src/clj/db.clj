@@ -32,7 +32,8 @@
     [this])
 
   (get-all-courses
-    [this])
+    [this]
+    "Get all courses")
 
   ;; only used for testing
   (get-course-iterations-of-course
@@ -58,7 +59,7 @@
     [this id])
 
   (add-question!
-    [this question])
+    [this question course-id])
 
   (add-question-set!
     [this question-set-name course-iteration-id required-points questions])
@@ -223,10 +224,10 @@
 
   (get-all-courses
     [this]
+    ;; Korrigiert - Parameter in eckigen Klammern
     (->> (d/q '[:find (pull ?e pattern)
                 :in $ pattern
-                :where
-                [?e :course/id]]
+                :where [?e :course/id]]
               @(.conn this) db.schema/course-slim-pull)
          (mapv first)
          (resolve-enums)))
@@ -313,61 +314,85 @@
 
 
   (add-question!
-    [this question]
-    ;; TODO: this needs to take a course as an argument so we can add the question to the owning course
-    (let [question-ids (map :question/id (get-all-question-ids this))
-          question-list (map #(select-keys (db/get-question-by-id this %)
-                                           [:question/type
-                                            :question/statement
-                                            :question/max-points])
-                             question-ids)]
-      (if (some #(= % (select-keys question [:question/type :question/statement :question/max-points])) question-list)
-        (throw (AssertionError. (str "There is a similar question already in the data base. Please check the existing question and wether you need to create a new one. " (select-keys question [:question/type :question/statement :question/max-points]))))
-        (let [possible-solutions (->> (question :question/possible-solutions)
-                                      (mapv (fn [sol]
-                                              {:solution/id (generate-id @(.conn this) :solution/id)
-                                               :solution/statement sol})))
-              possible-solutions-lookup (->> possible-solutions
-                                             (map (fn [sol]
-                                                    [(sol :solution/statement) (sol :solution/id)]))
-                                             (into {}))
-              correct-solutions (->> (question :question/correct-solutions)
-                                     (mapv (fn [sol]
-                                             [:solution/id (possible-solutions-lookup sol)])))
-              id (generate-id @(.conn this) :question/id)
-              type (:question/type question)
-              trans-map (apply assoc {:question/id id
-                                      :question/type type
-                                      :question/max-points (:question/max-points question)
-                                      :question/statement (:question/statement question)
-                                      :question/categories (:question/categories question)}
-                               (case type
-                                 :question.type/free-text
-                                 [:question/evaluation-criteria (:question/evaluation-criteria question)]
+    [this question course-id]
+    (let [db-conn @(.conn this)
+          existing-ids (d/q '[:find [?q ...]
+                              :in $ ?course-id
+                              :where
+                              [?q :question/course ?course-id]]
+                            db-conn course-id)
+          existing-questions (map #(select-keys (db/get-question-by-id this %)
+                                                [:question/type :question/statement])
+                                  existing-ids)]
 
-                                 (:question.type/single-choice :question.type/multiple-choice)
-                                 [:question/possible-solutions possible-solutions
-                                  :question/correct-solutions correct-solutions]))
-              tx-result (d/transact (.conn this) [trans-map])
-              db-after (:db-after tx-result)]
-          (->> (d/pull db-after db.schema/question-pull [:question/id id])
-               (resolve-enums))))))
+      (when (some #(= % (select-keys question [:question/type :question/statement]))
+                  existing-questions)
+        (throw (ex-info "There is a similar question already in this course"
+                        {:error :duplicate-question
+                         :question (select-keys question [:question/type :question/statement])})))
+
+      (let [possible-solutions (mapv (fn [sol]
+                                       {:solution/id (generate-id db-conn :solution/id)
+                                        :solution/statement sol})
+                                     (:question/possible-solutions question))
+
+            question-id (generate-id db-conn :question/id)
+            base-entity {:question/id question-id
+                         :question/type (:question/type question)
+                         :question/course [:course/id course-id]
+                         :db/id (d/tempid :db.part/user)}
+
+            solution-refs (mapv :solution/id possible-solutions)
+
+            correct-solutions (mapv (fn [sol]
+                                      [:solution/id
+                                       (->> possible-solutions
+                                            (filter #(= (:solution/statement %) sol))
+                                            first
+                                            :solution/id)])
+                                    (:question/correct-solutions question))
+
+            question-entity (merge base-entity
+                                   (select-keys question [:question/statement
+                                                          :question/max-points
+                                                          :question/categories])
+                                   (case (:question/type question)
+                                     :question.type/free-text
+                                     {:question/evaluation-criteria (:question/evaluation-criteria question)}
+
+                                     (:question.type/single-choice :question.type/multiple-choice)
+                                     {:question/possible-solutions solution-refs
+                                      :question/correct-solutions correct-solutions}))
+
+            tx-data (into [question-entity] possible-solutions)]
+
+        (d/transact db-conn tx-data)
+        (get-question-by-id this question-id))))
 
 
   (add-question-set!
     [this question-set-name course-iteration-id required-points questions]
-    (let [id (generate-id @(.conn this) :question-set/id)
+    (let [course-id (ffirst
+                      (d/q '[:find ?course-id
+                             :in $ ?course-iteration-id
+                             :where
+                             [?ci :course-iteration/id ?course-iteration-id]
+                             [?ci :course-iteration/course ?c]
+                             [?c :course/id ?course-id]]
+                           @(.conn this) course-iteration-id))
+          id (generate-id @(.conn this) :question-set/id)
           question-ids (mapv (fn [question]
                                (if (contains? question :question/id)
                                  (:question/id question)
-                                 (:question/id (add-question! this question)))) ; frage war noch nicht in db
+                                 (:question/id (add-question! this question course-id))))
                              questions)
           tx-result (d/transact (.conn this)
                                 [{:question-set/id id
                                   :question-set/name question-set-name
                                   :question-set/required-points required-points
                                   :question-set/questions (mapv (fn [id] [:question/id id]) question-ids)}
-                                 [:db/add [:course-iteration/id course-iteration-id] :course-iteration/question-sets [:question-set/id id]]])
+                                 [:db/add [:course-iteration/id course-iteration-id]
+                                  :course-iteration/question-sets [:question-set/id id]]])
           db-after (:db-after tx-result)]
       (->> (d/pull db-after db.schema/question-set-no-questions-pull [:question-set/id id])
            (resolve-enums))))

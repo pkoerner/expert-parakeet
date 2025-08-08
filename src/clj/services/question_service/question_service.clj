@@ -55,13 +55,14 @@
 ;; TODO: the spec for the question argument is incorrect, must not include ids and the solutions must be strings
 (s/fdef create-question-impl!
         :args (s/cat :self #(= PQuestionService (type %))
-                     :question :question/question)
+                     :question :question/question
+                     :course-id :course/id)
         :ret :question/question)
 
 
 (defn- create-question-impl!
-  [this question]
-  (db/add-question! (.db this) question))
+  [this question course-id]
+  (db/add-question! (.db this) question course-id))
 
 
 (s/fdef get-question-categories
