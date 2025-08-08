@@ -47,6 +47,8 @@
   (h/html
     (form/form-to
       [:post post-destination]
+      ;; (when-let [course-id (:question/course question)]
+      ;;  (form/hidden-field "course-id" course-id))
       [:p (:question/statement question)]
       (dispatch-question-type question)
       (h/raw (anti-forgery-field))

@@ -12,6 +12,13 @@
   [db])
 
 
+;; (defn- get-course-id-from-iteration
+;;  [db course-iteration-id]
+;;  (-> (db/get-course-iteration-by-id db course-iteration-id)
+;;      :course-iteration/course
+;;      :course/id))
+
+
 (s/fdef get-all-question-sets
         :args (s/cat :self #(satisfies? PQuestionSetService %))
         :ret (s/coll-of (s/keys :req [:question-set/id])))

@@ -60,8 +60,8 @@
 
 
 (defn- create-question-impl!
-  [this question]
-  (db/add-question! (.db this) question))
+  [this course-id question]
+  (db/add-question! (.db this) course-id question))
 
 
 (s/fdef get-question-categories

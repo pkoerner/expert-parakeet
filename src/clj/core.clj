@@ -34,6 +34,7 @@
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
     [services.user-service.user-service :refer [->UserService]]
     [util.ring-extensions :refer [html-response]]
+    [views.question.questions-overview-view :as questions-overview]
     [views.template :refer [wrap-navbar-and-footer]]))
 
 
@@ -82,11 +83,37 @@
         req
         (submit-user-answer! req (:answer-service services)))
 
+  ;; (GET "/create-question" req
+  ;;     (create-question-get req (partial get-question-categories (:question-service services)) "/create-question"))
+
+  ;; (POST "/create-question" req
+  ;;      (submit-create-question! req "/create-question" (:question-service services)))
+
   (GET "/create-question" req
-       (create-question-get req (partial get-question-categories (:question-service services)) "/create-question"))
+       (create-question-get
+         req
+         (partial get-question-categories (:question-service services))
+         (partial get-all-courses (:course-service services))  ; NEU: Kurse holen
+         "/create-question"))
 
   (POST "/create-question" req
-        (submit-create-question! req "/create-question" (:question-service services)))
+        (submit-create-question!
+          req
+          "/create-question"
+          (:question-service services)))
+
+
+
+  ;; show all quetions on "http://localhost:8081/questions"
+  (GET "/questions" [_req]  ; req
+       (let [db db/create-database
+             questions (db/get-all-question-ids db)
+             courses (db/get-all-courses db)
+             course-map (reduce (fn [m course]
+                                  (assoc m (:course/id course) (:course/name course)))
+                                {} courses)]
+         (html-response (questions-overview/questions-overview questions course-map))))
+
 
   (GET "/create-course" req
        (create-course-get req "/create-course"))
