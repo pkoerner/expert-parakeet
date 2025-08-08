@@ -40,8 +40,8 @@
 
   (reify PQuestionService
     (create-question!
-      [_self question]
-      (create-question! question))
+     [_self course-id question]  
+     (create-question! course-id question))
 
     (get-question-categories
       [_self]
@@ -56,11 +56,12 @@
   (let [db-stub (reify Database-Protocol)]
     (testing "Test that the db-add-function gets called with valid parameters."
       (let [test-request {:__anti-forgery-token ""
-                          :params {}}
+                          :params {:course-id "test-course-id"}}
             question-service (->QuestionService db-stub)
             basic-valid-input {:statement "Valid question statement"
                                :categories ["Valid Category"]
-                               :max-points "5"}
+                               :max-points "5"
+                               :course-id "test-course-id"}
             post-destination "S"
             free-text-question (merge basic-valid-input {:type "free-text"
                                                          :evaluation-criteria "Valid evaluation criteria"})
@@ -72,7 +73,7 @@
                                                                :correct-multiple-choice-solutions ["Solution1" "Solution2"]})]
         (t/are [question-form-data]
                (let [was-called (atom false)
-                     db-add-fun-stub (fn [question]
+                     db-add-fun-stub (fn [_ course-id question]
                                        (reset! was-called true)
                                        (-> question
                                            (update :question/possible-solutions (fn [sols]
@@ -98,11 +99,12 @@
 
     (testing "Test that the db-add-function is not called with invalid parameters"
       (let [test-request {:__anti-forgery-token ""
-                          :params {}}
+                          :params {:course-id "test-course-id"}}
             question-service (->QuestionService db-stub)
             basic-valid-input {:statement "Valid question statement"
                                :categories ["Valid Category"]
-                               :max-points "5"}
+                               :max-points "5"
+                               :course-id "test-course-id"}
             post-destination "S"
             single-choice-question1 (merge basic-valid-input {:type "single-choice"
                                                               :possible-single-choice-solutions ["Solution1" "Solution2" "Solution3"]
@@ -115,7 +117,7 @@
                                                                :correct-multiple-choice-solutions ["Solution1" "Unknown solution"]})]
         (t/are [question-form-data]
                (let [was-not-called (atom true)
-                     db-add-fun-stub (fn [question]
+                     db-add-fun-stub (fn [_ course-id question]
                                        (reset! was-not-called false)
                                        (-> question
                                            (update :question/possible-solution (fn [sols]
