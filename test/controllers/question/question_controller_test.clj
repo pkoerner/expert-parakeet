@@ -73,7 +73,7 @@
                                                                :correct-multiple-choice-solutions ["Solution1" "Solution2"]})]
         (t/are [question-form-data]
                (let [was-called (atom false)
-                     db-add-fun-stub (fn [_ course-id question]
+                     db-add-fun-stub (fn [_course-id question]
                                        (reset! was-called true)
                                        (-> question
                                            (update :question/possible-solutions (fn [sols]
@@ -117,7 +117,7 @@
                                                                :correct-multiple-choice-solutions ["Solution1" "Unknown solution"]})]
         (t/are [question-form-data]
                (let [was-not-called (atom true)
-                     db-add-fun-stub (fn [_ course-id question]
+                     db-add-fun-stub (fn [_course-id question]
                                        (reset! was-not-called false)
                                        (-> question
                                            (update :question/possible-solution (fn [sols]
