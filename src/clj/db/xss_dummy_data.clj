@@ -138,31 +138,30 @@
   [course-fp])
 
 
-(def user1
+(def user1-student
   {:user/id (gen-id! :user)
    :user/github-id (str "1" xss-payload)})
 
 
-(def user2
+(def user2-not-in-course
   {:user/id (gen-id! :user)
    :user/github-id (str "2" xss-payload)})
 
 
-(def user3
+(def user3-corrector
   {:user/id (gen-id! :user)
    :user/github-id (str "3" xss-payload)})
 
 
 (def users
-  [user1
-   user2
-   user3])
+  [user1-student
+   user2-not-in-course
+   user3-corrector])
 
 
 (def course-it-fp-members
-  (mapv (partial apply member) [[user1 :role/student]
-                                [user2 :role/student]
-                                [user3 :role/corrector]]))
+  (mapv (partial apply member) [[user1-student :role/student]
+                                [user3-corrector :role/corrector]]))
 
 
 (def course-it-fp
@@ -173,23 +172,16 @@
    :course-iteration/members (db-refs :membership/id course-it-fp-members)
    :course-iteration/question-sets (course-fp :course/question-sets)})
 
-
-(def course-it-prog-members
-  (mapv (partial apply member) [[user1 :role/student]
-                                [user2 :role/corrector]
-                                [user3 :role/student]]))
-
 (def course-iterations
   [course-it-fp])
 
 
 (def memberships
-  (vec (concat course-it-fp-members
-               course-it-prog-members)))
+  (vec (concat course-it-fp-members)))
 
 
-(def a1 (answer user1 q-text xss-payload))
-(def a2 (answer user1 q-choice [0 1]))
+(def a1 (answer user1-student q-text xss-payload))
+(def a2 (answer user1-student q-choice [0 1]))
 
 
 (def answers
@@ -201,8 +193,8 @@
 
 (def corrections
   [;; for user1, testing question set
-   (correction user3 a1 1 xss-payload)
-   (correction user3 a2 1 xss-payload)])
+   (correction user3-corrector a1 1 xss-payload)
+   (correction user3-corrector a2 1 xss-payload)])
 
 (def xss-data
   (vec (concat
