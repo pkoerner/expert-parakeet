@@ -112,7 +112,7 @@
 
 (def questions-xss
   `[~q-text
-    ~q-choice])
+    ~@q-choice])
 
 (def questions
   (vec (concat questions-xss)))
