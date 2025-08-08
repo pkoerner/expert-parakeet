@@ -40,8 +40,8 @@
 
   (reify PQuestionService
     (create-question!
-     [_self course-id question]  
-     (create-question! course-id question))
+      [_self course-id question]
+      (create-question! course-id question))
 
     (get-question-categories
       [_self]
