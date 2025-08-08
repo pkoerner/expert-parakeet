@@ -2,20 +2,25 @@
   (:require
    [clojure.string :as string]
    [clojure.test :as t :refer [deftest testing]]
-   [controllers.course.course-controller :refer [create-course-get submit-create-course!]]
+   [controllers.course.course-controller :refer [create-course-get
+                                                 submit-create-course!]]
+   [controllers.question-set.question-set-controller :refer [question-set-get]]
+   [controllers.question.question-controller :refer [create-question-get
+                                                     submit-create-question!]]
+   [controllers.user.user-overview-controller :refer [create-user-overview-get]]
    [datahike.api :as d]
-   [controllers.question.question-controller :refer [create-question-get submit-create-question!]]
-   [db :refer [Database-Protocol]]
-   [db.xss-dummy-data :as xss-dummy-data :refer [xss-payload]]
+   [db.dummy-data :refer [question-set-fp]]
    [db.schema :refer [db-schema]]
+   [db.xss-dummy-data :as xss-dummy-data :refer [user1-student user2-not-in-course xss-payload]]
    [services.answer-service.answer-service :refer [->AnswerService]]
    [services.correction-service.correction-service :refer [->CorrectionService]]
    [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
+   [services.course-iteration-service.p-course-iteration-service :refer [get-all-course-iterations-for-user]]
    [services.course-service.course-service :refer [->CourseService]]
+   [services.question-service.p-question-service :refer [get-question-categories]]
    [services.question-service.question-service :refer [->QuestionService]]
    [services.question-set-service.question-set-service :refer [->QuestionSetService]]
-   [services.user-service.user-service :refer [->UserService]]
-   [services.question-service.p-question-service :refer [get-question-categories]]))
+   [services.user-service.user-service :refer [->UserService]]))
 
 
 (defn create-test-db
@@ -60,9 +65,17 @@
         (submit-create-question! req post-destination (:question-service services)))))
 
 
-;; (deftest test-xss-user-overview
-;;   (testing "User overview html-code should be escaped to prevent XSS."
-;;     (let [req {:params {:name xss-data}}
-;;           post-destination "https://some.url"]
-;;       (t/are [html-output] (not (string/includes? html-output xss-data))
-;;         (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) user-github-id))))))
+(deftest test-user-overview
+  (testing "User overview html-code should be escaped to prevent XSS." 
+    (t/are [html-output] (not (string/includes? html-output xss-payload))
+      (create-user-overview-get (get-all-course-iterations-for-user (:course-iteration-service services) (user1-student :user/github-id))))))
+
+(deftest test-question-set 
+  (testing "Question set html-code should be escaped to prevent XSS."
+    (let [req_member {:session {:user {:id (user1-student :user/id)}} 
+                      :route-params {:id (question-set-fp :question-set/id)}}
+          req_not_member {:session {:user {:id (user2-not-in-course :user/id)}}
+                          :route-params {:id (question-set-fp :question-set/id)}}]
+      (t/are [html-output] (not (string/includes? html-output xss-payload))
+        (question-set-get req_member (:question-set-service services))
+        (question-set-get req_not_member (:question-set-service services))))))
