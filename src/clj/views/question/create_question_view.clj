@@ -184,22 +184,42 @@
          (h/raw (anti-forgery-field))
          (script "
           document.addEventListener('DOMContentLoaded', function() {
+            const mainForm = document.querySelector('form[method=\"post\"]');
             const categoryInput = document.getElementById('new-category');
-            const submitBtn = document.getElementById('main-submit-btn');
-            const categoryForm = document.getElementById('new-category-form');
+            const categoryContainer = document.getElementById('category-container');
 
-            if (categoryInput && submitBtn && categoryForm) {
-              const checkSubmit = () => {
-                submitBtn.disabled = categoryInput.value.trim() !== '';
-              };
+            if (mainForm && categoryInput && categoryContainer) {
+              mainForm.addEventListener('submit', function(e) {
+                const categoryValue = categoryInput.value.trim();
+                if (categoryValue) {
+                  e.preventDefault();
 
-              categoryInput.addEventListener('input', checkSubmit);
+                  // Create elements safely
+                  const div = document.createElement('div');
+                  div.className = 'form-check';
 
-              categoryForm.addEventListener('submit', function() {
-                setTimeout(checkSubmit, 10);
+                  const checkbox = document.createElement('input');
+                  checkbox.type = 'checkbox';
+                  checkbox.className = 'form-check-input';
+                  checkbox.name = 'categories';
+                  checkbox.value = categoryValue;
+                  checkbox.id = 'category-' + Date.now();
+                  checkbox.checked = true;
+
+                  const label = document.createElement('label');
+                  label.className = 'form-check-label';
+                  label.htmlFor = checkbox.id;
+                  label.textContent = categoryValue;
+
+                  div.appendChild(checkbox);
+                  div.appendChild(label);
+                  categoryContainer.appendChild(div);
+
+                  // Clear and submit
+                  categoryInput.value = '';
+                  mainForm.submit();
+                }
               });
-
-              checkSubmit();
             }
           });
           ")
