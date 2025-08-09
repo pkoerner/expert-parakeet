@@ -40,7 +40,12 @@
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
     [services.user-service.user-service :refer [->UserService]]
     [services.correction-queue-service.correction-queue-service :refer [->CorrectionQueueService]]
-    [services.correction-queue-service.p-correction-queue-service :refer [get-number-of-assigned-and-unassigned-answers get-correction-queue-statistics get-unassigned-answer-for-question get-all-uncorrected-assignments-for-user-and-question assign-answer-to-user]]
+    [services.correction-queue-service.p-correction-queue-service :refer [get-question-sets-for-overview
+                                                                          get-number-of-assigned-and-unassigned-answers 
+                                                                          get-correction-queue-statistics 
+                                                                          get-unassigned-answer-for-question 
+                                                                          get-all-uncorrected-assignments-for-user-and-question 
+                                                                          assign-answer-to-user]]
     [util.ring-extensions :refer [html-response]]
     [views.template :refer [wrap-navbar-and-footer]]))
 
@@ -121,8 +126,8 @@
 
   (GET "/correction-queue" req 
     (correction-queue-overview-get req "/correction-queue" 
-                                   (partial get-all-question-sets-with-questions (:question-set-service services)) 
-                                   (partial get-number-of-assigned-and-unassigned-answers (:correction-queue-service services))))
+                                   (partial get-number-of-assigned-and-unassigned-answers (:correction-queue-service services))
+                                   (partial get-question-sets-for-overview (:correction-queue-service services))))
 
   (GET "/correction-queue/unassigned/:question-id" req 
     (correction-queue-unassiged-get req "/correction-queue/unassigned" 

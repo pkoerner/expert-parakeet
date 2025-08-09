@@ -6,9 +6,6 @@
    [views.correction-queue.assigned-correction-queue-view :as assignments-view]
    [ring.util.response :refer [redirect]]))
 
-; TODO: Filtering should happen in db query
-(defn- filter-free-text-questions [question-sets]
-  (mapv (fn [x] (update x :question-set/questions (partial filter #(= :question.type/free-text (:question/type %))))) question-sets))
 
 (defn- get-answer-counts [question-sets user-id get-answer-counts-fn]
   (into {}
@@ -18,25 +15,11 @@
                          question-ids)))
                 question-sets)))
 
-(defn- filter-questions-where-no-correction-left [question-sets answer-counts]
-  (->> question-sets
-       (filter
-        (fn [question-set]
-          (some
-           (fn [question]
-             (let [[assigned unassigned] (answer-counts (:question/id question))]
-               (not= 0 (+ assigned unassigned))))
-           (:question-set/questions question-set))))
-       (mapv (fn [x] (update x :question-set/questions (partial filter (fn [question] (let [question-stats (answer-counts (:question/id question))] (not= 0 (apply + question-stats))))))))
-       ))
-
-(defn correction-queue-overview-get [req post-destination get-all-question-set-fn get-answer-counts-fn]
+(defn correction-queue-overview-get [req post-destination get-answer-counts-fn get-question-sets-uncorrected-free-text-fn]
   (let [user-id (get-in req [:session :user :id])
-        question-sets (get-all-question-set-fn)
-        question-sets-free-text-questions (filter-free-text-questions question-sets)
-        answer-count (get-answer-counts question-sets-free-text-questions user-id get-answer-counts-fn)
-        question-sets-no-finished-sets (filter-questions-where-no-correction-left question-sets-free-text-questions answer-count)]
-    (html-response (overview-view/create-correction-queue-overview-view post-destination question-sets-no-finished-sets answer-count))))
+        question-sets (get-question-sets-uncorrected-free-text-fn user-id)
+        answer-count (get-answer-counts question-sets user-id get-answer-counts-fn)]
+    (html-response (overview-view/create-correction-queue-overview-view post-destination question-sets answer-count))))
 
 (defn correction-queue-unassiged-get [req post-destination get-unassigned-answer-fn get-statistics-fn]
   (let [user-id (get-in req [:session :user :id])

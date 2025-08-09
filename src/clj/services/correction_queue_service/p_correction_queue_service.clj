@@ -33,4 +33,9 @@
 
   (get-number-of-assigned-and-unassigned-answers
     [this user-id question-id]
-    "Returns tupel of two numerical values, the first representing the number of uncorrected answers assigned to this user, the second the number of uncorrected and unassigned answers to this question."))
+    "Returns tupel of two numerical values, the first representing the number of uncorrected answers assigned to this user, the second the number of uncorrected and unassigned answers to this question.")
+  
+  (get-question-sets-for-overview
+   [this user-id]
+   "Returns question sets containing only the free-text questions.
+    Questions that have no uncorrected answers associated to them are filtered out, as are question-sets where there is no question associated after filtering."))

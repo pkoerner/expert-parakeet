@@ -157,10 +157,18 @@
   (get-unassigned-answer-count
     [this question-id]
     "returns the number of answers that are not assigned to anyone belonging to this question")
-  
+
   (get-assigned-answer-count
-   [this user-id question-id]
-   "returns the number of answers that are assigned to the user and belonging to this question that are not corrected yet"))
+    [this user-id question-id]
+    "returns the number of answers that are assigned to the user and belonging to this question that are not corrected yet")
+
+  (get-questions-with-open-free-text-corrections
+    [this user-id]
+    "returns all question sets containing the free-text questions where there is at least one answer left to correct")
+
+  (get-question-set-to-question
+    [this question-id]
+    "returns question-set that question is associated with"))
 
 
 (def id-len 10)
@@ -577,7 +585,7 @@
                  db.schema/answer-pull
                  [:answer/id answer-id])
          (resolve-enums)))
-  
+
 
   (get-unassigned-answer-for-question
     [this question-id]
@@ -607,7 +615,7 @@
       (->> (d/pull db-after db.schema/assignment-pull [:assignment/id id])
            (resolve-enums))))
 
-  
+
   (get-all-assignments
     [this]
     (->> (d/q '[:find (pull ?e pattern)
@@ -618,7 +626,7 @@
          (mapv first)
          (resolve-enums)))
 
-  
+
   (get-all-uncorrected-assignments-for-user-and-question
     [this user-id question-id]
     (->> (d/q '[:find (pull ?e pattern)
@@ -639,57 +647,57 @@
 
 
   (get-answer-count
-   [this question-id]
-   (let [result (->> (d/q '[:find (count ?e)
-                            :in $ pattern ?question-id
-                            :where
-                            [?q :question/id ?question-id]
-                            [?e :answer/question ?q]]
-                          @(.conn this)
-                          db.schema/answer-pull
-                          question-id)
-                     (mapv first)
-                     (resolve-enums))]
-     (if (empty? result) 0 (first result))))
+    [this question-id]
+    (let [result (->> (d/q '[:find (count ?e)
+                             :in $ pattern ?question-id
+                             :where
+                             [?q :question/id ?question-id]
+                             [?e :answer/question ?q]]
+                           @(.conn this)
+                           db.schema/answer-pull
+                           question-id)
+                      (mapv first)
+                      (resolve-enums))]
+      (if (empty? result) 0 (first result))))
 
-  
+
   (get-correction-by-user-count
-   [this user-id question-id]
-   (let [result (->> (d/q '[:find (count ?i)
-                            :in $ pattern ?user-id ?question-id
-                            :where
-                            [?i :correction/id]
-                            [?i :correction/answer ?e]
-                            [?i :correction/corrector ?u]
-                            [?u :user/id ?user-id]
-                            [?q :question/id ?question-id]
-                            [?e :answer/question ?q]]
-                          @(.conn this)
-                          db.schema/correction-pull
-                          user-id
-                          question-id)
-                     (mapv first)
-                     (resolve-enums))]
-     (if (empty? result) 0 (first result))))
+    [this user-id question-id]
+    (let [result (->> (d/q '[:find (count ?i)
+                             :in $ pattern ?user-id ?question-id
+                             :where
+                             [?i :correction/id]
+                             [?i :correction/answer ?e]
+                             [?i :correction/corrector ?u]
+                             [?u :user/id ?user-id]
+                             [?q :question/id ?question-id]
+                             [?e :answer/question ?q]]
+                           @(.conn this)
+                           db.schema/correction-pull
+                           user-id
+                           question-id)
+                      (mapv first)
+                      (resolve-enums))]
+      (if (empty? result) 0 (first result))))
 
-  
+
   (get-correction-count
-   [this question-id]
-   (let [result (->> (d/q '[:find (count ?i)
-                            :in $ pattern ?question-id
-                            :where
-                            [?i :correction/id]
-                            [?i :correction/answer ?e]
-                            [?q :question/id ?question-id]
-                            [?e :answer/question ?q]]
-                          @(.conn this)
-                          db.schema/correction-pull
-                          question-id)
-                     (mapv first)
-                     (resolve-enums))]
-     (if (empty? result) 0 (first result))))
+    [this question-id]
+    (let [result (->> (d/q '[:find (count ?i)
+                             :in $ pattern ?question-id
+                             :where
+                             [?i :correction/id]
+                             [?i :correction/answer ?e]
+                             [?q :question/id ?question-id]
+                             [?e :answer/question ?q]]
+                           @(.conn this)
+                           db.schema/correction-pull
+                           question-id)
+                      (mapv first)
+                      (resolve-enums))]
+      (if (empty? result) 0 (first result))))
 
-  
+
   (get-unassigned-answer-count
     [this question-id]
     (let [result (->> (d/q '[:find (count ?e)
@@ -706,7 +714,7 @@
                       (resolve-enums))]
       (if (empty? result) 0 (first result))))
 
-  
+
   (get-assigned-answer-count
     [this user-id question-id]
     (let [result (->> (d/q '[:find (count ?e)
@@ -724,7 +732,38 @@
                            question-id)
                       (mapv first)
                       (resolve-enums))]
-      (if (empty? result) 0 (first result)))))
+      (if (empty? result) 0 (first result))))
+
+  (get-questions-with-open-free-text-corrections
+   [this user-id]
+   (->>
+    (d/q '[:find (pull ?e pattern)
+           :in $ pattern ?user-id
+           :where
+           [?e :question/id]
+           [?e :question/type :question.type/free-text]
+           [?a :answer/question ?e]
+           (or-join [?a ?e]
+                    (and (not [_ :assignment/answer ?a])
+                         (not [_ :correction/answer ?a]))
+                    (and [?as :assignment/answer ?a]
+                         [?u :user/id ?user-id]
+                         [?as :assignment/corrector ?u]
+                         (not [_ :correction/answer ?a])))]
+         @(.conn this) db.schema/question-pull user-id)
+    (mapv first)
+    (resolve-enums)))
+  
+  (get-question-set-to-question
+    [this question-id]
+    (->> (d/q '[:find (pull ?e [:question-set/id :question-set/name])
+                :in $ pattern ?question-id
+                :where
+                [?q :question/id ?question-id]
+                [?e :question-set/questions ?q]]
+              @(.conn this) db.schema/question-set-slim-pull question-id)
+         (mapv first)
+         (resolve-enums))))
 
 
   ;; use mem db

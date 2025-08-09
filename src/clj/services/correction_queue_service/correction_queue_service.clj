@@ -35,6 +35,18 @@
   [(db/get-assigned-answer-count (.db this) user-id question-id)
   (db/get-unassigned-answer-count (.db this) question-id)])
 
+(defn get-question-sets-for-overview [this user-id]
+  (let [questions (db/get-questions-with-open-free-text-corrections (.db this) user-id)]
+    (->> questions
+         (map (fn [q]
+                [(first (db/get-question-set-to-question (.db this) (:question/id q)))
+                 q]))
+         (remove (comp nil? first))
+         (group-by first)
+         (map (fn [[qs entries]]
+                (assoc qs :question-set/questions (mapv second entries))))
+         (vec))))
+
 (extend CorrectionQueueService
   PCorrectionQueueService
   {:get-unassigned-answer-for-question get-unassigned-answer-for-question
@@ -43,4 +55,5 @@
    :get-all-assignments get-all-assignments
    :get-all-uncorrected-assignments-for-user-and-question get-all-uncorrected-assignments-for-user-and-question
    :get-correction-queue-statistics get-correction-queue-statistics
-   :get-number-of-assigned-and-unassigned-answers get-number-of-assigned-and-unassigned-answers})
+   :get-number-of-assigned-and-unassigned-answers get-number-of-assigned-and-unassigned-answers
+   :get-question-sets-for-overview get-question-sets-for-overview})
