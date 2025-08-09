@@ -577,6 +577,7 @@
                  db.schema/answer-pull
                  [:answer/id answer-id])
          (resolve-enums)))
+  
 
   (get-unassigned-answer-for-question
     [this question-id]
@@ -606,6 +607,7 @@
       (->> (d/pull db-after db.schema/assignment-pull [:assignment/id id])
            (resolve-enums))))
 
+  
   (get-all-assignments
     [this]
     (->> (d/q '[:find (pull ?e pattern)
@@ -616,6 +618,7 @@
          (mapv first)
          (resolve-enums)))
 
+  
   (get-all-uncorrected-assignments-for-user-and-question
     [this user-id question-id]
     (->> (d/q '[:find (pull ?e pattern)
@@ -649,6 +652,7 @@
                      (resolve-enums))]
      (if (empty? result) 0 (first result))))
 
+  
   (get-correction-by-user-count
    [this user-id question-id]
    (let [result (->> (d/q '[:find (count ?i)
@@ -668,6 +672,7 @@
                      (resolve-enums))]
      (if (empty? result) 0 (first result))))
 
+  
   (get-correction-count
    [this question-id]
    (let [result (->> (d/q '[:find (count ?i)
@@ -684,6 +689,7 @@
                      (resolve-enums))]
      (if (empty? result) 0 (first result))))
 
+  
   (get-unassigned-answer-count
     [this question-id]
     (let [result (->> (d/q '[:find (count ?e)
@@ -700,6 +706,7 @@
                       (resolve-enums))]
       (if (empty? result) 0 (first result))))
 
+  
   (get-assigned-answer-count
     [this user-id question-id]
     (let [result (->> (d/q '[:find (count ?e)

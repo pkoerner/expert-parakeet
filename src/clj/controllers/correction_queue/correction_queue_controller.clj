@@ -7,10 +7,10 @@
    [ring.util.response :refer [redirect]]))
 
 ; TODO: Filtering should happen in db query
-(defn filter-free-text-questions [question-sets]
+(defn- filter-free-text-questions [question-sets]
   (mapv (fn [x] (update x :question-set/questions (partial filter #(= :question.type/free-text (:question/type %))))) question-sets))
 
-(defn get-answer-counts [question-sets user-id get-answer-counts-fn]
+(defn- get-answer-counts [question-sets user-id get-answer-counts-fn]
   (into {}
         (mapcat (fn [question-set]
                   (let [question-ids (map :question/id (:question-set/questions question-set))]
@@ -18,7 +18,7 @@
                          question-ids)))
                 question-sets)))
 
-(defn filter-questions-where-no-correction-left [question-sets answer-counts]
+(defn- filter-questions-where-no-correction-left [question-sets answer-counts]
   (->> question-sets
        (filter
         (fn [question-set]
