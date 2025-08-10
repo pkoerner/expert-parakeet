@@ -15,10 +15,6 @@
     [self user-id answer-id]
     "Adds an assignment of the user to the question into the database.")
 
-  (get-correction-statistics
-    [self question-id]
-    "Returns 3-tuple with stats.")
-
   (get-all-assignments
     [self]
     "Returns all assignments currently in database.")

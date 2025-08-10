@@ -1,8 +1,7 @@
 (ns services.correction-queue-service.correction-queue-service
   (:require
    [db]
-   [services.correction-queue-service.p-correction-queue-service :refer [PCorrectionQueueService]]
-   [views.question.question-view :as question-view]))
+   [services.correction-queue-service.p-correction-queue-service :refer [PCorrectionQueueService]]))
 
 
 (deftype CorrectionQueueService
