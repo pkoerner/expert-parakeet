@@ -2,7 +2,11 @@
   (:require
    [clojure.string :as string]
    [clojure.test :as t :refer [deftest testing]]
-   [controllers.correction-queue.correction-queue-controller :refer [correction-queue-overview-get correction-queue-unassiged-get correction-queue-assignments-get]]))
+   [services.correction-queue-service.p-correction-queue-service :refer [PCorrectionQueueService, assign-answer-to-user]]
+   [controllers.correction-queue.correction-queue-controller :refer [correction-queue-overview-get 
+                                                                     correction-queue-unassiged-get 
+                                                                     correction-queue-assignments-get
+                                                                     submit-unassigned-correction-queue!]]))
 
 (defn- request
   [tab page _user-id]
@@ -133,3 +137,34 @@
         (t/is (string/includes? res "I like transients"))
         (t/is (string/includes? res "I dont like transients"))
         (t/is (string/includes? res "form"))))))
+
+(deftest test-unassigned-next-post
+  (let [mock-request {:params {:__anti-forgery-token ""
+                               :question-id "1"
+                               :answer-id "1"
+                               :action "next"
+                               :feedback ""
+                               :points "1"}
+                      :session {:user {:id "1"}}}
+        was-called (atom {:assign-answer-to-user false
+                          :add-correction false})
+        add-correction-fn (fn [_ _] 
+                            (swap! was-called (fn [m] (update m :add-correction (fn [_] true))))
+                            nil)
+        correction-queue-service (reify PCorrectionQueueService
+                                   (assign-answer-to-user
+                                     [_self user-id answer-id]
+                                     (swap! was-called (fn [m] (update m :assign-answer-to-user (fn [_] true))))
+                                     (t/is (= user-id "1"))
+                                     (t/is (= answer-id "1"))
+                                     nil)
+                                   )]
+    (testing "Unassigned correction queue post 'next' calls add-assignment-fn with correct parameters and does not call add-correction"
+      (submit-unassigned-correction-queue! mock-request "/correction-queue/unassigned"
+                                           (partial assign-answer-to-user correction-queue-service)
+                                           add-correction-fn)
+      (let [temp @was-called
+            add-correction-was-called (temp :add-correction)
+            assign-answer-to-user-was-called (temp :assign-answer-to-user)]
+      (t/is (not add-correction-was-called))
+      (t/is assign-answer-to-user-was-called)))))
