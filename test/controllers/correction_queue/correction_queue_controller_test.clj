@@ -12,7 +12,7 @@
   [tab page _user-id]
   {:params {:tab tab :page page} :session {:user {:id "0"}}})
 
-(def ^{:private true} question-sets
+(def ^{:private true} question-sets-1
   [{:question-set/id "1",
     :question-set/name "Test 01: Generative Testing",
     :question-set/questions [{:question/id "1",
@@ -20,13 +20,37 @@
                               :question/max-points 3,
                               :question/evaluation-criteria "The following aspects are explained: performance improvement, mutable variant of persistent data structures, must be made persistent before function return",
                               :question/categories [],
-                              :question/type :question.type/free-text}
+                              :question/type :question.type/free-text,
+                              :n-assigned 1
+                              :n-unassigned 2}
                              {:question/id "2",
                               :question/statement "What are some advantages and disadvantages of example-based and generative testing?",
                               :question/max-points 2,
                               :question/evaluation-criteria "The following aspects are explained: Oracle, performance, test-coverage",
                               :question/categories [],
-                              :question/type :question.type/free-text}]}])
+                              :question/type :question.type/free-text
+                              :n-assigned 0
+                              :n-unassigned 1}]}])
+
+(def ^{:private true} question-sets-2
+  [{:question-set/id "1",
+    :question-set/name "Test 01: Generative Testing",
+    :question-set/questions [{:question/id "1",
+                              :question/statement "Describe a use case for transient data structures",
+                              :question/max-points 3,
+                              :question/evaluation-criteria "The following aspects are explained: performance improvement, mutable variant of persistent data structures, must be made persistent before function return",
+                              :question/categories [],
+                              :question/type :question.type/free-text,
+                              :n-assigned 0
+                              :n-unassigned 2}
+                             {:question/id "2",
+                              :question/statement "What are some advantages and disadvantages of example-based and generative testing?",
+                              :question/max-points 2,
+                              :question/evaluation-criteria "The following aspects are explained: Oracle, performance, test-coverage",
+                              :question/categories [],
+                              :question/type :question.type/free-text
+                              :n-assigned 0
+                              :n-unassigned 1}]}])
 
 (def ^{:private true}
   answer
@@ -71,25 +95,21 @@
 
 (deftest test-correction-queue-overview-get-1
   (let [mock-request (request 0 1 1)
-        get-question-sets-uncorrected-free-text-fn (fn [_user-id] [])
-        get-number-of-assigned-and-unassigned-answers-fn (fn [_user-id _question-id] [])]
+        get-question-sets-uncorrected-free-text-fn (fn [_user-id] [])]
     (testing "correction-queue-overview-get response has status OK"
       (let [post-destination "post-destination"
             res (correction-queue-overview-get mock-request
                                                post-destination
-                                               get-number-of-assigned-and-unassigned-answers-fn
                                                get-question-sets-uncorrected-free-text-fn)]
         (t/is (string/includes? res ":status 200"))))))
 
 (deftest test-correction-queue-overview-get-2
   (let [mock-request (request 0 1 1)
-        get-question-sets-uncorrected-free-text-fn (fn [_user-id] question-sets)
-        get-number-of-assigned-and-unassigned-answers-fn (fn [_user-id _question-id] [1 1])]
+        get-question-sets-uncorrected-free-text-fn (fn [_user-id] question-sets-1)]
     (testing "correction-queue-overview-get response contains all free-text questions when there are still answers left to correct"
       (let [post-destination "post-destination"
             res (correction-queue-overview-get mock-request
                                                post-destination
-                                               get-number-of-assigned-and-unassigned-answers-fn
                                                get-question-sets-uncorrected-free-text-fn)]
         (t/is (string/includes? res ":status 200"))
 
@@ -99,16 +119,25 @@
 
 (deftest test-correction-queue-overview-get-3
   (let [mock-request (request 0 1 1)
-        get-question-sets-uncorrected-free-text-fn (fn [_user-id] [])
-        get-number-of-assigned-and-unassigned-answers-fn (fn [_user-id _question-id] [1 1])]
+        get-question-sets-uncorrected-free-text-fn (fn [_user-id] [])]
     (testing "correction-queue-overview-get response does not contain any questions if there are no uncorrected questions left"
       (let [post-destination "post-destination"
             res (correction-queue-overview-get mock-request
                                                post-destination
-                                               get-number-of-assigned-and-unassigned-answers-fn
                                                get-question-sets-uncorrected-free-text-fn)]
         (t/is (string/includes? res ":status 200"))
         (t/is (not (string/includes? res "Question Statement")))))))
+
+(deftest test-correction-queue-overview-get-4
+  (let [mock-request (request 0 1 1)
+        get-question-sets-uncorrected-free-text-fn (fn [_user-id] question-sets-2)]
+    (testing "correction-queue-overview-get response does not contain the Option to open assignments queue if there are no open assignments"
+      (let [post-destination "post-destination"
+            res (correction-queue-overview-get mock-request
+                                               post-destination
+                                               get-question-sets-uncorrected-free-text-fn)]
+        (t/is (string/includes? res ":status 200"))
+        (t/is (not (string/includes? res "My Assignments")))))))
 
 (deftest test-correction-queue-unassigned-get
   (let [mock-request (request 0 1 1)

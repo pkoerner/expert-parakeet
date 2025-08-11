@@ -36,12 +36,11 @@
     [services.course-service.p-course-service :refer [get-all-courses]]
     [services.question-service.p-question-service :refer [get-question-categories]]
     [services.question-service.question-service :refer [->QuestionService]]
-    [services.question-set-service.p-question-set-service :refer [get-all-question-sets get-all-question-sets-with-questions]]
+    [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
     [services.question-set-service.question-set-service :refer [->QuestionSetService]]
     [services.user-service.user-service :refer [->UserService]]
     [services.correction-queue-service.correction-queue-service :refer [->CorrectionQueueService]]
-    [services.correction-queue-service.p-correction-queue-service :refer [get-question-sets-for-overview
-                                                                          get-number-of-assigned-and-unassigned-answers 
+    [services.correction-queue-service.p-correction-queue-service :refer [get-question-sets-for-overview-statistics
                                                                           get-correction-queue-statistics 
                                                                           get-unassigned-answer-for-question 
                                                                           get-all-uncorrected-assignments-for-user-and-question 
@@ -126,8 +125,7 @@
 
   (GET "/correction-queue" req 
     (correction-queue-overview-get req "/correction-queue" 
-                                   (partial get-number-of-assigned-and-unassigned-answers (:correction-queue-service services))
-                                   (partial get-question-sets-for-overview (:correction-queue-service services))))
+                                   (partial get-question-sets-for-overview-statistics (:correction-queue-service services))))
 
   (GET "/correction-queue/unassigned/:question-id" req 
     (correction-queue-unassiged-get req "/correction-queue/unassigned" 

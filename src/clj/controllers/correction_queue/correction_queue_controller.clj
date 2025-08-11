@@ -7,19 +7,10 @@
    [ring.util.response :refer [redirect]]))
 
 
-(defn- get-answer-counts [question-sets user-id get-answer-counts-fn]
-  (into {}
-        (mapcat (fn [question-set]
-                  (let [question-ids (map :question/id (:question-set/questions question-set))]
-                    (map (fn [question-id] [question-id (get-answer-counts-fn user-id question-id)])
-                         question-ids)))
-                question-sets)))
-
-(defn correction-queue-overview-get [req post-destination get-answer-counts-fn get-question-sets-uncorrected-free-text-fn]
+(defn correction-queue-overview-get [req post-destination new-fn]
   (let [user-id (get-in req [:session :user :id])
-        question-sets (get-question-sets-uncorrected-free-text-fn user-id)
-        answer-count (get-answer-counts question-sets user-id get-answer-counts-fn)]
-    (html-response (overview-view/create-correction-queue-overview-view post-destination question-sets answer-count))))
+        question-sets (new-fn user-id)]
+    (html-response (overview-view/create-correction-queue-overview-view post-destination question-sets))))
 
 (defn correction-queue-unassiged-get [req post-destination get-unassigned-answer-fn get-statistics-fn]
   (let [user-id (get-in req [:session :user :id])

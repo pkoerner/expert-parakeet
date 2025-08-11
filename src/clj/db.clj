@@ -736,23 +736,22 @@
 
   (get-questions-with-open-free-text-corrections
    [this user-id]
-   (->>
-    (d/q '[:find (pull ?e pattern)
-           :in $ pattern ?user-id
-           :where
-           [?e :question/id]
-           [?e :question/type :question.type/free-text]
-           [?a :answer/question ?e]
-           (or-join [?a ?e]
-                    (and (not [_ :assignment/answer ?a])
-                         (not [_ :correction/answer ?a]))
-                    (and [?as :assignment/answer ?a]
-                         [?u :user/id ?user-id]
-                         [?as :assignment/corrector ?u]
-                         (not [_ :correction/answer ?a])))]
-         @(.conn this) db.schema/question-pull user-id)
-    (mapv first)
-    (resolve-enums)))
+   (->> (d/q '[:find (pull ?e pattern)
+               :in $ pattern ?user-id
+               :where
+               [?e :question/id]
+               [?e :question/type :question.type/free-text]
+               [?a :answer/question ?e]
+               (or-join [?a ?e]
+                        (and (not [_ :assignment/answer ?a])
+                             (not [_ :correction/answer ?a]))
+                        (and [?as :assignment/answer ?a]
+                             [?u :user/id ?user-id]
+                             [?as :assignment/corrector ?u]
+                             (not [_ :correction/answer ?a])))]
+             @(.conn this) db.schema/question-pull user-id)
+        (mapv first)
+        (resolve-enums)))
   
   (get-question-set-to-question
     [this question-id]
