@@ -1,22 +1,26 @@
-(ns view.xss-test 
+(ns view.xss-test
   (:require
-   [clojure.string :as string]
-   [clojure.test :as t :refer [deftest testing]]
-   [views.answer.answer-view :as av]
-   [views.course-iteration.create-course-iteration-view :as cciv :refer [course-iteration-form]]
-   [views.course.create-course-view :as ccv :refer [create-course-form]]
-   [views.question.create-question-view :refer [create-question-form
-                                                question-success-view]]
-   [views.question.question-view :refer [question-form]]))
+    [clojure.string :as string]
+    [clojure.test :as t :refer [deftest testing]]
+    [views.answer.answer-view :as av]
+    [views.course-iteration.create-course-iteration-view :as cciv :refer [course-iteration-form]]
+    [views.course.create-course-view :as ccv :refer [create-course-form]]
+    [views.question.create-question-view :refer [create-question-form
+                                                 question-success-view]]
+    [views.question.question-view :refer [question-form]]))
+
 
 (def xss-data "<script>alert('XSS')</script>")
 
-(def xss-question {:question/type :question.type/free-text
-               :question/statement xss-data 
-               :question/max-points 10
-               :question/categories [xss-data]})
 
-; TODO: This should be rewritten/continued after Issue #206 was solved
+(def xss-question
+  {:question/type :question.type/free-text
+   :question/statement xss-data
+   :question/max-points 10
+   :question/categories [xss-data]})
+
+
+;; TODO: This should be rewritten/continued after Issue #206 was solved
 (deftest test-xss
   (testing "Strings containing html-code should be escaped to prevent XSS."
     (t/are [html-output] (not (string/includes? html-output xss-data))
