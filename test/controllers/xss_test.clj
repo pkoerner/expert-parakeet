@@ -3,6 +3,8 @@
    [clojure.string :as string]
    [clojure.test :as t :refer [deftest testing]]
    [controllers.answer.answer-controller :refer [submit-user-answer!]]
+   [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get
+                                                                     submit-create-course-iteration!]]
    [controllers.course.course-controller :refer [create-course-get
                                                  submit-create-course!]]
    [controllers.question-set.question-set-controller :refer [question-set-get]]
@@ -13,7 +15,8 @@
    [datahike.api :as d]
    [db.dummy-data :refer [question-set-fp]]
    [db.schema :refer [db-schema]]
-   [db.xss-dummy-data :as xss-dummy-data :refer [q-text user1-student
+   [db.xss-dummy-data :as xss-dummy-data :refer [course-it-fp q-text
+                                                 user1-student
                                                  user2-not-in-course
                                                  xss-payload]]
    [services.answer-service.answer-service :refer [->AnswerService]]
@@ -21,8 +24,10 @@
    [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
    [services.course-iteration-service.p-course-iteration-service :refer [get-all-course-iterations-for-user]]
    [services.course-service.course-service :refer [->CourseService]]
+   [services.course-service.p-course-service :refer [get-all-courses]]
    [services.question-service.p-question-service :refer [get-question-categories]]
    [services.question-service.question-service :refer [->QuestionService]]
+   [services.question-set-service.p-question-set-service :refer [get-all-question-sets]]
    [services.question-set-service.question-set-service :refer [->QuestionSetService]]
    [services.user-service.user-service :refer [->UserService]]))
 
@@ -107,3 +112,26 @@
       (t/are [html-output] (not (string/includes? html-output xss-payload))
         (create-course-get req post-destination)
         (submit-create-course! req-submit post-destination (services :course-service))))))
+
+(deftest test-create-course-iteration
+  (testing "Create course iteration html-code should be escaped to prevent XSS."
+    (let [no-courses-fun (fn [] [])
+          no-q-sets-fun (fn [] [])
+          req-submit-error {}
+          req-submit-succes {:params {:course (:course/id (course-it-fp :course-iteration/course))
+                                      :year (course-it-fp :course-iteration/year )
+                                      :semester (course-it-fp :course-iteration/semester)
+                                      :question-sets (course-it-fp :course-iteration/question-sets)}}]
+      (t/are [html-output] (not (string/includes? html-output xss-payload))
+        (create-course-iteration-get req post-destination
+                                     (partial get-all-courses (:course-service services))
+                                     (partial get-all-question-sets (:question-set-service services)))
+        (create-course-iteration-get req post-destination no-courses-fun no-q-sets-fun) ; view/no-courses
+        (submit-create-course-iteration! req-submit-error post-destination
+                                         (partial get-all-courses (:course-service services))
+                                         (partial get-all-question-sets (:question-set-service services))
+                                         (:course-iteration-service services))
+        (submit-create-course-iteration! req-submit-succes post-destination
+                                         (partial get-all-courses (:course-service services))
+                                         (partial get-all-question-sets (:question-set-service services))
+                                         (:course-iteration-service services))))))
