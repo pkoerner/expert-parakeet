@@ -3,6 +3,7 @@
    [clojure.string :as string]
    [clojure.test :as t :refer [deftest testing]]
    [controllers.answer.answer-controller :refer [submit-user-answer!]]
+   [controllers.correction.correction-controller :refer [correction-overview-get]]
    [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get
                                                                      submit-create-course-iteration!]]
    [controllers.course.course-controller :refer [create-course-get
@@ -135,3 +136,9 @@
                                          (partial get-all-courses (:course-service services))
                                          (partial get-all-question-sets (:question-set-service services))
                                          (:course-iteration-service services))))))
+
+(deftest test-correction-overview
+  (testing "Correction overview html-code should be escaped to prevent XSS."
+    (let [req {:session {:user {:id (user2-not-in-course :user/id)}}}]
+      (t/are [html-output] (not (string/includes? html-output xss-payload))
+        (correction-overview-get req (services :correction-service))))))
