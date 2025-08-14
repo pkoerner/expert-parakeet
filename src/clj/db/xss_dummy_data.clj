@@ -10,6 +10,7 @@
 
 (def id-counter (atom {}))
 
+
 (defn- gen-id!
   [key]
   (str (get (swap! id-counter update key #(if (nil? %)
@@ -99,10 +100,12 @@
    :correction/feedback feedpack
    :correction/points points})
 
+
 (def q-text
   (text-question xss-payload
                  3 [xss-payload]
                  xss-payload))
+
 
 (def q-choice
   (choice-question xss-payload
@@ -113,6 +116,7 @@
 (def questions-xss
   `[~q-text
     ~@q-choice])
+
 
 (def questions
   (vec (concat questions-xss)))
@@ -133,6 +137,7 @@
    :course/name xss-payload
    :course/questions (db-refs :question/id questions-xss)
    :course/question-sets (db-refs :question-set/id [question-set-fp])})
+
 
 (def courses
   [course-fp])
@@ -172,6 +177,7 @@
    :course-iteration/members (db-refs :membership/id course-it-fp-members)
    :course-iteration/question-sets (course-fp :course/question-sets)})
 
+
 (def course-iterations
   [course-it-fp])
 
@@ -187,27 +193,30 @@
 (def answers
   [;; fp: testing
    a1
-   a2
-   ])
+   a2])
+
 
 (def a1-corr
   (correction user3-corrector a1 1 xss-payload))
 
+
 (def a2-corr
   (correction user3-corrector a2 1 xss-payload))
+
 
 (def corrections
   [;; for user1, testing question set
    a1-corr
    a2-corr])
 
+
 (def xss-data
   (vec (concat
-        users
-        memberships
-        questions
-        question-sets
-        courses
-        course-iterations
-        answers
-        corrections)))
+         users
+         memberships
+         questions
+         question-sets
+         courses
+         course-iterations
+         answers
+         corrections)))
