@@ -101,3 +101,15 @@
                :route-params {:id (q-text :question/id)}}]
       (t/are [html-output] (not (string/includes? html-output xss-payload))
         (submit-user-answer! req (:answer-service services))))))
+
+(deftest test-create-question
+  (testing "Create question html-code should be escaped to prevent XSS."
+    (let [req-submit {:params {:question-data {:id (:question/id q-text)
+                                               :type (:question/type q-text)
+                                               :statement (:question/statement q-text)
+                                               :evaluation-criteria (:question/evaluation-criteria q-text)
+                                               :max-points (:question/max-points q-text)
+                                               :categories (:question/categories q-text)}}}]
+      (t/are [html-output] (not (string/includes? html-output xss-payload))
+        (create-question-get req get-question-categories-fun post-destination)
+        (submit-create-question! req-submit post-destination (:question-service services))))))
