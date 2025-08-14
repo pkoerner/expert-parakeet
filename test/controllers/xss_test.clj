@@ -51,24 +51,11 @@
    :correction-service (->CorrectionService test-db)})
 
 ; Parameters used in Tests
-(def req {:params {:name xss-payload}})
+(def req {})
 (def get-question-categories-fun (partial get-question-categories (:question-service services)))
 (def post-destination "https://some.url")
 
 ; Tests
-(deftest test-create-course
-  (testing "Create course html-code should be escaped to prevent XSS."
-    (t/are [html-output] (not (string/includes? html-output xss-payload))
-      (create-course-get req post-destination)
-      (submit-create-course! req post-destination (services :course-service)))))
-
-(deftest test-create-question
-    (testing "Create question html-code should be escaped to prevent XSS."
-      (t/are [html-output] (not (string/includes? html-output xss-payload))
-        (create-question-get req get-question-categories-fun post-destination)
-        (submit-create-question! req post-destination (:question-service services)))))
-
-
 (deftest test-user-overview
   (testing "User overview html-code should be escaped to prevent XSS." 
     (t/are [html-output] (not (string/includes? html-output xss-payload))
@@ -113,3 +100,10 @@
       (t/are [html-output] (not (string/includes? html-output xss-payload))
         (create-question-get req get-question-categories-fun post-destination)
         (submit-create-question! req-submit post-destination (:question-service services))))))
+
+(deftest test-create-course
+  (testing "Create course html-code should be escaped to prevent XSS."
+    (let [req-submit {:params {:course-data {:name xss-payload}}}]
+      (t/are [html-output] (not (string/includes? html-output xss-payload))
+        (create-course-get req post-destination)
+        (submit-create-course! req-submit post-destination (services :course-service))))))
