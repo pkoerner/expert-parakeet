@@ -41,17 +41,12 @@
 
 
 (defn- mock-db
-  [& {:keys [get-all-courses add-course!]
-      :or {get-all-courses (fn [& _] {})
-           add-course! (fn [& _] {})}}]
+  [& {:keys [get-all-courses]
+      :or {get-all-courses (fn [& _] {})}}]
   (reify Database-Protocol
     (get-all-courses
       [_self]
-      (get-all-courses))
-
-    (add-course!
-      [_self course]
-      (add-course! course))))
+      (get-all-courses))))
 
 
 (deftest test-submit-create-course!
