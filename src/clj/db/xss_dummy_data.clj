@@ -190,11 +190,16 @@
    a2
    ])
 
+(def a1-corr
+  (correction user3-corrector a1 1 xss-payload))
+
+(def a2-corr
+  (correction user3-corrector a2 1 xss-payload))
 
 (def corrections
   [;; for user1, testing question set
-   (correction user3-corrector a1 1 xss-payload)
-   (correction user3-corrector a2 1 xss-payload)])
+   a1-corr
+   a2-corr])
 
 (def xss-data
   (vec (concat
