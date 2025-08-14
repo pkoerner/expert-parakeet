@@ -4,6 +4,8 @@
    [clojure.test :as t :refer [deftest testing]]
    [controllers.answer.answer-controller :refer [submit-user-answer!]]
    [controllers.correction.correction-controller :refer [correction-overview-get]]
+   [controllers.correction.new-correction-controller :refer [new-correction-get
+                                                             submit-new-correction!]]
    [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get
                                                                      submit-create-course-iteration!]]
    [controllers.course.course-controller :refer [create-course-get
@@ -16,10 +18,10 @@
    [datahike.api :as d]
    [db.dummy-data :refer [question-set-fp]]
    [db.schema :refer [db-schema]]
-   [db.xss-dummy-data :as xss-dummy-data :refer [course-it-fp q-text
-                                                 user1-student
+   [db.xss-dummy-data :as xss-dummy-data :refer [a1 a1-corr course-it-fp
+                                                 q-text user1-student
                                                  user2-not-in-course
-                                                 xss-payload]]
+                                                 user3-corrector xss-payload]]
    [services.answer-service.answer-service :refer [->AnswerService]]
    [services.correction-service.correction-service :refer [->CorrectionService]]
    [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
@@ -142,3 +144,16 @@
     (let [req {:session {:user {:id (user2-not-in-course :user/id)}}}]
       (t/are [html-output] (not (string/includes? html-output xss-payload))
         (correction-overview-get req (services :correction-service))))))
+
+(deftest test-new-correction
+  (testing "New-correction html-code should be escaped to prevent XSS."
+    (let [req-get {:query-params {"answer-id" (a1 :answer/id )}}
+          req-submit {:multipart-params {"answer-id" (a1 :answer/id)
+                                         "points" (str (a1-corr :correction/points))
+                                         "feedback" (a1-corr :correction/feedback)}
+                      :session {:user {:id (user3-corrector :user/id)}}
+                      :headers {:origin ""}}
+          add-correction-fn (fn [& args])]
+      (t/are [html-output] (not (string/includes? html-output xss-payload))
+        (new-correction-get req-get post-destination (partial db/get-answer-by-id test-db) (partial db/get-question-by-id test-db))
+        (submit-new-correction! req-submit post-destination add-correction-fn (partial db/get-user-by-id test-db))))))
