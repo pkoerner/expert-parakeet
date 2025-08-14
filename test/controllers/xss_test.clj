@@ -93,3 +93,11 @@
     (t/are [html-output] (not (string/includes? html-output xss-payload))
       (question-get req-member post-destination (:question-service services))
       (question-get req-not-member post-destination (:question-service services))))))
+
+(deftest test-answer
+  (testing "Answer html-code should be escaped to prevent XSS."
+    (let [req {:params {:free-text xss-payload}
+               :session {:user {:id (user1-student :user/id)}}
+               :route-params {:id (q-text :question/id)}}]
+      (t/are [html-output] (not (string/includes? html-output xss-payload))
+        (submit-user-answer! req (:answer-service services))))))
