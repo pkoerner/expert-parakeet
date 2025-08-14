@@ -16,6 +16,7 @@
                                                       submit-create-question!]]
     [controllers.user.user-overview-controller :refer [create-user-overview-get]]
     [datahike.api :as d]
+    [db]
     [db.dummy-data :refer [question-set-fp]]
     [db.schema :refer [db-schema]]
     [db.xss-dummy-data :as xss-dummy-data :refer [a1 a1-corr course-it-fp
@@ -165,7 +166,7 @@
                                          "feedback" (a1-corr :correction/feedback)}
                       :session {:user {:id (user3-corrector :user/id)}}
                       :headers {:origin ""}}
-          add-correction-fn (fn [& args])]
+          add-correction-fn (fn [_ _])]
       (t/are [html-output] (not (string/includes? html-output xss-payload))
         (new-correction-get req-get post-destination (partial db/get-answer-by-id test-db) (partial db/get-question-by-id test-db))
         (submit-new-correction! req-submit post-destination add-correction-fn (partial db/get-user-by-id test-db))))))
