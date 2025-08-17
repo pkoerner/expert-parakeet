@@ -188,39 +188,41 @@
             const categoryInput = document.getElementById('new-category');
             const categoryContainer = document.getElementById('category-container');
 
-            if (mainForm && categoryInput && categoryContainer) {
-              mainForm.addEventListener('submit', function(e) {
-                const categoryValue = categoryInput.value.trim();
-                if (categoryValue) {
-                  e.preventDefault();
+            mainForm.addEventListener('submit', function(e) {
+              const categoryValue = categoryInput.value.trim();
+              if (categoryValue) {
+                e.preventDefault();
 
-                  // Create elements safely
-                  const div = document.createElement('div');
-                  div.className = 'form-check';
+                // Create new category
+                const newId = 'category-' + Date.now();
+                const div = document.createElement('div');
+                div.className = 'form-check';
 
-                  const checkbox = document.createElement('input');
-                  checkbox.type = 'checkbox';
-                  checkbox.className = 'form-check-input';
-                  checkbox.name = 'categories';
-                  checkbox.value = categoryValue;
-                  checkbox.id = 'category-' + Date.now();
-                  checkbox.checked = true;
+                // Create new checkbox
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'form-check-input';
+                checkbox.name = 'categories';
+                checkbox.value = categoryValue;
+                checkbox.id = newId;
+                checkbox.checked = true;
 
-                  const label = document.createElement('label');
-                  label.className = 'form-check-label';
-                  label.htmlFor = checkbox.id;
-                  label.textContent = categoryValue;
+                // Create new label
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = newId;
+                label.textContent = categoryValue;
 
-                  div.appendChild(checkbox);
-                  div.appendChild(label);
-                  categoryContainer.appendChild(div);
+                // Append elements
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                categoryContainer.appendChild(div);
 
-                  // Clear and submit
-                  categoryInput.value = '';
-                  mainForm.submit();
-                }
-              });
-            }
+                // Clear input and execute submit
+                categoryInput.value = '';
+                mainForm.submit();
+              }
+            });
           });
           ")
          (hform/submit-button {:class "btn btn-primary" :id "main-submit-btn"} "Submit"))])))
