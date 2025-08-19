@@ -341,7 +341,7 @@
                                   :question/max-points (:question/max-points question)
                                   :question/statement (:question/statement question)
                                   :question/categories (:question/categories question)
-                                  :question/course [:course/id course-id]}  ; NEU
+                                  :question/course [:course/id course-id]}
                            (case type
                              :question.type/free-text
                              [:question/evaluation-criteria (:question/evaluation-criteria question)]

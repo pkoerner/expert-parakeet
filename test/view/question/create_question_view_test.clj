@@ -61,7 +61,8 @@
     (let [categories ["Cat1" "Cat2"]
           post-destination "https://some.url"
           possible-solutions ["Solution1" "Solution2" "More solutions"]
-          basic-input {:statement "Valid question statement."
+          basic-input {;; :question/id "q-2"
+                       :statement "Valid question statement."
                        :categories [(first categories)]
                        :max-points "5"
                        :evaluation-criteria "Some evaluation criteria"
