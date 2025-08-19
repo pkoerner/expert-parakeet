@@ -15,7 +15,7 @@
 
   (testing "Test that checkboxes are shown in the view, when the question is a multiple-choice question."
     (let [question {:question/id "q-2"
-                    ;; :question/course "Functional Programming: Clojure"
+                    :question/course "Test-Course"
                     :question/type :question.type/multiple-choice
                     :question/statement "Why 42?"
                     :question/possible-solutions [{:solution/id "1" :solution/statement "A"}
@@ -26,7 +26,7 @@
 
   (testing "Test that radio-buttons are shown in the view, when the question is a single-choice question."
     (let [question {:question/id "q-3"
-                    ;; :question/course "Functional Programming: Clojure"
+                    :question/course "Test-Course"
                     :question/type :question.type/single-choice
                     :question/statement "Why 42?"
                     :question/possible-solutions [{:solution/id "1" :solution/statement "A"}

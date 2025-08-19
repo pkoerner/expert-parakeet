@@ -30,11 +30,19 @@
 ;;                     :get-question-categories-fun (s/get-spec `q-ser/get-question-categories)
 ;;                     :post-destination string?))
 
+
 (s/fdef create-question-get
-        :args (s/cat :req coll?
-                     :get-question-categories-fun (s/get-spec `q-ser/get-question-categories)
+        :args (s/cat :req map?
+                     :get-question-categories-fun ifn?
                      :get-courses-fun ifn?
                      :post-destination string?))
+
+
+;; (s/fdef create-question-get
+;;        :args (s/cat :req coll?
+;;                     :get-question-categories-fun (s/get-spec `q-ser/get-question-categories)
+;;                     :get-courses-fun ifn?
+;;                     :post-destination string?))
 
 
 (defn create-question-get
