@@ -13,7 +13,7 @@
 (deftest test-create-question-get
   (let [empty-request {}
         get-categories-fun (fn [] [])
-        get-courses-fun (fn [])]
+        get-courses-fun (fn [] [])]
     (testing "Returns a form object on normal invocation."
       (let [post-destination "post-destination"
             res (create-question-get empty-request
@@ -29,7 +29,17 @@
                                      (fn [] categories)
                                      get-courses-fun
                                      "post-destination")]
-        (t/is (every? #(string/includes? res %) categories))))))
+        (t/is (every? #(string/includes? res %) categories))))
+
+
+    (testing "All courses are displayed."
+      (let [courses [{:course/id "c1" :course/name "Math"}
+                     {:course/id "c2" :course/name "Physics"}]
+            res (create-question-get empty-request
+                                     get-categories-fun
+                                     (fn [] courses)
+                                     "post-destination")]
+        (t/is (every? #(string/includes? res (:course/name %)) courses))))))
 
 
 (defn- stub-question-service

@@ -25,9 +25,15 @@
       (html-response (question-view/no-question-assignment permission-error)))))
 
 
+;; (s/fdef create-question-get
+;;        :args (s/cat :req coll?
+;;                     :get-question-categories-fun (s/get-spec `q-ser/get-question-categories)
+;;                     :post-destination string?))
+
 (s/fdef create-question-get
         :args (s/cat :req coll?
                      :get-question-categories-fun (s/get-spec `q-ser/get-question-categories)
+                     :get-courses-fun ifn?
                      :post-destination string?))
 
 
