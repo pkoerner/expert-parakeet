@@ -115,7 +115,7 @@
                                                :max-points (:question/max-points q-text)
                                                :categories (:question/categories q-text)}}}]
       (t/are [html-output] (not (string/includes? html-output xss-payload))
-        (create-question-get req get-question-categories-fun post-destination)
+        (create-question-get req get-question-categories-fun post-destination (:question-service services))
         (submit-create-question! req-submit post-destination (:question-service services))))))
 
 
