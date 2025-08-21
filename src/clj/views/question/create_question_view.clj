@@ -247,7 +247,7 @@
             });
           });
           ")
-         (hform/submit-button {:class "btn btn-primary" :id "main-submit-btn"} "Submit")
+          (hform/submit-button {:class "btn btn-primary" :id "main-submit-btn"} "Submit")
           [:a.btn.btn-secondary {:href "/questions"} "show questions"]])])))
 
 
