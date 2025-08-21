@@ -195,7 +195,7 @@
                                               :checked (contains? prev-categories cat)}]
                                      [:label {:class "form-check-label" :for id} cat]]))))])
            [:div.input-group
-            (hform/text-field {:class "form-control" :form "new-category-form" :required true :placeholder "Create new category"} "new-category")
+            (hform/text-field {:class "form-control" :form "new-category-form" :required true :placeholder "Create new category" :id "new-category"} "new-category")
             (hform/submit-button {:class "btn btn-outline-secondary" :form "new-category-form"} "+")]]]
 
 
@@ -204,7 +204,50 @@
 
          [:div.d-flex.align-items-center.gap-2.mt-4
           (h/raw (anti-forgery-field))
-          (hform/submit-button {:class "btn btn-primary"} "Submit")
+          (script "
+          document.addEventListener('DOMContentLoaded', function() {
+            const mainForm = document.querySelector('form[method=\"post\"]');
+            const categoryInput = document.getElementById('new-category');
+            const categoryContainer = document.getElementById('category-container');
+
+            mainForm.addEventListener('submit', function(e) {
+              const categoryValue = categoryInput.value.trim();
+              if (categoryValue) {
+                e.preventDefault();
+
+                // Create new category
+                const newId = 'category-' + Date.now();
+                const div = document.createElement('div');
+                div.className = 'form-check';
+
+                // Create new checkbox
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'form-check-input';
+                checkbox.name = 'categories';
+                checkbox.value = categoryValue;
+                checkbox.id = newId;
+                checkbox.checked = true;
+
+                // Create new label
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = newId;
+                label.textContent = categoryValue;
+
+                // Append elements
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                categoryContainer.appendChild(div);
+
+                // Clear input and execute submit
+                categoryInput.value = '';
+                mainForm.submit();
+              }
+            });
+          });
+          ")
+         (hform/submit-button {:class "btn btn-primary" :id "main-submit-btn"} "Submit")
           [:a.btn.btn-secondary {:href "/questions"} "show questions"]])])))
 
 
