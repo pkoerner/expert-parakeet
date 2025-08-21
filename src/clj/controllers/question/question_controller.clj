@@ -8,7 +8,7 @@
                                                           validate-question
                                                           get-question-by-id
                                                           validate-user-for-question]]
-    [services.question-service.question-service :as q-ser]
+    ;; [services.question-service.question-service :as q-ser]
     [util.ring-extensions :refer [html-response]]
     [views.question.create-question-view :as creation-view]
     [views.question.question-view :as question-view]))
