@@ -46,7 +46,9 @@
           response (submit-create-user request "/" user-service)]
       (t/is (= 401 (response :status)))))
   (testing "The create-user! function is called with the correct values"
-    (let [request {:session authenticated-session}
+    (let [request {:session authenticated-session
+                   :params {:user-name "satan"
+                            :matriculation-id "666"}}
           redirect-url "/redirect-url"
           user-service (reify PUserService
                          (github-id-in-use?
@@ -54,8 +56,11 @@
                            false)
 
                          (create-user!
-                           [_self github-id]
-                           (t/is (= github-id (-> request :session :user :oauth-github-id)))))
+                           [_self github-id name matriculation-id]
+                           (t/is (and
+                                   (= github-id (-> request :session :user :oauth-github-id))
+                                   (= name (-> request :params :user-name))
+                                   (= matriculation-id (-> request :params :matriculation-id))))))
           response (submit-create-user request redirect-url user-service)]
       (t/is (= 302 (response :status)))
       (t/is (= redirect-url (get-in response [:headers "Location"]))))))
