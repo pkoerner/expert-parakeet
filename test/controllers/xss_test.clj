@@ -108,7 +108,8 @@
 
 (deftest test-create-question
   (testing "Create question html-code should be escaped to prevent XSS."
-    (let [req-submit {:params {:question-data {:id (:question/id q-text)
+    (let [req-submit {:params {:course-id "test-course-id"
+                               :question-data {:id (:question/id q-text)
                                                :type (:question/type q-text)
                                                :statement (:question/statement q-text)
                                                :evaluation-criteria (:question/evaluation-criteria q-text)
@@ -117,6 +118,7 @@
       (t/are [html-output] (not (string/includes? html-output xss-payload))
         (create-question-get req get-question-categories-fun post-destination (:question-service services))
         (submit-create-question! req-submit post-destination (:question-service services))))))
+
 
 
 (deftest test-create-course
