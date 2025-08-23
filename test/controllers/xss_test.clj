@@ -120,7 +120,6 @@
         (submit-create-question! req-submit post-destination (:question-service services))))))
 
 
-
 (deftest test-create-course
   (testing "Create course html-code should be escaped to prevent XSS."
     (let [req-submit {:params {:course-data {:name xss-payload}}}]
