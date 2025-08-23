@@ -15,6 +15,7 @@
 
 (def xss-question
   {:question/type :question.type/free-text
+   :question/course "c1"
    :question/statement xss-data
    :question/max-points 10
    :question/categories [xss-data]})

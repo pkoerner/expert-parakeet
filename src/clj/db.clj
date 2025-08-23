@@ -58,7 +58,7 @@
     [this id])
 
   (add-question!
-    [this question])
+    [this course-id question])
 
   (add-question-set!
     [this question-set-name course-iteration-id required-points questions])
@@ -178,14 +178,14 @@
          (mapv first)
          (resolve-enums))
     #_(d/q '[:find (pull ?a [:answer/points
-                                   {:answer/question [:question/id :question/type]}])
-                   :in $ ?u ?t
-                   :where
-                   [?a :answer/creator ?u]
-                   [?a :answer/question ?f]
-                   [?t :question-set/questions ?f]
-                   [?a :answer/points]]
-                 @(.conn this) [:user/id user-id] [:question-set/id question-set-id]))
+                             {:answer/question [:question/id :question/type]}])
+             :in $ ?u ?t
+             :where
+             [?a :answer/creator ?u]
+             [?a :answer/question ?f]
+             [?t :question-set/questions ?f]
+             [?a :answer/points]]
+           @(.conn this) [:user/id user-id] [:question-set/id question-set-id]))
 
 
   (get-question-ids-for-user
@@ -313,9 +313,17 @@
 
 
   (add-question!
-    [this question]
+    [this course-id question]
     ;; TODO: this needs to take a course as an argument so we can add the question to the owning course
-    (let [possible-solutions (->> (question :question/possible-solutions)
+    (let [course-questions (d/q '[:find (pull ?q [:question/type :question/statement :question/max-points])
+                                  :in $ ?course-ref
+                                  :where [?q :question/course ?course-ref]]
+                                @(.conn this) [:course/id course-id])
+
+          _existing-questions (map #(select-keys (first %) [:question/type :question/statement :question/max-points])
+                                   course-questions)
+
+          possible-solutions (->> (question :question/possible-solutions)
                                   (mapv (fn [sol]
                                           {:solution/id (generate-id @(.conn this) :solution/id)
                                            :solution/statement sol})))
@@ -332,7 +340,8 @@
                                   :question/type type
                                   :question/max-points (:question/max-points question)
                                   :question/statement (:question/statement question)
-                                  :question/categories (:question/categories question)}
+                                  :question/categories (:question/categories question)
+                                  :question/course [:course/id course-id]}
                            (case type
                              :question.type/free-text
                              [:question/evaluation-criteria (:question/evaluation-criteria question)]
@@ -348,11 +357,17 @@
 
   (add-question-set!
     [this question-set-name course-iteration-id required-points questions]
-    (let [id (generate-id @(.conn this) :question-set/id)
+    (let [course-ref (d/pull @(.conn this)
+                             '[:course-iteration/course]
+                             [:course-iteration/id course-iteration-id])
+          course-id (-> course-ref
+                        :course-iteration/course
+                        second)
+          id (generate-id @(.conn this) :question-set/id)
           question-ids (mapv (fn [question]
                                (if (contains? question :question/id)
                                  (:question/id question)
-                                 (:question/id (add-question! this question)))) ; frage war noch nicht in db
+                                 (:question/id (add-question! this course-id question))))
                              questions)
           tx-result (d/transact (.conn this)
                                 [{:question-set/id id
@@ -363,6 +378,18 @@
           db-after (:db-after tx-result)]
       (->> (d/pull db-after db.schema/question-set-no-questions-pull [:question-set/id id])
            (resolve-enums))))
+
+
+  ;; (get-question-ids-for-course
+  ;;  [this course-id]
+  ;;  (->> (d/q '[:find (pull ?q [:question/id])
+  ;;            :in $ ?course-id
+  ;;            :where
+  ;;            [?q :question/course ?c]
+  ;;            [?c :course/id ?course-id]]
+  ;;          @(.conn this) course-id)
+  ;;       (mapv first)
+  ;;       (resolve-enums)))
 
 
   (add-user-answer!

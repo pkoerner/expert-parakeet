@@ -12,11 +12,13 @@
 
 (deftest test-create-question-get
   (let [empty-request {}
-        get-categories-fun (fn [] [])]
+        get-categories-fun (fn [] [])
+        get-courses-fun (fn [] [])]
     (testing "Returns a form object on normal invocation."
       (let [post-destination "post-destination"
             res (create-question-get empty-request
                                      get-categories-fun
+                                     get-courses-fun
                                      post-destination)]
         (t/is (and (string/includes? res "form")
                    (string/includes? res post-destination)))))
@@ -25,8 +27,19 @@
       (let [categories ["Cat1" "Cat2" "Hello World ok!"]
             res (create-question-get empty-request
                                      (fn [] categories)
+                                     get-courses-fun
                                      "post-destination")]
-        (t/is (every? #(string/includes? res %) categories))))))
+        (t/is (every? #(string/includes? res %) categories))))
+
+
+    (testing "All courses are displayed."
+      (let [courses [{:course/id "c1" :course/name "Math"}
+                     {:course/id "c2" :course/name "Physics"}]
+            res (create-question-get empty-request
+                                     get-categories-fun
+                                     (fn [] courses)
+                                     "post-destination")]
+        (t/is (every? #(string/includes? res (:course/name %)) courses))))))
 
 
 (defn- stub-question-service
@@ -37,8 +50,8 @@
 
   (reify PQuestionService
     (create-question!
-      [_self question]
-      (create-question! question))
+      [_self course-id question]
+      (create-question! course-id question))
 
     (get-question-categories
       [_self]
@@ -53,11 +66,12 @@
   (let [db-stub (reify Database-Protocol)]
     (testing "Test that the db-add-function gets called with valid parameters."
       (let [test-request {:__anti-forgery-token ""
-                          :params {}}
+                          :params {:course-id "test-course-id"}}
             question-service (->QuestionService db-stub)
             basic-valid-input {:statement "Valid question statement"
                                :categories ["Valid Category"]
-                               :max-points "5"}
+                               :max-points "5"
+                               :course-id "test-course-id"}
             post-destination "S"
             free-text-question (merge basic-valid-input {:type "free-text"
                                                          :evaluation-criteria "Valid evaluation criteria"})
@@ -69,7 +83,7 @@
                                                                :correct-multiple-choice-solutions ["Solution1" "Solution2"]})]
         (t/are [question-form-data]
                (let [was-called (atom false)
-                     db-add-fun-stub (fn [question]
+                     db-add-fun-stub (fn [_course-id question]
                                        (reset! was-called true)
                                        (-> question
                                            (update :question/possible-solutions (fn [sols]
@@ -95,11 +109,12 @@
 
     (testing "Test that the db-add-function is not called with invalid parameters"
       (let [test-request {:__anti-forgery-token ""
-                          :params {}}
+                          :params {:course-id "test-course-id"}}
             question-service (->QuestionService db-stub)
             basic-valid-input {:statement "Valid question statement"
                                :categories ["Valid Category"]
-                               :max-points "5"}
+                               :max-points "5"
+                               :course-id "test-course-id"}
             post-destination "S"
             single-choice-question1 (merge basic-valid-input {:type "single-choice"
                                                               :possible-single-choice-solutions ["Solution1" "Solution2" "Solution3"]
@@ -112,7 +127,7 @@
                                                                :correct-multiple-choice-solutions ["Solution1" "Unknown solution"]})]
         (t/are [question-form-data]
                (let [was-not-called (atom true)
-                     db-add-fun-stub (fn [question]
+                     db-add-fun-stub (fn [_course-id question]
                                        (reset! was-not-called false)
                                        (-> question
                                            (update :question/possible-solution (fn [sols]

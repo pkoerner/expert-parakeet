@@ -53,7 +53,7 @@
                             :question/correct-solutions ["42"]
                             :question/max-points 1
                             :question/categories ["Cat1"]}
-            _ (db/add-question! test-db input-question)
+            _ (db/add-question! test-db "1" input-question)
             question-ids (map :question/id (db/get-all-question-ids test-db))
             question-list (map #(db/get-question-by-id test-db %) question-ids)]
         (t/is (some #(= % (input-question :question/statement)) (map :question/statement question-list)))))
@@ -64,7 +64,7 @@
                             :question/correct-solutions ["42" "Alien"]
                             :question/max-points 1
                             :question/categories ["Cat2"]}
-            _ (db/add-question! test-db input-question)
+            _ (db/add-question! test-db "1" input-question)
             question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
             question-list (map #(db/get-question-by-id test-db %) question-ids)]
         (t/is (some #(= % (input-question :question/statement)) (map :question/statement question-list)))))
@@ -74,7 +74,7 @@
                             :question/evaluation-criteria "Never gonna give you up"
                             :question/max-points 2
                             :question/categories ["Cat2" "Cat3"]}
-            _ (db/add-question! test-db input-question)
+            _ (db/add-question! test-db "1" input-question)
             question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
             question-list (map #(db/get-question-by-id test-db %) question-ids)]
         (t/is (some #(= % (input-question :question/statement)) (map :question/statement question-list)))))
@@ -85,15 +85,15 @@
                             :question/correct-solutions ["42"]
                             :question/max-points 1
                             :question/categories ["Cat1"]}]
-        (t/is (thrown? java.lang.IllegalArgumentException (db/add-question! test-db input-question)))))
+        (t/is (thrown? java.lang.IllegalArgumentException (db/add-question! test-db "1" input-question)))))
     (testing "add-question! with already existing free-text-choice question as input: duplicate questions are now allowed"
       (let [input-question {:question/type :question.type/free-text
                             :question/statement "What are some advantages and disadvantages of example-based and generative testing?"
                             :question/evaluation-criteria "The following aspects are explained: Oracle, performance, test-coverage"
                             :question/max-points 2
                             :question/categories #{"Cat1" "Cat3"}}
-            _ (db/add-question! test-db input-question)
-            _ (db/add-question! test-db input-question)
+            _ (db/add-question! test-db "1" input-question)
+            _ (db/add-question! test-db "1" input-question)
             question-ids (map #(:question/id %) (db/get-all-question-ids test-db))
             question-list (map #(db/get-question-by-id test-db %) question-ids)
             matching-questions (filter #(= (:question/statement %) (:question/statement input-question)) question-list)]

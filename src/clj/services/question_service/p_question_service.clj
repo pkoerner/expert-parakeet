@@ -12,7 +12,7 @@
     "Checks if a user is assgined to a certain question.")
 
   (create-question!
-    [self question]
+    [self course-id question]
     "Creates a question entry in the database and returns a question map.")
 
   (get-question-categories

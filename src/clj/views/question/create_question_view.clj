@@ -101,7 +101,7 @@
    `:question-data`: Takes a map with form data keys mapped to values.
    When present, the values are put into the input fields corresponding to the name.
    This way the form can be re-/prepopulated."
-  [categories post-destination & {:keys [errors question-data] :or {errors {} question-data {}}}]
+  [categories post-destination & {:keys [errors question-data course-id courses] :or {errors {} question-data {} courses []}}]
   (let [question-types (->> question-types
                             (map name)
                             (sort))
@@ -120,10 +120,26 @@
        (hform/form-to
          [:post post-destination]
 
+         (when course-id
+           (hform/hidden-field "course-id" course-id))
+
+
+
          [:div
           (hform/label {:class "form-label"} "statement" "Question statement")
           (optional-error-display :statement errors)
           (hform/text-area {:class "form-control" :required true} "statement" (get question-data :statement))]
+
+
+         [:div
+          (hform/label {:class "form-label"} "course-id" "Course")
+          (optional-error-display :course-id errors)
+          (if (seq courses)
+            (hform/drop-down {:class "form-select" :required true}
+                             "course-id"
+                             (map (juxt :course/name :course/id) courses)
+                             course-id)
+            [:p "No courses available. Please create a course first."])]
 
          [:div
           (hform/label {:class "form-label"} "max-points" "Maximum number of points")
@@ -151,6 +167,7 @@
          (multiple-choice-inputs errors question-data)
          (free-text-inputs errors question-data)
          (script "expert_parakeet.question.create_question_view.register_question_type_switch('type', " question-types-js-arr ");")
+
 
          [:div
           [:fieldset
@@ -181,8 +198,13 @@
             (hform/text-field {:class "form-control" :form "new-category-form" :required true :placeholder "Create new category" :id "new-category"} "new-category")
             (hform/submit-button {:class "btn btn-outline-secondary" :form "new-category-form"} "+")]]]
 
-         (h/raw (anti-forgery-field))
-         (script "
+
+
+
+
+         [:div.d-flex.align-items-center.gap-2.mt-4
+          (h/raw (anti-forgery-field))
+          (script "
           document.addEventListener('DOMContentLoaded', function() {
             const mainForm = document.querySelector('form[method=\"post\"]');
             const categoryInput = document.getElementById('new-category');
@@ -225,7 +247,8 @@
             });
           });
           ")
-         (hform/submit-button {:class "btn btn-primary" :id "main-submit-btn"} "Submit"))])))
+          (hform/submit-button {:class "btn btn-primary" :id "main-submit-btn"} "Submit")
+          [:a.btn.btn-secondary {:href "/questions"} "show questions"]])])))
 
 
 (defn- possible-solutions-view
