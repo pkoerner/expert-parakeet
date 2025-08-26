@@ -311,7 +311,7 @@
    {:course-iteration/course course-slim-pull}
    :course-iteration/year
    {:course-iteration/semester semester-pull}
-   ;; no members and no question sets
+   ;; no members, no registrations and no question sets
    ])
 
 
@@ -320,7 +320,7 @@
    {:course-iteration/course course-slim-pull}
    :course-iteration/year
    {:course-iteration/semester semester-pull}
-   ;; no members
+   ;; no members and no registrations
    {:course-iteration/question-sets question-set-no-questions-pull}])
 
 
@@ -330,6 +330,7 @@
    :course-iteration/year
    {:course-iteration/semester semester-pull}
    {:course-iteration/members membership-pull}
+   {:course-iteration/registrations user-pull}
    {:course-iteration/question-sets question-set-slim-pull}])
 
 
@@ -356,6 +357,10 @@
         :valueType :db.type/ref
         :cardinality :db.cardinality/many
         :doc "The members (as membership references) of this course iteration"}
+   #:db{:ident :course-iteration/registrations
+        :valueType :db.type/ref
+        :cardinality :db.cardinality/many
+        :doc "The users who want to register for this course iteration"}
    #:db{:ident :course-iteration/question-sets
         :cardinality :db.cardinality/many
         :valueType :db.type/ref

@@ -251,7 +251,28 @@
       (t/is (thrown-with-msg?
               clojure.lang.ExceptionInfo
               #"Nothing found for entity id [:course-iteration/id \W 42\W ]"
-              (db/get-course-iteration-by-id test-db "42"))))))
+              (db/get-course-iteration-by-id test-db "42"))))
+    (testing "add-course-iteration-registration! basic insertion"
+      (let [course-iteration-id "1"
+            user-id "1"
+            result (db/add-course-iteration-registration! test-db course-iteration-id user-id)]
+        (t/is (some #(= user-id (:user/id %)) (:course-iteration/registrations result)))))
+    (testing "add-course-iteration-registration! with invalid user id"
+      (let [course-iteration-id "1"
+            user-id "invalid"]
+        (t/is (thrown-with-msg?
+                clojure.lang.ExceptionInfo
+                #"Nothing found for entity id [:user/id \W invalid \W]"
+                (db/add-course-iteration-registration!
+                  test-db course-iteration-id user-id)))))
+    (testing "add-course-iteration-registration! with invalid course-iteration id"
+      (let [course-iteration-id "invalid"
+            user-id "1"]
+        (t/is (thrown-with-msg?
+                clojure.lang.ExceptionInfo
+                #"Nothing found for entity id [:course-iteration/id \W invalid \W]"
+                (db/add-course-iteration-registration!
+                  test-db course-iteration-id user-id)))))))
 
 
 (deftest question-set-tests

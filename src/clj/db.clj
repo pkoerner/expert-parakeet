@@ -54,6 +54,9 @@
   (add-course-iteration!
     [this course])
 
+  (add-course-iteration-registration!
+    [this course-iteration-id user-id])
+
   (get-question-by-id
     [this id])
 
@@ -166,7 +169,7 @@
       (d/q '[:find (pull ?e pattern)
              :in $ pattern
              :where [?e :course-iteration/id]]
-           @(.conn this) db.schema/course-iteration-very-slim-pull)
+           @(.conn this) db.schema/course-iteration-pull)
       (mapv first)
       (resolve-enums)))
 
@@ -302,6 +305,15 @@
           db-after (:db-after tx-result)]
       (->> (d/pull db-after db.schema/course-iteration-slim-pull [:course-iteration/id id])
            (resolve-enums))))
+
+
+  (add-course-iteration-registration!
+    [this course-iteration-id user-id]
+    (let [tx-result (d/transact (.conn this)
+                                [[:db/add [:course-iteration/id course-iteration-id]
+                                  :course-iteration/registrations [:user/id user-id]]])
+          db-after (:db-after tx-result)]
+      (->> (d/pull db-after db.schema/course-iteration-pull [:course-iteration/id course-iteration-id]))))
 
 
   (get-question-by-id

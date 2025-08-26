@@ -74,8 +74,26 @@
       (partial db/get-graded-answers-of-question-set (.db this) user-id))))
 
 
+(s/fdef create-course-iteration-registration-impl
+        :args (s/cat :self #(satisfies? PCourseIterationService %)
+                     :course-iteration-id :course-iteration/id
+                     :user-id :user/id))
+
+
+(defn- create-course-iteration-registration-impl
+  [this course-iteration-id user-id]
+  (db/add-course-iteration-registration! (.db this) course-iteration-id user-id))
+
+
+(defn- get-all-course-iterations
+  [this]
+  (db/get-all-course-iterations (.db this)))
+
+
 (extend CourseIterationService
   PCourseIterationService
   {:create-course-iteration create-course-iteration-impl
    :validate-course-iteration (partial validate-form-data course-iteration-validators)
-   :get-all-course-iterations-for-user get-all-course-iterations-for-user})
+   :get-all-course-iterations get-all-course-iterations
+   :get-all-course-iterations-for-user get-all-course-iterations-for-user
+   :create-course-iteration-registration create-course-iteration-registration-impl})

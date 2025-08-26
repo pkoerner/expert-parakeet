@@ -11,6 +11,14 @@
     [self course-iteration-form-data]
     "Validates the values for the creation of a course-iteration. Returns a map of error keys or the validated course iteration.")
 
+  (get-all-course-iterations
+    [self]
+    "Returns a collection of all available course iterations.")
+
   (get-all-course-iterations-for-user
     [self user-github-id]
-    "Returns a collection of all available course iterations for a student."))
+    "Returns a collection of all available course iterations for a student.")
+
+  (create-course-iteration-registration
+    [self course-iteration-id user-id]
+    "Register a user for a particular course iteration"))

@@ -6,7 +6,7 @@
     [services.course-iteration-service.p-course-iteration-service :refer [create-course-iteration PCourseIterationService
                                                                           validate-course-iteration]]
     [util.ring-extensions :refer [html-response]]
-    [views.course-iteration.create-course-iteration-view :as view]))
+    [views.course-iteration.create-course-iteration-view :as creation-view]))
 
 
 (s/fdef create-course-iteration-get
@@ -35,8 +35,8 @@
   (let [courses (get-courses-fun)
         question-sets (get-question-sets-fun)]
     (if (empty? courses)
-      (html-response (view/no-courses))
-      (html-response (view/course-iteration-form courses question-sets post-destination)))))
+      (html-response (creation-view/no-courses))
+      (html-response (creation-view/course-iteration-form courses question-sets post-destination)))))
 
 
 (s/fdef submit-create-course-iteration!
@@ -59,7 +59,7 @@
         validation-errors (course-iteration-or-errors :errors)]
     (if (empty? validation-errors)
       (let [added-course-iteration (create-course-iteration course-iteration-service course-iteration-or-errors)]
-        (html-response (view/submit-success-view added-course-iteration)))
+        (html-response (creation-view/submit-success-view added-course-iteration)))
       (let [courses (get-courses-fun)
             question-sets (get-question-sets-fun)]
-        (html-response (view/course-iteration-form courses question-sets post-destination :errors validation-errors :course-iteration-data form-data))))))
+        (html-response (creation-view/course-iteration-form courses question-sets post-destination :errors validation-errors :course-iteration-data form-data))))))
