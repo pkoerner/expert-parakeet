@@ -55,14 +55,21 @@
 
 
 (defn submit-create-user
-  "This function takes a request, containing an oauth-github-id in the session, and an 
+  "This function takes a request, containing an oauth-github-id in the session, a user-name and matriculation-id in the parameters, and an 
    implementation of the `PUserService` protocol, which is used to insert a new user into the database.
    After creating a user the request will be redirected to the provided `redirect-uri`.
    In case the github-id is already in use the request is denied.
    "
   [req redirect-uri user-service]
-  (if (and (auth/is-authenticated? req) (not (github-id-in-use? user-service (str (-> req :session :user :oauth-github-id)))))
-    (let [oauth-github-id (-> req :session :user :oauth-github-id)]
-      (create-user! user-service (str oauth-github-id))
-      (redirect redirect-uri))
-    {:status 401 :body "Unauthorized"}))
+  (let [github-id (str (-> req :session :user :oauth-github-id))
+        user-name (str (-> req :params :user-name))
+        matriculation-id (str (-> req :params :matriculation-id))]
+    (if (and (auth/is-authenticated? req) (not (github-id-in-use? user-service github-id)))
+      (if (or
+            (empty? user-name)
+            (empty? matriculation-id))
+        (redirect "/create-user")
+        (do
+          (create-user! user-service github-id user-name matriculation-id)
+          (redirect redirect-uri)))
+      {:status 401 :body "Unauthorized"})))
