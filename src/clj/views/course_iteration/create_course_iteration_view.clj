@@ -45,12 +45,12 @@
       (hform/form-to
         [:post post-destination]
 
-        [:div
+        [:div {:class "mb-3"}
          (hform/label {:class "form-label"} "course" "Course")
          (optional-error-display :course errors)
          (hform/drop-down {:class "form-select" :required true} "course" (mapv course-to-option courses) (get course-iteration-data :course))]
 
-        [:div
+        [:div {:class "mb-3"}
          (hform/label {:class "form-label"} "year" "Year")
          (optional-error-display :year errors)
          [:input {:id "year"
@@ -63,12 +63,12 @@
                   :required true
                   :value (get course-iteration-data :year "2024")}]]
 
-        [:div
+        [:div {:class "mb-3"}
          (hform/label {:class "form-label"} "semester" "Semester")
          (optional-error-display :semester errors)
          (hform/drop-down {:class "form-select" :required true} "semester" [["Summer" "summer"] ["Winter" "winter"]] (get course-iteration-data :semester))]
 
-        [:fieldset
+        [:fieldset {:class "mb-3"}
          [:legend {:class "form-label"} "Question sets"]
          (optional-error-display :question-sets errors)
          (let
