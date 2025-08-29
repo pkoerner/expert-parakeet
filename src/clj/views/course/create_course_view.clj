@@ -27,7 +27,7 @@
     (hform/form-to
       [:post post-destination]
 
-      [:div
+      [:div {:class "mb-3"}
        (hform/label {:class "form-label"} "name" "Course name")
        (optional-error-display :name errors)
        (hform/text-field {:class "form-control" :required true} "name" (get course-data :name))]

@@ -120,12 +120,12 @@
        (hform/form-to
          [:post post-destination]
 
-         [:div
+         [:div {:class "mb-3"}
           (hform/label {:class "form-label"} "statement" "Question statement")
           (optional-error-display :statement errors)
           (hform/text-area {:class "form-control" :required true} "statement" (get question-data :statement))]
 
-         [:div
+         [:div {:class "mb-3"}
           (hform/label {:class "form-label"} "max-points" "Maximum number of points")
           (optional-error-display :max-points errors)
           [:input {:id "max-points"
@@ -137,7 +137,7 @@
                    :required true
                    :value (get question-data :max-points 1)}]]
 
-         [:div
+         [:div {:class "mb-3"}
           (hform/label {:class "form-label"} "type" "Question type")
           (optional-error-display :type errors)
           (let [selected-type (get question-data :type (first question-types))
@@ -152,7 +152,7 @@
          (free-text-inputs errors question-data)
          (script "expert_parakeet.question.create_question_view.register_question_type_switch('type', " question-types-js-arr ");")
 
-         [:div
+         [:div {:class "mb-3"}
           [:fieldset
            [:legend {:class "form-label"} "Categories"]
            (optional-error-display :categories errors)
@@ -239,7 +239,7 @@
 (defn- single-choice-question-view
   "Part of the success view: show possible and choices for single-choice questions."
   [{:question/keys [correct-solutions] :as question}]
-  [:div
+  [:div {:class "mb-3"}
    (possible-solutions-view question)
    [:p.lead [:b "With the correct choice: "] (-> correct-solutions
                                                  (first)
@@ -249,7 +249,7 @@
 (defn- multiple-choice-question-view
   "Part of the success view: show possible and choices for multiple-choice questions."
   [{:question/keys [correct-solutions] :as question}]
-  [:div
+  [:div {:class "mb-3"}
    (possible-solutions-view question)
    [:p.lead [:b "With the correct choices: "]
     [:ul.list-group (for [el correct-solutions]
@@ -259,7 +259,7 @@
 (defn- free-text-question-view
   "Part of the success view: show free-text-question-specific data."
   [{:question/keys [evaluation-criteria]}]
-  [:div
+  [:div {:class "mb-3"}
    [:p.lead [:b "With the evaluation criteria: "] evaluation-criteria]])
 
 
