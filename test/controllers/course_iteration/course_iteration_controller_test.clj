@@ -22,9 +22,10 @@
 
 
 (defn- stub-course-iteration-service
-  [& {:keys [validate-course-iteration create-course-iteration]
+  [& {:keys [validate-course-iteration create-course-iteration create-course-iteration-registration]
       :or {validate-course-iteration (fn [& _] {})
-           create-course-iteration (fn [& _] {})}}]
+           create-course-iteration (fn [& _] {})
+           create-course-iteration-registration (fn [& _] {})}}]
   (reify PCourseIterationService
     (validate-course-iteration
       [_self course-iteration-form-data]
@@ -32,7 +33,11 @@
 
     (create-course-iteration
       [_self course-iteration]
-      (create-course-iteration course-iteration))))
+      (create-course-iteration course-iteration))
+
+    (create-course-iteration-registration
+      [_self course-iteration-id user-id]
+      (create-course-iteration-registration course-iteration-id user-id))))
 
 
 (deftest test-submit-create-course-iteration!

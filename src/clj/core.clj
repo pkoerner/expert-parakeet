@@ -8,6 +8,7 @@
     [controllers.correction.correction-controller :refer [correction-overview-get]]
     [controllers.correction.new-correction-controller :refer [new-correction-get submit-new-correction!]]
     [controllers.course-iteration.course-iteration-controller :refer [create-course-iteration-get submit-create-course-iteration!]]
+    [controllers.course-iteration.registration-controller :refer [create-registration-get submit-create-registration]]
     [controllers.course.course-controller :refer [create-course-get submit-create-course!]]
     [controllers.question-set.question-set-controller :refer [question-set-get]]
     [controllers.question.question-controller :refer [create-question-get
@@ -25,7 +26,7 @@
     [services.answer-service.answer-service :refer [->AnswerService]]
     [services.correction-service.correction-service :refer [->CorrectionService]]
     [services.course-iteration-service.course-iteration-service :refer [->CourseIterationService]]
-    [services.course-iteration-service.p-course-iteration-service :refer [get-all-course-iterations-for-user]]
+    [services.course-iteration-service.p-course-iteration-service :refer [get-all-course-iterations get-all-course-iterations-for-user]]
     [services.course-service.course-service :refer [->CourseService]]
     [services.course-service.p-course-service :refer [get-all-courses]]
     [services.question-service.p-question-service :refer [get-question-categories]]
@@ -103,12 +104,17 @@
                                          (partial get-all-courses (:course-service services))
                                          (partial get-all-question-sets (:question-set-service services))
                                          (:course-iteration-service services)))
+  (GET "/registration" req (create-registration-get req "/registration"
+                                                    (partial get-all-course-iterations (:course-iteration-service services))))
+  (POST "/registration" req (submit-create-registration req "/registration" (:course-iteration-service services)))
 
   (GET "/correction-overview" req
        (html-response (correction-overview-get req (services :correction-service))))
 
   (GET "/new-correction" req (html-response (new-correction-get req "/new-correction" (partial db/get-answer-by-id db) (partial db/get-question-by-id db))))
   (POST "/new-correction" req (submit-new-correction! req "/new-correction" (partial db/add-correction! db) (partial db/get-user-by-id db)))
+
+
 
   (route/not-found "Not Found"))
 
